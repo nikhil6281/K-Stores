@@ -78,7 +78,7 @@ export const CheckoutModal: React.FC = () => {
     }
   };
 
-  const handleSubmitOrder = (e: React.FormEvent) => {
+  const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!fullName.trim()) {
@@ -119,16 +119,17 @@ export const CheckoutModal: React.FC = () => {
       });
     }
 
-    setTimeout(() => {
-      placeOrder({
+    try {
+      await placeOrder({
         customerName: fullName,
         customerPhone: cleanPhone,
         deliveryType,
         address,
         notes: notes.trim() || undefined
       });
+    } finally {
       setIsSubmitting(false);
-    }, 400);
+    }
   };
 
   return (

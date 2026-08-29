@@ -37,9 +37,12 @@ export const AdminDashboard: React.FC = () => {
     deals,
     toggleDeal,
     setIsOwnerMode,
+    refreshOrdersFromCloud,
     t,
     showToast
   } = useStore();
+
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'orders' | 'inventory' | 'analytics' | 'deals'>('orders');
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
@@ -192,6 +195,22 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={async () => {
+                setIsSyncing(true);
+                await refreshOrdersFromCloud();
+                setTimeout(() => setIsSyncing(false), 500);
+                showToast('success', 'Live Cloud Synced', 'Fetched all live orders across all devices.');
+              }}
+              disabled={isSyncing}
+              className="flex items-center gap-1.5 text-xs bg-purple-950/80 hover:bg-purple-900 text-purple-200 border border-purple-700 px-3 py-2 rounded-xl transition-all cursor-pointer"
+              title="Sync Orders across all devices"
+            >
+              <RotateCcw className={`w-3.5 h-3.5 text-purple-400 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Sync Cloud Orders</span>
+              <span className="sm:hidden">Sync</span>
+            </button>
+
             <button
               onClick={() => {
                 sounds.playOwnerNewOrderAlert();

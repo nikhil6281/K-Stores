@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { Product, CartItem, Order, OrderStatus, DeliveryType, DeliveryAddress, CustomerUser, StoreDeal, ToastMessage, Language } from '../types';
 import { initialProducts } from '../data/initialProducts';
 import { translations } from '../i18n/translations';
 import { sounds } from '../utils/sound';
+import { fetchCloudStoreData, addOrderToCloud, updateCloudOrderStatus } from '../services/cloudSync';
 
 interface StoreContextType {
   language: Language;
@@ -39,11 +40,12 @@ interface StoreContextType {
     deliveryType: DeliveryType;
     address?: DeliveryAddress;
     notes?: string;
-  }) => Order;
-  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+  }) => Promise<Order>;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>;
   reorder: (order: Order) => void;
   activeOrder: Order | null;
   setActiveOrderId: (id: string | null) => void;
+  refreshOrdersFromCloud: () => Promise<void>;
 
   // User & Owner Auth
   user: CustomerUser | null;
@@ -87,11 +89,11 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_PRODUCTS = 'mana_kirana_products_v1';
-const LOCAL_STORAGE_ORDERS = 'mana_kirana_orders_v1';
-const LOCAL_STORAGE_CART = 'mana_kirana_cart_v1';
-const LOCAL_STORAGE_USER = 'mana_kirana_user_v1';
-const LOCAL_STORAGE_LANG = 'mana_kirana_lang_v1';
+const LOCAL_STORAGE_PRODUCTS = 'kstores_products_v2';
+const LOCAL_STORAGE_ORDERS = 'kstores_orders_v2';
+const LOCAL_STORAGE_CART = 'kstores_cart_v2';
+const LOCAL_STORAGE_USER = 'kstores_user_v2';
+const LOCAL_STORAGE_LANG = 'kstores_lang_v2';
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Language
@@ -235,17 +237,79 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const showToast = (type: ToastMessage['type'], title: string, message: string, duration = 4000) => {
+  const showToast = useCallback((type: ToastMessage['type'], title: string, message: string, duration = 4000) => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts(prev => [...prev, { id, type, title, message, duration }]);
     setTimeout(() => {
       removeToast(id);
     }, duration);
-  };
+  }, []);
 
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
+
+  // Keep track of order count for audio alert triggers
+  const prevOrdersCountRef = useRef<number>(orders.length);
+  const isOwnerModeRef = useRef<boolean>(isOwnerMode);
+  isOwnerModeRef.current = isOwnerMode;
+
+  // Cloud Sync: Fetch latest orders from shared online cloud database
+  const refreshOrdersFromCloud = useCallback(async () => {
+    const cloudData = await fetchCloudStoreData();
+    if (cloudData && Array.isArray(cloudData.orders)) {
+      setOrders(prev => {
+        // Merge cloud orders with local orders without duplicates
+        const cloudOrderMap = new Map<string, Order>();
+        
+        // Add cloud orders
+        cloudData.orders.forEach(o => cloudOrderMap.set(o.id, o));
+        
+        // Add any local pending orders not yet in cloud
+        prev.forEach(o => {
+          if (!cloudOrderMap.has(o.id)) {
+            cloudOrderMap.set(o.id, o);
+          }
+        });
+
+        const mergedOrders = Array.from(cloudOrderMap.values()).sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        // If new orders arrived and count increased
+        if (mergedOrders.length > prevOrdersCountRef.current && prevOrdersCountRef.current > 0) {
+          const newestOrder = mergedOrders[0];
+          if (isOwnerModeRef.current) {
+            sounds.playOwnerNewOrderAlert();
+            showToast(
+              'success',
+              '🔔 New Live Customer Order!',
+              `Order #${newestOrder.id} for ₹${newestOrder.totalAmount} from ${newestOrder.customerName}`
+            );
+          }
+        }
+
+        prevOrdersCountRef.current = mergedOrders.length;
+        return mergedOrders;
+      });
+    }
+  }, [showToast]);
+
+  // Initial cloud sync & continuous background live polling (every 4 seconds)
+  useEffect(() => {
+    refreshOrdersFromCloud();
+    const interval = setInterval(() => {
+      refreshOrdersFromCloud();
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [refreshOrdersFromCloud]);
+
+  // Trigger immediate refresh when entering owner mode
+  useEffect(() => {
+    if (isOwnerMode) {
+      refreshOrdersFromCloud();
+    }
+  }, [isOwnerMode, refreshOrdersFromCloud]);
 
   // Cart Calculations
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
@@ -337,8 +401,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast('success', 'Reset Done', 'Inventory restored to default village catalog');
   };
 
-  // Order Placement
-  const placeOrder = ({
+  // Order Placement with Live Cloud Sync
+  const placeOrder = async ({
     customerName,
     customerPhone,
     deliveryType,
@@ -350,7 +414,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     deliveryType: DeliveryType;
     address?: DeliveryAddress;
     notes?: string;
-  }): Order => {
+  }): Promise<Order> => {
     const orderId = `MK-${Math.floor(100000 + Math.random() * 900000)}`;
     const newOrder: Order = {
       id: orderId,
@@ -370,7 +434,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       estimatedDeliveryMinutes: deliveryType === 'delivery_20min' ? 20 : 5,
     };
 
-    // Deduct stock for ordered items
+    // 1. Deduct stock for ordered items
     setProducts(prev =>
       prev.map(p => {
         const cartItem = cart.find(ci => ci.product.id === p.id);
@@ -381,7 +445,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       })
     );
 
-    // Save order
+    // 2. Save order locally
     setOrders(prev => [newOrder, ...prev]);
     setActiveOrderId(newOrder.id);
     clearCart();
@@ -390,7 +454,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     sounds.playOrderSuccess();
 
-    // Auto update user details if not saved
+    // 3. Auto update user details if not saved
     if (!user) {
       setUser({
         id: `user-${Date.now()}`,
@@ -401,14 +465,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       });
     }
 
+    // 4. Push to shared central Cloud Database so ALL devices see it!
+    try {
+      const updatedList = await addOrderToCloud(newOrder);
+      if (updatedList && updatedList.length > 0) {
+        setOrders(updatedList);
+      }
+    } catch (err) {
+      console.error('Background cloud sync error:', err);
+    }
+
     return newOrder;
   };
 
-  const updateOrderStatus = (orderId: string, status: OrderStatus) => {
+  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
+    // 1. Update local state
     setOrders(prev =>
       prev.map(o => (o.id === orderId ? { ...o, status } : o))
     );
     sounds.playStatusUpdate();
+
+    // 2. Update shared Cloud Database so customer device sees live delivery progress!
+    try {
+      await updateCloudOrderStatus(orderId, status);
+    } catch (err) {
+      console.error('Error syncing status update to cloud:', err);
+    }
 
     const statusMapEn: Record<OrderStatus, string> = {
       pending: 'Order Confirmed',
@@ -481,6 +563,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         reorder,
         activeOrder,
         setActiveOrderId,
+        refreshOrdersFromCloud,
 
         user,
         setUser,
