@@ -145,9 +145,9 @@ export const translations = {
     logoutAdmin: 'Exit Owner Mode',
     adminLoginTitle: 'Owner Security Login',
     adminLoginDesc: 'Enter Store Owner Passcode to access real-time orders and inventory management.',
-    adminPasscode: 'Owner Passcode (Passkey: 9874)',
+    adminPasscode: 'Owner Passcode',
     adminLoginBtn: 'Login to Owner Portal',
-    invalidPasscode: 'Invalid passkey. Please enter 9874.',
+    invalidPasscode: 'Invalid passkey. Please try again.',
 
     // Admin Tabs
     tabOrders: 'Live Orders',
@@ -358,9 +358,9 @@ export const translations = {
     logoutAdmin: 'ఓనర్ మోడ్ నుండి నిష్క్రమించు',
     adminLoginTitle: 'ఓనర్ సెక్యూరిటీ లాగిన్',
     adminLoginDesc: 'లైవ్ ఆర్డర్లు మరియు స్టాక్ చూడటానికి ఓనర్ పాస్‌కోడ్ నమోదు చేయండి.',
-    adminPasscode: 'ఓనర్ పాస్‌కీ (పాస్‌కోడ్: 9874)',
+    adminPasscode: 'ఓనర్ పాస్‌కీ',
     adminLoginBtn: 'ఓనర్ పోర్టల్‌లోకి లాగిన్ అవ్వండి',
-    invalidPasscode: 'తప్పుడు పాస్‌కీ. దయచేసి 9874 నమోదు చేయండి.',
+    invalidPasscode: 'తప్పుడు పాస్‌కీ. దయచేసి మళ్ళీ ప్రయత్నించండి.',
 
     // Admin Tabs
     tabOrders: 'లైవ్ ఆర్డర్లు',

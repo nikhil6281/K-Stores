@@ -62,7 +62,7 @@ export interface Order {
   customerPhone: string;
   deliveryType: DeliveryType;
   address?: DeliveryAddress;
-  paymentMethod: 'cash_on_delivery' | 'pay_on_pickup';
+  paymentMethod: 'cash_on_delivery' | 'pay_on_pickup' | 'online_razorpay';
   notes?: string;
   status: OrderStatus;
   subtotal: number;
@@ -70,8 +70,13 @@ export interface Order {
   totalDiscount: number;
   totalAmount: number;
   createdAt: string;
+  updatedAt?: string;
   estimatedDeliveryMinutes: number;
   whatsappSent?: boolean;
+  // Razorpay payment details
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  paymentVerified?: boolean;
 }
 
 export interface CustomerUser {

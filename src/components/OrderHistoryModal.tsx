@@ -180,12 +180,12 @@ export const OrderHistoryModal: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <div className="text-sm sm:text-base font-extrabold text-slate-900">₹{orderTotal}</div>
-                      <div className="text-[10px] text-emerald-700 font-semibold">
-                        {orderItems.length} items (COD)
+                      <div className="text-right">
+                        <div className="text-sm sm:text-base font-extrabold text-slate-900">₹{orderTotal}</div>
+                        <div className="text-[10px] text-emerald-700 font-semibold">
+                          {orderItems.length} items • {order.paymentMethod === 'online_razorpay' ? '💳 Paid (Razorpay)' : order.paymentMethod === 'pay_on_pickup' ? 'Pay on Pickup' : 'Cash on Delivery'}
+                        </div>
                       </div>
-                    </div>
                   </div>
 
                   {/* Items preview */}

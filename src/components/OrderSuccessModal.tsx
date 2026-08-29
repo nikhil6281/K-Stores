@@ -133,8 +133,16 @@ export const OrderSuccessModal: React.FC = () => {
               <div className="font-bold text-slate-800">
                 {language === 'te' ? 'ఆర్డర్ సారాంశం' : 'Order Bill Receipt'} (#{activeOrder.id})
               </div>
-              <span className="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">
-                {activeOrder.paymentMethod === 'cash_on_delivery' ? 'CASH ON DELIVERY' : 'PAY ON PICKUP'}
+              <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${
+                activeOrder.paymentMethod === 'online_razorpay'
+                  ? 'bg-blue-100 text-blue-900'
+                  : 'bg-emerald-100 text-emerald-800'
+              }`}>
+                {activeOrder.paymentMethod === 'online_razorpay'
+                  ? 'PAID ONLINE (RAZORPAY)'
+                  : activeOrder.paymentMethod === 'pay_on_pickup'
+                  ? 'PAY ON PICKUP'
+                  : 'CASH ON DELIVERY'}
               </span>
             </div>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
-import { X, Lock, KeyRound, Sparkles } from 'lucide-react';
+import { X, Lock, KeyRound } from 'lucide-react';
 import { sounds } from '../../utils/sound';
 
 export const AdminLoginModal: React.FC = () => {
@@ -23,19 +23,13 @@ export const AdminLoginModal: React.FC = () => {
     if (passcode.trim() === '9874') {
       setIsOwnerMode(true);
       setIsAdminLoginOpen(false);
+      setPasscode('');
+      setError('');
       sounds.playAdminChime();
       showToast('success', language === 'te' ? 'ఓనర్ మోడ్ ఆన్ చేయబడింది' : 'Owner Mode Active', language === 'te' ? 'లైవ్ ఆర్డర్లు మరియు స్టాక్ మేనేజర్ సిద్ధంగా ఉంది' : 'Store Owner Dashboard unlocked.');
     } else {
       setError(t.invalidPasscode);
     }
-  };
-
-  const handleQuickUnlock = () => {
-    setPasscode('9874');
-    setIsOwnerMode(true);
-    setIsAdminLoginOpen(false);
-    sounds.playAdminChime();
-    showToast('success', 'Owner Mode Active', 'Welcome, Store Owner!');
   };
 
   return (
@@ -78,7 +72,7 @@ export const AdminLoginModal: React.FC = () => {
                 setPasscode(e.target.value);
                 setError('');
               }}
-              placeholder="Enter passkey (9874)"
+              placeholder={language === 'te' ? 'స్టోర్ పాస్‌కీ నమోదు చేయండి' : 'Enter store passkey'}
               className="w-full px-4 py-3 rounded-xl border border-slate-300 text-center font-mono text-lg tracking-widest focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
             />
             {error && (
@@ -95,17 +89,8 @@ export const AdminLoginModal: React.FC = () => {
             {t.adminLoginBtn}
           </button>
 
-          <button
-            type="button"
-            onClick={handleQuickUnlock}
-            className="w-full bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-            <span>1-Click Owner Demo Login (Passkey: 9874)</span>
-          </button>
-
           <p className="text-[11px] text-center text-slate-400">
-            For village store owner & staff only.
+            {language === 'te' ? 'గ్రామ స్టోర్ ఓనర్ & సిబ్బంది మాత్రమే.' : 'For village store owner & staff only.'}
           </p>
         </form>
 

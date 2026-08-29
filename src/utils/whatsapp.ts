@@ -61,8 +61,14 @@ export function formatWhatsAppOrderBill(order: Order, language: 'en' | 'te' = 'e
     message += `🎉 *${isTe ? 'మొత్తం ఆదా (Savings)' : 'Total Savings'}:* -₹${order.totalDiscount}\n`;
   }
 
-  message += `\n💵 *${isTe ? 'చెల్లించవలసిన మొత్తం (TOTAL BILL)' : 'TOTAL AMOUNT TO PAY'}:* *₹${order.totalAmount}*\n`;
-  message += `💳 *${isTe ? 'చెల్లింపు విధానం' : 'Payment Method'}:* *${isTe ? 'క్యాష్ ఆన్ డెలివరీ / UPI (COD)' : 'Cash on Delivery / UPI (COD)'}*\n`;
+  const paymentStr = order.paymentMethod === 'online_razorpay'
+    ? (isTe ? `ఆన్‌లైన్ చెల్లింపు పూర్తయింది ✅ (Razorpay ID: ${order.razorpayPaymentId || 'PAID'})` : `PAID ONLINE via Razorpay ✅ (ID: ${order.razorpayPaymentId || 'PAID'})`)
+    : order.paymentMethod === 'pay_on_pickup'
+    ? (isTe ? 'స్టోర్ కౌంటర్‌లో చెల్లింపు (Pay on Pickup)' : 'Pay on Pickup at Store')
+    : (isTe ? 'క్యాష్ ఆన్ డెలివరీ / UPI (COD)' : 'Cash on Delivery / UPI (COD)');
+
+  message += `\n💵 *${isTe ? 'మొత్తం బిల్లు (TOTAL BILL)' : 'TOTAL BILL'}:* *₹${order.totalAmount}*\n`;
+  message += `💳 *${isTe ? 'చెల్లింపు వివరాలు' : 'Payment'}:* *${paymentStr}*\n`;
   message += `━━━━━━━━━━━━━━━━━━━━━\n`;
   message += isTe 
     ? `🙏 *ధన్యవాదాలు! దయచేసి ఆర్డర్‌ను 20 నిమిషాల్లో డెలివరీ చేయగలరు.*` 

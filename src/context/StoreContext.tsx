@@ -40,6 +40,9 @@ interface StoreContextType {
     deliveryType: DeliveryType;
     address?: DeliveryAddress;
     notes?: string;
+    paymentMethod?: 'cash_on_delivery' | 'pay_on_pickup' | 'online_razorpay';
+    razorpayPaymentId?: string;
+    razorpayOrderId?: string;
   }) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>;
   reorder: (order: Order) => void;
@@ -472,15 +475,23 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     customerPhone,
     deliveryType,
     address,
-    notes
+    notes,
+    paymentMethod,
+    razorpayPaymentId,
+    razorpayOrderId
   }: {
     customerName: string;
     customerPhone: string;
     deliveryType: DeliveryType;
     address?: DeliveryAddress;
     notes?: string;
+    paymentMethod?: 'cash_on_delivery' | 'pay_on_pickup' | 'online_razorpay';
+    razorpayPaymentId?: string;
+    razorpayOrderId?: string;
   }): Promise<Order> => {
     const orderId = `MK-${Math.floor(100000 + Math.random() * 900000)}`;
+    const resolvedPaymentMethod = paymentMethod || (deliveryType === 'store_pickup' ? 'pay_on_pickup' : 'cash_on_delivery');
+    
     const newOrder: Order = {
       id: orderId,
       items: [...cart],
@@ -489,7 +500,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       deliveryType,
       address,
       notes,
-      paymentMethod: deliveryType === 'store_pickup' ? 'pay_on_pickup' : 'cash_on_delivery',
+      paymentMethod: resolvedPaymentMethod,
+      razorpayPaymentId,
+      razorpayOrderId,
+      paymentVerified: !!razorpayPaymentId,
       status: 'pending',
       subtotal: cartSubtotal,
       deliveryFee,

@@ -8,9 +8,15 @@ import {
   Zap, 
   Store, 
   Navigation, 
-  CheckCircle2
+  CheckCircle2,
+  CreditCard,
+  ShieldCheck,
+  Loader2
 } from 'lucide-react';
 import type { DeliveryAddress } from '../types';
+import { createRazorpayOrder, openRazorpayCheckout, verifyRazorpayPayment } from '../services/razorpay';
+
+type PaymentMode = 'cod' | 'online';
 
 export const CheckoutModal: React.FC = () => {
   const {
@@ -41,6 +47,8 @@ export const CheckoutModal: React.FC = () => {
   const [isLocating, setIsLocating] = useState(false);
   const [locationSuccess, setLocationSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>('cod');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -112,27 +120,28 @@ export const CheckoutModal: React.FC = () => {
     }
   };
 
-  const handleSubmitOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const validateForm = (): boolean => {
     if (!fullName.trim()) {
       showToast('error', 'Required Field', language === 'te' ? 'దయచేసి మీ పూర్తి పేరు నమోదు చేయండి' : 'Please enter your full name');
-      return;
+      return false;
     }
 
     const cleanPhone = phoneNumber.replace(/\D/g, '');
     if (cleanPhone.length < 10) {
       showToast('error', 'Invalid Phone', language === 'te' ? 'దయచేసి సరైన 10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి' : 'Please enter a valid 10-digit mobile number');
-      return;
+      return false;
     }
 
     if (deliveryType === 'delivery_20min' && (!villageName.trim() || !landmark.trim())) {
       showToast('error', 'Address Incomplete', language === 'te' ? 'దయచేసి గ్రామం పేరు మరియు గుర్తింపు ల్యాండ్‌మార్క్ నమోదు చేయండి' : 'Please provide village street name and a landmark for 20-min delivery');
-      return;
+      return false;
     }
 
-    setIsSubmitting(true);
+    return true;
+  };
 
+  const buildOrderData = () => {
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
     const address: DeliveryAddress | undefined = deliveryType === 'delivery_20min' ? {
       fullName,
       phone: cleanPhone,
@@ -142,7 +151,10 @@ export const CheckoutModal: React.FC = () => {
       pincode: '500001'
     } : undefined;
 
-    // Save profile if updated
+    return { cleanPhone, address };
+  };
+
+  const saveUserProfile = (cleanPhone: string, address?: DeliveryAddress) => {
     if (!user || user.phone !== cleanPhone) {
       setUser({
         id: user?.id || `usr-${Date.now()}`,
@@ -152,6 +164,12 @@ export const CheckoutModal: React.FC = () => {
         joinedAt: user?.joinedAt || new Date().toISOString()
       });
     }
+  };
+
+  // --- COD Order Flow ---
+  const handleCODOrder = async () => {
+    const { cleanPhone, address } = buildOrderData();
+    saveUserProfile(cleanPhone, address);
 
     try {
       await placeOrder({
@@ -159,10 +177,110 @@ export const CheckoutModal: React.FC = () => {
         customerPhone: cleanPhone,
         deliveryType,
         address,
-        notes: notes.trim() || undefined
+        notes: notes.trim() || undefined,
+        paymentMethod: deliveryType === 'store_pickup' ? 'pay_on_pickup' : 'cash_on_delivery',
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // --- Online Payment (Razorpay) Flow ---
+  const handleOnlinePayment = async () => {
+    const { cleanPhone, address } = buildOrderData();
+    saveUserProfile(cleanPhone, address);
+
+    setIsProcessingPayment(true);
+
+    // Step 1: Create Razorpay order via backend
+    const result = await createRazorpayOrder(cartTotal);
+
+    if (!result.success || !result.order_id || !result.key_id) {
+      setIsProcessingPayment(false);
+      setIsSubmitting(false);
+      showToast('error',
+        language === 'te' ? 'పేమెంట్ ఎర్రర్' : 'Payment Error',
+        result.error || 'Could not create payment order. Please try Cash on Delivery.'
+      );
+      return;
+    }
+
+    // Step 2: Open Razorpay checkout modal
+    openRazorpayCheckout({
+      orderId: result.order_id,
+      keyId: result.key_id,
+      amountPaise: result.amount!,
+      currency: result.currency || 'INR',
+      customerName: fullName,
+      customerPhone: cleanPhone,
+      storeOrderId: `MK-${Math.floor(100000 + Math.random() * 900000)}`,
+      onSuccess: async (response) => {
+        // Step 3: Verify payment signature via backend
+        const verification = await verifyRazorpayPayment(
+          response.razorpay_order_id,
+          response.razorpay_payment_id,
+          response.razorpay_signature
+        );
+
+        if (verification.success) {
+          // Payment verified! Place the order
+          try {
+            await placeOrder({
+              customerName: fullName,
+              customerPhone: cleanPhone,
+              deliveryType,
+              address,
+              notes: notes.trim() || undefined,
+              paymentMethod: 'online_razorpay',
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+            });
+            showToast('success',
+              language === 'te' ? '💳 ఆన్‌లైన్ చెల్లింపు విజయవంతం!' : '💳 Payment Successful!',
+              language === 'te' ? 'మీ చెల్లింపు ధృవీకరించబడింది. ఆర్డర్ నమోదయింది!' : `Payment ₹${cartTotal} confirmed. Order placed!`
+            );
+          } finally {
+            setIsProcessingPayment(false);
+            setIsSubmitting(false);
+          }
+        } else {
+          setIsProcessingPayment(false);
+          setIsSubmitting(false);
+          showToast('error',
+            language === 'te' ? 'పేమెంట్ వెరిఫికేషన్ ఫెయిల్' : 'Payment Verification Failed',
+            verification.error || 'Payment could not be verified. Please contact store owner or try again.'
+          );
+        }
+      },
+      onFailure: (error) => {
+        setIsProcessingPayment(false);
+        setIsSubmitting(false);
+        showToast('error',
+          language === 'te' ? 'చెల్లింపు విఫలమైంది' : 'Payment Failed',
+          error
+        );
+      },
+      onDismiss: () => {
+        setIsProcessingPayment(false);
+        setIsSubmitting(false);
+        showToast('info',
+          language === 'te' ? 'పేమెంట్ రద్దు' : 'Payment Cancelled',
+          language === 'te' ? 'మీరు చెల్లింపును రద్దు చేసారు. మీరు క్యాష్ ఆన్ డెలివరీ ఎంచుకోవచ్చు.' : 'Payment was cancelled. You can choose Cash on Delivery instead.'
+        );
+      }
+    });
+  };
+
+  const handleSubmitOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    if (paymentMode === 'online') {
+      await handleOnlinePayment();
+    } else {
+      await handleCODOrder();
     }
   };
 
@@ -204,7 +322,7 @@ export const CheckoutModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setDeliveryType('delivery_20min')}
-                className={`p-3 rounded-xl text-left border flex flex-col gap-1 transition-all ${
+                className={`p-3 rounded-xl text-left border flex flex-col gap-1 transition-all cursor-pointer ${
                   deliveryType === 'delivery_20min'
                     ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500/20 text-emerald-950 font-bold'
                     : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 font-medium'
@@ -220,7 +338,7 @@ export const CheckoutModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setDeliveryType('store_pickup')}
-                className={`p-3 rounded-xl text-left border flex flex-col gap-1 transition-all ${
+                className={`p-3 rounded-xl text-left border flex flex-col gap-1 transition-all cursor-pointer ${
                   deliveryType === 'store_pickup'
                     ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500/20 text-emerald-950 font-bold'
                     : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 font-medium'
@@ -292,7 +410,7 @@ export const CheckoutModal: React.FC = () => {
                   type="button"
                   onClick={handleAutoLocate}
                   disabled={isLocating}
-                  className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
+                  className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors cursor-pointer"
                 >
                   <Navigation className={`w-3 h-3 ${isLocating ? 'animate-spin' : ''}`} />
                   <span>{isLocating ? 'Locating...' : locationSuccess ? '✓ Located' : t.useCurrentLocation}</span>
@@ -358,15 +476,78 @@ export const CheckoutModal: React.FC = () => {
             />
           </div>
 
-          {/* Payment Method Badge (COD) */}
-          <div className="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-3.5">
-            <div className="flex items-center gap-2 font-bold text-xs text-emerald-950 mb-1">
-              <Banknote className="w-4 h-4 text-emerald-700" />
-              <span>{deliveryType === 'delivery_20min' ? t.cashOnDelivery : t.payOnPickup}</span>
+          {/* ===== Payment Method Selection ===== */}
+          <div className="space-y-2.5">
+            <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <CreditCard className="w-4 h-4 text-emerald-700" />
+              <span>{language === 'te' ? 'చెల్లింపు విధానం ఎంచుకోండి' : 'Choose Payment Method'}</span>
             </div>
-            <p className="text-[11px] text-emerald-800/90 leading-relaxed">
-              {deliveryType === 'delivery_20min' ? t.cashOnDeliveryDesc : t.payOnPickupDesc}
-            </p>
+
+            <div className="grid grid-cols-2 gap-2">
+              {/* Cash on Delivery / Pay on Pickup */}
+              <button
+                type="button"
+                onClick={() => setPaymentMode('cod')}
+                className={`p-3 rounded-xl text-left border flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  paymentMode === 'cod'
+                    ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500/20'
+                    : 'bg-white border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <Banknote className={`w-4 h-4 ${paymentMode === 'cod' ? 'text-emerald-700' : 'text-slate-500'}`} />
+                  <span className={`text-xs font-bold ${paymentMode === 'cod' ? 'text-emerald-950' : 'text-slate-700'}`}>
+                    {language === 'te' ? 'క్యాష్ / UPI' : 'Cash / UPI'}
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-500">
+                  {deliveryType === 'delivery_20min'
+                    ? (language === 'te' ? 'డెలివరీ సమయంలో చెల్లించండి' : 'Pay when delivered')
+                    : (language === 'te' ? 'స్టోర్‌లో చెల్లించండి' : 'Pay at store counter')}
+                </div>
+              </button>
+
+              {/* Pay Online (Razorpay) */}
+              <button
+                type="button"
+                onClick={() => setPaymentMode('online')}
+                className={`p-3 rounded-xl text-left border flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  paymentMode === 'online'
+                    ? 'bg-blue-50 border-blue-600 ring-2 ring-blue-500/20'
+                    : 'bg-white border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <CreditCard className={`w-4 h-4 ${paymentMode === 'online' ? 'text-blue-700' : 'text-slate-500'}`} />
+                  <span className={`text-xs font-bold ${paymentMode === 'online' ? 'text-blue-950' : 'text-slate-700'}`}>
+                    {language === 'te' ? 'ఆన్‌లైన్ పే' : 'Pay Online'}
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-500">
+                  {language === 'te' ? 'UPI, కార్డ్, నెట్ బ్యాంకింగ్' : 'UPI, Card, Net Banking'}
+                </div>
+              </button>
+            </div>
+
+            {/* Payment info note */}
+            <div className={`rounded-xl p-2.5 text-[10px] flex items-center gap-1.5 ${
+              paymentMode === 'online'
+                ? 'bg-blue-50 border border-blue-200 text-blue-900'
+                : 'bg-emerald-50/80 border border-emerald-200 text-emerald-900'
+            }`}>
+              <ShieldCheck className={`w-3.5 h-3.5 flex-shrink-0 ${
+                paymentMode === 'online' ? 'text-blue-600' : 'text-emerald-600'
+              }`} />
+              <span>
+                {paymentMode === 'online'
+                  ? (language === 'te'
+                      ? 'Razorpay ద్వారా సురక్షిత చెల్లింపు. UPI, డెబిట్/క్రెడిట్ కార్డ్, నెట్ బ్యాంకింగ్ ఆమోదించబడతాయి.'
+                      : 'Secure payment via Razorpay. UPI, Debit/Credit Card, and Net Banking accepted.')
+                  : (language === 'te'
+                      ? 'సరుకులు వచ్చాక క్యాష్ లేదా UPI ద్వారా చెల్లించండి. ముందుగా చెల్లింపు అవసరం లేదు.'
+                      : 'Pay with Cash or UPI when items arrive. No advance payment required.')}
+              </span>
+            </div>
           </div>
 
           {/* Bill Overview in Checkout */}
@@ -394,17 +575,40 @@ export const CheckoutModal: React.FC = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 text-sm transition-all disabled:opacity-75 cursor-pointer"
+            disabled={isSubmitting || isProcessingPayment}
+            className={`w-full font-extrabold py-3.5 px-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 text-sm transition-all disabled:opacity-75 cursor-pointer ${
+              paymentMode === 'online'
+                ? 'bg-blue-600 hover:bg-blue-700 active:scale-98 text-white'
+                : 'bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white'
+            }`}
           >
-            <CheckCircle2 className="w-5 h-5 text-amber-300" />
-            <span>{isSubmitting ? t.placingOrder : `${t.placeOrder} • ₹${cartTotal}`}</span>
+            {isProcessingPayment ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin text-white/80" />
+                <span>{language === 'te' ? 'పేమెంట్ ప్రాసెసింగ్...' : 'Processing Payment...'}</span>
+              </>
+            ) : isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin text-white/80" />
+                <span>{t.placingOrder}</span>
+              </>
+            ) : paymentMode === 'online' ? (
+              <>
+                <CreditCard className="w-5 h-5 text-amber-300" />
+                <span>{language === 'te' ? `ఆన్‌లైన్ చెల్లించండి • ₹${cartTotal}` : `Pay Online • ₹${cartTotal}`}</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-5 h-5 text-amber-300" />
+                <span>{`${t.placeOrder} • ₹${cartTotal}`}</span>
+              </>
+            )}
           </button>
 
           <p className="text-[10px] text-center text-slate-400">
             {language === 'te' 
-              ? 'ఆర్డర్ పూర్తయిన తర్వాత షాప్ ఓనర్ వాట్సాప్ (+91 62817 30144) కి వివరమైన బిల్లు పంపబడుతుంది.' 
-              : 'After placing, complete itemized bill will be generated for store owner WhatsApp (+91 62817 30144).'}
+              ? 'ఆర్డర్ పూర్తయిన తర్వాత షాప్ ఓనర్ వాట్సాప్ కి వివరమైన బిల్లు పంపబడుతుంది.' 
+              : 'After placing, complete itemized bill will be generated for store owner WhatsApp.'}
           </p>
 
         </form>

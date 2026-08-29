@@ -191,7 +191,7 @@ export const AdminDashboard: React.FC = () => {
                   {t.adminTitle}
                 </h1>
                 <span className="bg-purple-900 text-purple-200 border border-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  LIVE (PIN: 9874)
+                  LIVE
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -390,8 +390,16 @@ export const AdminDashboard: React.FC = () => {
                         <div className="py-2 space-y-1 text-xs text-slate-300">
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-white text-sm">{custName}</span>
-                            <span className="text-emerald-400 font-bold text-sm">₹{totalAmt} (COD)</span>
+                            <span className="text-emerald-400 font-bold text-sm">
+                              ₹{totalAmt} ({order.paymentMethod === 'online_razorpay' ? '💳 Razorpay' : order.paymentMethod === 'pay_on_pickup' ? 'Store Pickup' : 'COD'})
+                            </span>
                           </div>
+                          
+                          {order.razorpayPaymentId && (
+                            <div className="text-[10px] text-blue-300 font-mono bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/60 inline-block">
+                              Payment ID: {order.razorpayPaymentId}
+                            </div>
+                          )}
                           
                           {custPhone && (
                             <div className="flex items-center gap-2 text-slate-400">
