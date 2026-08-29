@@ -89,10 +89,11 @@ export const OrderTrackingModal: React.FC = () => {
     }
   };
 
-  const currentStepIdx = getStepIndex(activeOrder.status);
+  const currentStepIdx = getStepIndex(activeOrder?.status || 'pending');
 
   // Demo helper to advance order status
   const handleAdvanceStatus = () => {
+    if (!activeOrder?.id) return;
     const nextStatuses: OrderStatus[] = ['pending', 'packing', 'out_for_delivery', 'delivered'];
     const nextIdx = Math.min(3, currentStepIdx + 1);
     updateOrderStatus(activeOrder.id, nextStatuses[nextIdx]);

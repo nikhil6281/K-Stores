@@ -108,6 +108,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const t = translations[language];
 
+  // User state
+  const [user, setUserState] = useState<CustomerUser | null>(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_USER);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
   // Products state
   const [products, setProducts] = useState<Product[]>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_PRODUCTS);
@@ -127,6 +140,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Cart state
   const [cart, setCart] = useState<CartItem[]>(() => {
+    // If user is currently saved, check their user-specific cart first
+    const savedUserStr = localStorage.getItem(LOCAL_STORAGE_USER);
+    if (savedUserStr) {
+      try {
+        const u = JSON.parse(savedUserStr);
+        if (u && u.phone) {
+          const userCart = localStorage.getItem(`kstores_cart_user_${u.phone}`);
+          if (userCart) return JSON.parse(userCart);
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
     const saved = localStorage.getItem(LOCAL_STORAGE_CART);
     if (saved) {
       try {
@@ -138,9 +165,61 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return [];
   });
 
+  // Persist cart
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_CART, JSON.stringify(cart));
-  }, [cart]);
+    if (user && user.phone) {
+      localStorage.setItem(`kstores_cart_user_${user.phone}`, JSON.stringify(cart));
+    }
+  }, [cart, user]);
+
+  // Handle Login and Logout with Cart Continuity
+  const setUser = (newUser: CustomerUser | null) => {
+    if (newUser) {
+      // Save user to active storage
+      localStorage.setItem(LOCAL_STORAGE_USER, JSON.stringify(newUser));
+      setUserState(newUser);
+
+      // Check if user has a previously saved cart from prior session
+      const savedUserCartKey = `kstores_cart_user_${newUser.phone}`;
+      const savedUserCartStr = localStorage.getItem(savedUserCartKey);
+
+      if (savedUserCartStr) {
+        try {
+          const savedItems: CartItem[] = JSON.parse(savedUserCartStr);
+          if (Array.isArray(savedItems) && savedItems.length > 0) {
+            // Merge with current guest cart without duplicates
+            setCart(prev => {
+              const itemMap = new Map<string, CartItem>();
+              savedItems.forEach(item => itemMap.set(item.product.id, item));
+              prev.forEach(item => {
+                if (itemMap.has(item.product.id)) {
+                  const existing = itemMap.get(item.product.id)!;
+                  itemMap.set(item.product.id, {
+                    ...existing,
+                    quantity: Math.max(existing.quantity, item.quantity)
+                  });
+                } else {
+                  itemMap.set(item.product.id, item);
+                }
+              });
+              return Array.from(itemMap.values());
+            });
+          }
+        } catch {
+          // Ignore
+        }
+      }
+    } else {
+      // User is logging out: save their cart first before clearing session
+      if (user && user.phone) {
+        localStorage.setItem(`kstores_cart_user_${user.phone}`, JSON.stringify(cart));
+      }
+      localStorage.removeItem(LOCAL_STORAGE_USER);
+      setUserState(null);
+      setCart([]);
+    }
+  };
 
   // Delivery Mode
   const [deliveryType, setDeliveryType] = useState<DeliveryType>('delivery_20min');
@@ -161,28 +240,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_ORDERS, JSON.stringify(orders));
   }, [orders]);
-
-  // User state
-  const [user, setUserState] = useState<CustomerUser | null>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_USER);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  });
-
-  const setUser = (newUser: CustomerUser | null) => {
-    setUserState(newUser);
-    if (newUser) {
-      localStorage.setItem(LOCAL_STORAGE_USER, JSON.stringify(newUser));
-    } else {
-      localStorage.removeItem(LOCAL_STORAGE_USER);
-    }
-  };
 
   // Owner state
   const [isOwnerMode, setIsOwnerMode] = useState<boolean>(false);
@@ -259,27 +316,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const cloudData = await fetchCloudStoreData();
     if (cloudData && Array.isArray(cloudData.orders)) {
       setOrders(prev => {
-        // Merge cloud orders with local orders without duplicates
         const cloudOrderMap = new Map<string, Order>();
         
-        // Add cloud orders
-        cloudData.orders.forEach(o => cloudOrderMap.set(o.id, o));
+        // Add cloud orders safely
+        cloudData.orders.forEach(o => {
+          if (o && o.id) cloudOrderMap.set(o.id, o);
+        });
         
         // Add any local pending orders not yet in cloud
         prev.forEach(o => {
-          if (!cloudOrderMap.has(o.id)) {
+          if (o && o.id && !cloudOrderMap.has(o.id)) {
             cloudOrderMap.set(o.id, o);
           }
         });
 
         const mergedOrders = Array.from(cloudOrderMap.values()).sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          (a, b) => {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return timeB - timeA;
+          }
         );
 
         // If new orders arrived and count increased
         if (mergedOrders.length > prevOrdersCountRef.current && prevOrdersCountRef.current > 0) {
           const newestOrder = mergedOrders[0];
-          if (isOwnerModeRef.current) {
+          if (isOwnerModeRef.current && newestOrder) {
             sounds.playOwnerNewOrderAlert();
             showToast(
               'success',
@@ -312,10 +374,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [isOwnerMode, refreshOrdersFromCloud]);
 
   // Cart Calculations
-  const cartSubtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-  const cartMrpTotal = cart.reduce((sum, item) => sum + (item.product.mrp * item.quantity), 0);
+  const cartSubtotal = cart.reduce((sum, item) => sum + ((item?.product?.price ?? 0) * (item?.quantity ?? 1)), 0);
+  const cartMrpTotal = cart.reduce((sum, item) => sum + ((item?.product?.mrp ?? 0) * (item?.quantity ?? 1)), 0);
   const cartDiscount = Math.max(0, cartMrpTotal - cartSubtotal);
-  const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartItemsCount = cart.reduce((sum, item) => sum + (item?.quantity ?? 1), 0);
   
   const minOrderForFreeDelivery = 199;
   const deliveryFee = (deliveryType === 'store_pickup' || cartSubtotal >= minOrderForFreeDelivery || cartSubtotal === 0) ? 0 : 15;
@@ -323,13 +385,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Cart Actions
   const addToCart = (product: Product) => {
-    if (product.stock <= 0) {
+    if (!product || product.stock <= 0) {
       showToast('warning', language === 'te' ? 'స్టాక్ లేదు' : 'Out of Stock', language === 'te' ? 'ఈ వస్తువు ప్రస్తుతం అందుబాటులో లేదు' : 'This item is currently out of stock');
       return;
     }
 
     setCart(prev => {
-      const existing = prev.find(item => item.product.id === product.id);
+      const existing = prev.find(item => item?.product?.id === product.id);
       if (existing) {
         if (existing.quantity >= product.stock) {
           showToast('warning', language === 'te' ? 'స్టాక్ పరిమితి' : 'Max Stock Reached', language === 'te' ? `కేవలం ${product.stock} మాత్రమే అందుబాటులో ఉన్నాయి` : `Only ${product.stock} available in store`);
@@ -344,11 +406,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
 
     sounds.playCartAdd();
-    showToast('success', language === 'te' ? 'కార్ట్‌కు చేర్చబడింది' : 'Added to Cart', `${language === 'te' ? product.nameTe : product.nameEn} x 1`, 2000);
+    showToast('success', language === 'te' ? 'కార్ట్‌కు చేర్చబడింది' : 'Added to Cart', `${language === 'te' ? (product.nameTe || product.nameEn) : product.nameEn} x 1`, 2000);
   };
 
   const removeFromCart = (productId: string) => {
-    setCart(prev => prev.filter(item => item.product.id !== productId));
+    setCart(prev => prev.filter(item => item?.product?.id !== productId));
   };
 
   const updateCartQuantity = (productId: string, quantity: number) => {
@@ -372,6 +434,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const clearCart = () => {
     setCart([]);
+    if (user && user.phone) {
+      localStorage.removeItem(`kstores_cart_user_${user.phone}`);
+    }
   };
 
   // Inventory Actions
@@ -454,18 +519,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     sounds.playOrderSuccess();
 
-    // 3. Auto update user details if not saved
-    if (!user) {
-      setUser({
-        id: `user-${Date.now()}`,
-        name: customerName,
-        phone: customerPhone,
-        savedAddress: address,
-        joinedAt: new Date().toISOString()
-      });
-    }
-
-    // 4. Push to shared central Cloud Database so ALL devices see it!
+    // 3. Push to shared central Cloud Database so ALL devices see it!
     try {
       const updatedList = await addOrderToCloud(newOrder);
       if (updatedList && updatedList.length > 0) {
@@ -516,7 +570,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const reorder = (pastOrder: Order) => {
+    if (!pastOrder || !Array.isArray(pastOrder.items)) return;
     pastOrder.items.forEach(item => {
+      if (!item || !item.product) return;
       const currentProduct = products.find(p => p.id === item.product.id);
       if (currentProduct && currentProduct.stock > 0) {
         addToCart(currentProduct);
@@ -528,7 +584,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast('success', language === 'te' ? 'వస్తువులు చేర్చబడ్డాయి' : 'Items Reordered', language === 'te' ? 'గత ఆర్డర్ వస్తువులు కార్ట్‌కు చేరాయి' : 'Previous order items added to cart');
   };
 
-  const activeOrder = orders.find(o => o.id === activeOrderId) || orders[0] || null;
+  const activeOrder = orders.find(o => o?.id === activeOrderId) || orders[0] || null;
 
   return (
     <StoreContext.Provider

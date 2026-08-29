@@ -27,14 +27,14 @@ import { getCustomerStatusUpdateWhatsAppUrl, STORE_OWNER_DISPLAY_PHONE } from '.
 
 export const AdminDashboard: React.FC = () => {
   const {
-    products,
+    products = [],
     updateProduct,
     addProduct,
     deleteProduct,
     resetInventory,
-    orders,
+    orders = [],
     updateOrderStatus,
-    deals,
+    deals = [],
     toggleDeal,
     setIsOwnerMode,
     refreshOrdersFromCloud,
@@ -43,7 +43,6 @@ export const AdminDashboard: React.FC = () => {
   } = useStore();
 
   const [isSyncing, setIsSyncing] = useState(false);
-
   const [activeTab, setActiveTab] = useState<'orders' | 'inventory' | 'analytics' | 'deals'>('orders');
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
   const [inventorySearch, setInventorySearch] = useState('');
@@ -65,46 +64,53 @@ export const AdminDashboard: React.FC = () => {
   const [formMinAlert, setFormMinAlert] = useState(5);
   const [formImage, setFormImage] = useState('https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&auto=format&fit=crop&q=60');
 
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  const safeProducts = Array.isArray(products) ? products : [];
+  const safeDeals = Array.isArray(deals) ? deals : [];
+
   // Filtered orders
-  const filteredOrders = orders.filter(o => {
+  const filteredOrders = safeOrders.filter(o => {
+    if (!o) return false;
     if (orderStatusFilter === 'all') return true;
     return o.status === orderStatusFilter;
   });
 
   // Filtered inventory
-  const filteredInventory = products.filter(p => {
-    const matchesSearch = 
-      p.nameEn.toLowerCase().includes(inventorySearch.toLowerCase()) || 
-      p.nameTe.includes(inventorySearch);
+  const filteredInventory = safeProducts.filter(p => {
+    if (!p) return false;
+    const nameEn = (p.nameEn || '').toLowerCase();
+    const nameTe = p.nameTe || '';
+    const q = inventorySearch.toLowerCase();
+    const matchesSearch = nameEn.includes(q) || nameTe.includes(inventorySearch);
     if (showLowStockOnly) {
-      return matchesSearch && p.stock <= p.minStockAlert;
+      return matchesSearch && (p.stock ?? 0) <= (p.minStockAlert ?? 5);
     }
     return matchesSearch;
   });
 
-  // Analytics Computations
-  const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
-  const todayRevenue = orders
-    .filter(o => new Date(o.createdAt).toDateString() === new Date().toDateString())
-    .reduce((sum, o) => sum + o.totalAmount, 0) || totalRevenue;
-  const avgOrderValue = orders.length > 0 ? Math.round(totalRevenue / orders.length) : 0;
-  const deliveryOrdersCount = orders.filter(o => o.deliveryType === 'delivery_20min').length;
-  const pickupOrdersCount = orders.filter(o => o.deliveryType === 'store_pickup').length;
-  const lowStockCount = products.filter(p => p.stock <= p.minStockAlert).length;
+  // Analytics Computations with full null-safety
+  const totalRevenue = safeOrders.reduce((sum, o) => sum + (o?.totalAmount || 0), 0);
+  const todayRevenue = safeOrders
+    .filter(o => o?.createdAt && !isNaN(new Date(o.createdAt).getTime()) && new Date(o.createdAt).toDateString() === new Date().toDateString())
+    .reduce((sum, o) => sum + (o?.totalAmount || 0), 0) || totalRevenue;
+  const avgOrderValue = safeOrders.length > 0 ? Math.round(totalRevenue / safeOrders.length) : 0;
+  const deliveryOrdersCount = safeOrders.filter(o => o?.deliveryType === 'delivery_20min').length;
+  const pickupOrdersCount = safeOrders.filter(o => o?.deliveryType === 'store_pickup').length;
+  const lowStockCount = safeProducts.filter(p => (p?.stock ?? 0) <= (p?.minStockAlert ?? 5)).length;
 
   // Open Edit Product Modal
   const openEditModal = (p: Product) => {
     setEditingProduct(p);
-    setFormNameEn(p.nameEn);
-    setFormNameTe(p.nameTe);
-    setFormCategory(p.category);
-    setFormPrice(p.price);
-    setFormMrp(p.mrp);
-    setFormUnit(p.unit);
-    setFormUnitTe(p.unitTe);
-    setFormStock(p.stock);
-    setFormMinAlert(p.minStockAlert);
-    setFormImage(p.image);
+    setFormNameEn(p.nameEn || '');
+    setFormNameTe(p.nameTe || '');
+    setFormCategory(p.category || 'vegetables');
+    setFormPrice(p.price || 30);
+    setFormMrp(p.mrp || 35);
+    setFormUnit(p.unit || '1 kg');
+    setFormUnitTe(p.unitTe || '1 కేజీ');
+    setFormStock(p.stock || 20);
+    setFormMinAlert(p.minStockAlert || 5);
+    setFormImage(p.image || '');
     setIsAddModalOpen(true);
   };
 
@@ -185,7 +191,7 @@ export const AdminDashboard: React.FC = () => {
                   {t.adminTitle}
                 </h1>
                 <span className="bg-purple-900 text-purple-200 border border-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  LIVE
+                  LIVE (PIN: 9874)
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -249,9 +255,9 @@ export const AdminDashboard: React.FC = () => {
           >
             <Package className="w-4 h-4" />
             <span>{t.tabOrders}</span>
-            {orders.filter(o => o.status !== 'delivered').length > 0 && (
+            {safeOrders.filter(o => o?.status !== 'delivered').length > 0 && (
               <span className="bg-amber-400 text-purple-950 text-[10px] font-black px-2 py-0.5 rounded-full">
-                {orders.filter(o => o.status !== 'delivered').length}
+                {safeOrders.filter(o => o?.status !== 'delivered').length}
               </span>
             )}
           </button>
@@ -306,11 +312,11 @@ export const AdminDashboard: React.FC = () => {
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
                 {[
-                  { id: 'all', label: `All (${orders.length})` },
-                  { id: 'pending', label: `Pending (${orders.filter(o => o.status === 'pending').length})` },
-                  { id: 'packing', label: `Packing (${orders.filter(o => o.status === 'packing').length})` },
-                  { id: 'out_for_delivery', label: `Out for Delivery (${orders.filter(o => o.status === 'out_for_delivery').length})` },
-                  { id: 'delivered', label: `Delivered (${orders.filter(o => o.status === 'delivered').length})` },
+                  { id: 'all', label: `All (${safeOrders.length})` },
+                  { id: 'pending', label: `Pending (${safeOrders.filter(o => o?.status === 'pending').length})` },
+                  { id: 'packing', label: `Packing (${safeOrders.filter(o => o?.status === 'packing').length})` },
+                  { id: 'out_for_delivery', label: `Out for Delivery (${safeOrders.filter(o => o?.status === 'out_for_delivery').length})` },
+                  { id: 'delivered', label: `Delivered (${safeOrders.filter(o => o?.status === 'delivered').length})` },
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -334,32 +340,44 @@ export const AdminDashboard: React.FC = () => {
 
             {/* Order Cards Grid */}
             {filteredOrders.length === 0 ? (
-              <div className="bg-slate-800/60 rounded-3xl p-10 text-center border border-slate-800">
-                <Package className="w-12 h-12 text-slate-600 mx-auto mb-2" />
+              <div className="bg-slate-800/60 rounded-3xl p-10 text-center border border-slate-800 space-y-3">
+                <Package className="w-12 h-12 text-slate-600 mx-auto" />
                 <h3 className="font-bold text-slate-300 text-sm">{t.noOrdersFound}</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  New orders placed by customers across any phone or laptop will appear here in real time.
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredOrders.map(order => {
-                  const orderDate = new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  if (!order) return null;
+                  const orderDate = order.createdAt && !isNaN(new Date(order.createdAt).getTime())
+                    ? new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : 'Recent';
                   
+                  const status = order.status || 'pending';
+                  const orderItems = Array.isArray(order.items) ? order.items : [];
+                  const custName = order.customerName || 'Customer';
+                  const custPhone = order.customerPhone || '';
+                  const totalAmt = order.totalAmount ?? 0;
+
                   return (
                     <div 
-                      key={order.id}
+                      key={order.id || Math.random().toString()}
                       className="bg-slate-800/90 border border-slate-700/80 rounded-3xl p-5 shadow-lg space-y-3.5 flex flex-col justify-between"
                     >
                       <div>
                         {/* Order Top Strip */}
                         <div className="flex items-center justify-between border-b border-slate-700 pb-3">
                           <div className="flex items-center gap-2">
-                            <span className="font-black text-white text-base">#{order.id}</span>
+                            <span className="font-black text-white text-base">#{order.id || 'MK-Order'}</span>
                             <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase ${
-                              order.status === 'pending' ? 'bg-amber-400 text-slate-950 animate-pulse' :
-                              order.status === 'packing' ? 'bg-blue-400 text-slate-950' :
-                              order.status === 'out_for_delivery' ? 'bg-purple-400 text-slate-950' :
+                              status === 'pending' ? 'bg-amber-400 text-slate-950 animate-pulse' :
+                              status === 'packing' ? 'bg-blue-400 text-slate-950' :
+                              status === 'out_for_delivery' ? 'bg-purple-400 text-slate-950' :
                               'bg-emerald-400 text-slate-950'
                             }`}>
-                              {order.status.replace('_', ' ')}
+                              {status.replace('_', ' ')}
                             </span>
                           </div>
 
@@ -371,21 +389,25 @@ export const AdminDashboard: React.FC = () => {
                         {/* Customer Details */}
                         <div className="py-2 space-y-1 text-xs text-slate-300">
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-white text-sm">{order.customerName}</span>
-                            <span className="text-emerald-400 font-bold text-sm">₹{order.totalAmount} (COD)</span>
+                            <span className="font-bold text-white text-sm">{custName}</span>
+                            <span className="text-emerald-400 font-bold text-sm">₹{totalAmt} (COD)</span>
                           </div>
                           
-                          <div className="flex items-center gap-2 text-slate-400">
-                            <Phone className="w-3.5 h-3.5 text-purple-400" />
-                            <span>+91 {order.customerPhone}</span>
-                          </div>
+                          {custPhone && (
+                            <div className="flex items-center gap-2 text-slate-400">
+                              <Phone className="w-3.5 h-3.5 text-purple-400" />
+                              <span>+91 {custPhone}</span>
+                            </div>
+                          )}
 
                           {order.address && (
                             <div className="flex items-start gap-2 text-slate-300 pt-1">
                               <MapPin className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
                               <div>
                                 <span>{order.address.doorNo ? `${order.address.doorNo}, ` : ''}{order.address.villageName}</span>
-                                <div className="text-amber-300 font-bold text-[11px]">📍 Landmark: {order.address.landmark}</div>
+                                {order.address.landmark && (
+                                  <div className="text-amber-300 font-bold text-[11px]">📍 Landmark: {order.address.landmark}</div>
+                                )}
                               </div>
                             </div>
                           )}
@@ -400,16 +422,24 @@ export const AdminDashboard: React.FC = () => {
                         {/* Itemized List */}
                         <div className="bg-slate-900/80 rounded-2xl p-3 border border-slate-700/60 space-y-1 text-xs">
                           <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                            {order.items.length} Grocery Items:
+                            {orderItems.length} Grocery Items:
                           </div>
-                          {order.items.map((item, idx) => (
-                            <div key={idx} className="flex justify-between items-center text-slate-300">
-                              <span className="truncate max-w-[220px]">
-                                • {item.product.nameEn} ({item.product.unit}) x{item.quantity}
-                              </span>
-                              <span className="font-semibold text-slate-400">₹{item.product.price * item.quantity}</span>
-                            </div>
-                          ))}
+                          {orderItems.map((item, idx) => {
+                            if (!item || !item.product) return null;
+                            const pName = item.product.nameEn || 'Item';
+                            const pUnit = item.product.unit || '';
+                            const pPrice = item.product.price ?? 0;
+                            const pQty = item.quantity ?? 1;
+
+                            return (
+                              <div key={idx} className="flex justify-between items-center text-slate-300">
+                                <span className="truncate max-w-[220px]">
+                                  • {pName} {pUnit ? `(${pUnit})` : ''} x{pQty}
+                                </span>
+                                <span className="font-semibold text-slate-400">₹{pPrice * pQty}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
 
@@ -419,7 +449,7 @@ export const AdminDashboard: React.FC = () => {
                         <div className="grid grid-cols-3 gap-1.5">
                           <button
                             onClick={() => handleStatusTransition(order.id, 'packing')}
-                            disabled={order.status === 'packing' || order.status === 'out_for_delivery' || order.status === 'delivered'}
+                            disabled={status === 'packing' || status === 'out_for_delivery' || status === 'delivered'}
                             className="bg-blue-600/80 hover:bg-blue-600 disabled:opacity-30 text-white font-bold py-2 px-1 rounded-xl text-[11px] transition-colors text-center cursor-pointer"
                           >
                             1. Mark Packing
@@ -427,7 +457,7 @@ export const AdminDashboard: React.FC = () => {
 
                           <button
                             onClick={() => handleStatusTransition(order.id, 'out_for_delivery')}
-                            disabled={order.status === 'out_for_delivery' || order.status === 'delivered'}
+                            disabled={status === 'out_for_delivery' || status === 'delivered'}
                             className="bg-purple-600/80 hover:bg-purple-600 disabled:opacity-30 text-white font-bold py-2 px-1 rounded-xl text-[11px] transition-colors text-center cursor-pointer"
                           >
                             2. Out for 20M
@@ -435,7 +465,7 @@ export const AdminDashboard: React.FC = () => {
 
                           <button
                             onClick={() => handleStatusTransition(order.id, 'delivered')}
-                            disabled={order.status === 'delivered'}
+                            disabled={status === 'delivered'}
                             className="bg-emerald-600/80 hover:bg-emerald-600 disabled:opacity-30 text-white font-bold py-2 px-1 rounded-xl text-[11px] transition-colors text-center cursor-pointer"
                           >
                             3. Delivered ✅
@@ -444,23 +474,29 @@ export const AdminDashboard: React.FC = () => {
 
                         {/* WhatsApp / Call Customer */}
                         <div className="flex items-center gap-2">
-                          <a
-                            href={getCustomerStatusUpdateWhatsAppUrl(order, order.status)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5" />
-                            <span>WhatsApp Customer</span>
-                          </a>
+                          {custPhone ? (
+                            <>
+                              <a
+                                href={getCustomerStatusUpdateWhatsAppUrl(order, status)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5" />
+                                <span>WhatsApp Customer</span>
+                              </a>
 
-                          <a
-                            href={`tel:+91${order.customerPhone}`}
-                            className="bg-slate-700 hover:bg-slate-600 text-white font-bold p-2 rounded-xl text-xs transition-colors"
-                            title="Call Customer"
-                          >
-                            <Phone className="w-4 h-4" />
-                          </a>
+                              <a
+                                href={`tel:+91${custPhone.replace(/\D/g, '')}`}
+                                className="bg-slate-700 hover:bg-slate-600 text-white font-bold p-2 rounded-xl text-xs transition-colors"
+                                title="Call Customer"
+                              >
+                                <Phone className="w-4 h-4" />
+                              </a>
+                            </>
+                          ) : (
+                            <div className="text-xs text-slate-500 italic py-1">No phone number provided</div>
+                          )}
                         </div>
                       </div>
 
@@ -538,29 +574,32 @@ export const AdminDashboard: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-700/60">
                     {filteredInventory.map((p) => {
-                      const isLow = p.stock <= p.minStockAlert;
+                      if (!p) return null;
+                      const isLow = (p.stock ?? 0) <= (p.minStockAlert ?? 5);
+                      const catName = (p.category || 'general').replace('_', ' ');
+
                       return (
                         <tr key={p.id} className="hover:bg-slate-700/40 transition-colors">
                           <td className="p-3.5 flex items-center gap-3">
                             <img
-                              src={p.image}
-                              alt={p.nameEn}
+                              src={p.image || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&auto=format&fit=crop&q=60'}
+                              alt={p.nameEn || 'Product'}
                               className="w-10 h-10 rounded-xl object-cover bg-slate-900 flex-shrink-0"
                             />
                             <div>
-                              <div className="font-bold text-white text-xs">{p.nameEn}</div>
-                              <div className="text-[11px] text-purple-300 font-medium">{p.nameTe}</div>
-                              <div className="text-[10px] text-slate-400">{p.unit}</div>
+                              <div className="font-bold text-white text-xs">{p.nameEn || 'Product'}</div>
+                              <div className="text-[11px] text-purple-300 font-medium">{p.nameTe || ''}</div>
+                              <div className="text-[10px] text-slate-400">{p.unit || ''}</div>
                             </div>
                           </td>
 
                           <td className="p-3.5 capitalize font-medium text-slate-300">
-                            {p.category.replace('_', ' ')}
+                            {catName}
                           </td>
 
                           <td className="p-3.5">
-                            <div className="font-bold text-emerald-400">₹{p.price}</div>
-                            <div className="text-[10px] text-slate-400 line-through">₹{p.mrp}</div>
+                            <div className="font-bold text-emerald-400">₹{p.price ?? 0}</div>
+                            <div className="text-[10px] text-slate-400 line-through">₹{p.mrp ?? 0}</div>
                           </td>
 
                           <td className="p-3.5">
@@ -570,7 +609,7 @@ export const AdminDashboard: React.FC = () => {
                                 isLow ? 'bg-amber-950 text-amber-300 border border-amber-800' :
                                 'bg-slate-900 text-slate-200'
                               }`}>
-                                {p.stock}
+                                {p.stock ?? 0}
                               </span>
 
                               {isLow && (
@@ -631,7 +670,7 @@ export const AdminDashboard: React.FC = () => {
                   <span>{t.totalOrdersCount}</span>
                   <ShoppingBag className="w-4 h-4 text-purple-400" />
                 </div>
-                <div className="text-2xl font-black text-white">{orders.length}</div>
+                <div className="text-2xl font-black text-white">{safeOrders.length}</div>
                 <div className="text-[11px] text-purple-300 mt-1 font-medium">
                   {deliveryOrdersCount} Home Delivery | {pickupOrdersCount} Pickup
                 </div>
@@ -749,34 +788,37 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                {deals.map(deal => (
-                  <div 
-                    key={deal.id}
-                    className="bg-slate-900 p-4 rounded-2xl border border-slate-700 flex flex-wrap items-center justify-between gap-3"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-white text-sm">{deal.titleEn}</span>
-                        <span className="bg-purple-900 text-purple-200 border border-purple-700 text-[10px] font-bold px-2 py-0.5 rounded">
-                          {deal.code}
-                        </span>
-                      </div>
-                      <div className="text-xs text-purple-300 font-medium">{deal.titleTe}</div>
-                      <div className="text-[11px] text-slate-400">{deal.subtitleEn} • Min Order: ₹{deal.minOrder}</div>
-                    </div>
-
-                    <button
-                      onClick={() => toggleDeal(deal.id)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        deal.active
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-slate-800 text-slate-400 border border-slate-700'
-                      }`}
+                {safeDeals.map(deal => {
+                  if (!deal) return null;
+                  return (
+                    <div 
+                      key={deal.id}
+                      className="bg-slate-900 p-4 rounded-2xl border border-slate-700 flex flex-wrap items-center justify-between gap-3"
                     >
-                      {deal.active ? '✓ Active on App' : 'Disabled'}
-                    </button>
-                  </div>
-                ))}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-white text-sm">{deal.titleEn}</span>
+                          <span className="bg-purple-900 text-purple-200 border border-purple-700 text-[10px] font-bold px-2 py-0.5 rounded">
+                            {deal.code}
+                          </span>
+                        </div>
+                        <div className="text-xs text-purple-300 font-medium">{deal.titleTe}</div>
+                        <div className="text-[11px] text-slate-400">{deal.subtitleEn} • Min Order: ₹{deal.minOrder}</div>
+                      </div>
+
+                      <button
+                        onClick={() => toggleDeal(deal.id)}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          deal.active
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-slate-800 text-slate-400 border border-slate-700'
+                        }`}
+                      >
+                        {deal.active ? '✓ Active on App' : 'Disabled'}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

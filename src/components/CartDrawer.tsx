@@ -30,6 +30,9 @@ export const CartDrawer: React.FC = () => {
     deliveryFee,
     minOrderForFreeDelivery,
     setIsCheckoutOpen,
+    user,
+    setIsAuthOpen,
+    showToast,
     language,
     t
   } = useStore();
@@ -256,6 +259,12 @@ export const CartDrawer: React.FC = () => {
           <div className="p-4 border-t border-slate-200 bg-white">
             <button
               onClick={() => {
+                if (!user) {
+                  setIsCartOpen(false);
+                  setIsAuthOpen(true);
+                  showToast('warning', 'Sign in Required', language === 'te' ? 'ఆర్డర్ చేయడానికి దయచేసి లాగిన్ అవ్వండి' : 'Please sign in to your account to place an order.');
+                  return;
+                }
                 setIsCartOpen(false);
                 setIsCheckoutOpen(true);
               }}
