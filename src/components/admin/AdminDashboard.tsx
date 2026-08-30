@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { 
   Package, 
@@ -31,7 +31,7 @@ export const AdminDashboard: React.FC = () => {
     updateProduct,
     addProduct,
     deleteProduct,
-    resetInventory,
+    
     orders = [],
     updateOrderStatus,
     deals = [],
@@ -59,7 +59,7 @@ export const AdminDashboard: React.FC = () => {
   const [formPrice, setFormPrice] = useState(30);
   const [formMrp, setFormMrp] = useState(35);
   const [formUnit, setFormUnit] = useState('1 kg');
-  const [formUnitTe, setFormUnitTe] = useState('1 కేజీ');
+  const [formUnitTe, setFormUnitTe] = useState('1 à°•à±‡à°œà±€');
   const [formStock, setFormStock] = useState(20);
   const [formMinAlert, setFormMinAlert] = useState(5);
   const [formImage, setFormImage] = useState('https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&auto=format&fit=crop&q=60');
@@ -107,7 +107,7 @@ export const AdminDashboard: React.FC = () => {
     setFormPrice(p.price || 30);
     setFormMrp(p.mrp || 35);
     setFormUnit(p.unit || '1 kg');
-    setFormUnitTe(p.unitTe || '1 కేజీ');
+    setFormUnitTe(p.unitTe || '1 à°•à±‡à°œà±€');
     setFormStock(p.stock || 20);
     setFormMinAlert(p.minStockAlert || 5);
     setFormImage(p.image || '');
@@ -123,7 +123,7 @@ export const AdminDashboard: React.FC = () => {
     setFormPrice(30);
     setFormMrp(35);
     setFormUnit('1 kg');
-    setFormUnitTe('1 కేజీ');
+    setFormUnitTe('1 à°•à±‡à°œà±€');
     setFormStock(25);
     setFormMinAlert(5);
     setFormImage('https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&auto=format&fit=crop&q=60');
@@ -183,7 +183,7 @@ export const AdminDashboard: React.FC = () => {
           
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-bold text-lg shadow-md">
-              👑
+              ðŸ‘‘
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -391,7 +391,7 @@ export const AdminDashboard: React.FC = () => {
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-white text-sm">{custName}</span>
                             <span className="text-emerald-400 font-bold text-sm">
-                              ₹{totalAmt} ({order.paymentMethod === 'online_razorpay' ? '💳 Razorpay' : order.paymentMethod === 'pay_on_pickup' ? 'Store Pickup' : 'COD'})
+                              â‚¹{totalAmt} ({order.paymentMethod === 'online_razorpay' ? 'ðŸ’³ Razorpay' : order.paymentMethod === 'pay_on_pickup' ? 'Store Pickup' : 'COD'})
                             </span>
                           </div>
                           
@@ -414,7 +414,7 @@ export const AdminDashboard: React.FC = () => {
                               <div>
                                 <span>{order.address.doorNo ? `${order.address.doorNo}, ` : ''}{order.address.villageName}</span>
                                 {order.address.landmark && (
-                                  <div className="text-amber-300 font-bold text-[11px]">📍 Landmark: {order.address.landmark}</div>
+                                  <div className="text-amber-300 font-bold text-[11px]">ðŸ“ Landmark: {order.address.landmark}</div>
                                 )}
                               </div>
                             </div>
@@ -442,9 +442,9 @@ export const AdminDashboard: React.FC = () => {
                             return (
                               <div key={idx} className="flex justify-between items-center text-slate-300">
                                 <span className="truncate max-w-[220px]">
-                                  • {pName} {pUnit ? `(${pUnit})` : ''} x{pQty}
+                                  â€¢ {pName} {pUnit ? `(${pUnit})` : ''} x{pQty}
                                 </span>
-                                <span className="font-semibold text-slate-400">₹{pPrice * pQty}</span>
+                                <span className="font-semibold text-slate-400">â‚¹{pPrice * pQty}</span>
                               </div>
                             );
                           })}
@@ -476,7 +476,7 @@ export const AdminDashboard: React.FC = () => {
                             disabled={status === 'delivered'}
                             className="bg-emerald-600/80 hover:bg-emerald-600 disabled:opacity-30 text-white font-bold py-2 px-1 rounded-xl text-[11px] transition-colors text-center cursor-pointer"
                           >
-                            3. Delivered ✅
+                            3. Delivered âœ…
                           </button>
                         </div>
 
@@ -558,7 +558,7 @@ export const AdminDashboard: React.FC = () => {
                 </button>
 
                 <button
-                  onClick={resetInventory}
+                  onClick={}
                   className="bg-slate-900 hover:bg-slate-700 text-slate-400 hover:text-white px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 transition-colors cursor-pointer"
                   title="Reset Catalog"
                 >
@@ -606,8 +606,8 @@ export const AdminDashboard: React.FC = () => {
                           </td>
 
                           <td className="p-3.5">
-                            <div className="font-bold text-emerald-400">₹{p.price ?? 0}</div>
-                            <div className="text-[10px] text-slate-400 line-through">₹{p.mrp ?? 0}</div>
+                            <div className="font-bold text-emerald-400">â‚¹{p.price ?? 0}</div>
+                            <div className="text-[10px] text-slate-400 line-through">â‚¹{p.mrp ?? 0}</div>
                           </td>
 
                           <td className="p-3.5">
@@ -667,7 +667,7 @@ export const AdminDashboard: React.FC = () => {
                   <span>{t.todaySales}</span>
                   <DollarSign className="w-4 h-4 text-emerald-400" />
                 </div>
-                <div className="text-2xl font-black text-white">₹{todayRevenue}</div>
+                <div className="text-2xl font-black text-white">â‚¹{todayRevenue}</div>
                 <div className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1 font-semibold">
                   <ArrowUpRight className="w-3 h-3" /> 20-Min Fast Orders
                 </div>
@@ -689,7 +689,7 @@ export const AdminDashboard: React.FC = () => {
                   <span>{t.avgOrderValue}</span>
                   <TrendingUp className="w-4 h-4 text-amber-400" />
                 </div>
-                <div className="text-2xl font-black text-white">₹{avgOrderValue}</div>
+                <div className="text-2xl font-black text-white">â‚¹{avgOrderValue}</div>
                 <div className="text-[11px] text-amber-300 mt-1 font-medium">
                   Village grocery basket size
                 </div>
@@ -719,11 +719,11 @@ export const AdminDashboard: React.FC = () => {
 
                 <div className="space-y-3">
                   {[
-                    { name: 'Fresh Farm Tomatoes (నాటు టమాటాలు)', count: 48, percent: 90 },
-                    { name: 'Sona Masoori Rice 5kg (సోనా మసూరి)', count: 35, percent: 75 },
-                    { name: 'Heritage Special Buffalo Milk (తాజా పాలు)', count: 32, percent: 70 },
-                    { name: 'Aashirvaad Chakki Atta 5kg (గోధుమ పిండి)', count: 28, percent: 60 },
-                    { name: 'Gold Drop Sunflower Oil (సన్‌ఫ్లవర్ నూనె)', count: 22, percent: 48 },
+                    { name: 'Fresh Farm Tomatoes (à°¨à°¾à°Ÿà± à°Ÿà°®à°¾à°Ÿà°¾à°²à±)', count: 48, percent: 90 },
+                    { name: 'Sona Masoori Rice 5kg (à°¸à±‹à°¨à°¾ à°®à°¸à±‚à°°à°¿)', count: 35, percent: 75 },
+                    { name: 'Heritage Special Buffalo Milk (à°¤à°¾à°œà°¾ à°ªà°¾à°²à±)', count: 32, percent: 70 },
+                    { name: 'Aashirvaad Chakki Atta 5kg (à°—à±‹à°§à±à°® à°ªà°¿à°‚à°¡à°¿)', count: 28, percent: 60 },
+                    { name: 'Gold Drop Sunflower Oil (à°¸à°¨à±â€Œà°«à±à°²à°µà°°à± à°¨à±‚à°¨à±†)', count: 22, percent: 48 },
                   ].map((item, idx) => (
                     <div key={idx} className="space-y-1">
                       <div className="flex justify-between text-xs font-semibold">
@@ -811,7 +811,7 @@ export const AdminDashboard: React.FC = () => {
                           </span>
                         </div>
                         <div className="text-xs text-purple-300 font-medium">{deal.titleTe}</div>
-                        <div className="text-[11px] text-slate-400">{deal.subtitleEn} • Min Order: ₹{deal.minOrder}</div>
+                        <div className="text-[11px] text-slate-400">{deal.subtitleEn} â€¢ Min Order: â‚¹{deal.minOrder}</div>
                       </div>
 
                       <button
@@ -822,7 +822,7 @@ export const AdminDashboard: React.FC = () => {
                             : 'bg-slate-800 text-slate-400 border border-slate-700'
                         }`}
                       >
-                        {deal.active ? '✓ Active on App' : 'Disabled'}
+                        {deal.active ? 'âœ“ Active on App' : 'Disabled'}
                       </button>
                     </div>
                   );
@@ -857,13 +857,13 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Product Name (Telugu - తెలుగు) *</label>
+                <label className="block font-bold text-slate-300 mb-1">Product Name (Telugu - à°¤à±†à°²à±à°—à±) *</label>
                 <input
                   type="text"
                   required
                   value={formNameTe}
                   onChange={(e) => setFormNameTe(e.target.value)}
-                  placeholder="ఉదా: తాజా నాటు టమాటాలు"
+                  placeholder="à°‰à°¦à°¾: à°¤à°¾à°œà°¾ à°¨à°¾à°Ÿà± à°Ÿà°®à°¾à°Ÿà°¾à°²à±"
                   className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-purple-500"
                 />
               </div>
@@ -876,16 +876,16 @@ export const AdminDashboard: React.FC = () => {
                     onChange={(e) => setFormCategory(e.target.value as ProductCategory)}
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none"
                   >
-                    <option value="vegetables">Vegetables (కూరగాయలు)</option>
-                    <option value="fruits">Fruits (పండ్లు)</option>
-                    <option value="dairy">Dairy & Bread (పాలు & బ్రెడ్)</option>
-                    <option value="staples">Rice & Atta & Dals (బియ్యం & పప్పులు)</option>
-                    <option value="snacks">Snacks (స్నాక్స్)</option>
-                    <option value="spices">Spices & Oils (మసాలాలు)</option>
-                    <option value="beverages">Beverages (కూల్ డ్రింక్స్)</option>
-                    <option value="household">Household (ఇంటి శుభ్రత)</option>
-                    <option value="personal_care">Personal Care (సబ్బులు)</option>
-                    <option value="pooja">Pooja Items (పూజా సామాగ్రి)</option>
+                    <option value="vegetables">Vegetables (à°•à±‚à°°à°—à°¾à°¯à°²à±)</option>
+                    <option value="fruits">Fruits (à°ªà°‚à°¡à±à°²à±)</option>
+                    <option value="dairy">Dairy & Bread (à°ªà°¾à°²à± & à°¬à±à°°à±†à°¡à±)</option>
+                    <option value="staples">Rice & Atta & Dals (à°¬à°¿à°¯à±à°¯à°‚ & à°ªà°ªà±à°ªà±à°²à±)</option>
+                    <option value="snacks">Snacks (à°¸à±à°¨à°¾à°•à±à°¸à±)</option>
+                    <option value="spices">Spices & Oils (à°®à°¸à°¾à°²à°¾à°²à±)</option>
+                    <option value="beverages">Beverages (à°•à±‚à°²à± à°¡à±à°°à°¿à°‚à°•à±à°¸à±)</option>
+                    <option value="household">Household (à°‡à°‚à°Ÿà°¿ à°¶à±à°­à±à°°à°¤)</option>
+                    <option value="personal_care">Personal Care (à°¸à°¬à±à°¬à±à°²à±)</option>
+                    <option value="pooja">Pooja Items (à°ªà±‚à°œà°¾ à°¸à°¾à°®à°¾à°—à±à°°à°¿)</option>
                   </select>
                 </div>
 
@@ -902,7 +902,7 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">Selling Price (₹) *</label>
+                  <label className="block font-bold text-slate-300 mb-1">Selling Price (â‚¹) *</label>
                   <input
                     type="number"
                     required
@@ -913,7 +913,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-300 mb-1">MRP Price (₹)</label>
+                  <label className="block font-bold text-slate-300 mb-1">MRP Price (â‚¹)</label>
                   <input
                     type="number"
                     value={formMrp}
@@ -980,3 +980,4 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
+
