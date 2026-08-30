@@ -10,13 +10,14 @@ export const OrderHistoryModal: React.FC = () => {
     user,
     setIsAuthOpen,
     setIsTrackingOpen,
-    setActiveOrder,
+    setActiveOrderId,
     language
   } = useStore();
 
   if (!isHistoryOpen) return null;
 
-  const userOrders = orders.filter(order => {
+  // Task 3: Strictly filter orders belonging to this logged-in customer
+  const userOrders = orders.filter((order: any) => {
     if (!user) return false;
     if (order.userId && user.id && order.userId === user.id) return true;
     if (order.customerEmail && user.email && order.customerEmail.toLowerCase() === user.email.toLowerCase()) return true;
@@ -79,7 +80,7 @@ export const OrderHistoryModal: React.FC = () => {
               </p>
             </div>
           ) : (
-            userOrders.map((order) => (
+            userOrders.map((order: any) => (
               <div
                 key={order.id}
                 className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3"
@@ -87,17 +88,17 @@ export const OrderHistoryModal: React.FC = () => {
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <div>
                     <div className="font-black text-xs text-slate-900 font-mono">#{order.id}</div>
-                    <div className="text-[11px] text-slate-500">{order.createdAt?.slice(0, 16).replace('T', ' ')}</div>
+                    <div className="text-[11px] text-slate-500">{order.createdAt ? String(order.createdAt).slice(0, 16).replace('T', ' ') : ''}</div>
                   </div>
                   <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase bg-slate-100 text-slate-800">
                     {order.status}
                   </span>
                 </div>
                 <div className="space-y-1 text-xs text-slate-700">
-                  {order.items.map((item, idx) => (
+                  {order.items && order.items.map((item: any, idx: number) => (
                     <div key={idx} className="flex justify-between">
-                      <span>{item.product.nameEn} x {item.quantity}</span>
-                      <span className="font-bold">₹{item.product.price * item.quantity}</span>
+                      <span>{item.product?.nameEn || 'Item'} x {item.quantity}</span>
+                      <span className="font-bold">₹{(item.product?.price || 0) * item.quantity}</span>
                     </div>
                   ))}
                 </div>
@@ -105,11 +106,11 @@ export const OrderHistoryModal: React.FC = () => {
                   <div className="text-xs font-black text-slate-900">Total: ₹{order.totalAmount}</div>
                   <button
                     onClick={() => {
-                      setActiveOrder(order);
+                      if (setActiveOrderId) setActiveOrderId(order.id);
                       setIsHistoryOpen(false);
                       setIsTrackingOpen(true);
                     }}
-                    className="text-xs font-bold text-[#9e1a22] hover:underline flex items-center gap-1"
+                    className="text-xs font-bold text-[#9e1a22] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>Track Order</span>
                     <ArrowRight className="w-3.5 h-3.5" />

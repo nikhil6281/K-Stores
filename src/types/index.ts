@@ -1,4 +1,4 @@
-export type Language = 'en' | 'te';
+﻿export type Language = 'en' | 'te';
 
 export type ProductCategory = 
   | 'vegetables'
@@ -56,6 +56,8 @@ export interface DeliveryAddress {
 }
 
 export interface Order {
+  userId?: string;
+  customerEmail?: string;
   id: string;
   items: CartItem[];
   customerName: string;
@@ -107,3 +109,4 @@ export interface ToastMessage {
   message: string;
   duration?: number;
 }
+

@@ -31,7 +31,7 @@ export const AdminDashboard: React.FC = () => {
     updateProduct,
     addProduct,
     deleteProduct,
-    
+    resetInventory,
     orders = [],
     updateOrderStatus,
     deals = [],
@@ -557,13 +557,7 @@ export const AdminDashboard: React.FC = () => {
                   <span>{t.addNewProduct}</span>
                 </button>
 
-                <button
-                  onClick={}
-                  className="bg-slate-900 hover:bg-slate-700 text-slate-400 hover:text-white px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 transition-colors cursor-pointer"
-                  title="Reset Catalog"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                </button>
+                
               </div>
             </div>
 
