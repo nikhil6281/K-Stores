@@ -1,42 +1,28 @@
 import type { Order, OrderStatus } from '../types';
 
 /**
- * K-Stores Order Sync Service
+ * K-Stores Universal Cross-Device Order Sync Engine
  * 
- * Architecture:
- * 1. LOCAL STORAGE: Primary data store — always works, instant
- * 2. BROADCAST CHANNEL: Syncs across browser tabs on same device instantly
- * 3. EXPRESS BACKEND (when running): True cross-device sync via server API
- * 4. CLOUD FALLBACK: Uses a shared cloud JSON endpoint for cross-device when no backend
- * 
- * The cloud fallback uses localStorage as a write-through cache
- * to minimize API calls and stay within rate limits.
+ * Synchronizes orders in real-time across all devices (phones, tablets, laptops)
+ * using a multi-tier architecture:
+ * 1. Live Global Cloud Storage (extendsclass JSON storage bin)
+ * 2. Express Backend API (when running locally or hosted)
+ * 3. BroadcastChannel + localStorage (instant same-device tab sync)
  */
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
-// Shared localStorage key for cross-tab sync on same device
+// Central Cloud Storage Bin (Zero rate limits, public real-time REST endpoint)
+const CLOUD_STORAGE_URL = 'https://extendsclass.com/api/json-storage/bin/fbcdbcf';
 const CLOUD_ORDERS_CACHE_KEY = 'kstores_cloud_orders_cache';
 
-// Cloud endpoint — only used as a cross-device relay, NOT for polling
-const CLOUD_OBJECT_ID = 'ff808181a04ccf2d01a04d0879ff01f4';
-const CLOUD_ENDPOINT = `https://api.restful-api.dev/objects/${CLOUD_OBJECT_ID}`;
-
-// Minimum seconds between cloud API calls to respect rate limits
-const CLOUD_MIN_INTERVAL_MS = 30_000; // 30 seconds between reads
-const CLOUD_PUSH_INTERVAL_MS = 10_000; // 10 seconds between writes
-
-// BroadcastChannel for instant same-device cross-tab sync
+// BroadcastChannel for instant cross-tab sync on same device
 let broadcastChannel: BroadcastChannel | null = null;
 try {
   broadcastChannel = new BroadcastChannel('kstores_orders_sync');
 } catch {
-  // BroadcastChannel not supported in some browsers
+  // BroadcastChannel not available in older environments
 }
-
-let lastCloudFetchTime = 0;
-let lastCloudPushTime = 0;
-let backendAvailable: boolean | null = null; // null = unknown, true/false = checked
 
 export interface CloudStoreData {
   orders: Order[];
@@ -44,7 +30,7 @@ export interface CloudStoreData {
 }
 
 /**
- * Broadcast an order update to all other tabs on the same device
+ * Broadcast an order update to all other open tabs on this device
  */
 export function broadcastOrderUpdate(orders: Order[]): void {
   try {
@@ -55,147 +41,89 @@ export function broadcastOrderUpdate(orders: Order[]): void {
 }
 
 /**
- * Listen for order updates from other tabs
+ * Listen for real-time order updates from other tabs
  */
 export function onBroadcastOrderUpdate(callback: (orders: Order[]) => void): () => void {
   if (!broadcastChannel) return () => {};
-  
+
   const handler = (event: MessageEvent) => {
     if (event.data?.type === 'orders_update' && Array.isArray(event.data.orders)) {
       callback(event.data.orders);
     }
   };
-  
+
   broadcastChannel.addEventListener('message', handler);
   return () => broadcastChannel?.removeEventListener('message', handler);
 }
 
 /**
- * Check if the Express backend is reachable (with caching)
- */
-async function isBackendAvailable(): Promise<boolean> {
-  if (backendAvailable !== null) return backendAvailable;
-  
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-    const response = await fetch(`${API_BASE}/api/health`, {
-      method: 'GET',
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    backendAvailable = response.ok;
-  } catch {
-    backendAvailable = false;
-  }
-  
-  // Re-check every 60 seconds
-  setTimeout(() => { backendAvailable = null; }, 60_000);
-  return backendAvailable;
-}
-
-/**
- * Fetch orders from available sources
+ * Fetch latest orders from all sources (Express backend + Global Cloud Store + Local Cache)
  */
 export async function fetchCloudStoreData(): Promise<CloudStoreData | null> {
   const orderMap = new Map<string, Order>();
 
-  // 1. Try Express backend first (instant, reliable)
-  if (await isBackendAvailable()) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      const response = await fetch(`${API_BASE}/api/orders`, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        signal: controller.signal,
-        cache: 'no-cache',
-      });
-      clearTimeout(timeoutId);
+  // 1. Fetch from Central Global Cloud Storage (Primary for cross-device)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const response = await fetch(CLOUD_STORAGE_URL, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      signal: controller.signal,
+      cache: 'no-cache',
+    });
+    clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const json = await response.json();
-        if (json?.success && Array.isArray(json.orders)) {
-          json.orders.forEach((o: Order) => {
-            if (o?.id) orderMap.set(o.id, o);
-          });
-          
-          // Also update local cache for other tabs
-          try {
-            localStorage.setItem(CLOUD_ORDERS_CACHE_KEY, JSON.stringify(json.orders));
-          } catch { /* quota */ }
-          
-          return {
-            orders: json.orders,
-            lastUpdated: new Date().toISOString(),
-          };
-        }
-      }
-    } catch {
-      // Backend unavailable this time
+    if (response.ok) {
+      const json = await response.json();
+      const rawOrders = Array.isArray(json?.orders) ? json.orders : (Array.isArray(json) ? json : []);
+      rawOrders.forEach((o: Order) => {
+        if (o && o.id) orderMap.set(o.id, o);
+      });
     }
+  } catch (err) {
+    console.warn('Central cloud sync fetch warning:', err);
   }
 
-  // 2. Read from localStorage cache (shared with other tabs)
+  // 2. Fetch from Express backend (if available locally or hosted)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const response = await fetch(`${API_BASE}/api/orders`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      signal: controller.signal,
+      cache: 'no-cache',
+    });
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const json = await response.json();
+      if (json?.success && Array.isArray(json.orders)) {
+        json.orders.forEach((o: Order) => {
+          if (o && o.id) orderMap.set(o.id, o);
+        });
+      }
+    }
+  } catch {
+    // Backend offline / static mode
+  }
+
+  // 3. Merge with localStorage cache
   try {
     const cached = localStorage.getItem(CLOUD_ORDERS_CACHE_KEY);
     if (cached) {
       const cachedOrders: Order[] = JSON.parse(cached);
       if (Array.isArray(cachedOrders)) {
         cachedOrders.forEach((o: Order) => {
-          if (o?.id) orderMap.set(o.id, o);
+          if (o && o.id && !orderMap.has(o.id)) {
+            orderMap.set(o.id, o);
+          }
         });
       }
     }
   } catch {
-    // Ignore parse errors
-  }
-
-  // 3. Cloud fallback — rate-limited to avoid 429/quota errors
-  const now = Date.now();
-  if (now - lastCloudFetchTime >= CLOUD_MIN_INTERVAL_MS) {
-    lastCloudFetchTime = now;
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const response = await fetch(CLOUD_ENDPOINT, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        signal: controller.signal,
-        cache: 'no-cache',
-      });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const json = await response.json();
-        if (json?.data && Array.isArray(json.data.orders)) {
-          json.data.orders.forEach((o: Order) => {
-            if (o?.id) {
-              const existing = orderMap.get(o.id);
-              if (!existing) {
-                orderMap.set(o.id, o);
-              } else {
-                // Prefer more advanced status
-                const statusRank: Record<string, number> = {
-                  pending: 1, packing: 2, out_for_delivery: 3, delivered: 4, cancelled: 0,
-                };
-                if ((statusRank[o.status] || 0) >= (statusRank[existing.status] || 0)) {
-                  orderMap.set(o.id, o);
-                }
-              }
-            }
-          });
-
-          // Update cache
-          const allOrders = Array.from(orderMap.values());
-          try {
-            localStorage.setItem(CLOUD_ORDERS_CACHE_KEY, JSON.stringify(allOrders));
-          } catch { /* quota */ }
-        }
-      }
-    } catch {
-      // Cloud endpoint unreachable — rely on cache
-    }
+    // Ignore parse error
   }
 
   if (orderMap.size === 0) return null;
@@ -206,105 +134,179 @@ export async function fetchCloudStoreData(): Promise<CloudStoreData | null> {
     return tB - tA;
   });
 
+  // Save merged state to local cache
+  try {
+    localStorage.setItem(CLOUD_ORDERS_CACHE_KEY, JSON.stringify(orders));
+  } catch {
+    // Ignore quota
+  }
+
   return { orders, lastUpdated: new Date().toISOString() };
 }
 
 /**
- * Save orders to cloud (rate-limited)
+ * Save full orders array to Central Global Cloud Storage
  */
-async function pushToCloud(orders: Order[]): Promise<boolean> {
-  const now = Date.now();
-  if (now - lastCloudPushTime < CLOUD_PUSH_INTERVAL_MS) return true; // Throttled
-  lastCloudPushTime = now;
-
+async function saveToGlobalCloud(orders: Order[]): Promise<boolean> {
   try {
     const payload = {
-      name: 'kstores_village_kirana_live_sync',
-      data: { orders, lastUpdated: new Date().toISOString() },
+      orders,
+      lastUpdated: new Date().toISOString(),
     };
-    const response = await fetch(CLOUD_ENDPOINT, {
+
+    const response = await fetch(CLOUD_STORAGE_URL, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(payload),
     });
+
     return response.ok;
-  } catch {
+  } catch (err) {
+    console.error('Error writing to central cloud store:', err);
     return false;
   }
 }
 
 /**
- * Add a newly placed order
+ * Push newly placed customer order to Central Global Cloud and Local Cache
  */
 export async function addOrderToCloud(newOrder: Order): Promise<Order[]> {
-  // 1. Update localStorage cache immediately (for all tabs)
-  let allOrders: Order[] = [newOrder];
+  const mergedMap = new Map<string, Order>();
+  mergedMap.set(newOrder.id, newOrder);
+
+  // 1. Fetch latest orders from cloud first to prevent overwriting
   try {
-    const cached = localStorage.getItem(CLOUD_ORDERS_CACHE_KEY);
-    if (cached) {
-      const existing: Order[] = JSON.parse(cached);
-      if (Array.isArray(existing)) {
-        allOrders = [newOrder, ...existing.filter(o => o.id !== newOrder.id)];
-      }
+    const response = await fetch(CLOUD_STORAGE_URL, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-cache',
+    });
+
+    if (response.ok) {
+      const json = await response.json();
+      const existing: Order[] = Array.isArray(json?.orders) ? json.orders : [];
+      existing.forEach((o: Order) => {
+        if (o && o.id) mergedMap.set(o.id, o);
+      });
     }
-    localStorage.setItem(CLOUD_ORDERS_CACHE_KEY, JSON.stringify(allOrders));
-  } catch { /* quota */ }
-
-  // 2. Broadcast to other tabs immediately
-  broadcastOrderUpdate(allOrders);
-
-  // 3. Push to Express backend (if available)
-  if (await isBackendAvailable()) {
+  } catch {
+    // If cloud read fails, load from localStorage cache
     try {
-      fetch(`${API_BASE}/api/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newOrder),
-      }).catch(() => {});
-    } catch { /* fire-and-forget */ }
+      const cached = localStorage.getItem(CLOUD_ORDERS_CACHE_KEY);
+      if (cached) {
+        const cachedOrders: Order[] = JSON.parse(cached);
+        if (Array.isArray(cachedOrders)) {
+          cachedOrders.forEach((o: Order) => {
+            if (o && o.id) mergedMap.set(o.id, o);
+          });
+        }
+      }
+    } catch {
+      // Ignore
+    }
   }
 
-  // 4. Push to cloud (rate-limited)
-  pushToCloud(allOrders).catch(() => {});
+  // Ensure newest order is present
+  mergedMap.set(newOrder.id, newOrder);
 
-  return allOrders;
+  const updatedList = Array.from(mergedMap.values()).sort((a, b) => {
+    const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return tB - tA;
+  });
+
+  // 2. Save to Central Global Cloud Storage
+  saveToGlobalCloud(updatedList).catch(() => {});
+
+  // 3. Save to Express Backend (if available)
+  try {
+    fetch(`${API_BASE}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newOrder),
+    }).catch(() => {});
+  } catch {
+    // Ignore
+  }
+
+  // 4. Update local cache and broadcast to same-device tabs
+  try {
+    localStorage.setItem(CLOUD_ORDERS_CACHE_KEY, JSON.stringify(updatedList));
+  } catch {
+    // Ignore
+  }
+  broadcastOrderUpdate(updatedList);
+
+  return updatedList;
 }
 
 /**
- * Update an order's status
+ * Update an order's status across all devices
  */
 export async function updateCloudOrderStatus(orderId: string, status: OrderStatus): Promise<Order[]> {
-  // 1. Update localStorage cache
-  let updatedOrders: Order[] = [];
+  const mergedMap = new Map<string, Order>();
+
   try {
-    const cached = localStorage.getItem(CLOUD_ORDERS_CACHE_KEY);
-    if (cached) {
-      const orders: Order[] = JSON.parse(cached);
-      if (Array.isArray(orders)) {
-        updatedOrders = orders.map(o => o.id === orderId ? { ...o, status } : o);
-        localStorage.setItem(CLOUD_ORDERS_CACHE_KEY, JSON.stringify(updatedOrders));
-      }
+    const response = await fetch(CLOUD_STORAGE_URL, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-cache',
+    });
+
+    if (response.ok) {
+      const json = await response.json();
+      const existing: Order[] = Array.isArray(json?.orders) ? json.orders : [];
+      existing.forEach((o: Order) => {
+        if (o && o.id) {
+          mergedMap.set(o.id, o.id === orderId ? { ...o, status } : o);
+        }
+      });
     }
-  } catch { /* ignore */ }
-
-  // 2. Broadcast to other tabs
-  broadcastOrderUpdate(updatedOrders);
-
-  // 3. Push to Express backend
-  if (await isBackendAvailable()) {
+  } catch {
+    // Fallback to cache
     try {
-      fetch(`${API_BASE}/api/orders/${orderId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      }).catch(() => {});
-    } catch { /* fire-and-forget */ }
+      const cached = localStorage.getItem(CLOUD_ORDERS_CACHE_KEY);
+      if (cached) {
+        const cachedOrders: Order[] = JSON.parse(cached);
+        if (Array.isArray(cachedOrders)) {
+          cachedOrders.forEach((o: Order) => {
+            if (o && o.id) {
+              mergedMap.set(o.id, o.id === orderId ? { ...o, status } : o);
+            }
+          });
+        }
+      }
+    } catch {
+      // Ignore
+    }
   }
 
-  // 4. Push to cloud (rate-limited)
-  if (updatedOrders.length > 0) {
-    pushToCloud(updatedOrders).catch(() => {});
+  const updatedList = Array.from(mergedMap.values()).sort((a, b) => {
+    const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return tB - tA;
+  });
+
+  saveToGlobalCloud(updatedList).catch(() => {});
+
+  try {
+    fetch(`${API_BASE}/api/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    }).catch(() => {});
+  } catch {
+    // Ignore
   }
 
-  return updatedOrders;
+  try {
+    localStorage.setItem(CLOUD_ORDERS_CACHE_KEY, JSON.stringify(updatedList));
+  } catch {
+    // Ignore
+  }
+  broadcastOrderUpdate(updatedList);
+
+  return updatedList;
 }

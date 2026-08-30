@@ -34,7 +34,7 @@ export const BottomNav: React.FC = () => {
             setSearchQuery('');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-700 p-1"
+          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#9e1a22] p-1"
         >
           <Home className="w-5 h-5" />
           <span className="text-[10px] font-bold">{language === 'te' ? 'హోమ్' : 'Home'}</span>
@@ -43,9 +43,11 @@ export const BottomNav: React.FC = () => {
         {/* Categories */}
         <button
           onClick={() => {
-            window.scrollTo({ top: 380, behavior: 'smooth' });
+            const el = document.getElementById('catalog-section');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            else window.scrollTo({ top: 380, behavior: 'smooth' });
           }}
-          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-700 p-1"
+          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#9e1a22] p-1"
         >
           <Layers className="w-5 h-5" />
           <span className="text-[10px] font-bold">{language === 'te' ? 'విభాగాలు' : 'Categories'}</span>
@@ -54,11 +56,11 @@ export const BottomNav: React.FC = () => {
         {/* Orders */}
         <button
           onClick={() => setIsHistoryOpen(true)}
-          className="relative flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-700 p-1"
+          className="relative flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#9e1a22] p-1"
         >
           <Package className="w-5 h-5" />
           {pendingCount > 0 && (
-            <span className="absolute top-0 right-1 w-2 h-2 bg-emerald-600 rounded-full animate-ping" />
+            <span className="absolute top-0 right-1 w-2 h-2 bg-[#9e1a22] rounded-full animate-ping" />
           )}
           <span className="text-[10px] font-bold">{language === 'te' ? 'ఆర్డర్లు' : 'Orders'}</span>
         </button>
@@ -66,7 +68,7 @@ export const BottomNav: React.FC = () => {
         {/* Support */}
         <button
           onClick={() => setIsSupportOpen(true)}
-          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-emerald-700 p-1"
+          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#9e1a22] p-1"
         >
           <Phone className="w-5 h-5" />
           <span className="text-[10px] font-bold">{language === 'te' ? 'సహాయం' : 'Help'}</span>
@@ -75,12 +77,12 @@ export const BottomNav: React.FC = () => {
         {/* Cart */}
         <button
           onClick={() => setIsCartOpen(true)}
-          className="relative flex flex-col items-center gap-0.5 text-emerald-800 p-1"
+          className="relative flex flex-col items-center gap-0.5 text-[#9e1a22] p-1"
         >
           <div className="relative">
-            <ShoppingBag className="w-5 h-5 text-emerald-700" />
+            <ShoppingBag className="w-5 h-5 text-[#9e1a22]" />
             {cartItemsCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-amber-400 text-emerald-950 font-black text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-2 bg-amber-400 text-black font-black text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center">
                 {cartItemsCount}
               </span>
             )}

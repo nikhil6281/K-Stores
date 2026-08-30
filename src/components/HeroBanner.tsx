@@ -2,175 +2,127 @@ import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { 
   Zap, 
-  Banknote, 
-  MessageSquare, 
-  Store, 
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle2
+  ShoppingBag
 } from 'lucide-react';
 import { STORE_OWNER_DISPLAY_PHONE } from '../utils/whatsapp';
 
 export const HeroBanner: React.FC = () => {
-  const { t, language, setSelectedCategory, setIsSupportOpen } = useStore();
+  const { language, setSelectedCategory } = useStore();
+
+  const handleShopNow = () => {
+    setSelectedCategory('all');
+    const catalog = document.getElementById('catalog-section');
+    if (catalog) {
+      catalog.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 450, behavior: 'smooth' });
+    }
+  };
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-green-900 text-white rounded-3xl mx-4 sm:mx-6 my-4 shadow-xl border border-emerald-700/50">
-      {/* Background patterns */}
-      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
-      <div className="absolute -right-20 -top-20 w-80 h-80 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="relative bg-[#9e1a22] text-white overflow-hidden border-b border-[#83181d]">
+      {/* Subtle radial atmosphere */}
+      <div className="absolute inset-0 bg-radial-[at_top_right] from-[#b91c1c]/40 via-transparent to-black/20 pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-6 py-8 sm:py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
-          {/* Left Column: Text & Hero Details */}
-          <div className="lg:col-span-7 space-y-4">
+          {/* Left Column: Bold SAVOR-style Typography */}
+          <div className="lg:col-span-7 space-y-6 text-left">
             
-            {/* Top Tag */}
-            <div className="inline-flex items-center gap-2 bg-emerald-700/80 border border-emerald-500/40 px-3.5 py-1.5 rounded-full text-xs font-semibold text-emerald-100 shadow-sm">
-              <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+            {/* Top pill badge */}
+            <div className="inline-flex items-center gap-2 bg-black/30 border border-white/20 px-3.5 py-1.5 rounded-full text-xs font-bold text-white tracking-wider uppercase">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
               <Zap className="w-3.5 h-3.5 text-amber-300" />
-              <span>{language === 'te' ? 'గ్రామ ప్రజలకు ప్రత్యేక కిరాణా సేవ' : 'First Superfast Kirana Delivery for our Village'}</span>
+              <span>{language === 'te' ? '20 నిమిషాల విలేజ్ డెలివరీ' : '20-Minute Village Delivery'}</span>
             </div>
 
-            {/* Main Headline */}
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-white">
-              {t.bannerTitle}
-            </h1>
+            {/* Impact Headline matching Image 1 */}
+            <div className="space-y-1">
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] font-sans text-white">
+                SAVOR EVERY.
+                <br />
+                <span className="text-white">FRESH. BITE.</span>
+              </h1>
+            </div>
 
-            {/* Subtitle */}
-            <p className="text-sm sm:text-base text-emerald-100/90 max-w-2xl font-normal leading-relaxed">
-              {t.bannerSubtitle}
+            {/* Subtext */}
+            <p className="text-sm sm:text-base text-white/80 max-w-xl font-normal leading-relaxed">
+              {language === 'te' 
+                ? 'మన గ్రామ ప్రజల కోసం తాజా కూరగాయలు, నిత్యావసర సరుకులు మరియు నాణ్యమైన కిరాణా కేవలం 20 నిమిషాల్లో మీ ఇంటి ముందుకు.'
+                : 'Pure local village groceries, fresh farm produce, staples, and daily essentials delivered directly to your doorstep within 20 minutes.'}
             </p>
 
-            {/* Key Value Badges */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 p-2.5 rounded-2xl flex flex-col gap-1">
-                <div className="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold">
-                  <Zap className="w-4 h-4" />
-                </div>
-                <div className="text-xs font-bold text-white leading-tight">20 Min Delivery</div>
-                <div className="text-[10px] text-emerald-200">{language === 'te' ? 'గ్రామ పరిధిలో' : 'To your doorstep'}</div>
-              </div>
+            {/* CTA Link matching Image 1 "Shop sauces →" */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <button
+                onClick={handleShopNow}
+                className="group inline-flex items-center gap-2 text-white hover:text-amber-300 font-extrabold text-base sm:text-lg uppercase tracking-wider underline underline-offset-8 transition-colors cursor-pointer"
+              >
+                <span>{language === 'te' ? 'సరుకులు కొనండి →' : 'Shop groceries →'}</span>
+              </button>
 
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 p-2.5 rounded-2xl flex flex-col gap-1">
-                <div className="w-7 h-7 rounded-lg bg-green-400/20 text-green-300 flex items-center justify-center font-bold">
-                  <Banknote className="w-4 h-4" />
-                </div>
-                <div className="text-xs font-bold text-white leading-tight">Cash on Delivery</div>
-                <div className="text-[10px] text-emerald-200">{language === 'te' ? 'వచ్చాక డబ్బులు' : 'Cash / PhonePe'}</div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 p-2.5 rounded-2xl flex flex-col gap-1">
-                <div className="w-7 h-7 rounded-lg bg-emerald-400/20 text-emerald-300 flex items-center justify-center font-bold">
-                  <MessageSquare className="w-4 h-4" />
-                </div>
-                <div className="text-xs font-bold text-white leading-tight">WhatsApp Bill</div>
-                <div className="text-[10px] text-emerald-200">{STORE_OWNER_DISPLAY_PHONE}</div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 p-2.5 rounded-2xl flex flex-col gap-1">
-                <div className="w-7 h-7 rounded-lg bg-blue-400/20 text-blue-300 flex items-center justify-center font-bold">
-                  <Store className="w-4 h-4" />
-                </div>
-                <div className="text-xs font-bold text-white leading-tight">Store Pickup</div>
-                <div className="text-[10px] text-emerald-200">{language === 'te' ? '5 నిమిషాల్లో' : 'Ready in 5 mins'}</div>
-              </div>
+              <button
+                onClick={handleShopNow}
+                className="bg-white text-[#9e1a22] hover:bg-amber-100 font-black px-6 py-3 rounded-full text-xs sm:text-sm uppercase tracking-wider shadow-xl transition-all transform active:scale-95 flex items-center gap-2 cursor-pointer"
+              >
+                <ShoppingBag className="w-4 h-4 text-[#9e1a22]" />
+                <span>{language === 'te' ? 'ఆర్డర్ చేయండి' : 'Order Now'}</span>
+              </button>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <button
-                onClick={() => {
-                  setSelectedCategory('all');
-                  window.scrollTo({ top: 400, behavior: 'smooth' });
-                }}
-                className="bg-amber-400 hover:bg-amber-300 text-emerald-950 px-6 py-3 rounded-xl font-extrabold text-sm shadow-lg flex items-center gap-2 transition-all transform active:scale-95"
-              >
-                <span>{t.shopNow}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={() => setIsSupportOpen(true)}
-                className="bg-white/15 hover:bg-white/25 text-white border border-white/20 px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-md flex items-center gap-2 transition-all"
-              >
-                <ShieldCheck className="w-4 h-4 text-amber-300" />
-                <span>{language === 'te' ? 'షాప్ వివరాలు & ఫోన్' : 'Store Details & Phone'}</span>
-              </button>
+            {/* 3 Quick USPs */}
+            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/15 max-w-lg text-xs">
+              <div className="space-y-0.5">
+                <div className="font-extrabold text-white">⚡ 20 MINS</div>
+                <div className="text-[10px] text-white/70">Doorstep Delivery</div>
+              </div>
+              <div className="space-y-0.5">
+                <div className="font-extrabold text-white">💵 CASH / UPI</div>
+                <div className="text-[10px] text-white/70">Pay on Delivery</div>
+              </div>
+              <div className="space-y-0.5">
+                <div className="font-extrabold text-white">📱 WHATSAPP</div>
+                <div className="text-[10px] text-white/70">{STORE_OWNER_DISPLAY_PHONE}</div>
+              </div>
             </div>
 
           </div>
 
-          {/* Right Column: Visual Card / 20-Min Promise Highlights */}
-          <div className="lg:col-span-5">
-            <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-5 sm:p-6 shadow-2xl text-white">
-              
-              <div className="flex items-center justify-between border-b border-white/15 pb-4 mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-400 text-emerald-950 flex items-center justify-center font-black text-xl shadow-md">
-                    ⚡
+          {/* Right Column: Hero Visual Product Showcase */}
+          <div className="lg:col-span-5 relative flex justify-center lg:justify-end">
+            <div className="relative w-full max-w-md">
+              {/* Product Bottle Showcase Card */}
+              <div className="relative bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="bg-amber-400 text-black font-black text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    Featured Deal
                   </div>
-                  <div>
-                    <div className="text-sm font-bold text-white">{language === 'te' ? '20 నిమిషాల డెలివరీ గ్యారెంటీ' : '20-Min Delivery Promise'}</div>
-                    <div className="text-[11px] text-amber-300">{language === 'te' ? 'బ్లింకిట్ లాంటి ఫాస్ట్ సర్వీస్' : 'Village Quick Commerce'}</div>
-                  </div>
+                  <span className="text-xs text-white/80 font-mono">100% Genuine</span>
                 </div>
 
-                <div className="bg-emerald-700/80 px-2.5 py-1 rounded-full text-xs font-bold text-emerald-100 border border-emerald-500/50 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-amber-300" />
-                  <span>{language === 'te' ? 'లైవ్' : 'LIVE'}</span>
-                </div>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div className="flex items-start gap-2.5 bg-black/20 p-2.5 rounded-xl border border-white/10">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-semibold text-white">
-                      {language === 'te' ? '1. మీ ఆర్డర్ వెంటనే ప్యాక్ అవుతుంది' : '1. Instant Store Item Packing'}
-                    </div>
-                    <div className="text-[11px] text-emerald-200">
-                      {language === 'te' ? 'సరుకులు మన ఊరి షాప్‌లోనే అందుబాటులో ఉన్నాయి' : 'Items picked directly from local Kirana shelves'}
-                    </div>
+                <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-white shadow-inner flex items-center justify-center p-4">
+                  <img
+                    src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80"
+                    alt="Fresh Farm Produce"
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                  <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-lg">
+                    Farm Fresh Vegetables
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5 bg-black/20 p-2.5 rounded-xl border border-white/10">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <div className="flex items-center justify-between text-white">
                   <div>
-                    <div className="font-semibold text-white">
-                      {language === 'te' ? '2. బైక్‌పై నేరుగా మీ ఇంటి ముందుకు' : '2. Fast Bike Delivery across Village'}
-                    </div>
-                    <div className="text-[11px] text-emerald-200">
-                      {language === 'te' ? 'చిన్న బజార్, రామాలయం వీధి, కాలనీలకు 20 నిమిషాల్లో' : 'Delivered within 20 mins to any landmark'}
-                    </div>
+                    <h3 className="font-extrabold text-base leading-tight">Fresh Farm Tomatoes</h3>
+                    <p className="text-xs text-white/70">1 kg • Locally grown</p>
                   </div>
-                </div>
-
-                <div className="flex items-start gap-2.5 bg-black/20 p-2.5 rounded-xl border border-white/10">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-semibold text-white">
-                      {language === 'te' ? '3. వాట్సాప్ రసీదు & నగదు చెల్లింపు' : '3. WhatsApp Bill & Cash on Delivery'}
-                    </div>
-                    <div className="text-[11px] text-emerald-200">
-                      {language === 'te' ? 'సరుకులు పరిశీలించాక డబ్బులు ఇవ్వండి' : 'Check products at door and pay with Cash or UPI'}
-                    </div>
+                  <div className="text-right">
+                    <span className="text-lg font-black text-amber-300">₹28</span>
+                    <span className="text-xs text-white/50 line-through ml-1">₹35</span>
                   </div>
                 </div>
               </div>
-
-              {/* Owner WhatsApp banner */}
-              <div className="mt-4 pt-3 border-t border-white/15 flex items-center justify-between text-xs">
-                <span className="text-emerald-200 font-medium">{language === 'te' ? 'ఓనర్ వాట్సాప్:' : 'Store WhatsApp:'}</span>
-                <span className="bg-emerald-500/30 text-amber-300 font-bold px-2.5 py-1 rounded-lg border border-emerald-400/30">
-                  {STORE_OWNER_DISPLAY_PHONE}
-                </span>
-              </div>
-
             </div>
           </div>
 

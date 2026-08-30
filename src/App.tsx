@@ -125,14 +125,14 @@ export const AppContent: React.FC = () => {
           
           {/* Active Deals of the Day (Only on 'all' and when not searching) */}
           {selectedCategory === 'all' && !searchQuery && dealProducts.length > 0 && (
-            <section className="space-y-3">
+            <section id="deals-section" className="space-y-4 pt-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-amber-400 text-emerald-950 flex items-center justify-center font-bold text-sm shadow-xs">
+                  <div className="w-8 h-8 rounded-xl bg-[#9e1a22] text-white flex items-center justify-center font-bold text-sm shadow-xs">
                     🔥
                   </div>
                   <div>
-                    <h2 className="text-base sm:text-lg font-black text-slate-900">
+                    <h2 className="text-base sm:text-lg font-black uppercase tracking-wide text-slate-900 font-sans">
                       {language === 'te' ? 'నేటి ప్రత్యేక ఆఫర్లు & డీల్స్' : 'Deals of the Day'}
                     </h2>
                     <p className="text-xs text-slate-500 font-medium">
@@ -141,12 +141,12 @@ export const AppContent: React.FC = () => {
                   </div>
                 </div>
 
-                <span className="bg-amber-100 text-amber-900 font-extrabold text-[11px] px-2.5 py-1 rounded-full border border-amber-300">
+                <span className="bg-red-50 text-[#9e1a22] font-extrabold text-[11px] px-3 py-1 rounded-full border border-red-200">
                   {language === 'te' ? 'పరిమిత స్టాక్' : 'Limited Stock'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-5">
                 {dealProducts.map(product => (
                   <GroceryProductCard key={product.id} product={product} />
                 ))}
@@ -155,10 +155,10 @@ export const AppContent: React.FC = () => {
           )}
 
           {/* Product Catalog Grid */}
-          <section className="space-y-4">
+          <section id="catalog-section" className="space-y-4 pt-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-wide flex items-center gap-2 font-sans">
                   <span>{searchQuery ? `Search results for "${searchQuery}"` : selectedCategory === 'all' ? t.all : selectedCategory.toUpperCase()}</span>
                   <span className="text-xs font-bold text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded-full">
                     {filteredProducts.length}
@@ -173,7 +173,7 @@ export const AppContent: React.FC = () => {
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="text-xs text-emerald-700 hover:text-emerald-800 font-bold underline cursor-pointer mr-1"
+                    className="text-xs text-[#9e1a22] hover:text-[#83181d] font-bold underline cursor-pointer mr-1"
                   >
                     Clear search
                   </button>
@@ -213,13 +213,13 @@ export const AppContent: React.FC = () => {
                     setSearchQuery('');
                     setSelectedCategory('all');
                   }}
-                  className="bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md cursor-pointer"
+                  className="bg-[#9e1a22] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md cursor-pointer"
                 >
                   View All Products
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-5">
                 {filteredProducts.map(product => (
                   <GroceryProductCard key={product.id} product={product} />
                 ))}
@@ -228,7 +228,7 @@ export const AppContent: React.FC = () => {
           </section>
 
           {/* Village Fast Delivery Promise Banner */}
-          <section className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-green-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <section id="delivery-promise-section" className="bg-[#9e1a22] rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-[#83181d]">
             <div className="space-y-2 text-center md:text-left">
               <div className="inline-flex items-center gap-1.5 bg-amber-400 text-emerald-950 font-black text-xs px-3 py-1 rounded-full shadow-xs">
                 <Zap className="w-3.5 h-3.5" />

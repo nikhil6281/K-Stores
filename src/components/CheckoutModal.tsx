@@ -221,15 +221,15 @@ export const CheckoutModal: React.FC = () => {
 
     setIsProcessingPayment(true);
 
-    // Step 1: Create Razorpay order via backend
+    // Step 1: Create Razorpay order (or use standard client gateway)
     const result = await createRazorpayOrder(cartTotal);
 
-    if (!result.success || !result.order_id || !result.key_id) {
+    if (!result.success || !result.key_id) {
       setIsProcessingPayment(false);
       setIsSubmitting(false);
       showToast('error',
         language === 'te' ? 'పేమెంట్ ఎర్రర్' : 'Payment Error',
-        result.error || 'Could not create payment order. Please try Cash on Delivery.'
+        result.error || 'Could not connect to payment gateway. Please try Cash on Delivery.'
       );
       return;
     }
@@ -238,7 +238,7 @@ export const CheckoutModal: React.FC = () => {
     openRazorpayCheckout({
       orderId: result.order_id,
       keyId: result.key_id,
-      amountPaise: result.amount!,
+      amountPaise: result.amount,
       currency: result.currency || 'INR',
       customerName: fullName,
       customerPhone: cleanPhone,

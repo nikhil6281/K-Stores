@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { X, MapPin, LogOut, Sparkles, Lock, Mail, Phone, User } from 'lucide-react';
+import { X, ArrowRight, Package, User, LogOut, MapPin } from 'lucide-react';
 import type { CustomerUser } from '../types';
 
 export const AuthModal: React.FC = () => {
@@ -12,414 +12,308 @@ export const AuthModal: React.FC = () => {
     language,
     orders,
     cart,
+    setIsHistoryOpen,
     showToast
   } = useStore();
 
-  const [tab, setTab] = useState<'signin' | 'signup'>('signin');
-  const [identifier, setIdentifier] = useState('');
+  const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [villageName, setVillageName] = useState('Chinna Bazar, Main Village');
-  const [doorNo, setDoorNo] = useState('2-14/B');
-  const [landmark, setLandmark] = useState('Near Ramalayam Temple');
+  const [showPassword, setShowPassword] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isAuthOpen) return null;
 
-  const handleSignIn = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanId = identifier.trim();
-    if (!cleanId) {
-      showToast('error', 'Required Field', 'Please enter your email or 10-digit mobile number');
-      return;
-    }
+  // Google 1-Click Sign-In
+  const handleGoogleSignIn = () => {
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const googleUser: CustomerUser = {
+        id: `usr-google-${Date.now()}`,
+        name: 'K-Stores Customer',
+        email: 'customer@gmail.com',
+        phone: '9876543210',
+        savedAddress: {
+          fullName: 'K-Stores Customer',
+          phone: '9876543210',
+          villageName: 'Chinna Bazar, Main Village',
+          doorNo: '3-12/A',
+          landmark: 'Near Ramalayam Temple',
+          pincode: '500001',
+        },
+        joinedAt: new Date().toISOString(),
+      };
 
-    const isPhone = /^\d+$/.test(cleanId.replace(/\D/g, '')) && cleanId.replace(/\D/g, '').length >= 10;
-    const cleanPhone = isPhone ? cleanId.replace(/\D/g, '') : '9876543210';
-    const email = !isPhone ? cleanId : undefined;
-
-    // Check if user was saved previously in accounts store
-    const accountsKey = 'kstores_registered_users_v2';
-    let savedUsers: CustomerUser[] = [];
-    try {
-      savedUsers = JSON.parse(localStorage.getItem(accountsKey) || '[]');
-    } catch {
-      savedUsers = [];
-    }
-
-    const existing = savedUsers.find(u => u.phone === cleanPhone || (email && u.email?.toLowerCase() === email.toLowerCase()));
-
-    const loggedInUser: CustomerUser = existing || {
-      id: `usr-${cleanPhone}`,
-      name: cleanPhone === '9876543210' ? 'Ramesh Kumar (రమేష్)' : `Customer (${cleanId.slice(0, 8)})`,
-      phone: cleanPhone,
-      email,
-      savedAddress: {
-        fullName: cleanPhone === '9876543210' ? 'Ramesh Kumar' : 'Customer',
-        phone: cleanPhone,
-        villageName,
-        doorNo,
-        landmark,
-        pincode: '500001'
-      },
-      joinedAt: new Date().toISOString()
-    };
-
-    setUser(loggedInUser);
-    setIsAuthOpen(false);
-    showToast(
-      'success',
-      language === 'te' ? 'లాగిన్ విజయవంతమైంది' : 'Welcome back!',
-      `Logged in as ${loggedInUser.name}`
-    );
+      setUser(googleUser);
+      setIsSubmitting(false);
+      setIsAuthOpen(false);
+      showToast(
+        'success',
+        language === 'te' ? 'గూగుల్ లాగిన్ విజయవంతమైంది' : 'Google Sign-In Successful',
+        `Welcome to K-Stores, ${googleUser.name}!`
+      );
+    }, 600);
   };
 
-  const handleSignUp = (e: React.FormEvent) => {
+  // Email / Phone Sign-In
+  const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanPhone = identifier.replace(/\D/g, '');
-    if (!name.trim()) {
-      showToast('error', 'Name Required', 'Please enter your full name');
-      return;
-    }
-    if (cleanPhone.length < 10 && !identifier.includes('@')) {
-      showToast('error', 'Invalid Contact', 'Please enter a valid mobile number or email');
+    const clean = emailOrPhone.trim();
+    if (!clean) {
+      showToast('error', 'Required Field', 'Please enter your email or mobile number');
       return;
     }
 
-    const phoneVal = cleanPhone.length >= 10 ? cleanPhone : '9876543210';
-    const emailVal = identifier.includes('@') ? identifier.trim() : undefined;
+    if (!showPassword && clean.includes('@')) {
+      setShowPassword(true);
+      return;
+    }
+
+    const isPhone = /^\d+$/.test(clean.replace(/\D/g, '')) && clean.replace(/\D/g, '').length >= 10;
+    const phone = isPhone ? clean.replace(/\D/g, '') : '9876543210';
+    const email = !isPhone ? clean : undefined;
+    const userName = name.trim() || (email ? email.split('@')[0] : `Customer (${phone.slice(-4)})`);
 
     const newUser: CustomerUser = {
-      id: `usr-${Date.now()}`,
-      name: name.trim(),
-      phone: phoneVal,
-      email: emailVal,
+      id: `usr-${phone || Date.now()}`,
+      name: userName,
+      phone,
+      email,
       savedAddress: {
-        fullName: name.trim(),
-        phone: phoneVal,
-        villageName,
-        doorNo,
-        landmark,
-        pincode: '500001'
+        fullName: userName,
+        phone,
+        villageName: 'Chinna Bazar, Main Village',
+        doorNo: '2-14/B',
+        landmark: 'Near Grama Center',
+        pincode: '500001',
       },
-      joinedAt: new Date().toISOString()
+      joinedAt: new Date().toISOString(),
     };
-
-    // Save to local registry
-    const accountsKey = 'kstores_registered_users_v2';
-    try {
-      const savedUsers: CustomerUser[] = JSON.parse(localStorage.getItem(accountsKey) || '[]');
-      const filtered = savedUsers.filter(u => u.phone !== newUser.phone);
-      localStorage.setItem(accountsKey, JSON.stringify([newUser, ...filtered]));
-    } catch {
-      // Ignore
-    }
 
     setUser(newUser);
     setIsAuthOpen(false);
-    showToast('success', language === 'te' ? 'ఖాతా సృష్టించబడింది' : 'Account Created!', `Welcome to K-Stores, ${newUser.name}`);
-  };
-
-  const handleQuickDemoLogin = () => {
-    const demoUser: CustomerUser = {
-      id: 'demo-user-ramesh',
-      name: 'Ramesh Kumar (రమేష్)',
-      phone: '9876543210',
-      email: 'ramesh.village@example.com',
-      savedAddress: {
-        fullName: 'Ramesh Kumar',
-        phone: '9876543210',
-        villageName: 'Chinna Bazar, Main Village',
-        doorNo: '4-22/A',
-        landmark: 'Opposite Ramalayam Temple & Water Tank',
-        pincode: '500001'
-      },
-      joinedAt: new Date().toISOString()
-    };
-
-    setUser(demoUser);
-    setIsAuthOpen(false);
-    showToast('success', 'Logged in as Demo User', 'Welcome back, Ramesh Kumar! Your village cart is restored.');
+    showToast(
+      'success',
+      language === 'te' ? 'లాగిన్ విజయవంతమైంది' : 'Sign in Successful',
+      `Welcome, ${newUser.name}!`
+    );
   };
 
   const handleLogout = () => {
     setUser(null);
-    setIsAuthOpen(false);
-    showToast('info', 'Logged Out', 'You have been safely logged out.');
+    showToast('info', 'Logged Out', 'You have been signed out.');
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
-      <div className="relative bg-[#0f172a] text-slate-100 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-scale-up border border-slate-800">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div 
+        className="relative bg-white text-slate-900 w-full max-w-md rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden animate-scale-up border border-slate-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         
-        {/* Close Button */}
-        <button
-          onClick={() => setIsAuthOpen(false)}
-          className="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 transition-colors z-10"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Modal Header */}
-        <div className="p-6 pb-2 text-center relative space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xl mx-auto shadow-inner">
-            🛒
-          </div>
-
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800 text-[10px] font-bold text-emerald-300">
-            <span>K-Stores Village Quick-Commerce</span>
-          </div>
-
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            {user ? 'My Account Profile' : tab === 'signin' ? 'Welcome back' : 'Create your account'}
+        {/* Header matching Image 4 */}
+        <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-100">
+          <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+            {user ? 'My Account' : 'Sign in or create account'}
           </h2>
-          <p className="text-xs text-slate-400 max-w-xs mx-auto">
-            {user 
-              ? 'Manage your village delivery address and past orders' 
-              : tab === 'signin' 
-                ? 'Sign in to order fresh groceries & track 20-minute delivery.' 
-                : 'Sign up to unlock 20-min village delivery with Cash on Delivery.'}
-          </p>
+
+          <button
+            onClick={() => setIsAuthOpen(false)}
+            className="p-1.5 rounded-lg border border-slate-300 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Modal Content */}
-        <div className="p-6 pt-2 space-y-4">
+        {/* Modal Body */}
+        <div className="p-6 space-y-5">
           
           {user ? (
             /* Logged in state */
             <div className="space-y-4">
-              <div className="bg-slate-800/80 rounded-2xl p-4 border border-slate-700 space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-md">
-                    {user.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-white text-sm sm:text-base">{user.name}</h3>
-                    <p className="text-xs text-slate-400">+91 {user.phone}</p>
-                    {user.email && <p className="text-[11px] text-slate-500">{user.email}</p>}
-                  </div>
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-[#9e1a22] text-white flex items-center justify-center font-black text-lg shadow-sm">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">{user.name}</h3>
+                  {user.phone && <p className="text-xs text-slate-500">+91 {user.phone}</p>}
+                  {user.email && <p className="text-xs text-slate-500">{user.email}</p>}
                 </div>
               </div>
 
-              {/* Saved Address */}
               {user.savedAddress && (
-                <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/80 text-xs space-y-1.5">
-                  <div className="font-bold text-slate-200 flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 text-emerald-400" />
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs space-y-1.5">
+                  <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 text-[#9e1a22]" />
                     <span>Saved Delivery Address</span>
                   </div>
-                  <div className="text-slate-400 pl-5 text-[11px] space-y-0.5">
+                  <div className="text-slate-600 pl-5 text-[11px] space-y-0.5">
                     <div>{user.savedAddress.doorNo ? `${user.savedAddress.doorNo}, ` : ''}{user.savedAddress.villageName}</div>
-                    <div className="text-emerald-400 font-semibold">📍 Landmark: {user.savedAddress.landmark}</div>
+                    <div className="text-[#9e1a22] font-semibold">📍 Landmark: {user.savedAddress.landmark}</div>
                   </div>
                 </div>
               )}
 
-              {/* Status Pills */}
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 text-center">
-                  <div className="text-slate-400 text-[10px]">Cart Items</div>
-                  <div className="font-black text-emerald-400 text-base">{cart.length}</div>
-                </div>
-                <div className="bg-slate-800/40 p-3 rounded-xl border border-slate-700/60 text-center">
-                  <div className="text-slate-400 text-[10px]">Total Orders</div>
-                  <div className="font-black text-purple-400 text-base">{orders.length}</div>
+                <button
+                  onClick={() => {
+                    setIsAuthOpen(false);
+                    setIsHistoryOpen(true);
+                  }}
+                  className="bg-slate-100 hover:bg-slate-200 p-3 rounded-xl border border-slate-200 text-center font-bold text-slate-800 transition-colors"
+                >
+                  <div className="text-slate-500 text-[10px]">Total Orders</div>
+                  <div className="font-black text-base text-[#9e1a22]">{orders.length}</div>
+                </button>
+                <div className="bg-slate-100 p-3 rounded-xl border border-slate-200 text-center font-bold text-slate-800">
+                  <div className="text-slate-500 text-[10px]">Cart Items</div>
+                  <div className="font-black text-base text-emerald-700">{cart.length}</div>
                 </div>
               </div>
 
               <button
                 onClick={handleLogout}
-                className="w-full bg-red-950/40 hover:bg-red-900/60 text-red-200 font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-red-800/60 transition-colors cursor-pointer"
+                className="w-full bg-red-50 hover:bg-red-100 text-[#9e1a22] font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-red-200 transition-colors cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
-                <span>Logout from Account</span>
+                <span>Logout</span>
               </button>
             </div>
           ) : (
-            /* Auth Forms */
+            /* Sign in form matching Image 4 */
             <div className="space-y-4">
               
-              {/* Segmented Tab Toggle (Exact match to Image 3) */}
-              <div className="bg-slate-800/90 p-1 rounded-2xl flex border border-slate-700/80">
-                <button
-                  type="button"
-                  onClick={() => setTab('signin')}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center cursor-pointer ${
-                    tab === 'signin'
-                      ? 'bg-slate-900 text-white shadow-md border border-slate-700'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Sign in
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTab('signup')}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center cursor-pointer ${
-                    tab === 'signup'
-                      ? 'bg-slate-900 text-white shadow-md border border-slate-700'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Create account
-                </button>
+              {/* Google Sign-in Single Sign-on Button matching Image 4 */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isSubmitting}
+                className="w-full bg-white hover:bg-slate-50 border border-slate-300 rounded-xl p-3 flex items-center justify-between shadow-xs transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-3">
+                  {/* Google G Logo SVG */}
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                    />
+                  </svg>
+                  <span className="text-xs sm:text-sm font-bold text-slate-800">
+                    Continue with Google
+                  </span>
+                </div>
+
+                <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">
+                  1-click
+                </span>
+              </button>
+
+              {/* OR Divider matching Image 4 */}
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-slate-200" />
+                <span className="flex-shrink mx-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                  OR
+                </span>
+                <div className="flex-grow border-t border-slate-200" />
               </div>
 
-              {tab === 'signin' ? (
-                /* Sign in Form */
-                <form onSubmit={handleSignIn} className="space-y-3.5">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                      Email or Mobile Number
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                        <Mail className="w-4 h-4" />
-                      </div>
-                      <input
-                        type="text"
-                        required
-                        value={identifier}
-                        onChange={(e) => setIdentifier(e.target.value)}
-                        placeholder="you@example.com or 9876543210"
-                        className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
-                      />
-                    </div>
-                  </div>
+              {/* Email / Mobile input form with Arrow button */}
+              <form onSubmit={handleEmailSubmit} className="space-y-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    value={emailOrPhone}
+                    onChange={(e) => setEmailOrPhone(e.target.value)}
+                    placeholder="Email or mobile number"
+                    className="w-full px-4 py-3.5 pr-12 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:ring-2 focus:ring-[#9e1a22]/20 focus:outline-none transition-all"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-[#9e1a22] hover:bg-[#83181d] text-white transition-colors cursor-pointer"
+                    aria-label="Submit"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                      Password (or PIN)
-                    </label>
+                {showPassword && (
+                  <div className="space-y-2 animate-scale-up">
                     <div className="relative">
-                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                        <Lock className="w-4 h-4" />
-                      </div>
                       <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+                        placeholder="Enter password or leave blank for OTP"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:outline-none"
                       />
                     </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg text-xs sm:text-sm transition-all cursor-pointer mt-1"
-                  >
-                    Sign in
-                  </button>
-                </form>
-              ) : (
-                /* Sign up Form */
-                <form onSubmit={handleSignUp} className="space-y-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                      Full Name *
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                        <User className="w-4 h-4" />
-                      </div>
+                    <div>
                       <input
                         type="text"
-                        required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="e.g. Ramesh Kumar"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                        placeholder="Your Name (Optional)"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:outline-none"
                       />
                     </div>
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                      Mobile Number (WhatsApp) *
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                        <Phone className="w-4 h-4" />
-                      </div>
-                      <input
-                        type="tel"
-                        required
-                        maxLength={10}
-                        value={identifier}
-                        onChange={(e) => setIdentifier(e.target.value.replace(/\D/g, ''))}
-                        placeholder="10-digit mobile number"
-                        className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
-                      />
-                    </div>
-                  </div>
+                {/* Checkbox matching Image 4 */}
+                <label className="flex items-center gap-2.5 text-xs text-slate-600 cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={subscribeNewsletter}
+                    onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                    className="w-4 h-4 rounded text-[#9e1a22] focus:ring-[#9e1a22] border-slate-300 cursor-pointer"
+                  />
+                  <span>Email me with news and offers</span>
+                </label>
+              </form>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                        Village / Street *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={villageName}
-                        onChange={(e) => setVillageName(e.target.value)}
-                        placeholder="Chinna Bazar"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-white focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                        Door / House No
-                      </label>
-                      <input
-                        type="text"
-                        value={doorNo}
-                        onChange={(e) => setDoorNo(e.target.value)}
-                        placeholder="2-14/B"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-white focus:outline-none"
-                      />
-                    </div>
-                  </div>
+              {/* Bottom Navigation Buttons matching Image 4 [ Orders ] [ Profile ] */}
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAuthOpen(false);
+                    setIsHistoryOpen(true);
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <Package className="w-4 h-4 text-slate-600" />
+                  <span>Orders</span>
+                </button>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                      Landmark (for 20-min delivery rider) *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={landmark}
-                      onChange={(e) => setLandmark(e.target.value)}
-                      placeholder="Near Ramalayam Temple / Water Tank"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-white focus:outline-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-extrabold py-3 px-4 rounded-xl shadow-lg text-xs sm:text-sm transition-all cursor-pointer mt-1"
-                  >
-                    Create account
-                  </button>
-                </form>
-              )}
-
-              {/* Divider */}
-              <div className="relative flex py-1 items-center">
-                <div className="flex-grow border-t border-slate-800" />
-                <span className="flex-shrink mx-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider">or</span>
-                <div className="flex-grow border-t border-slate-800" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Pre-fill demo
+                    setEmailOrPhone('ramesh@village.com');
+                    setName('Ramesh Kumar');
+                  }}
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <User className="w-4 h-4 text-slate-600" />
+                  <span>Demo Profile</span>
+                </button>
               </div>
-
-              {/* 1-Tap Demo Customer (Ramesh) */}
-              <button
-                type="button"
-                onClick={handleQuickDemoLogin}
-                className="w-full bg-slate-800/90 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer hover:border-emerald-500/50"
-              >
-                <Sparkles className="w-4 h-4 text-emerald-400" />
-                <span>1-Tap Demo Customer (Ramesh - 9876543210)</span>
-              </button>
 
             </div>
           )}

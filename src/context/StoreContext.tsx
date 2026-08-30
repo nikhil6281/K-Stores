@@ -363,14 +363,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [showToast]);
 
-  // Initial cloud sync & continuous background live polling (every 10 seconds to respect rate limits)
+  // Initial cloud sync & continuous background live polling (every 4s in owner mode, 10s otherwise)
   useEffect(() => {
     refreshOrdersFromCloud();
     const interval = setInterval(() => {
       refreshOrdersFromCloud();
-    }, 10_000);
+    }, isOwnerMode ? 4000 : 10_000);
     return () => clearInterval(interval);
-  }, [refreshOrdersFromCloud]);
+  }, [isOwnerMode, refreshOrdersFromCloud]);
 
   // BroadcastChannel: instant cross-tab sync on the same device (no API calls needed)
   useEffect(() => {

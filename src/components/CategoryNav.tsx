@@ -42,16 +42,16 @@ export const CategoryNav: React.FC = () => {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex-shrink-0 border ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex-shrink-0 border cursor-pointer ${
                 isSelected
-                  ? 'bg-emerald-700 text-white border-emerald-800 shadow-sm ring-2 ring-emerald-500/30'
+                  ? 'bg-[#9e1a22] text-white border-[#83181d] shadow-sm ring-2 ring-[#9e1a22]/30'
                   : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border-slate-200/70'
               }`}
             >
               <span className="text-sm leading-none">{cat.icon}</span>
               <span>{language === 'te' ? cat.nameTe : cat.nameEn}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5 ${
-                isSelected ? 'bg-emerald-900 text-emerald-100' : 'bg-slate-200 text-slate-600'
+                isSelected ? 'bg-[#83181d] text-white' : 'bg-slate-200 text-slate-600'
               }`}>
                 {count}
               </span>
