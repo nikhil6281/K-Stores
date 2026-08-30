@@ -1,16 +1,8 @@
 ﻿export type Language = 'en' | 'te';
-
-export type ProductCategory = 
-  | 'vegetables'
-  | 'fruits'
-  | 'dairy'
-  | 'staples'
-  | 'snacks'
-  | 'spices'
-  | 'beverages'
-  | 'household'
-  | 'personal_care'
-  | 'pooja';
+export type DeliveryType = 'delivery_20min' | 'store_pickup';
+export type OrderStatus = 'pending' | 'packing' | 'out_for_delivery' | 'delivered' | 'cancelled';
+export type PaymentMethod = 'cash_on_delivery' | 'pay_on_pickup' | 'online_razorpay' | 'upi_direct';
+export type ProductCategory = 'all' | 'vegetables' | 'fruits' | 'dairy' | 'staples' | 'snacks' | 'spices' | 'beverages' | 'household' | 'personal_care' | 'pooja';
 
 export interface Product {
   id: string;
@@ -21,13 +13,11 @@ export interface Product {
   mrp: number;
   unit: string;
   unitTe: string;
+  image: string;
   stock: number;
   minStockAlert: number;
-  image: string;
-  isDeal?: boolean;
-  dealTagEn?: string;
-  dealTagTe?: string;
   isVeg: boolean;
+  isDeal?: boolean;
   descriptionEn?: string;
   descriptionTe?: string;
 }
@@ -37,48 +27,13 @@ export interface CartItem {
   quantity: number;
 }
 
-export type OrderStatus = 'pending' | 'packing' | 'out_for_delivery' | 'delivered' | 'cancelled';
-
-export type DeliveryType = 'delivery_20min' | 'store_pickup';
-
 export interface DeliveryAddress {
   fullName: string;
   phone: string;
   villageName: string;
-  streetName?: string;
   doorNo?: string;
   landmark: string;
   pincode?: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-}
-
-export interface Order {
-  userId?: string;
-  customerEmail?: string;
-  id: string;
-  items: CartItem[];
-  customerName: string;
-  customerPhone: string;
-  deliveryType: DeliveryType;
-  address?: DeliveryAddress;
-  paymentMethod: 'cash_on_delivery' | 'pay_on_pickup' | 'online_razorpay';
-  notes?: string;
-  status: OrderStatus;
-  subtotal: number;
-  deliveryFee: number;
-  totalDiscount: number;
-  totalAmount: number;
-  createdAt: string;
-  updatedAt?: string;
-  estimatedDeliveryMinutes: number;
-  whatsappSent?: boolean;
-  // Razorpay payment details
-  razorpayPaymentId?: string;
-  razorpayOrderId?: string;
-  paymentVerified?: boolean;
 }
 
 export interface CustomerUser {
@@ -90,23 +45,31 @@ export interface CustomerUser {
   joinedAt: string;
 }
 
-export interface StoreDeal {
+export interface Order {
   id: string;
-  titleEn: string;
-  titleTe: string;
-  subtitleEn: string;
-  subtitleTe: string;
-  code: string;
-  discountAmount: number;
-  minOrder: number;
-  active: boolean;
+  userId?: string;
+  customerEmail?: string;
+  customerName: string;
+  customerPhone: string;
+  items: CartItem[];
+  totalAmount: number;
+  subtotal: number;
+  deliveryFee: number;
+  discount?: number;
+  status: OrderStatus;
+  deliveryType: DeliveryType;
+  address?: DeliveryAddress;
+  notes?: string;
+  paymentMethod: PaymentMethod;
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface ToastMessage {
+export interface ToastNotification {
   id: string;
-  type: 'success' | 'info' | 'warning' | 'error';
+  type: 'success' | 'error' | 'info' | 'warning';
   title: string;
-  message: string;
-  duration?: number;
+  message?: string;
 }
-
