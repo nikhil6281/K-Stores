@@ -349,7 +349,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredOrders.map(order => {
+                {filteredOrders.map((order, idx) => {
                   if (!order) return null;
                   const orderDate = order.createdAt && !isNaN(new Date(order.createdAt).getTime())
                     ? new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -363,7 +363,7 @@ export const AdminDashboard: React.FC = () => {
 
                   return (
                     <div 
-                      key={order.id || Math.random().toString()}
+                      key={order.id || `ord-${idx}`}
                       className="bg-slate-800/90 border border-slate-700/80 rounded-3xl p-5 shadow-lg space-y-3.5 flex flex-col justify-between"
                     >
                       <div>

@@ -51,15 +51,14 @@ export const CheckoutModal: React.FC = () => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      if (user.name && !fullName) setFullName(user.name);
-      if (user.phone && !phoneNumber) setPhoneNumber(user.phone);
-      if (user.savedAddress) {
-        if (!doorNo && user.savedAddress.doorNo) setDoorNo(user.savedAddress.doorNo);
-        if (!landmark && user.savedAddress.landmark) setLandmark(user.savedAddress.landmark);
-      }
+    if (user && isCheckoutOpen) {
+      if (user.name) setFullName(prev => prev || user.name);
+      if (user.phone) setPhoneNumber(prev => prev || user.phone);
+      if (user.savedAddress?.doorNo) setDoorNo(prev => prev || user.savedAddress?.doorNo || '');
+      if (user.savedAddress?.landmark) setLandmark(prev => prev || user.savedAddress?.landmark || '');
+      if (user.savedAddress?.villageName) setVillageName(prev => prev || user.savedAddress?.villageName || '');
     }
-  }, [user]);
+  }, [user, isCheckoutOpen]);
 
   if (!isCheckoutOpen) return null;
 
@@ -90,6 +89,36 @@ export const CheckoutModal: React.FC = () => {
             className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl text-xs transition-colors cursor-pointer"
           >
             Sign in / Create Account
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (cartItemsCount === 0) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+        <div className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden p-6 text-center space-y-4 border border-slate-200 animate-scale-up">
+          <button
+            onClick={() => setIsCheckoutOpen(false)}
+            className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 rounded-lg bg-slate-100"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-3xl mx-auto">
+            🛒
+          </div>
+          <div>
+            <h3 className="font-extrabold text-lg text-slate-900">{language === 'te' ? 'మీ కార్ట్ ఖాళీగా ఉంది' : 'Your Cart is Empty'}</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              {language === 'te' ? 'ఆర్డర్ చేయడానికి దయచేసి కూరగాయలు లేదా సరుకులు ఎంచుకోండి.' : 'Please add some items to your cart before proceeding to checkout.'}
+            </p>
+          </div>
+          <button
+            onClick={() => setIsCheckoutOpen(false)}
+            className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 px-4 rounded-xl text-xs transition-colors cursor-pointer"
+          >
+            {language === 'te' ? 'సరుకులు కొనండి' : 'Start Shopping'}
           </button>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useStore } from './context/StoreContext';
 import { Header } from './components/Header';
 import { PromotionsTicker } from './components/PromotionsTicker';
@@ -25,7 +25,8 @@ import {
   Clock, 
   MapPin, 
   Heart,
-  ChevronRight
+  ChevronRight,
+  ArrowUpDown
 } from 'lucide-react';
 import { STORE_OWNER_DISPLAY_PHONE, STORE_OWNER_PHONE, getWhatsAppSupportUrl } from './utils/whatsapp';
 
@@ -44,18 +45,46 @@ export const AppContent: React.FC = () => {
     t
   } = useStore();
 
-  // Filter products by category and search
+  const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high' | 'discount'>('featured');
+
+  // Filter and sort products by category, search query, and sorting selection
   const filteredProducts = useMemo(() => {
-    return products.filter(p => {
+    const list = products.filter(p => {
       const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
-      const q = searchQuery.toLowerCase().trim();
-      const matchesSearch = !q || 
-        p.nameEn.toLowerCase().includes(q) || 
-        p.nameTe.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q);
+      const q = (searchQuery || '').toLowerCase().trim();
+      if (!q) return matchesCategory;
+
+      const pNameEn = (p.nameEn || '').toLowerCase();
+      const pNameTe = (p.nameTe || '').toLowerCase();
+      const pCat = (p.category || '').toLowerCase();
+      const pDescEn = (p.descriptionEn || '').toLowerCase();
+      const pDescTe = (p.descriptionTe || '').toLowerCase();
+
+      const matchesSearch = pNameEn.includes(q) ||
+        pNameTe.includes(q) ||
+        pCat.includes(q) ||
+        pDescEn.includes(q) ||
+        pDescTe.includes(q);
+
       return matchesCategory && matchesSearch;
     });
-  }, [products, selectedCategory, searchQuery]);
+
+    return [...list].sort((a, b) => {
+      if (sortBy === 'price-low') return (a.price ?? 0) - (b.price ?? 0);
+      if (sortBy === 'price-high') return (b.price ?? 0) - (a.price ?? 0);
+      if (sortBy === 'discount') {
+        const discA = Math.max(0, (a.mrp ?? a.price) - a.price);
+        const discB = Math.max(0, (b.mrp ?? b.price) - b.price);
+        return discB - discA;
+      }
+      // 'featured': deals first, then by in-stock status
+      if (a.isDeal && !b.isDeal) return -1;
+      if (!a.isDeal && b.isDeal) return 1;
+      if (a.stock > 0 && b.stock <= 0) return -1;
+      if (a.stock <= 0 && b.stock > 0) return 1;
+      return 0;
+    });
+  }, [products, selectedCategory, searchQuery, sortBy]);
 
   // Deal products
   const dealProducts = useMemo(() => {
@@ -140,14 +169,30 @@ export const AppContent: React.FC = () => {
                 </p>
               </div>
 
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-xs text-emerald-700 hover:text-emerald-800 font-bold underline cursor-pointer"
-                >
-                  Clear search
-                </button>
-              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="text-xs text-emerald-700 hover:text-emerald-800 font-bold underline cursor-pointer mr-1"
+                  >
+                    Clear search
+                  </button>
+                )}
+
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-xs">
+                  <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'featured' | 'price-low' | 'price-high' | 'discount')}
+                    className="text-xs font-semibold text-slate-700 bg-transparent border-none focus:outline-none cursor-pointer"
+                  >
+                    <option value="featured">{language === 'te' ? 'ఫీచర్డ్ & డీల్స్' : 'Featured & Deals'}</option>
+                    <option value="price-low">{language === 'te' ? 'ధర: తక్కువ నుండి ఎక్కువ' : 'Price: Low to High'}</option>
+                    <option value="price-high">{language === 'te' ? 'ధర: ఎక్కువ నుండి తక్కువ' : 'Price: High to Low'}</option>
+                    <option value="discount">{language === 'te' ? 'ఎక్కువ డిస్కౌంట్' : 'Highest Discount'}</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             {filteredProducts.length === 0 ? (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { 
   X, 
@@ -23,24 +23,13 @@ export const OrderTrackingModal: React.FC = () => {
     t
   } = useStore();
 
-  const [timeLeftMinutes, setTimeLeftMinutes] = useState(18);
-
-  useEffect(() => {
-    if (!activeOrder) return;
-    if (activeOrder.status === 'delivered') {
-      setTimeLeftMinutes(0);
-      return;
-    }
-    if (activeOrder.status === 'out_for_delivery') {
-      setTimeLeftMinutes(8);
-      return;
-    }
-    if (activeOrder.status === 'packing') {
-      setTimeLeftMinutes(14);
-      return;
-    }
-    setTimeLeftMinutes(18);
-  }, [activeOrder?.status]);
+  const timeLeftMinutes = (() => {
+    if (!activeOrder) return 18;
+    if (activeOrder.status === 'delivered') return 0;
+    if (activeOrder.status === 'out_for_delivery') return 8;
+    if (activeOrder.status === 'packing') return 14;
+    return 18;
+  })();
 
   if (!isTrackingOpen || !activeOrder) return null;
 

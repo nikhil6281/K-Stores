@@ -150,7 +150,7 @@ export const OrderHistoryModal: React.FC = () => {
               )}
             </div>
           ) : (
-            filteredOrders.map((order) => {
+            filteredOrders.map((order, idx) => {
               if (!order) return null;
 
               const safeDate = order.createdAt && !isNaN(new Date(order.createdAt).getTime())
@@ -166,7 +166,7 @@ export const OrderHistoryModal: React.FC = () => {
 
               return (
                 <div 
-                  key={order.id || Math.random().toString()}
+                  key={order.id || `hist-${idx}`}
                   className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs hover:border-emerald-400 transition-all space-y-3"
                 >
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">

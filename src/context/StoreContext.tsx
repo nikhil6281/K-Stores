@@ -3,7 +3,7 @@ import type { Product, CartItem, Order, OrderStatus, DeliveryType, DeliveryAddre
 import { initialProducts } from '../data/initialProducts';
 import { translations } from '../i18n/translations';
 import { sounds } from '../utils/sound';
-import { fetchCloudStoreData, addOrderToCloud, updateCloudOrderStatus } from '../services/cloudSync';
+import { fetchCloudStoreData, addOrderToCloud, updateCloudOrderStatus, onBroadcastOrderUpdate } from '../services/cloudSync';
 
 interface StoreContextType {
   language: Language;
@@ -297,22 +297,25 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
   const showToast = useCallback((type: ToastMessage['type'], title: string, message: string, duration = 4000) => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts(prev => [...prev, { id, type, title, message, duration }]);
     setTimeout(() => {
-      removeToast(id);
+      setToasts(prev => prev.filter(t => t.id !== id));
     }, duration);
   }, []);
-
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
 
   // Keep track of order count for audio alert triggers
   const prevOrdersCountRef = useRef<number>(orders.length);
   const isOwnerModeRef = useRef<boolean>(isOwnerMode);
-  isOwnerModeRef.current = isOwnerMode;
+  
+  useEffect(() => {
+    isOwnerModeRef.current = isOwnerMode;
+  }, [isOwnerMode]);
 
   // Cloud Sync: Fetch latest orders from shared online cloud database
   const refreshOrdersFromCloud = useCallback(async () => {
@@ -360,14 +363,71 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [showToast]);
 
-  // Initial cloud sync & continuous background live polling (every 4 seconds)
+  // Initial cloud sync & continuous background live polling (every 10 seconds to respect rate limits)
   useEffect(() => {
     refreshOrdersFromCloud();
     const interval = setInterval(() => {
       refreshOrdersFromCloud();
-    }, 4000);
+    }, 10_000);
     return () => clearInterval(interval);
   }, [refreshOrdersFromCloud]);
+
+  // BroadcastChannel: instant cross-tab sync on the same device (no API calls needed)
+  useEffect(() => {
+    const unsubscribe = onBroadcastOrderUpdate((incomingOrders) => {
+      if (Array.isArray(incomingOrders) && incomingOrders.length > 0) {
+        setOrders(prev => {
+          const orderMap = new Map<string, Order>();
+          incomingOrders.forEach(o => { if (o?.id) orderMap.set(o.id, o); });
+          prev.forEach(o => { if (o?.id && !orderMap.has(o.id)) orderMap.set(o.id, o); });
+
+          const merged = Array.from(orderMap.values()).sort((a, b) => {
+            const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return tB - tA;
+          });
+
+          if (merged.length > prevOrdersCountRef.current && prevOrdersCountRef.current > 0) {
+            if (isOwnerModeRef.current) {
+              sounds.playOwnerNewOrderAlert();
+              const newest = merged[0];
+              if (newest) {
+                showToast('success', '🔔 New Order!', `Order #${newest.id} — ₹${newest.totalAmount} from ${newest.customerName}`);
+              }
+            }
+          }
+          prevOrdersCountRef.current = merged.length;
+          return merged;
+        });
+      }
+    });
+    return unsubscribe;
+  }, [showToast]);
+
+  // localStorage 'storage' event: cross-tab sync fallback for browsers without BroadcastChannel
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'kstores_cloud_orders_cache' && e.newValue) {
+        try {
+          const orders = JSON.parse(e.newValue);
+          if (Array.isArray(orders)) {
+            setOrders(prev => {
+              const orderMap = new Map<string, Order>();
+              orders.forEach((o: Order) => { if (o?.id) orderMap.set(o.id, o); });
+              prev.forEach(o => { if (o?.id && !orderMap.has(o.id)) orderMap.set(o.id, o); });
+              return Array.from(orderMap.values()).sort((a, b) => {
+                const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return tB - tA;
+              });
+            });
+          }
+        } catch { /* ignore */ }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Trigger immediate refresh when entering owner mode
   useEffect(() => {
