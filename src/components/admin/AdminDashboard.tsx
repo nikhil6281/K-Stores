@@ -31,7 +31,8 @@ export const AdminDashboard: React.FC = () => {
     updateProduct,
     addProduct,
     deleteProduct,
-        orders = [],
+    
+    orders = [],
     updateOrderStatus,
     deals = [],
     toggleDeal,
@@ -973,6 +974,4 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
-
-
 

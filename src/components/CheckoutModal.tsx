@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { 
   X, 
@@ -73,7 +73,7 @@ export const CheckoutModal: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
           <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl mx-auto">
-            ðŸ”’
+            🔒
           </div>
           <div>
             <h3 className="font-extrabold text-lg text-white">Sign in Required</h3>
@@ -106,19 +106,19 @@ export const CheckoutModal: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
           <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-3xl mx-auto">
-            ðŸ›’
+            🛒
           </div>
           <div>
-            <h3 className="font-extrabold text-lg text-slate-900">{language === 'te' ? 'à°®à±€ à°•à°¾à°°à±à°Ÿà± à°–à°¾à°³à±€à°—à°¾ à°‰à°‚à°¦à°¿' : 'Your Cart is Empty'}</h3>
+            <h3 className="font-extrabold text-lg text-slate-900">{language === 'te' ? 'మీ కార్ట్ ఖాళీగా ఉంది' : 'Your Cart is Empty'}</h3>
             <p className="text-xs text-slate-500 mt-1">
-              {language === 'te' ? 'à°†à°°à±à°¡à°°à± à°šà±‡à°¯à°¡à°¾à°¨à°¿à°•à°¿ à°¦à°¯à°šà±‡à°¸à°¿ à°•à±‚à°°à°—à°¾à°¯à°²à± à°²à±‡à°¦à°¾ à°¸à°°à±à°•à±à°²à± à°Žà°‚à°šà±à°•à±‹à°‚à°¡à°¿.' : 'Please add some items to your cart before proceeding to checkout.'}
+              {language === 'te' ? 'ఆర్డర్ చేయడానికి దయచేసి కూరగాయలు లేదా సరుకులు ఎంచుకోండి.' : 'Please add some items to your cart before proceeding to checkout.'}
             </p>
           </div>
           <button
             onClick={() => setIsCheckoutOpen(false)}
             className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 px-4 rounded-xl text-xs transition-colors cursor-pointer"
           >
-            {language === 'te' ? 'à°¸à°°à±à°•à±à°²à± à°•à±Šà°¨à°‚à°¡à°¿' : 'Start Shopping'}
+            {language === 'te' ? 'సరుకులు కొనండి' : 'Start Shopping'}
           </button>
         </div>
       </div>
@@ -133,7 +133,7 @@ export const CheckoutModal: React.FC = () => {
           setIsLocating(false);
           setLocationSuccess(true);
           setLandmark(prev => prev || `GPS Pin: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)} (Village Center Area)`);
-          showToast('success', language === 'te' ? 'à°²à±Šà°•à±‡à°·à°¨à± à°—à±à°°à±à°¤à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Location Detected', language === 'te' ? 'à°®à±€ GPS à°¸à±à°¥à°¾à°¨à°‚ à°¨à°®à±‹à°¦à± à°šà±‡à°¯à°¬à°¡à°¿à°‚à°¦à°¿' : 'GPS location captured for 20-min delivery rider');
+          showToast('success', language === 'te' ? 'లొకేషన్ గుర్తించబడింది' : 'Location Detected', language === 'te' ? 'మీ GPS స్థానం నమోదు చేయబడింది' : 'GPS location captured for 20-min delivery rider');
         },
         () => {
           setIsLocating(false);
@@ -151,34 +151,25 @@ export const CheckoutModal: React.FC = () => {
 
   const validateForm = (): boolean => {
     if (!fullName.trim()) {
-      showToast('error', 'Required Field', language === 'te' ? 'à°¦à°¯à°šà±‡à°¸à°¿ à°®à±€ à°ªà±‚à°°à±à°¤à°¿ à°ªà±‡à°°à± à°¨à°®à±‹à°¦à± à°šà±‡à°¯à°‚à°¡à°¿' : 'Please enter your full name');
+      showToast('error', 'Required Field', language === 'te' ? 'దయచేసి మీ పూర్తి పేరు నమోదు చేయండి' : 'Please enter your full name');
       return false;
     }
 
     const cleanPhone = phoneNumber.replace(/\D/g, '');
     if (cleanPhone.length < 10) {
-      showToast('error', 'Invalid Phone', language === 'te' ? 'à°¦à°¯à°šà±‡à°¸à°¿ à°¸à°°à±ˆà°¨ 10 à°…à°‚à°•à±†à°² à°®à±Šà°¬à±ˆà°²à± à°¨à°‚à°¬à°°à± à°¨à°®à±‹à°¦à± à°šà±‡à°¯à°‚à°¡à°¿' : 'Please enter a valid 10-digit mobile number');
+      showToast('error', 'Invalid Phone', language === 'te' ? 'దయచేసి సరైన 10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి' : 'Please enter a valid 10-digit mobile number');
       return false;
     }
 
     if (deliveryType === 'delivery_20min' && (!villageName.trim() || !landmark.trim())) {
-      showToast('error', 'Address Incomplete', language === 'te' ? 'à°¦à°¯à°šà±‡à°¸à°¿ à°—à±à°°à°¾à°®à°‚ à°ªà±‡à°°à± à°®à°°à°¿à°¯à± à°—à±à°°à±à°¤à°¿à°‚à°ªà± à°²à±à°¯à°¾à°‚à°¡à±â€Œà°®à°¾à°°à±à°•à± à°¨à°®à±‹à°¦à± à°šà±‡à°¯à°‚à°¡à°¿' : 'Please provide village street name and a landmark for 20-min delivery');
+      showToast('error', 'Address Incomplete', language === 'te' ? 'దయచేసి గ్రామం పేరు మరియు గుర్తింపు ల్యాండ్‌మార్క్ నమోదు చేయండి' : 'Please provide village street name and a landmark for 20-min delivery');
       return false;
     }
 
     return true;
   };
 
-    const buildOrderData = () => {
-    const cleanPhone = phoneNumber.replace(/\D/g, '');
-    const address: DeliveryAddress | undefined = deliveryType === 'delivery_20min' ? {
-      fullName: fullName.trim(),
-      phone: cleanPhone,
-      villageName: villageName.trim(),
-      doorNo: doorNo.trim() || undefined,
-      landmark: landmark.trim(),
-      pincode: '500001'
-    } : undefined;
+  const buildOrderData = () => {
     const cleanPhone = phoneNumber.replace(/\D/g, '');
     const address: DeliveryAddress | undefined = deliveryType === 'delivery_20min' ? {
       fullName,
@@ -237,7 +228,7 @@ export const CheckoutModal: React.FC = () => {
       setIsProcessingPayment(false);
       setIsSubmitting(false);
       showToast('error',
-        language === 'te' ? 'à°ªà±‡à°®à±†à°‚à°Ÿà± à°Žà°°à±à°°à°°à±' : 'Payment Error',
+        language === 'te' ? 'పేమెంట్ ఎర్రర్' : 'Payment Error',
         result.error || 'Could not connect to payment gateway. Please try Cash on Delivery.'
       );
       return;
@@ -274,8 +265,8 @@ export const CheckoutModal: React.FC = () => {
               razorpayOrderId: response.razorpay_order_id,
             });
             showToast('success',
-              language === 'te' ? 'ðŸ’³ à°†à°¨à±â€Œà°²à±ˆà°¨à± à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚!' : 'ðŸ’³ Payment Successful!',
-              language === 'te' ? 'à°®à±€ à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°§à±ƒà°µà±€à°•à°°à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿. à°†à°°à±à°¡à°°à± à°¨à°®à±‹à°¦à°¯à°¿à°‚à°¦à°¿!' : `Payment â‚¹${cartTotal} confirmed. Order placed!`
+              language === 'te' ? '💳 ఆన్‌లైన్ చెల్లింపు విజయవంతం!' : '💳 Payment Successful!',
+              language === 'te' ? 'మీ చెల్లింపు ధృవీకరించబడింది. ఆర్డర్ నమోదయింది!' : `Payment ₹${cartTotal} confirmed. Order placed!`
             );
           } finally {
             setIsProcessingPayment(false);
@@ -285,7 +276,7 @@ export const CheckoutModal: React.FC = () => {
           setIsProcessingPayment(false);
           setIsSubmitting(false);
           showToast('error',
-            language === 'te' ? 'à°ªà±‡à°®à±†à°‚à°Ÿà± à°µà±†à°°à°¿à°«à°¿à°•à±‡à°·à°¨à± à°«à±†à°¯à°¿à°²à±' : 'Payment Verification Failed',
+            language === 'te' ? 'పేమెంట్ వెరిఫికేషన్ ఫెయిల్' : 'Payment Verification Failed',
             verification.error || 'Payment could not be verified. Please contact store owner or try again.'
           );
         }
@@ -294,7 +285,7 @@ export const CheckoutModal: React.FC = () => {
         setIsProcessingPayment(false);
         setIsSubmitting(false);
         showToast('error',
-          language === 'te' ? 'à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿' : 'Payment Failed',
+          language === 'te' ? 'చెల్లింపు విఫలమైంది' : 'Payment Failed',
           error
         );
       },
@@ -302,8 +293,8 @@ export const CheckoutModal: React.FC = () => {
         setIsProcessingPayment(false);
         setIsSubmitting(false);
         showToast('info',
-          language === 'te' ? 'à°ªà±‡à°®à±†à°‚à°Ÿà± à°°à°¦à±à°¦à±' : 'Payment Cancelled',
-          language === 'te' ? 'à°®à±€à°°à± à°šà±†à°²à±à°²à°¿à°‚à°ªà±à°¨à± à°°à°¦à±à°¦à± à°šà±‡à°¸à°¾à°°à±. à°®à±€à°°à± à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ à°Žà°‚à°šà±à°•à±‹à°µà°šà±à°šà±.' : 'Payment was cancelled. You can choose Cash on Delivery instead.'
+          language === 'te' ? 'పేమెంట్ రద్దు' : 'Payment Cancelled',
+          language === 'te' ? 'మీరు చెల్లింపును రద్దు చేసారు. మీరు క్యాష్ ఆన్ డెలివరీ ఎంచుకోవచ్చు.' : 'Payment was cancelled. You can choose Cash on Delivery instead.'
         );
       }
     });
@@ -330,14 +321,14 @@ export const CheckoutModal: React.FC = () => {
         <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-800 to-green-700 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-amber-400 text-emerald-950 flex items-center justify-center font-bold text-lg shadow-md">
-              ðŸ›µ
+              🛵
             </div>
             <div>
               <h2 className="font-extrabold text-base sm:text-lg text-white leading-tight">
                 {t.checkoutTitle}
               </h2>
               <p className="text-xs text-emerald-100 font-medium">
-                {deliveryType === 'delivery_20min' ? 'âš¡ 20-Min Doorstep Delivery' : 'ðŸª 5-Min Store Pickup'}
+                {deliveryType === 'delivery_20min' ? '⚡ 20-Min Doorstep Delivery' : '🏪 5-Min Store Pickup'}
               </p>
             </div>
           </div>
@@ -451,7 +442,7 @@ export const CheckoutModal: React.FC = () => {
                   className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors cursor-pointer"
                 >
                   <Navigation className={`w-3 h-3 ${isLocating ? 'animate-spin' : ''}`} />
-                  <span>{isLocating ? 'Locating...' : locationSuccess ? 'âœ“ Located' : t.useCurrentLocation}</span>
+                  <span>{isLocating ? 'Locating...' : locationSuccess ? '✓ Located' : t.useCurrentLocation}</span>
                 </button>
               </div>
 
@@ -518,7 +509,7 @@ export const CheckoutModal: React.FC = () => {
           <div className="space-y-2.5">
             <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <CreditCard className="w-4 h-4 text-emerald-700" />
-              <span>{language === 'te' ? 'à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°µà°¿à°§à°¾à°¨à°‚ à°Žà°‚à°šà±à°•à±‹à°‚à°¡à°¿' : 'Choose Payment Method'}</span>
+              <span>{language === 'te' ? 'చెల్లింపు విధానం ఎంచుకోండి' : 'Choose Payment Method'}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -535,13 +526,13 @@ export const CheckoutModal: React.FC = () => {
                 <div className="flex items-center gap-1.5">
                   <Banknote className={`w-4 h-4 ${paymentMode === 'cod' ? 'text-emerald-700' : 'text-slate-500'}`} />
                   <span className={`text-xs font-bold ${paymentMode === 'cod' ? 'text-emerald-950' : 'text-slate-700'}`}>
-                    {language === 'te' ? 'à°•à±à°¯à°¾à°·à± / UPI' : 'Cash / UPI'}
+                    {language === 'te' ? 'క్యాష్ / UPI' : 'Cash / UPI'}
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-500">
                   {deliveryType === 'delivery_20min'
-                    ? (language === 'te' ? 'à°¡à±†à°²à°¿à°µà°°à±€ à°¸à°®à°¯à°‚à°²à±‹ à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿' : 'Pay when delivered')
-                    : (language === 'te' ? 'à°¸à±à°Ÿà±‹à°°à±â€Œà°²à±‹ à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿' : 'Pay at store counter')}
+                    ? (language === 'te' ? 'డెలివరీ సమయంలో చెల్లించండి' : 'Pay when delivered')
+                    : (language === 'te' ? 'స్టోర్‌లో చెల్లించండి' : 'Pay at store counter')}
                 </div>
               </button>
 
@@ -558,11 +549,11 @@ export const CheckoutModal: React.FC = () => {
                 <div className="flex items-center gap-1.5">
                   <CreditCard className={`w-4 h-4 ${paymentMode === 'online' ? 'text-blue-700' : 'text-slate-500'}`} />
                   <span className={`text-xs font-bold ${paymentMode === 'online' ? 'text-blue-950' : 'text-slate-700'}`}>
-                    {language === 'te' ? 'à°†à°¨à±â€Œà°²à±ˆà°¨à± à°ªà±‡' : 'Pay Online'}
+                    {language === 'te' ? 'ఆన్‌లైన్ పే' : 'Pay Online'}
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-500">
-                  {language === 'te' ? 'UPI, à°•à°¾à°°à±à°¡à±, à°¨à±†à°Ÿà± à°¬à±à°¯à°¾à°‚à°•à°¿à°‚à°—à±' : 'UPI, Card, Net Banking'}
+                  {language === 'te' ? 'UPI, కార్డ్, నెట్ బ్యాంకింగ్' : 'UPI, Card, Net Banking'}
                 </div>
               </button>
             </div>
@@ -579,10 +570,10 @@ export const CheckoutModal: React.FC = () => {
               <span>
                 {paymentMode === 'online'
                   ? (language === 'te'
-                      ? 'Razorpay à°¦à±à°µà°¾à°°à°¾ à°¸à±à°°à°•à±à°·à°¿à°¤ à°šà±†à°²à±à°²à°¿à°‚à°ªà±. UPI, à°¡à±†à°¬à°¿à°Ÿà±/à°•à±à°°à±†à°¡à°¿à°Ÿà± à°•à°¾à°°à±à°¡à±, à°¨à±†à°Ÿà± à°¬à±à°¯à°¾à°‚à°•à°¿à°‚à°—à± à°†à°®à±‹à°¦à°¿à°‚à°šà°¬à°¡à°¤à°¾à°¯à°¿.'
+                      ? 'Razorpay ద్వారా సురక్షిత చెల్లింపు. UPI, డెబిట్/క్రెడిట్ కార్డ్, నెట్ బ్యాంకింగ్ ఆమోదించబడతాయి.'
                       : 'Secure payment via Razorpay. UPI, Debit/Credit Card, and Net Banking accepted.')
                   : (language === 'te'
-                      ? 'à°¸à°°à±à°•à±à°²à± à°µà°šà±à°šà°¾à°• à°•à±à°¯à°¾à°·à± à°²à±‡à°¦à°¾ UPI à°¦à±à°µà°¾à°°à°¾ à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿. à°®à±à°‚à°¦à±à°—à°¾ à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°…à°µà°¸à°°à°‚ à°²à±‡à°¦à±.'
+                      ? 'సరుకులు వచ్చాక క్యాష్ లేదా UPI ద్వారా చెల్లించండి. ముందుగా చెల్లింపు అవసరం లేదు.'
                       : 'Pay with Cash or UPI when items arrive. No advance payment required.')}
               </span>
             </div>
@@ -592,21 +583,21 @@ export const CheckoutModal: React.FC = () => {
           <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200 text-xs space-y-1.5">
             <div className="flex justify-between text-slate-600">
               <span>{cartItemsCount} {t.items} {t.itemTotal}</span>
-              <span>â‚¹{cartSubtotal}</span>
+              <span>₹{cartSubtotal}</span>
             </div>
             {cartDiscount > 0 && (
               <div className="flex justify-between text-emerald-700 font-semibold">
                 <span>{t.mrpSavings}</span>
-                <span>-â‚¹{cartDiscount}</span>
+                <span>-₹{cartDiscount}</span>
               </div>
             )}
             <div className="flex justify-between text-slate-600">
               <span>{t.deliveryFee}</span>
-              <span>{deliveryFee === 0 ? <span className="text-emerald-700 font-bold">{t.free}</span> : `â‚¹${deliveryFee}`}</span>
+              <span>{deliveryFee === 0 ? <span className="text-emerald-700 font-bold">{t.free}</span> : `₹${deliveryFee}`}</span>
             </div>
             <div className="pt-1.5 border-t border-slate-200 flex justify-between items-center text-sm font-extrabold text-slate-900">
               <span>{t.toPay}</span>
-              <span className="text-base text-emerald-800">â‚¹{cartTotal}</span>
+              <span className="text-base text-emerald-800">₹{cartTotal}</span>
             </div>
           </div>
 
@@ -623,7 +614,7 @@ export const CheckoutModal: React.FC = () => {
             {isProcessingPayment ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin text-white/80" />
-                <span>{language === 'te' ? 'à°ªà±‡à°®à±†à°‚à°Ÿà± à°ªà±à°°à°¾à°¸à±†à°¸à°¿à°‚à°—à±...' : 'Processing Payment...'}</span>
+                <span>{language === 'te' ? 'పేమెంట్ ప్రాసెసింగ్...' : 'Processing Payment...'}</span>
               </>
             ) : isSubmitting ? (
               <>
@@ -633,19 +624,19 @@ export const CheckoutModal: React.FC = () => {
             ) : paymentMode === 'online' ? (
               <>
                 <CreditCard className="w-5 h-5 text-amber-300" />
-                <span>{language === 'te' ? `à°†à°¨à±â€Œà°²à±ˆà°¨à± à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿ â€¢ â‚¹${cartTotal}` : `Pay Online â€¢ â‚¹${cartTotal}`}</span>
+                <span>{language === 'te' ? `ఆన్‌లైన్ చెల్లించండి • ₹${cartTotal}` : `Pay Online • ₹${cartTotal}`}</span>
               </>
             ) : (
               <>
                 <CheckCircle2 className="w-5 h-5 text-amber-300" />
-                <span>{`${t.placeOrder} â€¢ â‚¹${cartTotal}`}</span>
+                <span>{`${t.placeOrder} • ₹${cartTotal}`}</span>
               </>
             )}
           </button>
 
           <p className="text-[10px] text-center text-slate-400">
             {language === 'te' 
-              ? 'à°†à°°à±à°¡à°°à± à°ªà±‚à°°à±à°¤à°¯à°¿à°¨ à°¤à°°à±à°µà°¾à°¤ à°·à°¾à°ªà± à°“à°¨à°°à± à°µà°¾à°Ÿà±à°¸à°¾à°ªà± à°•à°¿ à°µà°¿à°µà°°à°®à±ˆà°¨ à°¬à°¿à°²à±à°²à± à°ªà°‚à°ªà°¬à°¡à±à°¤à±à°‚à°¦à°¿.' 
+              ? 'ఆర్డర్ పూర్తయిన తర్వాత షాప్ ఓనర్ వాట్సాప్ కి వివరమైన బిల్లు పంపబడుతుంది.' 
               : 'After placing, complete itemized bill will be generated for store owner WhatsApp.'}
           </p>
 
@@ -655,4 +646,3 @@ export const CheckoutModal: React.FC = () => {
     </div>
   );
 };
-

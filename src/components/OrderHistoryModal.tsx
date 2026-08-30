@@ -10,7 +10,7 @@ export const OrderHistoryModal: React.FC = () => {
     user,
     setIsAuthOpen,
     setIsTrackingOpen,
-    setActiveOrder,
+    setActiveOrderId,
     language
   } = useStore();
 
@@ -119,7 +119,7 @@ export const OrderHistoryModal: React.FC = () => {
                   <div className="text-xs font-black text-slate-900">Total: ₹{order.totalAmount}</div>
                   <button
                     onClick={() => {
-                      if (setActiveOrder) setActiveOrder(order);
+                      if (setActiveOrderId) setActiveOrderId(order.id);
                       setIsHistoryOpen(false);
                       setIsTrackingOpen(true);
                     }}
