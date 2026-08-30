@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { X, ArrowRight, Package, User, LogOut, MapPin } from 'lucide-react';
+import { X, ArrowRight, Package, User, LogOut, MapPin, Loader2 } from 'lucide-react';
 import type { CustomerUser } from '../types';
+import { signInWithGoogleReal, signOutReal } from '../services/firebaseSync';
 
 export const AuthModal: React.FC = () => {
   const {
@@ -21,22 +22,23 @@ export const AuthModal: React.FC = () => {
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
 
   if (!isAuthOpen) return null;
 
-  // Google 1-Click Sign-In
-  const handleGoogleSignIn = () => {
-    setIsSubmitting(true);
-    setTimeout(() => {
-      const googleUser: CustomerUser = {
-        id: `usr-google-${Date.now()}`,
-        name: 'K-Stores Customer',
-        email: 'customer@gmail.com',
-        phone: '9876543210',
+  const handleGoogleSignIn = async () => {
+    setIsLoadingGoogle(true);
+    try {
+      const gUser = await signInWithGoogleReal();
+      
+      const loggedUser: CustomerUser = {
+        id: gUser.id,
+        name: gUser.name,
+        email: gUser.email,
+        phone: gUser.phone || '9876543210',
         savedAddress: {
-          fullName: 'K-Stores Customer',
-          phone: '9876543210',
+          fullName: gUser.name,
+          phone: gUser.phone || '9876543210',
           villageName: 'Chinna Bazar, Main Village',
           doorNo: '3-12/A',
           landmark: 'Near Ramalayam Temple',
@@ -45,18 +47,27 @@ export const AuthModal: React.FC = () => {
         joinedAt: new Date().toISOString(),
       };
 
-      setUser(googleUser);
-      setIsSubmitting(false);
+      setUser(loggedUser);
       setIsAuthOpen(false);
       showToast(
         'success',
-        language === 'te' ? 'గూగుల్ లాగిన్ విజయవంతమైంది' : 'Google Sign-In Successful',
-        `Welcome to K-Stores, ${googleUser.name}!`
+        language === 'te' ? 'గూగుల్ లాగిన్ విజయవంతమైంది!' : 'Google Sign-In Successful!',
+        `Welcome, ${loggedUser.name} (${loggedUser.email})`
       );
-    }, 600);
+    } catch (err: any) {
+      console.error('Google Sign-In Error:', err);
+      showToast(
+        'error',
+        'Google Login Failed',
+        err.message?.includes('popup-closed-by-user')
+          ? 'Login cancelled by user.'
+          : 'Could not complete Google Sign-In. Please check your internet connection.'
+      );
+    } finally {
+      setIsLoadingGoogle(false);
+    }
   };
 
-  // Email / Phone Sign-In
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = emailOrPhone.trim();
@@ -100,7 +111,8 @@ export const AuthModal: React.FC = () => {
     );
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOutReal();
     setUser(null);
     showToast('info', 'Logged Out', 'You have been signed out.');
   };
@@ -112,7 +124,7 @@ export const AuthModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         
-        {/* Header matching Image 4 */}
+        {/* Header */}
         <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-100">
           <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
             {user ? 'My Account' : 'Sign in or create account'}
@@ -131,7 +143,6 @@ export const AuthModal: React.FC = () => {
         <div className="p-6 space-y-5">
           
           {user ? (
-            /* Logged in state */
             <div className="space-y-4">
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-[#9e1a22] text-white flex items-center justify-center font-black text-lg shadow-sm">
@@ -139,8 +150,8 @@ export const AuthModal: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-900 text-base">{user.name}</h3>
-                  {user.phone && <p className="text-xs text-slate-500">+91 {user.phone}</p>}
                   {user.email && <p className="text-xs text-slate-500">{user.email}</p>}
+                  {user.phone && <p className="text-xs text-slate-400">+91 {user.phone}</p>}
                 </div>
               </div>
 
@@ -183,47 +194,36 @@ export const AuthModal: React.FC = () => {
               </button>
             </div>
           ) : (
-            /* Sign in form matching Image 4 */
             <div className="space-y-4">
               
-              {/* Google Sign-in Single Sign-on Button matching Image 4 */}
+              {/* Real Google Sign-in Button */}
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
-                disabled={isSubmitting}
-                className="w-full bg-white hover:bg-slate-50 border border-slate-300 rounded-xl p-3 flex items-center justify-between shadow-xs transition-all cursor-pointer group"
+                disabled={isLoadingGoogle}
+                className="w-full bg-white hover:bg-slate-50 border border-slate-300 rounded-xl p-3 flex items-center justify-between shadow-xs transition-all cursor-pointer group disabled:opacity-70"
               >
                 <div className="flex items-center gap-3">
-                  {/* Google G Logo SVG */}
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                    />
-                  </svg>
+                  {isLoadingGoogle ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-slate-600" />
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" />
+                      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z" />
+                      <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" />
+                      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
+                    </svg>
+                  )}
                   <span className="text-xs sm:text-sm font-bold text-slate-800">
-                    Continue with Google
+                    {isLoadingGoogle ? 'Connecting to Google...' : 'Continue with Google'}
                   </span>
                 </div>
 
                 <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">
-                  1-click
+                  Official
                 </span>
               </button>
 
-              {/* OR Divider matching Image 4 */}
               <div className="relative flex py-1 items-center">
                 <div className="flex-grow border-t border-slate-200" />
                 <span className="flex-shrink mx-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
@@ -232,7 +232,7 @@ export const AuthModal: React.FC = () => {
                 <div className="flex-grow border-t border-slate-200" />
               </div>
 
-              {/* Email / Mobile input form with Arrow button */}
+              {/* Email / Mobile input form */}
               <form onSubmit={handleEmailSubmit} className="space-y-3">
                 <div className="relative">
                   <input
@@ -259,7 +259,7 @@ export const AuthModal: React.FC = () => {
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter password or leave blank for OTP"
+                        placeholder="Enter password or leave blank"
                         className="w-full px-4 py-3 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:outline-none"
                       />
                     </div>
@@ -275,7 +275,6 @@ export const AuthModal: React.FC = () => {
                   </div>
                 )}
 
-                {/* Checkbox matching Image 4 */}
                 <label className="flex items-center gap-2.5 text-xs text-slate-600 cursor-pointer pt-1">
                   <input
                     type="checkbox"
@@ -287,7 +286,6 @@ export const AuthModal: React.FC = () => {
                 </label>
               </form>
 
-              {/* Bottom Navigation Buttons matching Image 4 [ Orders ] [ Profile ] */}
               <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100">
                 <button
                   type="button"
@@ -304,7 +302,6 @@ export const AuthModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    // Pre-fill demo
                     setEmailOrPhone('ramesh@village.com');
                     setName('Ramesh Kumar');
                   }}
