@@ -8,7 +8,7 @@ import {
   Phone, 
   MapPin, 
   MessageSquare, 
-  Bell, 
+   
   Search, 
   CheckSquare, 
   Square 
@@ -382,3 +382,4 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
+

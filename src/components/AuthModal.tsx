@@ -35,7 +35,7 @@ export const AuthModal: React.FC = () => {
         name: gUser.name,
         email: gUser.email,
         phone: gUser.phone || '',
-        savedAddress: gUser.savedAddress,
+        savedAddress: (gUser as any).savedAddress,
         joinedAt: new Date().toISOString(),
       };
 
@@ -272,3 +272,4 @@ export const AuthModal: React.FC = () => {
     </div>
   );
 };
+
