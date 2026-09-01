@@ -514,7 +514,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ...newProductData,
       id: `prod-${Date.now()}`
     };
-    setProducts(prev => [newProduct, ...prev]);
+    setProducts(prev => [newProduct, ...prev]); addProductToFirebase(newProduct);
     showToast('success', language === 'te' ? 'à°•à±Šà°¤à±à°¤ à°µà°¸à±à°¤à±à°µà± à°šà±‡à°°à±à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Product Added', language === 'te' ? 'à°•à±Šà°¤à±à°¤ à°µà°¸à±à°¤à±à°µà± à°¸à±à°Ÿà°¾à°•à±â€Œà°²à±‹ à°šà±‡à°°à°¿à°‚à°¦à°¿' : 'New product added to inventory');
   };
 
@@ -743,4 +743,5 @@ export const useStore = () => {
   }
   return context;
 };
+
 
