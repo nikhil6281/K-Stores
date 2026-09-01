@@ -32,7 +32,7 @@ export const OrderHistoryModal: React.FC = () => {
         {/* Header */}
         <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#9e1a22] text-white flex items-center justify-center font-bold">
+            <div className="w-9 h-9 rounded-xl bg-[#166534] text-white flex items-center justify-center font-bold">
               <Package className="w-5 h-5" />
             </div>
             <div>
@@ -57,7 +57,7 @@ export const OrderHistoryModal: React.FC = () => {
         <div className="p-5 overflow-y-auto flex-1 space-y-4">
           {!user ? (
             <div className="text-center py-12 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-red-50 text-[#9e1a22] flex items-center justify-center mx-auto text-2xl font-bold">
+              <div className="w-16 h-16 rounded-full bg-red-50 text-[#166534] flex items-center justify-center mx-auto text-2xl font-bold">
                 🔒
               </div>
               <h3 className="font-extrabold text-slate-900 text-base">Please sign in to view your orders</h3>
@@ -66,7 +66,7 @@ export const OrderHistoryModal: React.FC = () => {
                   setIsHistoryOpen(false);
                   setIsAuthOpen(true);
                 }}
-                className="bg-[#9e1a22] text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
+                className="bg-[#166534] text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
               >
                 Sign in with Google
               </button>
@@ -123,7 +123,7 @@ export const OrderHistoryModal: React.FC = () => {
                       setIsHistoryOpen(false);
                       setIsTrackingOpen(true);
                     }}
-                    className="text-xs font-bold text-[#9e1a22] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-bold text-[#166534] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>Track Order</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -137,3 +137,4 @@ export const OrderHistoryModal: React.FC = () => {
     </div>
   );
 };
+

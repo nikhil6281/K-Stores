@@ -119,7 +119,7 @@ export const AuthModal: React.FC = () => {
             /* Logged in state */
             <div className="space-y-4">
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[#9e1a22] text-white flex items-center justify-center font-black text-lg shadow-sm">
+                <div className="w-12 h-12 rounded-full bg-[#166534] text-white flex items-center justify-center font-black text-lg shadow-sm">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -137,7 +137,7 @@ export const AuthModal: React.FC = () => {
                   className="bg-slate-100 hover:bg-slate-200 p-3 rounded-xl border border-slate-200 text-center font-bold text-slate-800 transition-colors cursor-pointer"
                 >
                   <div className="text-slate-500 text-[10px]">Total Orders</div>
-                  <div className="font-black text-base text-[#9e1a22]">{orders.length}</div>
+                  <div className="font-black text-base text-[#166534]">{orders.length}</div>
                 </button>
                 <div className="bg-slate-100 p-3 rounded-xl border border-slate-200 text-center font-bold text-slate-800">
                   <div className="text-slate-500 text-[10px]">Cart Items</div>
@@ -147,7 +147,7 @@ export const AuthModal: React.FC = () => {
 
               <button
                 onClick={handleLogout}
-                className="w-full bg-red-50 hover:bg-red-100 text-[#9e1a22] font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-red-200 transition-colors cursor-pointer"
+                className="w-full bg-red-50 hover:bg-red-100 text-[#166534] font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-red-200 transition-colors cursor-pointer"
               >
                 <span>Logout</span>
               </button>
@@ -207,7 +207,7 @@ export const AuthModal: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:ring-2 focus:ring-[#9e1a22]/20 focus:outline-none"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#166534] focus:ring-2 focus:ring-[#166534]/20 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -224,7 +224,7 @@ export const AuthModal: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:ring-2 focus:ring-[#9e1a22]/20 focus:outline-none"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#166534] focus:ring-2 focus:ring-[#166534]/20 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -234,14 +234,14 @@ export const AuthModal: React.FC = () => {
                     type="checkbox"
                     checked={subscribeNewsletter}
                     onChange={(e) => setSubscribeNewsletter(e.target.checked)}
-                    className="w-4 h-4 rounded text-[#9e1a22] focus:ring-[#9e1a22] border-slate-300 cursor-pointer"
+                    className="w-4 h-4 rounded text-[#166534] focus:ring-[#166534] border-slate-300 cursor-pointer"
                   />
                   <span>Email me with 20-min grocery offers</span>
                 </label>
 
                 <button
                   type="submit"
-                  className="w-full bg-[#9e1a22] hover:bg-[#83181d] text-white font-extrabold py-3 px-4 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer mt-2"
+                  className="w-full bg-[#166534] hover:bg-[#14532d] text-white font-extrabold py-3 px-4 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer mt-2"
                 >
                   <span>Sign in with Email & Password</span>
                   <ArrowRight className="w-4 h-4" />
@@ -272,4 +272,5 @@ export const AuthModal: React.FC = () => {
     </div>
   );
 };
+
 

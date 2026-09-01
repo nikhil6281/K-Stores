@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+﻿import React, { useRef, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { Search, X, Plus } from 'lucide-react';
 
@@ -44,7 +44,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={language === 'te' ? 'సరుకులు వెతకండి (టమాటాలు, పాలు, బియ్యం...)' : 'Search fresh groceries, staples, snacks...'}
+            placeholder={language === 'te' ? 'à°¸à°°à±à°•à±à°²à± à°µà±†à°¤à°•à°‚à°¡à°¿ (à°Ÿà°®à°¾à°Ÿà°¾à°²à±, à°ªà°¾à°²à±, à°¬à°¿à°¯à±à°¯à°‚...)' : 'Search fresh groceries, staples, snacks...'}
             className="flex-1 text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none bg-transparent"
           />
           {searchQuery && (
@@ -78,7 +78,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
 
           {matchedProducts.length === 0 ? (
             <div className="py-12 text-center text-slate-400 space-y-2">
-              <div className="text-3xl">🔍</div>
+              <div className="text-3xl">ðŸ”</div>
               <p className="text-sm font-semibold text-slate-700">No products matching "{searchQuery}"</p>
               <p className="text-xs text-slate-400">Try searching for vegetables, milk, rice, or oils.</p>
             </div>
@@ -110,12 +110,12 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
                     </div>
 
                     <div className="flex items-center justify-between pt-2 mt-1 border-t border-slate-200/60">
-                      <span className="font-extrabold text-xs text-slate-900">₹{product.price}</span>
+                      <span className="font-extrabold text-xs text-slate-900">â‚¹{product.price}</span>
                       <button
                         onClick={() => {
                           addToCart(product);
                         }}
-                        className="w-7 h-7 rounded-full bg-[#9e1a22] hover:bg-[#83181d] text-white flex items-center justify-center shadow-xs transition-transform active:scale-90"
+                        className="w-7 h-7 rounded-full bg-[#166534] hover:bg-[#14532d] text-white flex items-center justify-center shadow-xs transition-transform active:scale-90"
                         title="Add to cart"
                       >
                         <Plus className="w-4 h-4" />
@@ -130,15 +130,16 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
 
         {/* Footer info */}
         <div className="bg-slate-50 px-4 py-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>⚡ Fast 20-minute village delivery on all orders</span>
+          <span>âš¡ Fast 20-minute village delivery on all orders</span>
           <button
             onClick={onClose}
-            className="text-[#9e1a22] font-bold hover:underline"
+            className="text-[#166534] font-bold hover:underline"
           >
-            View Full Catalog →
+            View Full Catalog â†’
           </button>
         </div>
       </div>
     </div>
   );
 };
+

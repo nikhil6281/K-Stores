@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { useStore } from './context/StoreContext';
 import { Header } from './components/Header';
 import { PromotionsTicker } from './components/PromotionsTicker';
@@ -128,21 +128,21 @@ export const AppContent: React.FC = () => {
             <section id="deals-section" className="space-y-4 pt-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-[#9e1a22] text-white flex items-center justify-center font-bold text-sm shadow-xs">
-                    🔥
+                  <div className="w-8 h-8 rounded-xl bg-[#166534] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                    ðŸ”¥
                   </div>
                   <div>
                     <h2 className="text-base sm:text-lg font-black uppercase tracking-wide text-slate-900 font-sans">
-                      {language === 'te' ? 'నేటి ప్రత్యేక ఆఫర్లు & డీల్స్' : 'Deals of the Day'}
+                      {language === 'te' ? 'à°¨à±‡à°Ÿà°¿ à°ªà±à°°à°¤à±à°¯à±‡à°• à°†à°«à°°à±à°²à± & à°¡à±€à°²à±à°¸à±' : 'Deals of the Day'}
                     </h2>
                     <p className="text-xs text-slate-500 font-medium">
-                      {language === 'te' ? 'తక్కువ ధరల్లో తాజా సరుకులు' : 'Super savings on fresh essentials'}
+                      {language === 'te' ? 'à°¤à°•à±à°•à±à°µ à°§à°°à°²à±à°²à±‹ à°¤à°¾à°œà°¾ à°¸à°°à±à°•à±à°²à±' : 'Super savings on fresh essentials'}
                     </p>
                   </div>
                 </div>
 
-                <span className="bg-red-50 text-[#9e1a22] font-extrabold text-[11px] px-3 py-1 rounded-full border border-red-200">
-                  {language === 'te' ? 'పరిమిత స్టాక్' : 'Limited Stock'}
+                <span className="bg-red-50 text-[#166534] font-extrabold text-[11px] px-3 py-1 rounded-full border border-red-200">
+                  {language === 'te' ? 'à°ªà°°à°¿à°®à°¿à°¤ à°¸à±à°Ÿà°¾à°•à±' : 'Limited Stock'}
                 </span>
               </div>
 
@@ -165,7 +165,7 @@ export const AppContent: React.FC = () => {
                   </span>
                 </h2>
                 <p className="text-xs text-slate-500">
-                  {language === 'te' ? '20 నిమిషాల్లో మీ ఇంటి ముందుకు' : 'Delivered in 20 minutes to your village address'}
+                  {language === 'te' ? '20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°®à±€ à°‡à°‚à°Ÿà°¿ à°®à±à°‚à°¦à±à°•à±' : 'Delivered in 20 minutes to your village address'}
                 </p>
               </div>
 
@@ -173,7 +173,7 @@ export const AppContent: React.FC = () => {
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="text-xs text-[#9e1a22] hover:text-[#83181d] font-bold underline cursor-pointer mr-1"
+                    className="text-xs text-[#166534] hover:text-[#14532d] font-bold underline cursor-pointer mr-1"
                   >
                     Clear search
                   </button>
@@ -186,10 +186,10 @@ export const AppContent: React.FC = () => {
                     onChange={(e) => setSortBy(e.target.value as 'featured' | 'price-low' | 'price-high' | 'discount')}
                     className="text-xs font-semibold text-slate-700 bg-transparent border-none focus:outline-none cursor-pointer"
                   >
-                    <option value="featured">{language === 'te' ? 'ఫీచర్డ్ & డీల్స్' : 'Featured & Deals'}</option>
-                    <option value="price-low">{language === 'te' ? 'ధర: తక్కువ నుండి ఎక్కువ' : 'Price: Low to High'}</option>
-                    <option value="price-high">{language === 'te' ? 'ధర: ఎక్కువ నుండి తక్కువ' : 'Price: High to Low'}</option>
-                    <option value="discount">{language === 'te' ? 'ఎక్కువ డిస్కౌంట్' : 'Highest Discount'}</option>
+                    <option value="featured">{language === 'te' ? 'à°«à±€à°šà°°à±à°¡à± & à°¡à±€à°²à±à°¸à±' : 'Featured & Deals'}</option>
+                    <option value="price-low">{language === 'te' ? 'à°§à°°: à°¤à°•à±à°•à±à°µ à°¨à±à°‚à°¡à°¿ à°Žà°•à±à°•à±à°µ' : 'Price: Low to High'}</option>
+                    <option value="price-high">{language === 'te' ? 'à°§à°°: à°Žà°•à±à°•à±à°µ à°¨à±à°‚à°¡à°¿ à°¤à°•à±à°•à±à°µ' : 'Price: High to Low'}</option>
+                    <option value="discount">{language === 'te' ? 'à°Žà°•à±à°•à±à°µ à°¡à°¿à°¸à±à°•à±Œà°‚à°Ÿà±' : 'Highest Discount'}</option>
                   </select>
                 </div>
               </div>
@@ -198,14 +198,14 @@ export const AppContent: React.FC = () => {
             {filteredProducts.length === 0 ? (
               <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 shadow-xs">
                 <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-3xl mx-auto mb-3">
-                  🔍
+                  ðŸ”
                 </div>
                 <h3 className="font-bold text-slate-800 text-base mb-1">
-                  {language === 'te' ? 'సరుకులు కనుగొనబడలేదు' : 'No items found'}
+                  {language === 'te' ? 'à°¸à°°à±à°•à±à°²à± à°•à°¨à±à°—à±Šà°¨à°¬à°¡à°²à±‡à°¦à±' : 'No items found'}
                 </h3>
                 <p className="text-xs text-slate-500 mb-4 max-w-sm mx-auto">
                   {language === 'te' 
-                    ? 'మీరు వెతుకుతున్న వస్తువు స్టాక్‌లో లేకపోవచ్చు. దయచేసి వేరే పేరుతో వెతకండి లేదా ఓనర్‌కి వాట్సాప్ చేయండి.'
+                    ? 'à°®à±€à°°à± à°µà±†à°¤à±à°•à±à°¤à±à°¨à±à°¨ à°µà°¸à±à°¤à±à°µà± à°¸à±à°Ÿà°¾à°•à±â€Œà°²à±‹ à°²à±‡à°•à°ªà±‹à°µà°šà±à°šà±. à°¦à°¯à°šà±‡à°¸à°¿ à°µà±‡à°°à±‡ à°ªà±‡à°°à±à°¤à±‹ à°µà±†à°¤à°•à°‚à°¡à°¿ à°²à±‡à°¦à°¾ à°“à°¨à°°à±â€Œà°•à°¿ à°µà°¾à°Ÿà±à°¸à°¾à°ªà± à°šà±‡à°¯à°‚à°¡à°¿.'
                     : 'We could not find the item you are searching for. You can request it directly from the store owner.'}
                 </p>
                 <button
@@ -213,7 +213,7 @@ export const AppContent: React.FC = () => {
                     setSearchQuery('');
                     setSelectedCategory('all');
                   }}
-                  className="bg-[#9e1a22] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md cursor-pointer"
+                  className="bg-[#166534] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md cursor-pointer"
                 >
                   View All Products
                 </button>
@@ -228,7 +228,7 @@ export const AppContent: React.FC = () => {
           </section>
 
           {/* Village Fast Delivery Promise Banner */}
-          <section id="delivery-promise-section" className="bg-[#9e1a22] rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-[#83181d]">
+          <section id="delivery-promise-section" className="bg-[#166534] rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-[#14532d]">
             <div className="space-y-2 text-center md:text-left">
               <div className="inline-flex items-center gap-1.5 bg-amber-400 text-emerald-950 font-black text-xs px-3 py-1 rounded-full shadow-xs">
                 <Zap className="w-3.5 h-3.5" />
@@ -236,13 +236,13 @@ export const AppContent: React.FC = () => {
               </div>
               <h3 className="text-xl sm:text-2xl font-black text-white">
                 {language === 'te' 
-                  ? 'మీకు కావాల్సిన ఏదైనా కిరాణా వస్తువు లేదా పాలు 20 నిమిషాల్లో చేరవేస్తాము!'
+                  ? 'à°®à±€à°•à± à°•à°¾à°µà°¾à°²à±à°¸à°¿à°¨ à°à°¦à±ˆà°¨à°¾ à°•à°¿à°°à°¾à°£à°¾ à°µà°¸à±à°¤à±à°µà± à°²à±‡à°¦à°¾ à°ªà°¾à°²à± 20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°šà±‡à°°à°µà±‡à°¸à±à°¤à°¾à°®à±!'
                   : 'Get all your daily kirana essentials delivered to your doorstep in 20 minutes!'}
               </h3>
               <p className="text-xs sm:text-sm text-emerald-100 max-w-xl">
                 {language === 'te'
-                  ? 'క్యాష్ ఆన్ డెలివరీ • వాట్సాప్‌లో సులభంగా బిల్లు • షాప్ వద్ద ఉచిత పికప్'
-                  : 'Cash on Delivery • WhatsApp itemized billing • 100% genuine local kirana products'}
+                  ? 'à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ â€¢ à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¸à±à°²à°­à°‚à°—à°¾ à°¬à°¿à°²à±à°²à± â€¢ à°·à°¾à°ªà± à°µà°¦à±à°¦ à°‰à°šà°¿à°¤ à°ªà°¿à°•à°ªà±'
+                  : 'Cash on Delivery â€¢ WhatsApp itemized billing â€¢ 100% genuine local kirana products'}
               </p>
             </div>
 
@@ -283,7 +283,7 @@ export const AppContent: React.FC = () => {
             <div className="w-3 h-3 rounded-full bg-amber-400 animate-ping" />
             <div className="text-left leading-tight">
               <div className="text-[10px] text-amber-300 font-bold">20-Min Order #{activeOrder.id}</div>
-              <div className="font-bold capitalize">{activeOrder.status.replace('_', ' ')} 🛵</div>
+              <div className="font-bold capitalize">{activeOrder.status.replace('_', ' ')} ðŸ›µ</div>
             </div>
             <ChevronRight className="w-4 h-4 text-amber-400 ml-1" />
           </button>
@@ -300,7 +300,7 @@ export const AppContent: React.FC = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-black text-lg">
-                  🌾
+                  ðŸŒ¾
                 </div>
                 <div>
                   <span className="font-extrabold text-white text-base">{t.storeName}</span>
@@ -309,7 +309,7 @@ export const AppContent: React.FC = () => {
               </div>
               <p className="text-slate-400 text-xs leading-relaxed">
                 {language === 'te'
-                  ? 'మన గ్రామ ప్రజల కోసం ప్రత్యేకంగా ప్రారంభించిన 20 నిమిషాల సూపర్ ఫాస్ట్ కిరాణా డెలివరీ యాప్.'
+                  ? 'à°®à°¨ à°—à±à°°à°¾à°® à°ªà±à°°à°œà°² à°•à±‹à°¸à°‚ à°ªà±à°°à°¤à±à°¯à±‡à°•à°‚à°—à°¾ à°ªà±à°°à°¾à°°à°‚à°­à°¿à°‚à°šà°¿à°¨ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¸à±‚à°ªà°°à± à°«à°¾à°¸à±à°Ÿà± à°•à°¿à°°à°¾à°£à°¾ à°¡à±†à°²à°¿à°µà°°à±€ à°¯à°¾à°ªà±.'
                   : 'Fast 20-minute local village grocery delivery with Cash on Delivery and WhatsApp bill generation.'}
               </p>
             </div>
@@ -317,7 +317,7 @@ export const AppContent: React.FC = () => {
             {/* Col 2: 20-Min Service Highlights */}
             <div className="space-y-2">
               <h4 className="font-extrabold text-white text-sm">
-                {language === 'te' ? 'సేవా విశేషాలు' : 'Store Highlights'}
+                {language === 'te' ? 'à°¸à±‡à°µà°¾ à°µà°¿à°¶à±‡à°·à°¾à°²à±' : 'Store Highlights'}
               </h4>
               <ul className="space-y-1.5 text-slate-400">
                 <li className="flex items-center gap-1.5">
@@ -364,11 +364,11 @@ export const AppContent: React.FC = () => {
             {/* Col 4: Village Fast Access */}
             <div className="space-y-3">
               <h4 className="font-extrabold text-white text-sm">
-                {language === 'te' ? 'ఓనర్ పోర్టల్' : 'Store Owner Portal'}
+                {language === 'te' ? 'à°“à°¨à°°à± à°ªà±‹à°°à±à°Ÿà°²à±' : 'Store Owner Portal'}
               </h4>
               <p className="text-slate-400 text-[11px]">
                 {language === 'te' 
-                  ? 'షాప్ ఓనర్ లైవ్ ఆర్డర్లు మరియు స్టాక్ నిల్వలను నిర్వహించడానికి ఇక్కడ లాగిన్ అవ్వండి.' 
+                  ? 'à°·à°¾à°ªà± à°“à°¨à°°à± à°²à±ˆà°µà± à°†à°°à±à°¡à°°à±à°²à± à°®à°°à°¿à°¯à± à°¸à±à°Ÿà°¾à°•à± à°¨à°¿à°²à±à°µà°²à°¨à± à°¨à°¿à°°à±à°µà°¹à°¿à°‚à°šà°¡à°¾à°¨à°¿à°•à°¿ à°‡à°•à±à°•à°¡ à°²à°¾à°—à°¿à°¨à± à°…à°µà±à°µà°‚à°¡à°¿.' 
                   : 'Access owner dashboard to manage incoming orders and stock.'}
               </p>
               <button
@@ -383,7 +383,7 @@ export const AppContent: React.FC = () => {
           </div>
 
           <div className="pt-6 border-t border-slate-800 text-center text-slate-500 text-[11px] flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span>© {new Date().getFullYear()} {t.storeName}. {t.footerRights}</span>
+            <span>Â© {new Date().getFullYear()} {t.storeName}. {t.footerRights}</span>
             <span className="flex items-center gap-1">
               Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> for our local village community
             </span>
@@ -412,3 +412,4 @@ export const AppContent: React.FC = () => {
 export default function App() {
   return <AppContent />;
 }
+

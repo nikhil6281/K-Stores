@@ -166,7 +166,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#9e1a22] text-white flex items-center justify-center font-black text-lg shadow-md">
+            <div className="w-10 h-10 rounded-2xl bg-[#166534] text-white flex items-center justify-center font-black text-lg shadow-md">
               👑
             </div>
             <div>
@@ -189,7 +189,7 @@ export const AdminDashboard: React.FC = () => {
             <button
               onClick={() => setActiveTab('orders')}
               className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'orders' ? 'bg-[#9e1a22] text-white shadow-md' : 'text-slate-400 hover:text-white'
+                activeTab === 'orders' ? 'bg-[#166534] text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
               <Package className="w-3.5 h-3.5" />
@@ -199,7 +199,7 @@ export const AdminDashboard: React.FC = () => {
             <button
               onClick={() => setActiveTab('inventory')}
               className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'inventory' ? 'bg-[#9e1a22] text-white shadow-md' : 'text-slate-400 hover:text-white'
+                activeTab === 'inventory' ? 'bg-[#166534] text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
               <Tag className="w-3.5 h-3.5" />
@@ -209,7 +209,7 @@ export const AdminDashboard: React.FC = () => {
             <button
               onClick={() => setActiveTab('store_controls')}
               className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'store_controls' ? 'bg-[#9e1a22] text-white shadow-md' : 'text-slate-400 hover:text-white'
+                activeTab === 'store_controls' ? 'bg-[#166534] text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
               <Sliders className="w-3.5 h-3.5" />
@@ -292,7 +292,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => setFilterStatus(tab.id)}
                     className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                       filterStatus === tab.id
-                        ? 'bg-[#9e1a22] text-white shadow-md'
+                        ? 'bg-[#166534] text-white shadow-md'
                         : 'bg-slate-800 text-slate-400 hover:text-white'
                     }`}
                   >
@@ -308,7 +308,7 @@ export const AdminDashboard: React.FC = () => {
                   value={orderSearchQuery}
                   onChange={(e) => setOrderSearchQuery(e.target.value)}
                   placeholder="Search order ID, name, phone..."
-                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#9e1a22]"
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#166534]"
                 />
               </div>
             </div>
@@ -389,7 +389,7 @@ export const AdminDashboard: React.FC = () => {
                         {order.deliveryType === 'delivery_20min' && order.address ? (
                           <div className="text-slate-300 space-y-0.5 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
                             <div className="flex items-start gap-1.5 text-[11px]">
-                              <MapPin className="w-3.5 h-3.5 text-[#9e1a22] flex-shrink-0 mt-0.5" />
+                              <MapPin className="w-3.5 h-3.5 text-[#166534] flex-shrink-0 mt-0.5" />
                               <div>
                                 <span className="font-bold text-white">
                                   {order.address.doorNo ? `${order.address.doorNo}, ` : ''}{order.address.villageName}
@@ -532,7 +532,7 @@ export const AdminDashboard: React.FC = () => {
 
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="bg-[#9e1a22] hover:bg-[#83181d] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-all"
+                className="bg-[#166534] hover:bg-[#14532d] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-all"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add New Product</span>
@@ -550,7 +550,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => setProductCategoryFilter(cat)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer whitespace-nowrap ${
                       productCategoryFilter === cat
-                        ? 'bg-[#9e1a22] text-white'
+                        ? 'bg-[#166534] text-white'
                         : 'bg-slate-800 text-slate-400 hover:text-white'
                     }`}
                   >
@@ -566,7 +566,7 @@ export const AdminDashboard: React.FC = () => {
                   value={productSearchQuery}
                   onChange={(e) => setProductSearchQuery(e.target.value)}
                   placeholder="Search products..."
-                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#9e1a22]"
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#166534]"
                 />
               </div>
             </div>
@@ -775,7 +775,7 @@ export const AdminDashboard: React.FC = () => {
                     onClick={() => setDeliveryTimeMinutes(mins)}
                     className={`py-3 px-4 rounded-2xl font-black text-sm border transition-all cursor-pointer text-center ${
                       deliveryTimeMinutes === mins
-                        ? 'bg-[#9e1a22] text-white border-[#9e1a22] shadow-lg ring-2 ring-red-500/30'
+                        ? 'bg-[#166534] text-white border-[#166534] shadow-lg ring-2 ring-red-500/30'
                         : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
                     }`}
                   >
@@ -803,7 +803,7 @@ export const AdminDashboard: React.FC = () => {
                         <span className="text-red-400 font-bold">Only {p.stock} left!</span>
                         <button
                           onClick={() => updateProduct && updateProduct({ ...p, stock: p.stock + 20 })}
-                          className="bg-[#9e1a22] hover:bg-[#83181d] text-white font-bold px-2.5 py-1 rounded-lg text-xs cursor-pointer"
+                          className="bg-[#166534] hover:bg-[#14532d] text-white font-bold px-2.5 py-1 rounded-lg text-xs cursor-pointer"
                         >
                           +20 Stock
                         </button>
@@ -828,7 +828,7 @@ export const AdminDashboard: React.FC = () => {
             
             <div className="p-5 border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#9e1a22] flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-xl bg-[#166534] flex items-center justify-center font-bold">
                   <Plus className="w-4 h-4" />
                 </div>
                 <h2 className="font-extrabold text-base">Add New Grocery Product</h2>
@@ -851,7 +851,7 @@ export const AdminDashboard: React.FC = () => {
                     value={newProductNameEn}
                     onChange={(e) => setNewProductNameEn(e.target.value)}
                     placeholder="e.g. Fresh Tomatoes"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#9e1a22]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#166534]"
                   />
                 </div>
                 <div>
@@ -861,7 +861,7 @@ export const AdminDashboard: React.FC = () => {
                     value={newProductNameTe}
                     onChange={(e) => setNewProductNameTe(e.target.value)}
                     placeholder="e.g. తాజా టమాటాలు"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#9e1a22]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#166534]"
                   />
                 </div>
               </div>
@@ -872,7 +872,7 @@ export const AdminDashboard: React.FC = () => {
                   <select
                     value={newProductCategory}
                     onChange={(e) => setNewProductCategory(e.target.value as ProductCategory)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#9e1a22]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#166534]"
                   >
                     <option value="vegetables">Vegetables</option>
                     <option value="fruits">Fruits</option>
@@ -893,7 +893,7 @@ export const AdminDashboard: React.FC = () => {
                     value={newProductUnit}
                     onChange={(e) => setNewProductUnit(e.target.value)}
                     placeholder="e.g. 1 kg, 500 g, 1 L"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#9e1a22]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#166534]"
                   />
                 </div>
               </div>
@@ -906,7 +906,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={newProductPrice}
                     onChange={(e) => setNewProductPrice(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#9e1a22]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#166534]"
                   />
                 </div>
                 <div>
@@ -915,7 +915,7 @@ export const AdminDashboard: React.FC = () => {
                     type="number"
                     value={newProductMrp}
                     onChange={(e) => setNewProductMrp(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#9e1a22]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#166534]"
                   />
                 </div>
                 <div>
@@ -924,7 +924,7 @@ export const AdminDashboard: React.FC = () => {
                     type="number"
                     value={newProductStock}
                     onChange={(e) => setNewProductStock(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#9e1a22]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#166534]"
                   />
                 </div>
               </div>
@@ -935,13 +935,13 @@ export const AdminDashboard: React.FC = () => {
                   type="text"
                   value={newProductImage}
                   onChange={(e) => setNewProductImage(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#9e1a22]"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-[#166534]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-[#9e1a22] hover:bg-[#83181d] text-white font-bold py-3 rounded-xl shadow-md cursor-pointer transition-all mt-2"
+                className="w-full bg-[#166534] hover:bg-[#14532d] text-white font-bold py-3 rounded-xl shadow-md cursor-pointer transition-all mt-2"
               >
                 + Add Product to Store
               </button>
@@ -954,3 +954,4 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
+

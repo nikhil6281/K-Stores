@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { 
   X, 
@@ -36,7 +36,7 @@ export const CartDrawer: React.FC = () => {
   const handleApplyPromo = (e: React.FormEvent) => {
     e.preventDefault();
     const code = promoCode.trim().toUpperCase();
-    if (code === 'VILLAGE20' || code === 'SAVOR20' || code === 'KSTORES') {
+    if (code === 'VILLAGE20' || code === 'KIRANA20' || code === 'KSTORES') {
       setAppliedPromo(code);
       showToast('success', 'Promo Code Applied!', 'You received extra village savings on this order.');
     } else {
@@ -48,7 +48,7 @@ export const CartDrawer: React.FC = () => {
     if (!user) {
       setIsCartOpen(false);
       setIsAuthOpen(true);
-      showToast('warning', 'Sign in Required', language === 'te' ? 'ఆర్డర్ చేయడానికి దయచేసి లాగిన్ అవ్వండి' : 'Please sign in to proceed with checkout.');
+      showToast('warning', 'Sign in Required', language === 'te' ? 'à°†à°°à±à°¡à°°à± à°šà±‡à°¯à°¡à°¾à°¨à°¿à°•à°¿ à°¦à°¯à°šà±‡à°¸à°¿ à°²à°¾à°—à°¿à°¨à± à°…à°µà±à°µà°‚à°¡à°¿' : 'Please sign in to proceed with checkout.');
       return;
     }
     setIsCartOpen(false);
@@ -101,7 +101,7 @@ export const CartDrawer: React.FC = () => {
             </p>
             <button
               onClick={() => setIsCartOpen(false)}
-              className="bg-[#9e1a22] hover:bg-[#83181d] text-white text-xs font-black uppercase tracking-wider px-6 py-3 rounded-xl shadow-md transition-all cursor-pointer"
+              className="bg-[#166534] hover:bg-[#14532d] text-white text-xs font-black uppercase tracking-wider px-6 py-3 rounded-xl shadow-md transition-all cursor-pointer"
             >
               Shop Groceries
             </button>
@@ -140,11 +140,11 @@ export const CartDrawer: React.FC = () => {
                           {quantity} {quantity > 1 ? 'Units' : 'Unit'} ({unit})
                         </div>
                         <div className="text-xs font-bold text-slate-800 mt-0.5">
-                          ₹{product.price}
+                          â‚¹{product.price}
                         </div>
                       </div>
 
-                      {/* Stepper & Trash matching Image 5: [ - 1 + ] [ 🗑️ ] */}
+                      {/* Stepper & Trash matching Image 5: [ - 1 + ] [ ðŸ—‘ï¸ ] */}
                       <div className="flex items-center gap-3">
                         <div className="inline-flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white">
                           <button
@@ -179,7 +179,7 @@ export const CartDrawer: React.FC = () => {
 
                     {/* Price on right */}
                     <div className="text-right font-black text-xs sm:text-sm text-slate-900">
-                      ₹{itemTotal}
+                      â‚¹{itemTotal}
                     </div>
                   </div>
                 );
@@ -212,7 +212,7 @@ export const CartDrawer: React.FC = () => {
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     placeholder="Enter promo (e.g. VILLAGE20)"
-                    className="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-xs uppercase font-mono focus:border-[#9e1a22] focus:outline-none"
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-xs uppercase font-mono focus:border-[#166534] focus:outline-none"
                   />
                   <button
                     type="submit"
@@ -237,7 +237,7 @@ export const CartDrawer: React.FC = () => {
                 Estimated total
               </span>
               <span className="font-black text-base sm:text-lg text-slate-900 font-sans">
-                ₹{cartTotal}
+                â‚¹{cartTotal}
               </span>
             </div>
 
@@ -249,7 +249,7 @@ export const CartDrawer: React.FC = () => {
             {/* Big bold crimson CHECK OUT button */}
             <button
               onClick={handleCheckoutClick}
-              className="w-full bg-[#9e1a22] hover:bg-[#83181d] active:scale-98 text-white font-black py-4 px-6 rounded-2xl shadow-xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer text-center font-sans"
+              className="w-full bg-[#166534] hover:bg-[#14532d] active:scale-98 text-white font-black py-4 px-6 rounded-2xl shadow-xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer text-center font-sans"
             >
               CHECK OUT
             </button>
@@ -261,3 +261,4 @@ export const CartDrawer: React.FC = () => {
     </div>
   );
 };
+
