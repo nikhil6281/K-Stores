@@ -1,132 +1,93 @@
-import React from 'react';
+﻿import React from 'react';
 import { useStore } from '../context/StoreContext';
-import { 
-  Zap, 
-  ShoppingBag
-} from 'lucide-react';
-import { STORE_OWNER_DISPLAY_PHONE } from '../utils/whatsapp';
+import { Zap, ShieldCheck, Clock, ArrowRight, Sparkles } from 'lucide-react';
 
-export const HeroBanner: React.FC = () => {
-  const { language, setSelectedCategory } = useStore();
-
-  const handleShopNow = () => {
-    setSelectedCategory('all');
-    const catalog = document.getElementById('catalog-section');
-    if (catalog) {
-      catalog.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: 450, behavior: 'smooth' });
-    }
-  };
+export const HeroBanner: React.FC<{ onShopNow: () => void }> = ({ onShopNow }) => {
+  const { language } = useStore();
 
   return (
-    <div className="relative bg-[#9e1a22] text-white overflow-hidden border-b border-[#83181d]">
-      {/* Subtle radial atmosphere */}
-      <div className="absolute inset-0 bg-radial-[at_top_right] from-[#b91c1c]/40 via-transparent to-black/20 pointer-events-none" />
+    <div className="relative bg-gradient-to-br from-[#14532d] via-[#166534] to-[#15803d] text-white overflow-hidden py-10 sm:py-14 px-4 sm:px-6">
+      {/* Decorative Glow */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative z-10">
+        
+        {/* Left Content */}
+        <div className="md:col-span-7 space-y-4 sm:space-y-5 text-center md:text-left">
           
-          {/* Left Column: Bold SAVOR-style Typography */}
-          <div className="lg:col-span-7 space-y-6 text-left">
-            
-            {/* Top pill badge */}
-            <div className="inline-flex items-center gap-2 bg-black/30 border border-white/20 px-3.5 py-1.5 rounded-full text-xs font-bold text-white tracking-wider uppercase">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-              <Zap className="w-3.5 h-3.5 text-amber-300" />
-              <span>{language === 'te' ? '20 నిమిషాల విలేజ్ డెలివరీ' : '20-Minute Village Delivery'}</span>
-            </div>
-
-            {/* Impact Headline matching Image 1 */}
-            <div className="space-y-1">
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] font-sans text-white">
-                SAVOR EVERY.
-                <br />
-                <span className="text-white">FRESH. BITE.</span>
-              </h1>
-            </div>
-
-            {/* Subtext */}
-            <p className="text-sm sm:text-base text-white/80 max-w-xl font-normal leading-relaxed">
-              {language === 'te' 
-                ? 'మన గ్రామ ప్రజల కోసం తాజా కూరగాయలు, నిత్యావసర సరుకులు మరియు నాణ్యమైన కిరాణా కేవలం 20 నిమిషాల్లో మీ ఇంటి ముందుకు.'
-                : 'Pure local village groceries, fresh farm produce, staples, and daily essentials delivered directly to your doorstep within 20 minutes.'}
-            </p>
-
-            {/* CTA Link matching Image 1 "Shop sauces →" */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <button
-                onClick={handleShopNow}
-                className="group inline-flex items-center gap-2 text-white hover:text-amber-300 font-extrabold text-base sm:text-lg uppercase tracking-wider underline underline-offset-8 transition-colors cursor-pointer"
-              >
-                <span>{language === 'te' ? 'సరుకులు కొనండి →' : 'Shop groceries →'}</span>
-              </button>
-
-              <button
-                onClick={handleShopNow}
-                className="bg-white text-[#9e1a22] hover:bg-amber-100 font-black px-6 py-3 rounded-full text-xs sm:text-sm uppercase tracking-wider shadow-xl transition-all transform active:scale-95 flex items-center gap-2 cursor-pointer"
-              >
-                <ShoppingBag className="w-4 h-4 text-[#9e1a22]" />
-                <span>{language === 'te' ? 'ఆర్డర్ చేయండి' : 'Order Now'}</span>
-              </button>
-            </div>
-
-            {/* 3 Quick USPs */}
-            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/15 max-w-lg text-xs">
-              <div className="space-y-0.5">
-                <div className="font-extrabold text-white">⚡ 20 MINS</div>
-                <div className="text-[10px] text-white/70">Doorstep Delivery</div>
-              </div>
-              <div className="space-y-0.5">
-                <div className="font-extrabold text-white">💵 CASH / UPI</div>
-                <div className="text-[10px] text-white/70">Pay on Delivery</div>
-              </div>
-              <div className="space-y-0.5">
-                <div className="font-extrabold text-white">📱 WHATSAPP</div>
-                <div className="text-[10px] text-white/70">{STORE_OWNER_DISPLAY_PHONE}</div>
-              </div>
-            </div>
-
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-xs px-3.5 py-1.5 rounded-full text-xs font-bold text-amber-300">
+            <Zap className="w-3.5 h-3.5 text-amber-300" />
+            <span>{language === 'te' ? 'గ్రామాలకు 20 నిమిషాల ఎక్స్‌ప్రెస్ డెలివరీ' : '20-Minute Express Village Delivery'}</span>
           </div>
 
-          {/* Right Column: Hero Visual Product Showcase */}
-          <div className="lg:col-span-5 relative flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-md">
-              {/* Product Bottle Showcase Card */}
-              <div className="relative bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-2xl space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="bg-amber-400 text-black font-black text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                    Featured Deal
-                  </div>
-                  <span className="text-xs text-white/80 font-mono">100% Genuine</span>
-                </div>
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white">
+            {language === 'te' ? (
+              <>మీ ఇంటి వద్దకే <span className="text-amber-300">తాజా నిత్యావసరాలు</span> మరియు కూరగాయలు</>
+            ) : (
+              <>Fresh Daily Groceries & Vegetables <span className="text-amber-300">Delivered Fast.</span></>
+            )}
+          </h1>
 
-                <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-white shadow-inner flex items-center justify-center p-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80"
-                    alt="Fresh Farm Produce"
-                    className="w-full h-full object-cover rounded-xl"
-                  />
-                  <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-lg">
-                    Farm Fresh Vegetables
-                  </div>
-                </div>
+          <p className="text-xs sm:text-sm text-emerald-100 max-w-xl mx-auto md:mx-0 leading-relaxed font-normal">
+            {language === 'te' 
+              ? 'ఉదయం కోసిన తాజా కూరగాయలు, పాలు, బియ్యం మరియు నిత్యావసర సరుకులు మీ ఇంటి ముందుకు. క్యాష్ ఆన్ డెలివరీ లేదా ఆన్‌లైన్ చెల్లింపు.'
+              : 'Farm-fresh vegetables, dairy, rice, and daily household staples delivered in 20 minutes with Cash on Delivery and verified online payment.'}
+          </p>
 
-                <div className="flex items-center justify-between text-white">
-                  <div>
-                    <h3 className="font-extrabold text-base leading-tight">Fresh Farm Tomatoes</h3>
-                    <p className="text-xs text-white/70">1 kg • Locally grown</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-lg font-black text-amber-300">₹28</span>
-                    <span className="text-xs text-white/50 line-through ml-1">₹35</span>
-                  </div>
-                </div>
+          <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
+            <button
+              onClick={onShopNow}
+              className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold px-6 py-3 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+            >
+              <span>{language === 'te' ? 'షాపింగ్ ప్రారంభించండి' : 'Order Groceries Now'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-4 text-emerald-200 text-xs font-semibold px-2">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-300" />
+                <span>{language === 'te' ? '100% నమ్మకమైన సేవ' : '100% Guaranteed'}</span>
               </div>
             </div>
           </div>
 
         </div>
+
+        {/* Right Feature Card */}
+        <div className="md:col-span-5 flex justify-center md:justify-end">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 sm:p-6 text-white shadow-2xl max-w-sm w-full space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/15">
+              <div className="font-extrabold text-sm flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>{language === 'te' ? 'ఈ రోజు స్పెషల్ ఆఫర్లు' : "Today's Fresh Highlights"}</span>
+              </div>
+              <span className="bg-amber-400 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-full">
+                BEST PRICE
+              </span>
+            </div>
+
+            <div className="space-y-2.5 text-xs text-emerald-100">
+              <div className="flex justify-between items-center bg-white/5 p-2.5 rounded-xl">
+                <span>🍅 Farm Fresh Tomatoes (1 kg)</span>
+                <span className="font-black text-amber-300">₹30</span>
+              </div>
+              <div className="flex justify-between items-center bg-white/5 p-2.5 rounded-xl">
+                <span>🥛 Heritage / Sangam Milk (500ml)</span>
+                <span className="font-black text-amber-300">₹32</span>
+              </div>
+              <div className="flex justify-between items-center bg-white/5 p-2.5 rounded-xl">
+                <span>🍚 Sona Masoori Rice (5 kg)</span>
+                <span className="font-black text-amber-300">₹320</span>
+              </div>
+            </div>
+
+            <div className="pt-1 text-center text-[11px] text-emerald-200">
+              ⚡ {language === 'te' ? '20 నిమిషాల్లో మీ ఇంటికి వస్తుంది' : 'Delivered right to your doorstep'}
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

@@ -135,7 +135,7 @@ export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Pr
       email: cleanEmail,
     },
     theme: {
-      color: '#9e1a22',
+      color: '#166534',
     },
     modal: {
       ondismiss: () => {
@@ -198,4 +198,5 @@ export async function verifyRazorpayPayment(
 
   return { success: Boolean(paymentId) };
 }
+
 

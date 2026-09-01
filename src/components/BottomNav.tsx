@@ -1,96 +1,63 @@
-import React from 'react';
+﻿import React from 'react';
 import { useStore } from '../context/StoreContext';
-import { 
-  Home, 
-  Layers, 
-  Package, 
-  Phone, 
-  ShoppingBag 
-} from 'lucide-react';
+import { Home, Search, ShoppingBag, User, MessageCircle } from 'lucide-react';
 
-export const BottomNav: React.FC = () => {
+export const BottomNav: React.FC<{ onOpenSearch: () => void }> = ({ onOpenSearch }) => {
   const {
-    cartItemsCount,
+    cartItemCount,
+    cartTotal,
     setIsCartOpen,
-    setIsHistoryOpen,
+    setIsAuthOpen,
     setIsSupportOpen,
-    setSelectedCategory,
-    setSearchQuery,
-    orders,
-    language,
-    t
+    language
   } = useStore();
 
-  const pendingCount = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
-
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 shadow-lg">
-      <div className="flex items-center justify-around">
-        
-        {/* Home */}
-        <button
-          onClick={() => {
-            setSelectedCategory('all');
-            setSearchQuery('');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#9e1a22] p-1"
-        >
-          <Home className="w-5 h-5" />
-          <span className="text-[10px] font-bold">{language === 'te' ? 'హోమ్' : 'Home'}</span>
-        </button>
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200/80 px-2 py-1.5 shadow-lg flex items-center justify-around text-slate-600">
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="flex flex-col items-center gap-0.5 p-1 text-[#166534] font-bold text-[10px] cursor-pointer"
+      >
+        <Home className="w-5 h-5" />
+        <span>{language === 'te' ? 'హోమ్' : 'Home'}</span>
+      </button>
 
-        {/* Categories */}
-        <button
-          onClick={() => {
-            const el = document.getElementById('catalog-section');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-            else window.scrollTo({ top: 380, behavior: 'smooth' });
-          }}
-          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#9e1a22] p-1"
-        >
-          <Layers className="w-5 h-5" />
-          <span className="text-[10px] font-bold">{language === 'te' ? 'విభాగాలు' : 'Categories'}</span>
-        </button>
+      <button
+        onClick={onOpenSearch}
+        className="flex flex-col items-center gap-0.5 p-1 text-slate-600 hover:text-[#166534] text-[10px] font-semibold cursor-pointer"
+      >
+        <Search className="w-5 h-5" />
+        <span>{language === 'te' ? 'వెతకండి' : 'Search'}</span>
+      </button>
 
-        {/* Orders */}
-        <button
-          onClick={() => setIsHistoryOpen(true)}
-          className="relative flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#9e1a22] p-1"
-        >
-          <Package className="w-5 h-5" />
-          {pendingCount > 0 && (
-            <span className="absolute top-0 right-1 w-2 h-2 bg-[#9e1a22] rounded-full animate-ping" />
-          )}
-          <span className="text-[10px] font-bold">{language === 'te' ? 'ఆర్డర్లు' : 'Orders'}</span>
-        </button>
+      <button
+        onClick={() => setIsCartOpen(true)}
+        className="flex flex-col items-center gap-0.5 p-1 text-slate-600 hover:text-[#166534] text-[10px] font-semibold relative cursor-pointer"
+      >
+        <ShoppingBag className="w-5 h-5" />
+        <span>{language === 'te' ? 'కార్ట్' : 'Cart'}</span>
+        {cartItemCount > 0 && (
+          <span className="absolute top-0 right-1 bg-[#166534] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+            {cartItemCount}
+          </span>
+        )}
+      </button>
 
-        {/* Support */}
-        <button
-          onClick={() => setIsSupportOpen(true)}
-          className="flex flex-col items-center gap-0.5 text-slate-600 hover:text-[#9e1a22] p-1"
-        >
-          <Phone className="w-5 h-5" />
-          <span className="text-[10px] font-bold">{language === 'te' ? 'సహాయం' : 'Help'}</span>
-        </button>
+      <button
+        onClick={() => setIsSupportOpen(true)}
+        className="flex flex-col items-center gap-0.5 p-1 text-slate-600 hover:text-emerald-700 text-[10px] font-semibold cursor-pointer"
+      >
+        <MessageCircle className="w-5 h-5 text-emerald-600" />
+        <span>{language === 'te' ? 'సహాయం' : 'Help'}</span>
+      </button>
 
-        {/* Cart */}
-        <button
-          onClick={() => setIsCartOpen(true)}
-          className="relative flex flex-col items-center gap-0.5 text-[#9e1a22] p-1"
-        >
-          <div className="relative">
-            <ShoppingBag className="w-5 h-5 text-[#9e1a22]" />
-            {cartItemsCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-amber-400 text-black font-black text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center">
-                {cartItemsCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] font-black">{t.cart}</span>
-        </button>
-
-      </div>
-    </div>
+      <button
+        onClick={() => setIsAuthOpen(true)}
+        className="flex flex-col items-center gap-0.5 p-1 text-slate-600 hover:text-[#166534] text-[10px] font-semibold cursor-pointer"
+      >
+        <User className="w-5 h-5" />
+        <span>{language === 'te' ? 'ఖాతా' : 'Account'}</span>
+      </button>
+    </nav>
   );
 };

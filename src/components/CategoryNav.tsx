@@ -1,60 +1,61 @@
-import React from 'react';
+﻿import React from 'react';
 import { useStore } from '../context/StoreContext';
+import { 
+  Sparkles, 
+  Carrot, 
+  Apple, 
+  Milk, 
+  Wheat, 
+  Cookie, 
+  Coffee, 
+  Home, 
+  Heart, 
+  Flame 
+} from 'lucide-react';
 import type { ProductCategory } from '../types';
 
 interface CategoryItem {
-  id: ProductCategory | 'all';
-  nameEn: string;
-  nameTe: string;
-  icon: string;
+  id: ProductCategory;
+  labelEn: string;
+  labelTe: string;
+  icon: React.ReactNode;
 }
 
-const categories: CategoryItem[] = [
-  { id: 'all', nameEn: 'All Items', nameTe: 'అన్నీ', icon: '🛒' },
-  { id: 'vegetables', nameEn: 'Vegetables', nameTe: 'కూరగాయలు', icon: '🥬' },
-  { id: 'fruits', nameEn: 'Fruits', nameTe: 'పండ్లు', icon: '🍎' },
-  { id: 'dairy', nameEn: 'Dairy & Bread', nameTe: 'పాలు & బ్రెడ్', icon: '🥛' },
-  { id: 'staples', nameEn: 'Rice & Atta & Dal', nameTe: 'బియ్యం & పప్పులు', icon: '🌾' },
-  { id: 'snacks', nameEn: 'Snacks & Biscuits', nameTe: 'స్నాక్స్ & బిస్కెట్లు', icon: '🍪' },
-  { id: 'spices', nameEn: 'Spices & Oils', nameTe: 'మసాలాలు & నూనెలు', icon: '🌶️' },
-  { id: 'beverages', nameEn: 'Tea, Coffee & Drinks', nameTe: 'టీ, కూల్ డ్రింక్స్', icon: '🧃' },
-  { id: 'household', nameEn: 'Household Cleaners', nameTe: 'ఇంటి శుభ్రత', icon: '🧼' },
-  { id: 'personal_care', nameEn: 'Soaps & Care', nameTe: 'సబ్బులు', icon: '🧴' },
-  { id: 'pooja', nameEn: 'Pooja Samagri', nameTe: 'పూజా సామాగ్రి', icon: '🪔' },
+const CATEGORIES: CategoryItem[] = [
+  { id: 'all', labelEn: 'All Items', labelTe: 'అన్నీ', icon: <Sparkles className="w-4 h-4" /> },
+  { id: 'vegetables', labelEn: 'Vegetables', labelTe: 'కూరగాయలు', icon: <Carrot className="w-4 h-4" /> },
+  { id: 'fruits', labelEn: 'Fruits', labelTe: 'పండ్లు', icon: <Apple className="w-4 h-4" /> },
+  { id: 'dairy', labelEn: 'Dairy & Eggs', labelTe: 'పాలు & గుడ్లు', icon: <Milk className="w-4 h-4" /> },
+  { id: 'staples', labelEn: 'Staples & Atta', labelTe: 'బియ్యం & పిండి', icon: <Wheat className="w-4 h-4" /> },
+  { id: 'snacks', labelEn: 'Snacks', labelTe: 'స్నాక్స్', icon: <Cookie className="w-4 h-4" /> },
+  { id: 'beverages', labelEn: 'Beverages', labelTe: 'టీ & కాఫీ', icon: <Coffee className="w-4 h-4" /> },
+  { id: 'household', labelEn: 'Household', labelTe: 'క్లీనర్స్', icon: <Home className="w-4 h-4" /> },
+  { id: 'personal_care', labelEn: 'Personal Care', labelTe: 'కేర్', icon: <Heart className="w-4 h-4" /> },
+  { id: 'pooja', labelEn: 'Pooja Needs', labelTe: 'పూజ వస్తువులు', icon: <Flame className="w-4 h-4" /> },
 ];
 
 export const CategoryNav: React.FC = () => {
-  const { selectedCategory, setSelectedCategory, language, products } = useStore();
-
-  const getCount = (catId: ProductCategory | 'all') => {
-    if (catId === 'all') return products.length;
-    return products.filter(p => p.category === catId).length;
-  };
+  const { selectedCategory, setSelectedCategory, language } = useStore();
 
   return (
-    <div className="sticky top-[95px] sm:top-[105px] z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-        {categories.map((cat) => {
-          const isSelected = selectedCategory === cat.id;
-          const count = getCount(cat.id);
-
+    <div className="sticky top-[58px] sm:top-[68px] z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs py-2.5 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar">
+        {CATEGORIES.map((cat) => {
+          const isActive = selectedCategory === cat.id;
           return (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex-shrink-0 border cursor-pointer ${
-                isSelected
-                  ? 'bg-[#9e1a22] text-white border-[#83181d] shadow-sm ring-2 ring-[#9e1a22]/30'
-                  : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border-slate-200/70'
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-[#166534] text-white shadow-sm'
+                  : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700'
               }`}
             >
-              <span className="text-sm leading-none">{cat.icon}</span>
-              <span>{language === 'te' ? cat.nameTe : cat.nameEn}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5 ${
-                isSelected ? 'bg-[#83181d] text-white' : 'bg-slate-200 text-slate-600'
-              }`}>
-                {count}
+              <span className={isActive ? 'text-amber-300' : 'text-slate-500'}>
+                {cat.icon}
               </span>
+              <span>{language === 'te' ? cat.labelTe : cat.labelEn}</span>
             </button>
           );
         })}
