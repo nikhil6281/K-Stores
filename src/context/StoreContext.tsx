@@ -1,4 +1,4 @@
-﻿import { saveCloudProduct, deleteCloudProduct, fetchCloudProducts } from '../services/cloudSync';
+﻿import { saveCloudProduct } from '../services/cloudSync';
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { Product, CartItem, Order, OrderStatus, DeliveryType, DeliveryAddress, CustomerUser, StoreDeal, ToastMessage, Language } from '../types';
 import { initialProducts } from '../data/initialProducts';
@@ -743,6 +743,7 @@ export const useStore = () => {
   }
   return context;
 };
+
 
 
 
