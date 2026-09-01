@@ -1,66 +1,54 @@
-// Razorpay Standard Web Checkout Integration
-// Works seamlessly in both static frontend hosting (GitHub Pages) and Express backend mode
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
-const RAZORPAY_PUBLIC_KEY = 'rzp_test_TVd0zW6feQlmUb';
-
-// Declare Razorpay on window
-declare global {
+﻿declare global {
   interface Window {
-    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+    Razorpay: any;
   }
 }
 
-interface RazorpayOptions {
-  key: string;
-  amount: number;
-  currency: string;
-  name: string;
-  description: string;
+export const RAZORPAY_KEY_ID = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_TWg0Y7KNdLe04U';
+
+export interface RazorpayOrderResponse {
+  success: boolean;
   order_id?: string;
-  handler: (response: RazorpaySuccessResponse) => void;
-  prefill?: {
-    name?: string;
-    email?: string;
-    contact?: string;
-  };
-  notes?: Record<string, string>;
-  theme?: {
-    color?: string;
-  };
-  modal?: {
-    ondismiss?: () => void;
-  };
+  amount?: number;
+  currency?: string;
+  key_id?: string;
+  error?: string;
 }
 
-interface RazorpayInstance {
-  open: () => void;
-  on: (event: string, handler: (response: RazorpayFailedResponse) => void) => void;
-}
-
-export interface RazorpaySuccessResponse {
+export interface RazorpayPaymentSuccessResponse {
   razorpay_payment_id: string;
-  razorpay_order_id?: string;
-  razorpay_signature?: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
 }
 
-interface RazorpayFailedResponse {
-  error: {
-    code: string;
-    description: string;
-    source: string;
-    step: string;
-    reason: string;
-  };
+export interface RazorpayCheckoutOptions {
+  orderId?: string;
+  keyId: string;
+  amountPaise: number;
+  currency?: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  storeOrderId: string;
+  onSuccess: (response: RazorpayPaymentSuccessResponse) => void;
+  onFailure: (error: string) => void;
 }
 
 /**
- * Ensure Razorpay checkout.js script is loaded dynamically
+ * Dynamically loads Razorpay checkout.js script
  */
-export async function loadRazorpayScript(): Promise<boolean> {
-  if (typeof window.Razorpay !== 'undefined') return true;
-
+export function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve(false);
+    if (window.Razorpay) return resolve(true);
+
+    const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(true));
+      existingScript.addEventListener('error', () => resolve(false));
+      return;
+    }
+
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
@@ -71,168 +59,129 @@ export async function loadRazorpayScript(): Promise<boolean> {
 }
 
 /**
- * Create a Razorpay order (Backend with fallback to client standard checkout)
+ * Step 1: Create Order via Backend (or fallback to client test gateway)
  */
-export async function createRazorpayOrder(amountInRupees: number): Promise<{
-  success: boolean;
-  order_id?: string;
-  key_id: string;
-  amount: number; // in paise
-  currency: string;
-  error?: string;
-}> {
-  const amountPaise = Math.round(amountInRupees * 100);
+export async function createRazorpayOrder(amountRupees: number): Promise<RazorpayOrderResponse> {
+  const amountPaise = Math.round(amountRupees * 100);
 
-  // Try backend if API_BASE is present or backend is alive
+  if (amountPaise < 100) {
+    return { success: false, error: 'Minimum order amount for online payment is ₹1.00' };
+  }
+
+  // Attempt backend API call first
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-    const response = await fetch(`${API_BASE}/api/create-order`, {
+    const res = await fetch('/api/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        amount: amountInRupees,
-        receipt: `kstores_${Date.now()}`
-      }),
-      signal: controller.signal
+        amount: amountPaise,
+        currency: 'INR',
+        receipt: `mk_${Date.now()}`
+      })
     });
-    clearTimeout(timeoutId);
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data?.success && data?.order_id) {
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.order_id) {
         return {
           success: true,
           order_id: data.order_id,
-          key_id: data.key_id || RAZORPAY_PUBLIC_KEY,
-          amount: data.amount || amountPaise,
-          currency: data.currency || 'INR',
+          amount: data.amount,
+          currency: data.currency,
+          key_id: data.key_id || RAZORPAY_KEY_ID
         };
       }
     }
-  } catch {
-    // Backend offline / static hosting mode — standard client checkout applies
+  } catch (err) {
+    console.warn('[Razorpay] Backend offline. Using Standard Web Checkout mode:', err);
   }
 
-  // Client-side direct Razorpay standard checkout in Test Mode
+  // Fallback for static hosting (GitHub Pages)
   return {
     success: true,
-    key_id: RAZORPAY_PUBLIC_KEY,
     amount: amountPaise,
     currency: 'INR',
+    key_id: RAZORPAY_KEY_ID
   };
 }
 
 /**
- * Verify Razorpay payment signature
+ * Step 2: Open Razorpay Standard Checkout Modal
  */
-export async function verifyRazorpayPayment(
-  razorpay_order_id?: string,
-  razorpay_payment_id?: string,
-  razorpay_signature?: string
-): Promise<{ success: boolean; error?: string }> {
-  if (!razorpay_payment_id) {
-    return { success: false, error: 'No payment ID received from Razorpay' };
-  }
-
-  // If order_id & signature exist, attempt server-side verification if server available
-  if (razorpay_order_id && razorpay_signature) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
-      const response = await fetch(`${API_BASE}/api/verify-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          razorpay_order_id,
-          razorpay_payment_id,
-          razorpay_signature,
-        }),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        return { success: data.success, error: data.error };
-      }
-    } catch {
-      // Backend not running — accept valid payment ID in test mode
-    }
-  }
-
-  // Valid payment ID confirmed
-  return { success: true };
-}
-
-/**
- * Open Razorpay Standard Checkout modal
- */
-export async function openRazorpayCheckout(options: {
-  orderId?: string;
-  keyId: string;
-  amountPaise: number;
-  currency: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail?: string;
-  storeOrderId: string;
-  onSuccess: (response: RazorpaySuccessResponse) => void;
-  onFailure: (error: string) => void;
-  onDismiss: () => void;
-}): Promise<void> {
+export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Promise<void> {
   const isLoaded = await loadRazorpayScript();
-  if (!isLoaded || typeof window.Razorpay === 'undefined') {
-    options.onFailure('Razorpay payment gateway could not be loaded. Please check your internet connection or choose Cash on Delivery.');
+  if (!isLoaded || !window.Razorpay) {
+    options.onFailure('Unable to load Razorpay payment gateway. Please check your internet connection.');
     return;
   }
 
-  const rzpOptions: RazorpayOptions = {
-    key: options.keyId || RAZORPAY_PUBLIC_KEY,
+  const rzpOptions: any = {
+    key: options.keyId || RAZORPAY_KEY_ID,
     amount: options.amountPaise,
     currency: options.currency || 'INR',
-    name: 'K-STORES (కె-స్టోర్స్)',
-    description: `Order #${options.storeOrderId} — Village Grocery Delivery`,
-    handler: (response: RazorpaySuccessResponse) => {
-      options.onSuccess(response);
-    },
+    name: 'K-STORES',
+    description: 'Fresh Grocery Village Delivery (20 Mins)',
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=80',
     prefill: {
       name: options.customerName,
-      contact: options.customerPhone.startsWith('+91')
-        ? options.customerPhone
-        : `+91${options.customerPhone.replace(/\D/g, '')}`,
-      email: options.customerEmail || '',
-    },
-    notes: {
-      store_order_id: options.storeOrderId,
-      store_name: 'K-Stores Village Kirana',
+      contact: options.customerPhone,
+      email: options.customerEmail || 'customer@kstores.local',
     },
     theme: {
-      color: '#9e1a22', // Brand Crimson Red matching SAVOR aesthetic
+      color: '#9e1a22',
     },
     modal: {
       ondismiss: () => {
-        options.onDismiss();
-      },
+        options.onFailure('Payment cancelled by user.');
+      }
     },
+    handler: (response: any) => {
+      options.onSuccess({
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id || options.orderId || `order_client_${Date.now()}`,
+        razorpay_signature: response.razorpay_signature || 'client_verified_payment_sig'
+      });
+    }
   };
 
   if (options.orderId) {
     rzpOptions.order_id = options.orderId;
   }
 
-  try {
-    const rzp = new window.Razorpay(rzpOptions);
+  const rzp = new window.Razorpay(rzpOptions);
+  rzp.on('payment.failed', (response: any) => {
+    options.onFailure(response.error ? response.error.description : 'Payment transaction failed.');
+  });
 
-    rzp.on('payment.failed', (response: RazorpayFailedResponse) => {
-      options.onFailure(
-        response?.error?.description || 'Payment was declined or cancelled. You can try again or select Cash on Delivery.'
-      );
+  rzp.open();
+}
+
+/**
+ * Step 3: Verify Payment Signature via Backend
+ */
+export async function verifyRazorpayPayment(
+  orderId: string,
+  paymentId: string,
+  signature: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch('/api/verify-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        razorpay_order_id: orderId,
+        razorpay_payment_id: paymentId,
+        razorpay_signature: signature
+      })
     });
 
-    rzp.open();
+    if (res.ok) {
+      const data = await res.json();
+      return { success: data.success };
+    }
   } catch (err) {
-    console.error('Error opening Razorpay modal:', err);
-    options.onFailure('Unable to open payment modal. Please try Cash on Delivery.');
+    console.warn('[Razorpay] Server verification skipped on static site:', err);
   }
+
+  return { success: Boolean(paymentId) };
 }
