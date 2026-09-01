@@ -10,8 +10,8 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_test_TWg0Y7KNdLe04U';
-const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'LuFNvPfE2iiu77tlFw50bfSw';
+const KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_test_TWgfmbYBnc7AU9';
+const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '9bNyxZV8SWTuh4wtSPeAUOhJ';
 
 const razorpay = new Razorpay({
   key_id: KEY_ID,
@@ -26,7 +26,7 @@ app.post('/api/create-order', async (req, res) => {
   try {
     const { amount, currency = 'INR', receipt } = req.body;
 
-    // Minimum amount validation: 100 paise (Rs 1)
+    // Minimum amount validation: 100 paise (₹1.00)
     if (!amount || amount < 100) {
       return res.status(400).json({
         success: false,

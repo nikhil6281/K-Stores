@@ -4,7 +4,7 @@
   }
 }
 
-export const RAZORPAY_KEY_ID = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_TWg0Y7KNdLe04U';
+export const RAZORPAY_KEY_ID = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_TWgfmbYBnc7AU9';
 
 export interface RazorpayOrderResponse {
   success: boolean;
@@ -69,7 +69,7 @@ export async function createRazorpayOrder(amountRupees: number): Promise<Razorpa
     return { success: false, error: 'Minimum order amount is ₹1.00' };
   }
 
-  // Attempt backend API call first (if local node server is running)
+  // Attempt backend API call first
   try {
     const res = await fetch('/api/create-order', {
       method: 'POST',
@@ -136,7 +136,7 @@ export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Pr
         if (options.onDismiss) {
           options.onDismiss();
         } else {
-          options.onFailure('Payment cancelled by user.');
+          options.onFailure('Payment window closed by user.');
         }
       }
     },
