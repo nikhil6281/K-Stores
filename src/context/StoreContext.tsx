@@ -668,6 +668,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const activeOrder = orders.find(o => o?.id === activeOrderId) || orders[0] || null;
 
+    const handleUpdateProductWithFirebase = (updatedProduct: Product) => {
+    setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    updateProductInFirebase(updatedProduct.id, updatedProduct);
+  };
+
+  const handleDeleteProductWithFirebase = (id: string) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+    deleteProductFromFirebase(id);
+  };
+
   return (
     <StoreContext.Provider
       value={{
@@ -676,9 +686,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         t,
 
         products,
-        updateProduct,
+        updateProduct: handleUpdateProductWithFirebase,
         addProduct,
-        deleteProduct,
+        deleteProduct: handleDeleteProductWithFirebase,
         resetInventory,
 
         cart,
@@ -750,6 +760,7 @@ export const useStore = () => {
   }
   return context;
 };
+
 
 
 
