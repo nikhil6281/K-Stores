@@ -511,7 +511,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Inventory Actions
-  const updateProduct = (updated: Product) => {
+  const updateProduct = (updated: Product) => { updateProductInFirebase(updated.id, updated);
     setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
     showToast('success', language === 'te' ? 'à°¸à°µà°°à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Product Updated', language === 'te' ? 'à°µà°¸à±à°¤à±à°µà± à°µà°¿à°µà°°à°¾à°²à± à°¨à°µà±€à°•à°°à°¿à°‚à°šà°¬à°¡à±à°¡à°¾à°¯à°¿' : 'Product updated successfully');
   };
@@ -525,7 +525,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast('success', language === 'te' ? 'à°•à±Šà°¤à±à°¤ à°µà°¸à±à°¤à±à°µà± à°šà±‡à°°à±à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Product Added', language === 'te' ? 'à°•à±Šà°¤à±à°¤ à°µà°¸à±à°¤à±à°µà± à°¸à±à°Ÿà°¾à°•à±â€Œà°²à±‹ à°šà±‡à°°à°¿à°‚à°¦à°¿' : 'New product added to inventory');
   };
 
-  const deleteProduct = (productId: string) => {
+  const deleteProduct = (productId: string) => { deleteProductFromFirebase(productId);
     setProducts(prev => prev.filter(p => p.id !== productId));
     removeFromCart(productId);
     showToast('info', language === 'te' ? 'à°¤à±Šà°²à°—à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Deleted', language === 'te' ? 'à°µà°¸à±à°¤à±à°µà± à°¤à±Šà°²à°—à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Product removed from catalog');
@@ -668,15 +668,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const activeOrder = orders.find(o => o?.id === activeOrderId) || orders[0] || null;
 
-    const handleUpdateProductWithFirebase = (updatedProduct: Product) => {
-    setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
-    updateProductInFirebase(updatedProduct.id, updatedProduct);
-  };
-
-  const handleDeleteProductWithFirebase = (id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
-    deleteProductFromFirebase(id);
-  };
+    
 
   return (
     <StoreContext.Provider
@@ -686,9 +678,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         t,
 
         products,
-        updateProduct: handleUpdateProductWithFirebase,
+        updateProduct,
         addProduct,
-        deleteProduct: handleDeleteProductWithFirebase,
+        deleteProduct,
         resetInventory,
 
         cart,
@@ -760,6 +752,7 @@ export const useStore = () => {
   }
   return context;
 };
+
 
 
 
