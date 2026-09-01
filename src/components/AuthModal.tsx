@@ -1,6 +1,6 @@
 ﻿import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { X, ArrowRight, Package, User, LogOut, MapPin, Loader2 } from 'lucide-react';
+import { X, ArrowRight, Package, Loader2, Mail, Lock } from 'lucide-react';
 import type { CustomerUser } from '../types';
 import { signInWithGoogleReal, signOutReal } from '../services/firebaseSync';
 
@@ -17,15 +17,14 @@ export const AuthModal: React.FC = () => {
     showToast
   } = useStore();
 
-  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
   const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
 
   if (!isAuthOpen) return null;
 
+  // Real Google Sign-In (Working)
   const handleGoogleSignIn = async () => {
     setIsLoadingGoogle(true);
     try {
@@ -35,15 +34,8 @@ export const AuthModal: React.FC = () => {
         id: gUser.id,
         name: gUser.name,
         email: gUser.email,
-        phone: gUser.phone || '9876543210',
-        savedAddress: {
-          fullName: gUser.name,
-          phone: gUser.phone || '9876543210',
-          villageName: 'Chinna Bazar, Main Village',
-          doorNo: '3-12/A',
-          landmark: 'Near Ramalayam Temple',
-          pincode: '500001',
-        },
+        phone: gUser.phone || '',
+        savedAddress: gUser.savedAddress,
         joinedAt: new Date().toISOString(),
       };
 
@@ -52,62 +44,43 @@ export const AuthModal: React.FC = () => {
       showToast(
         'success',
         language === 'te' ? 'గూగుల్ లాగిన్ విజయవంతమైంది!' : 'Google Sign-In Successful!',
-        `Welcome, ${loggedUser.name} (${loggedUser.email})`
+        `Welcome, ${loggedUser.name}`
       );
     } catch (err: any) {
-      console.error('Google Sign-In Error:', err);
-      showToast(
-        'error',
-        'Google Login Failed',
-        err.message?.includes('popup-closed-by-user')
-          ? 'Login cancelled by user.'
-          : 'Could not complete Google Sign-In. Please check your internet connection.'
-      );
+      showToast('error', 'Login Cancelled', 'Google Sign-In was cancelled or closed.');
     } finally {
       setIsLoadingGoogle(false);
     }
   };
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  // Email & Password Sign-In
+  const handleEmailPasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const clean = emailOrPhone.trim();
-    if (!clean) {
-      showToast('error', 'Required Field', 'Please enter your email or mobile number');
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      showToast('error', 'Invalid Email', 'Please enter a valid email address');
+      return;
+    }
+    if (!password.trim() || password.length < 4) {
+      showToast('error', 'Password Required', 'Please enter your password (at least 4 characters)');
       return;
     }
 
-    if (!showPassword && clean.includes('@')) {
-      setShowPassword(true);
-      return;
-    }
-
-    const isPhone = /^\d+$/.test(clean.replace(/\D/g, '')) && clean.replace(/\D/g, '').length >= 10;
-    const phone = isPhone ? clean.replace(/\D/g, '') : '9876543210';
-    const email = !isPhone ? clean : undefined;
-    const userName = name.trim() || (email ? email.split('@')[0] : `Customer (${phone.slice(-4)})`);
-
-    const newUser: CustomerUser = {
-      id: `usr-${phone || Date.now()}`,
-      name: userName,
-      phone,
-      email,
-      savedAddress: {
-        fullName: userName,
-        phone,
-        villageName: 'Chinna Bazar, Main Village',
-        doorNo: '2-14/B',
-        landmark: 'Near Grama Center',
-        pincode: '500001',
-      },
+    const userName = cleanEmail.split('@')[0];
+    const loggedUser: CustomerUser = {
+      id: `usr-${cleanEmail.replace(/[^a-zA-Z0-9]/g, '_')}`,
+      name: userName.charAt(0).toUpperCase() + userName.slice(1),
+      email: cleanEmail,
+      phone: '',
       joinedAt: new Date().toISOString(),
     };
 
-    setUser(newUser);
+    setUser(loggedUser);
     setIsAuthOpen(false);
     showToast(
       'success',
       language === 'te' ? 'లాగిన్ విజయవంతమైంది' : 'Sign in Successful',
-      `Welcome, ${newUser.name}!`
+      `Welcome, ${loggedUser.name}!`
     );
   };
 
@@ -132,7 +105,7 @@ export const AuthModal: React.FC = () => {
 
           <button
             onClick={() => setIsAuthOpen(false)}
-            className="p-1.5 rounded-lg border border-slate-300 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+            className="p-1.5 rounded-lg border border-slate-300 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -143,6 +116,7 @@ export const AuthModal: React.FC = () => {
         <div className="p-6 space-y-5">
           
           {user ? (
+            /* Logged in state */
             <div className="space-y-4">
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-[#9e1a22] text-white flex items-center justify-center font-black text-lg shadow-sm">
@@ -151,22 +125,8 @@ export const AuthModal: React.FC = () => {
                 <div>
                   <h3 className="font-extrabold text-slate-900 text-base">{user.name}</h3>
                   {user.email && <p className="text-xs text-slate-500">{user.email}</p>}
-                  {user.phone && <p className="text-xs text-slate-400">+91 {user.phone}</p>}
                 </div>
               </div>
-
-              {user.savedAddress && (
-                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs space-y-1.5">
-                  <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 text-[#9e1a22]" />
-                    <span>Saved Delivery Address</span>
-                  </div>
-                  <div className="text-slate-600 pl-5 text-[11px] space-y-0.5">
-                    <div>{user.savedAddress.doorNo ? `${user.savedAddress.doorNo}, ` : ''}{user.savedAddress.villageName}</div>
-                    <div className="text-[#9e1a22] font-semibold">📍 Landmark: {user.savedAddress.landmark}</div>
-                  </div>
-                </div>
-              )}
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <button
@@ -174,7 +134,7 @@ export const AuthModal: React.FC = () => {
                     setIsAuthOpen(false);
                     setIsHistoryOpen(true);
                   }}
-                  className="bg-slate-100 hover:bg-slate-200 p-3 rounded-xl border border-slate-200 text-center font-bold text-slate-800 transition-colors"
+                  className="bg-slate-100 hover:bg-slate-200 p-3 rounded-xl border border-slate-200 text-center font-bold text-slate-800 transition-colors cursor-pointer"
                 >
                   <div className="text-slate-500 text-[10px]">Total Orders</div>
                   <div className="font-black text-base text-[#9e1a22]">{orders.length}</div>
@@ -189,14 +149,14 @@ export const AuthModal: React.FC = () => {
                 onClick={handleLogout}
                 className="w-full bg-red-50 hover:bg-red-100 text-[#9e1a22] font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 border border-red-200 transition-colors cursor-pointer"
               >
-                <LogOut className="w-4 h-4" />
                 <span>Logout</span>
               </button>
             </div>
           ) : (
+            /* Sign in form */
             <div className="space-y-4">
               
-              {/* Real Google Sign-in Button */}
+              {/* Primary: Continue with Google */}
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
@@ -219,11 +179,12 @@ export const AuthModal: React.FC = () => {
                   </span>
                 </div>
 
-                <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md">
-                  Official
+                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                  1-Click
                 </span>
               </button>
 
+              {/* OR Divider */}
               <div className="relative flex py-1 items-center">
                 <div className="flex-grow border-t border-slate-200" />
                 <span className="flex-shrink mx-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
@@ -232,83 +193,73 @@ export const AuthModal: React.FC = () => {
                 <div className="flex-grow border-t border-slate-200" />
               </div>
 
-              {/* Email / Mobile input form */}
-              <form onSubmit={handleEmailSubmit} className="space-y-3">
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    value={emailOrPhone}
-                    onChange={(e) => setEmailOrPhone(e.target.value)}
-                    placeholder="Email or mobile number"
-                    className="w-full px-4 py-3.5 pr-12 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:ring-2 focus:ring-[#9e1a22]/20 focus:outline-none transition-all"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-[#9e1a22] hover:bg-[#83181d] text-white transition-colors cursor-pointer"
-                    aria-label="Submit"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+              {/* Email & Password Inputs */}
+              <form onSubmit={handleEmailPasswordSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:ring-2 focus:ring-[#9e1a22]/20 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
-                {showPassword && (
-                  <div className="space-y-2 animate-scale-up">
-                    <div className="relative">
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter password or leave blank"
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Your Name (Optional)"
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:outline-none"
-                      />
-                    </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#9e1a22] focus:ring-2 focus:ring-[#9e1a22]/20 focus:outline-none"
+                    />
                   </div>
-                )}
+                </div>
 
-                <label className="flex items-center gap-2.5 text-xs text-slate-600 cursor-pointer pt-1">
+                <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer pt-0.5">
                   <input
                     type="checkbox"
                     checked={subscribeNewsletter}
                     onChange={(e) => setSubscribeNewsletter(e.target.checked)}
                     className="w-4 h-4 rounded text-[#9e1a22] focus:ring-[#9e1a22] border-slate-300 cursor-pointer"
                   />
-                  <span>Email me with news and offers</span>
+                  <span>Email me with 20-min grocery offers</span>
                 </label>
+
+                <button
+                  type="submit"
+                  className="w-full bg-[#9e1a22] hover:bg-[#83181d] text-white font-extrabold py-3 px-4 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer mt-2"
+                >
+                  <span>Sign in with Email & Password</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </form>
 
-              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100">
+              {/* Bottom Action: View Orders */}
+              <div className="pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => {
                     setIsAuthOpen(false);
                     setIsHistoryOpen(true);
                   }}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
                 >
-                  <Package className="w-4 h-4 text-slate-600" />
-                  <span>Orders</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmailOrPhone('ramesh@village.com');
-                    setName('Ramesh Kumar');
-                  }}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-colors cursor-pointer"
-                >
-                  <User className="w-4 h-4 text-slate-600" />
-                  <span>Demo Profile</span>
+                  <Package className="w-4 h-4 text-slate-500" />
+                  <span>View Past Orders</span>
                 </button>
               </div>
 
