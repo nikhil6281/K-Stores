@@ -126,6 +126,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   // Products state
+    useEffect(() => {
+    const unsub = subscribeToLiveCatalog((liveList) => {
+      if (Array.isArray(liveList) && liveList.length > 0) setProducts(liveList);
+    });
+    return () => unsub();
+  }, []);
+
   const [products, setProducts] = useState<Product[]>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_PRODUCTS);
     if (saved) {
@@ -743,5 +750,6 @@ export const useStore = () => {
   }
   return context;
 };
+
 
 
