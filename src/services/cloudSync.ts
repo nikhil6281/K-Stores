@@ -3,8 +3,8 @@ import { initialProducts } from '../data/initialProducts';
 
 const FIREBASE_REST_BASE = 'https://k-store-ae9dd-default-rtdb.firebaseio.com';
 const BACKUP_REST_URL = 'https://extendsclass.com/api/json-storage/bin/fbcdbcf';
-const LOCAL_STORAGE_ORDERS_KEY = 'kstores_production_orders_v4';
-const LOCAL_STORAGE_PRODUCTS_KEY = 'kstores_cloud_products_v1';
+const LOCAL_STORAGE_KEY = 'kstores_production_orders_v4';
+const LOCAL_STORAGE_PRODS = 'kstores_cloud_products_v1';
 
 let broadcastChannel: BroadcastChannel | null = null;
 try {
@@ -13,13 +13,8 @@ try {
   }
 } catch {}
 
-// =====================================================================
-// PRODUCT CLOUD SYNC (Add, Edit Price, Refill Stock, Deals, Delete)
-// =====================================================================
-
 /**
- * Fetch all products from Firebase Realtime Database.
- * If cloud is empty, seed it with initial products automatically.
+ * Fetch all products from Firebase Realtime Database
  */
 export async function fetchCloudProducts(): Promise<Product[]> {
   try {
@@ -27,43 +22,35 @@ export async function fetchCloudProducts(): Promise<Product[]> {
       cache: 'no-store',
       headers: { 'Accept': 'application/json' }
     });
-
     if (res.ok) {
       const data = await res.json();
       if (data && typeof data === 'object') {
-        const productList: Product[] = Object.values(data);
-        if (productList.length > 0) {
-          localStorage.setItem(LOCAL_STORAGE_PRODUCTS_KEY, JSON.stringify(productList));
-          return productList;
+        const list: Product[] = Object.values(data);
+        if (list.length > 0) {
+          localStorage.setItem(LOCAL_STORAGE_PRODS, JSON.stringify(list));
+          return list;
         }
       }
     }
-  } catch (err) {
-    console.warn('[CloudSync] Products fetch warning, using cache/initial:', err);
-  }
+  } catch {}
 
-  // Check local cache
+  // Check cache or fallback to initial
   try {
-    const cached = localStorage.getItem(LOCAL_STORAGE_PRODUCTS_KEY);
+    const cached = localStorage.getItem(LOCAL_STORAGE_PRODS);
     if (cached) {
       const parsed = JSON.parse(cached);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch {}
 
-  // Auto-seed Firebase on first run
   seedCloudProducts(initialProducts);
   return initialProducts;
 }
 
-/**
- * Seed initial catalog to Firebase Realtime Database
- */
 export async function seedCloudProducts(productsToSeed: Product[]): Promise<void> {
   try {
     const payload: { [key: string]: Product } = {};
     productsToSeed.forEach(p => { payload[p.id] = p; });
-
     await fetch(`${FIREBASE_REST_BASE}/products.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -72,9 +59,6 @@ export async function seedCloudProducts(productsToSeed: Product[]): Promise<void
   } catch {}
 }
 
-/**
- * Save or update a product in Firebase (Instant customer visibility)
- */
 export async function saveCloudProduct(product: Product): Promise<void> {
   try {
     await fetch(`${FIREBASE_REST_BASE}/products/${product.id}.json`, {
@@ -87,9 +71,6 @@ export async function saveCloudProduct(product: Product): Promise<void> {
   }
 }
 
-/**
- * Delete a product from Firebase
- */
 export async function deleteCloudProduct(productId: string): Promise<void> {
   try {
     await fetch(`${FIREBASE_REST_BASE}/products/${productId}.json`, {
@@ -99,10 +80,6 @@ export async function deleteCloudProduct(productId: string): Promise<void> {
     console.warn('[CloudSync] Product delete error:', err);
   }
 }
-
-// =====================================================================
-// ORDER CLOUD SYNC
-// =====================================================================
 
 export async function fetchCloudStoreData(): Promise<{ orders: Order[]; lastUpdated?: string }> {
   const orderMap = new Map<string, Order>();
@@ -135,7 +112,7 @@ export async function fetchCloudStoreData(): Promise<{ orders: Order[]; lastUpda
   } catch {}
 
   try {
-    const cached = localStorage.getItem(LOCAL_STORAGE_ORDERS_KEY);
+    const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (cached) {
       JSON.parse(cached).forEach((o: any) => {
         if (o && o.id && !orderMap.has(o.id)) orderMap.set(o.id, o);
@@ -147,7 +124,7 @@ export async function fetchCloudStoreData(): Promise<{ orders: Order[]; lastUpda
   ordersList.sort((a, b) => (b.createdAt ? new Date(b.createdAt).getTime() : 0) - (a.createdAt ? new Date(a.createdAt).getTime() : 0));
 
   try {
-    localStorage.setItem(LOCAL_STORAGE_ORDERS_KEY, JSON.stringify(ordersList));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(ordersList));
   } catch {}
 
   return { orders: ordersList, lastUpdated: new Date().toISOString() };
@@ -186,7 +163,6 @@ export async function updateCloudOrderStatus(orderId: string, status: OrderStatu
       body: JSON.stringify({ status, updatedAt })
     });
   } catch {}
-
   return true;
 }
 
