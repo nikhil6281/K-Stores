@@ -4,7 +4,7 @@
   }
 }
 
-export const RAZORPAY_KEY_ID = (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || 'rzp_test_TWgfmbYBnc7AU9';
+export const RAZORPAY_KEY_ID = 'rzp_test_TWgfmbYBnc7AU9';
 
 export interface RazorpayOrderResponse {
   success: boolean;
@@ -23,7 +23,7 @@ export interface RazorpayPaymentSuccessResponse {
 
 export interface RazorpayCheckoutOptions {
   orderId?: string;
-  keyId: string;
+  keyId?: string;
   amountPaise: number;
   currency?: string;
   customerName: string;
@@ -60,18 +60,18 @@ export function loadRazorpayScript(): Promise<boolean> {
 }
 
 /**
- * Step 1: Create Order via Backend (or fallback to client test gateway)
+ * Step 1: Create Order
  */
 export async function createRazorpayOrder(amountRupees: number): Promise<RazorpayOrderResponse> {
-  const amountPaise = Math.round(amountRupees * 100);
+  const amountPaise = Math.round(Number(amountRupees) * 100);
 
   if (amountPaise < 100) {
     return { success: false, error: 'Minimum order amount is ₹1.00' };
   }
 
-  // Attempt backend API call first
+  // Attempt backend API call if running locally
   try {
-    const res = await fetch('/api/create-order', {
+    const res = await fetch('http://localhost:5000/api/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -95,7 +95,7 @@ export async function createRazorpayOrder(amountRupees: number): Promise<Razorpa
     }
   } catch {}
 
-  // Fallback for static hosting (GitHub Pages)
+  // Fallback for static GitHub Pages
   return {
     success: true,
     amount: amountPaise,
@@ -114,19 +114,25 @@ export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Pr
     return;
   }
 
-  const cleanPhone = (options.customerPhone || '9876543210').replace(/\D/g, '').slice(-10);
+  // Strictly clean 10-digit contact number
+  let cleanContact = (options.customerPhone || '').replace(/\D/g, '');
+  if (cleanContact.length > 10) cleanContact = cleanContact.slice(-10);
+  if (cleanContact.length < 10) cleanContact = '9876543210';
+
+  const cleanEmail = options.customerEmail && options.customerEmail.includes('@')
+    ? options.customerEmail.trim()
+    : 'customer@kstores.in';
 
   const rzpOptions: any = {
-    key: options.keyId || RAZORPAY_KEY_ID,
-    amount: options.amountPaise,
+    key: (options.keyId || RAZORPAY_KEY_ID).trim(),
+    amount: Math.round(Number(options.amountPaise)),
     currency: options.currency || 'INR',
     name: 'K-STORES',
     description: 'Fresh Grocery Village Delivery (20 Mins)',
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=80',
     prefill: {
-      name: options.customerName || 'Customer',
-      contact: cleanPhone,
-      email: options.customerEmail || 'customer@kstores.in',
+      name: (options.customerName || 'Customer').trim(),
+      contact: cleanContact,
+      email: cleanEmail,
     },
     theme: {
       color: '#9e1a22',
@@ -136,7 +142,7 @@ export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Pr
         if (options.onDismiss) {
           options.onDismiss();
         } else {
-          options.onFailure('Payment window closed by user.');
+          options.onFailure('Payment cancelled by user.');
         }
       }
     },
@@ -149,19 +155,19 @@ export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Pr
     }
   };
 
-  // Only attach order_id if it's a real order created by backend (starts with "order_")
-  if (options.orderId && options.orderId.startsWith('order_')) {
+  // Only pass order_id if it was genuinely created by Razorpay backend
+  if (options.orderId && typeof options.orderId === 'string' && options.orderId.startsWith('order_')) {
     rzpOptions.order_id = options.orderId;
   }
 
   try {
     const rzp = new window.Razorpay(rzpOptions);
     rzp.on('payment.failed', (response: any) => {
-      options.onFailure(response.error?.description || 'Payment failed. Please try again or use Cash on Delivery.');
+      options.onFailure(response.error?.description || 'Payment failed. Please try again.');
     });
     rzp.open();
   } catch (err: any) {
-    options.onFailure(err?.message || 'Could not open Razorpay checkout modal.');
+    options.onFailure(err?.message || 'Could not open Razorpay checkout.');
   }
 }
 
@@ -174,7 +180,7 @@ export async function verifyRazorpayPayment(
   signature: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const res = await fetch('/api/verify-payment', {
+    const res = await fetch('http://localhost:5000/api/verify-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
