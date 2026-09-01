@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { Product, CartItem, Order, OrderStatus, DeliveryType, DeliveryAddress, CustomerUser, StoreDeal, ToastMessage, Language } from '../types';
 import { initialProducts } from '../data/initialProducts';
 import { translations } from '../i18n/translations';
@@ -255,9 +255,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     {
       id: 'deal-1',
       titleEn: 'Village Welcome Offer',
-      titleTe: 'à°—à±à°°à°¾à°® à°ªà±à°°à°œà°²à°•à± à°¸à±à°µà°¾à°—à°¤à°‚ à°†à°«à°°à±',
-      subtitleEn: 'Free 20-min delivery on orders above â‚¹199',
-      subtitleTe: 'â‚¹199 à°ªà±ˆà°¨ à°†à°°à±à°¡à°°à±à°²à°•à± à°‰à°šà°¿à°¤ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€',
+      titleTe: 'గ్రామ ప్రజలకు స్వాగతం ఆఫర్',
+      subtitleEn: 'Free 20-min delivery on orders above ₹199',
+      subtitleTe: '₹199 పైన ఆర్డర్లకు ఉచిత 20 నిమిషాల డెలివరీ',
       code: 'GRAMA20',
       discountAmount: 15,
       minOrder: 199,
@@ -266,9 +266,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     {
       id: 'deal-2',
       titleEn: 'Fresh Farm Tuesday',
-      titleTe: 'à°¤à°¾à°œà°¾ à°•à±‚à°°à°—à°¾à°¯à°² à°ªà±à°°à°¤à±à°¯à±‡à°• à°¡à±€à°²à±',
-      subtitleEn: 'Extra â‚¹20 off on vegetable baskets above â‚¹299',
-      subtitleTe: 'à°•à±‚à°°à°—à°¾à°¯à°²à°ªà±ˆ â‚¹299 à°ªà±ˆà°¨ â‚¹20 à°¤à°—à±à°—à°¿à°‚à°ªà±',
+      titleTe: 'తాజా కూరగాయల ప్రత్యేక డీల్',
+      subtitleEn: 'Extra ₹20 off on vegetable baskets above ₹299',
+      subtitleTe: 'కూరగాయలపై ₹299 పైన ₹20 తగ్గింపు',
       code: 'FARM20',
       discountAmount: 20,
       minOrder: 299,
@@ -351,8 +351,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             sounds.playOwnerNewOrderAlert();
             showToast(
               'success',
-              'ðŸ”” New Live Customer Order!',
-              `Order #${newestOrder.id} for â‚¹${newestOrder.totalAmount} from ${newestOrder.customerName}`
+              '🔔 New Live Customer Order!',
+              `Order #${newestOrder.id} for ₹${newestOrder.totalAmount} from ${newestOrder.customerName}`
             );
           }
         }
@@ -392,7 +392,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               sounds.playOwnerNewOrderAlert();
               const newest = merged[0];
               if (newest) {
-                showToast('success', 'ðŸ”” New Order!', `Order #${newest.id} â€” â‚¹${newest.totalAmount} from ${newest.customerName}`);
+                showToast('success', '🔔 New Order!', `Order #${newest.id} — ₹${newest.totalAmount} from ${newest.customerName}`);
               }
             }
           }
@@ -449,7 +449,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Cart Actions
   const addToCart = (product: Product) => {
     if (!product || product.stock <= 0) {
-      showToast('warning', language === 'te' ? 'à°¸à±à°Ÿà°¾à°•à± à°²à±‡à°¦à±' : 'Out of Stock', language === 'te' ? 'à°ˆ à°µà°¸à±à°¤à±à°µà± à°ªà±à°°à°¸à±à°¤à±à°¤à°‚ à°…à°‚à°¦à±à°¬à°¾à°Ÿà±à°²à±‹ à°²à±‡à°¦à±' : 'This item is currently out of stock');
+      showToast('warning', language === 'te' ? 'స్టాక్ లేదు' : 'Out of Stock', language === 'te' ? 'ఈ వస్తువు ప్రస్తుతం అందుబాటులో లేదు' : 'This item is currently out of stock');
       return;
     }
 
@@ -457,7 +457,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const existing = prev.find(item => item?.product?.id === product.id);
       if (existing) {
         if (existing.quantity >= product.stock) {
-          showToast('warning', language === 'te' ? 'à°¸à±à°Ÿà°¾à°•à± à°ªà°°à°¿à°®à°¿à°¤à°¿' : 'Max Stock Reached', language === 'te' ? `à°•à±‡à°µà°²à°‚ ${product.stock} à°®à°¾à°¤à±à°°à°®à±‡ à°…à°‚à°¦à±à°¬à°¾à°Ÿà±à°²à±‹ à°‰à°¨à±à°¨à°¾à°¯à°¿` : `Only ${product.stock} available in store`);
+          showToast('warning', language === 'te' ? 'స్టాక్ పరిమితి' : 'Max Stock Reached', language === 'te' ? `కేవలం ${product.stock} మాత్రమే అందుబాటులో ఉన్నాయి` : `Only ${product.stock} available in store`);
           return prev;
         }
         return prev.map(item =>
@@ -469,7 +469,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
 
     sounds.playCartAdd();
-    showToast('success', language === 'te' ? 'à°•à°¾à°°à±à°Ÿà±â€Œà°•à± à°šà±‡à°°à±à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Added to Cart', `${language === 'te' ? (product.nameTe || product.nameEn) : product.nameEn} x 1`, 2000);
+    showToast('success', language === 'te' ? 'కార్ట్‌కు చేర్చబడింది' : 'Added to Cart', `${language === 'te' ? (product.nameTe || product.nameEn) : product.nameEn} x 1`, 2000);
   };
 
   const removeFromCart = (productId: string) => {
@@ -484,7 +484,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const product = products.find(p => p.id === productId);
     if (product && quantity > product.stock) {
-      showToast('warning', language === 'te' ? 'à°¸à±à°Ÿà°¾à°•à± à°ªà°°à°¿à°®à°¿à°¤à°¿' : 'Stock Limit', `${language === 'te' ? 'à°¸à±à°Ÿà°¾à°•à± à°¨à°¿à°²à±à°µ' : 'Available stock'}: ${product.stock}`);
+      showToast('warning', language === 'te' ? 'స్టాక్ పరిమితి' : 'Stock Limit', `${language === 'te' ? 'స్టాక్ నిల్వ' : 'Available stock'}: ${product.stock}`);
       return;
     }
 
@@ -505,7 +505,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Inventory Actions
   const updateProduct = (updated: Product) => {
     setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
-    showToast('success', language === 'te' ? 'à°¸à°µà°°à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Product Updated', language === 'te' ? 'à°µà°¸à±à°¤à±à°µà± à°µà°¿à°µà°°à°¾à°²à± à°¨à°µà±€à°•à°°à°¿à°‚à°šà°¬à°¡à±à°¡à°¾à°¯à°¿' : 'Product updated successfully');
+    showToast('success', language === 'te' ? 'సవరించబడింది' : 'Product Updated', language === 'te' ? 'వస్తువు వివరాలు నవీకరించబడ్డాయి' : 'Product updated successfully');
   };
 
   const addProduct = (newProductData: Omit<Product, 'id'>) => {
@@ -514,13 +514,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: `prod-${Date.now()}`
     };
     setProducts(prev => [newProduct, ...prev]);
-    showToast('success', language === 'te' ? 'à°•à±Šà°¤à±à°¤ à°µà°¸à±à°¤à±à°µà± à°šà±‡à°°à±à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Product Added', language === 'te' ? 'à°•à±Šà°¤à±à°¤ à°µà°¸à±à°¤à±à°µà± à°¸à±à°Ÿà°¾à°•à±â€Œà°²à±‹ à°šà±‡à°°à°¿à°‚à°¦à°¿' : 'New product added to inventory');
+    showToast('success', language === 'te' ? 'కొత్త వస్తువు చేర్చబడింది' : 'Product Added', language === 'te' ? 'కొత్త వస్తువు స్టాక్‌లో చేరింది' : 'New product added to inventory');
   };
 
   const deleteProduct = (productId: string) => {
     setProducts(prev => prev.filter(p => p.id !== productId));
     removeFromCart(productId);
-    showToast('info', language === 'te' ? 'à°¤à±Šà°²à°—à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Deleted', language === 'te' ? 'à°µà°¸à±à°¤à±à°µà± à°¤à±Šà°²à°—à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Product removed from catalog');
+    showToast('info', language === 'te' ? 'తొలగించబడింది' : 'Deleted', language === 'te' ? 'వస్తువు తొలగించబడింది' : 'Product removed from catalog');
   };
 
   const resetInventory = () => {
@@ -623,22 +623,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const statusMapEn: Record<OrderStatus, string> = {
       pending: 'Order Confirmed',
       packing: 'Packing Groceries in Store',
-      out_for_delivery: 'Out for 20-Min Delivery ðŸ›µ',
-      delivered: 'Order Delivered Successfully âœ…',
+      out_for_delivery: 'Out for 20-Min Delivery 🛵',
+      delivered: 'Order Delivered Successfully ✅',
       cancelled: 'Order Cancelled'
     };
 
     const statusMapTe: Record<OrderStatus, string> = {
-      pending: 'à°†à°°à±à°¡à°°à± à°•à°¨à±à°«à°°à±à°®à± à°…à°¯à°¿à°‚à°¦à°¿',
-      packing: 'à°¸à°°à±à°•à±à°²à± à°ªà±à°¯à°¾à°•à°¿à°‚à°—à± à°…à°µà±à°¤à±à°¨à±à°¨à°¾à°¯à°¿',
-      out_for_delivery: 'à°¡à±†à°²à°¿à°µà°°à±€ à°¬à°¯à°²à±à°¦à±‡à°°à°¿à°‚à°¦à°¿ ðŸ›µ',
-      delivered: 'à°¡à±†à°²à°¿à°µà°°à±€ à°ªà±‚à°°à±à°¤à°¯à°¿à°‚à°¦à°¿ âœ…',
-      cancelled: 'à°†à°°à±à°¡à°°à± à°°à°¦à±à°¦à± à°šà±‡à°¯à°¬à°¡à°¿à°‚à°¦à°¿'
+      pending: 'ఆర్డర్ కన్ఫర్మ్ అయింది',
+      packing: 'సరుకులు ప్యాకింగ్ అవుతున్నాయి',
+      out_for_delivery: 'డెలివరీ బయలుదేరింది 🛵',
+      delivered: 'డెలివరీ పూర్తయింది ✅',
+      cancelled: 'ఆర్డర్ రద్దు చేయబడింది'
     };
 
     showToast(
       status === 'delivered' ? 'success' : 'info',
-      language === 'te' ? 'à°†à°°à±à°¡à°°à± à°…à°ªà±â€Œà°¡à±‡à°Ÿà±' : 'Order Update',
+      language === 'te' ? 'ఆర్డర్ అప్‌డేట్' : 'Order Update',
       `Order #${orderId}: ${language === 'te' ? statusMapTe[status] : statusMapEn[status]}`
     );
   };
@@ -655,7 +655,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsHistoryOpen(false);
     setIsTrackingOpen(false);
     setIsCartOpen(true);
-    showToast('success', language === 'te' ? 'à°µà°¸à±à°¤à±à°µà±à°²à± à°šà±‡à°°à±à°šà°¬à°¡à±à°¡à°¾à°¯à°¿' : 'Items Reordered', language === 'te' ? 'à°—à°¤ à°†à°°à±à°¡à°°à± à°µà°¸à±à°¤à±à°µà±à°²à± à°•à°¾à°°à±à°Ÿà±â€Œà°•à± à°šà±‡à°°à°¾à°¯à°¿' : 'Previous order items added to cart');
+    showToast('success', language === 'te' ? 'వస్తువులు చేర్చబడ్డాయి' : 'Items Reordered', language === 'te' ? 'గత ఆర్డర్ వస్తువులు కార్ట్‌కు చేరాయి' : 'Previous order items added to cart');
   };
 
   const activeOrder = orders.find(o => o?.id === activeOrderId) || orders[0] || null;
@@ -663,14 +663,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <StoreContext.Provider
       value={{
-    addProduct,
-    updateProduct,
-    deleteProduct,
-    toggleDeal,
-    isStoreOpen,
-    setIsStoreOpen,
-    deliveryTimeMinutes,
-    setDeliveryTimeMinutes,
         language,
         setLanguage,
         t,
@@ -750,4 +742,3 @@ export const useStore = () => {
   }
   return context;
 };
-

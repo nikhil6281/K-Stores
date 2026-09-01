@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { 
   Package, 
@@ -24,7 +24,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { STORE_OWNER_DISPLAY_PHONE, getWhatsAppOrderUrl } from '../../utils/whatsapp';
-import type { OrderStatus, ProductCategory } from '../../types';
+import type { OrderStatus, ProductCategory, Product } from '../../types';
 
 export const AdminDashboard: React.FC = () => {
   const {
@@ -37,10 +37,6 @@ export const AdminDashboard: React.FC = () => {
     updateProduct,
     deleteProduct,
     toggleDeal,
-    isStoreOpen = true,
-    setIsStoreOpen,
-    deliveryTimeMinutes = 20,
-    setDeliveryTimeMinutes,
     language,
     showToast
   } = useStore();
@@ -53,6 +49,22 @@ export const AdminDashboard: React.FC = () => {
   const [productCategoryFilter, setProductCategoryFilter] = useState<string>('all');
   const [isSyncing, setIsSyncing] = useState(false);
   const [packedItems, setPackedItems] = useState<{ [key: string]: boolean }>({});
+
+  // Store Controls State (Persisted)
+  const [isStoreOpen, setIsStoreOpen] = useState<boolean>(() => {
+    return localStorage.getItem('kstores_store_open') !== 'false';
+  });
+  const [deliveryTimeMinutes, setDeliveryTimeMinutes] = useState<number>(() => {
+    return Number(localStorage.getItem('kstores_delivery_mins')) || 20;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('kstores_store_open', String(isStoreOpen));
+  }, [isStoreOpen]);
+
+  useEffect(() => {
+    localStorage.setItem('kstores_delivery_mins', String(deliveryTimeMinutes));
+  }, [deliveryTimeMinutes]);
 
   // Add Product Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -111,7 +123,8 @@ export const AdminDashboard: React.FC = () => {
       return;
     }
     if (addProduct) {
-      addProduct({
+      const prod: Product = {
+        id: `prod_${Date.now()}`,
         nameEn: newProductNameEn.trim(),
         nameTe: newProductNameTe.trim() || newProductNameEn.trim(),
         category: newProductCategory,
@@ -124,20 +137,24 @@ export const AdminDashboard: React.FC = () => {
         image: newProductImage.trim(),
         isVeg: true,
         isDeal: false
-      });
+      };
+      addProduct(prod);
       setIsAddModalOpen(false);
       setNewProductNameEn('');
       setNewProductNameTe('');
+      showToast('success', 'Product Added', `${prod.nameEn} added to catalog.`);
     }
   };
 
-  const saveInlinePrice = (prodId: string) => {
+  const saveInlinePrice = (prod: Product) => {
     if (updateProduct) {
-      updateProduct(prodId, {
+      updateProduct({
+        ...prod,
         price: Number(editPriceVal) || 10,
         mrp: Number(editMrpVal) || Number(editPriceVal) || 12
       });
       setEditingPriceId(null);
+      showToast('success', 'Price Saved', `${prod.nameEn} price updated to ₹${editPriceVal}`);
     }
   };
 
@@ -206,7 +223,7 @@ export const AdminDashboard: React.FC = () => {
                 setIsSyncing(true);
                 await refreshOrdersFromCloud();
                 setTimeout(() => setIsSyncing(false), 500);
-                showToast('success', 'Cloud Synced', 'Fresh data fetched.');
+                showToast('success', 'Cloud Synced', 'Fresh orders fetched.');
               }}
               disabled={isSyncing}
               className="flex items-center gap-1 text-xs bg-purple-950 hover:bg-purple-900 text-purple-200 border border-purple-800 px-3 py-1.5 rounded-xl cursor-pointer"
@@ -501,32 +518,28 @@ export const AdminDashboard: React.FC = () => {
         )}
 
         {/* =====================================================================
-            TAB 2: CATALOG & INVENTORY MANAGEMENT (Add, Edit Price, Deals, Delete)
+            TAB 2: CATALOG & INVENTORY MANAGEMENT
         ====================================================================== */}
         {activeTab === 'inventory' && (
           <div className="space-y-6">
             
-            {/* Top Inventory Toolbar */}
+            {/* Top Toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 p-4 rounded-3xl border border-slate-800">
-              <div className="flex items-center gap-3">
-                <div>
-                  <h2 className="font-extrabold text-white text-base">Store Catalog & Prices</h2>
-                  <p className="text-xs text-slate-400">Total Products: {products.length} • Low Stock: {lowStockCount}</p>
-                </div>
+              <div>
+                <h2 className="font-extrabold text-white text-base">Store Catalog & Prices</h2>
+                <p className="text-xs text-slate-400">Total Products: {products.length} • Low Stock: {lowStockCount}</p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="bg-[#9e1a22] hover:bg-[#83181d] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-all"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Product</span>
-                </button>
-              </div>
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-[#9e1a22] hover:bg-[#83181d] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add New Product</span>
+              </button>
             </div>
 
-            {/* Filter by Category & Search */}
+            {/* Filter Category & Search */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/40 p-3 rounded-2xl border border-slate-800">
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                 {[
@@ -591,7 +604,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Price & Stock Section */}
+                      {/* Price Section */}
                       <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
                         {isEditing ? (
                           <div className="flex items-center gap-1.5 flex-1">
@@ -614,7 +627,7 @@ export const AdminDashboard: React.FC = () => {
                               />
                             </div>
                             <button
-                              onClick={() => saveInlinePrice(prod.id)}
+                              onClick={() => saveInlinePrice(prod)}
                               className="bg-emerald-600 hover:bg-emerald-500 text-white p-1.5 rounded-lg text-xs font-bold mt-3.5 cursor-pointer"
                             >
                               <Save className="w-3.5 h-3.5" />
@@ -658,17 +671,16 @@ export const AdminDashboard: React.FC = () => {
 
                     {/* Stock Refill & Action Buttons */}
                     <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between gap-1.5 text-xs">
-                      {/* Refill Quick Buttons */}
                       <div className="flex items-center gap-1">
                         <span className="text-[10px] text-slate-500">Refill:</span>
                         <button
-                          onClick={() => updateProduct && updateProduct(prod.id, { stock: prod.stock + 5 })}
+                          onClick={() => updateProduct && updateProduct({ ...prod, stock: prod.stock + 5 })}
                           className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer"
                         >
                           +5
                         </button>
                         <button
-                          onClick={() => updateProduct && updateProduct(prod.id, { stock: prod.stock + 10 })}
+                          onClick={() => updateProduct && updateProduct({ ...prod, stock: prod.stock + 10 })}
                           className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer"
                         >
                           +10
@@ -676,7 +688,6 @@ export const AdminDashboard: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-1">
-                        {/* Toggle Deal Button */}
                         <button
                           onClick={() => toggleDeal && toggleDeal(prod.id)}
                           className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1 ${
@@ -689,7 +700,6 @@ export const AdminDashboard: React.FC = () => {
                           <span>{prod.isDeal ? 'Offer ON' : 'Make Deal'}</span>
                         </button>
 
-                        {/* Delete Button */}
                         <button
                           onClick={() => {
                             if (window.confirm(`Delete ${prod.nameEn} from catalog?`)) {
@@ -736,7 +746,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <button
-                  onClick={() => setIsStoreOpen && setIsStoreOpen(!isStoreOpen)}
+                  onClick={() => setIsStoreOpen(!isStoreOpen)}
                   className={`px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer ${
                     isStoreOpen ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-red-600 hover:bg-red-500 text-white'
                   }`}
@@ -762,7 +772,7 @@ export const AdminDashboard: React.FC = () => {
                 {[15, 20, 30].map(mins => (
                   <button
                     key={mins}
-                    onClick={() => setDeliveryTimeMinutes && setDeliveryTimeMinutes(mins)}
+                    onClick={() => setDeliveryTimeMinutes(mins)}
                     className={`py-3 px-4 rounded-2xl font-black text-sm border transition-all cursor-pointer text-center ${
                       deliveryTimeMinutes === mins
                         ? 'bg-[#9e1a22] text-white border-[#9e1a22] shadow-lg ring-2 ring-red-500/30'
@@ -792,7 +802,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="flex items-center gap-3">
                         <span className="text-red-400 font-bold">Only {p.stock} left!</span>
                         <button
-                          onClick={() => updateProduct && updateProduct(p.id, { stock: p.stock + 20 })}
+                          onClick={() => updateProduct && updateProduct({ ...p, stock: p.stock + 20 })}
                           className="bg-[#9e1a22] hover:bg-[#83181d] text-white font-bold px-2.5 py-1 rounded-lg text-xs cursor-pointer"
                         >
                           +20 Stock
