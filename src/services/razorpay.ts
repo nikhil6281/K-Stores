@@ -32,6 +32,7 @@ export interface RazorpayCheckoutOptions {
   storeOrderId: string;
   onSuccess: (response: RazorpayPaymentSuccessResponse) => void;
   onFailure: (error: string) => void;
+  onDismiss?: () => void;
 }
 
 /**
@@ -185,3 +186,4 @@ export async function verifyRazorpayPayment(
 
   return { success: Boolean(paymentId) };
 }
+
