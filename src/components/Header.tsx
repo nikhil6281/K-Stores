@@ -4,7 +4,6 @@ import {
   ShoppingBag, 
   Search, 
   User, 
-  Globe, 
   Clock, 
   MapPin 
 } from 'lucide-react';
@@ -16,13 +15,9 @@ export const Header: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenSearch }
     setIsCartOpen,
     user,
     setIsAuthOpen,
-    language,
-    setLanguage,
     setIsAdminLoginOpen,
     isOwnerMode
   } = useStore();
-
-  const teluguWord = '\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41'; // Telugu: తెలుగు
 
   return (
     <header className="sticky top-0 z-40 bg-[#166534] text-white shadow-md">
@@ -32,29 +27,21 @@ export const Header: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenSearch }
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1 font-bold text-amber-300">
               <Clock className="w-3.5 h-3.5" />
-              <span>{language === 'te' ? '20 నిమిషాల డెలివరీ' : '20-Min Village Delivery'}</span>
+              <span>20-Min Village Delivery</span>
             </span>
             <span className="hidden sm:inline text-emerald-400">•</span>
             <span className="hidden sm:inline text-emerald-200">
-              {language === 'te' ? 'ఉచిత డెలివరీ ₹199 పైన' : 'Free delivery on orders over ₹199'}
+              Free delivery on orders over ₹199
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setLanguage(language === 'en' ? 'te' : 'en')}
-              className="flex items-center gap-1.5 font-bold text-white hover:text-amber-300 transition-colors cursor-pointer bg-emerald-900/80 px-3 py-1 rounded-lg border border-emerald-700/80 text-xs shadow-xs"
-            >
-              <Globe className="w-3.5 h-3.5 text-amber-300" />
-              <span>{language === 'en' ? teluguWord : 'English'}</span>
-            </button>
-
             {!isOwnerMode && (
               <button
                 onClick={() => setIsAdminLoginOpen(true)}
                 className="text-emerald-300 hover:text-white transition-colors cursor-pointer font-medium text-[11px]"
               >
-                Owner
+                Owner Portal
               </button>
             )}
           </div>
@@ -79,7 +66,7 @@ export const Header: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenSearch }
             </div>
             <p className="text-[11px] text-emerald-200 flex items-center gap-1">
               <MapPin className="w-3 h-3 text-emerald-300" />
-              <span>{language === 'te' ? 'మన కిరాణా • తాజా సరుకులు' : 'Mana Kirana • Fresh Daily'}</span>
+              <span>RA General Store • Fresh Groceries</span>
             </p>
           </div>
         </div>
@@ -92,7 +79,7 @@ export const Header: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenSearch }
           >
             <div className="flex items-center gap-2">
               <Search className="w-4 h-4 text-emerald-300" />
-              <span>{language === 'te' ? 'కూరగాయలు, పాలు, నిత్యావసరాలు వెతకండి...' : 'Search vegetables, dairy, groceries...'}</span>
+              <span>Search vegetables, dairy, rice, snacks...</span>
             </div>
             <kbd className="bg-white/20 text-white font-mono text-[10px] px-1.5 py-0.5 rounded">Ctrl+K</kbd>
           </button>
@@ -115,7 +102,7 @@ export const Header: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenSearch }
             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer"
           >
             <User className="w-4 h-4 text-emerald-200" />
-            <span className="hidden sm:inline">{user ? user.name.split(' ')[0] : (language === 'te' ? 'లాగిన్' : 'Sign In')}</span>
+            <span className="hidden sm:inline">{user ? user.name.split(' ')[0] : 'Sign In'}</span>
           </button>
 
           <button
@@ -123,7 +110,7 @@ export const Header: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenSearch }
             className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-md transition-all cursor-pointer relative"
           >
             <ShoppingBag className="w-4 h-4" />
-            <span className="hidden sm:inline">{language === 'te' ? 'కార్ట్' : 'Cart'}</span>
+            <span className="hidden sm:inline">Cart</span>
             {cartItemsCount > 0 && (
               <span className="bg-[#166534] text-white text-[11px] font-black px-1.5 py-0.2 rounded-full">
                 {cartItemsCount}

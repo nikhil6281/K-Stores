@@ -101,7 +101,7 @@ const LOCAL_STORAGE_LANG = 'kstores_lang_v2';
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Language
-  const [language, setLanguageState] = useState<Language>(() => {
+  const [language, setLanguageState] = useState<Language>('en') => {
     return (localStorage.getItem(LOCAL_STORAGE_LANG) as Language) || 'en';
   });
 
@@ -110,7 +110,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem(LOCAL_STORAGE_LANG, lang);
   };
 
-  const t = translations[language];
+  const t = translations['en'];
 
   // User state
   const [user, setUserState] = useState<CustomerUser | null>(() => {
@@ -752,6 +752,7 @@ export const useStore = () => {
   }
   return context;
 };
+
 
 
 
