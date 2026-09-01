@@ -1,4 +1,4 @@
-export type Language = 'en' | 'te';
+﻿export type Language = 'en' | 'te';
 
 export type ProductCategory = 
   | 'vegetables'
@@ -107,3 +107,4 @@ export interface ToastMessage {
   message: string;
   duration?: number;
 }
+
