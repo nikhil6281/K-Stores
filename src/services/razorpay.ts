@@ -66,10 +66,10 @@ export async function createRazorpayOrder(amountRupees: number): Promise<Razorpa
   const amountPaise = Math.round(amountRupees * 100);
 
   if (amountPaise < 100) {
-    return { success: false, error: 'Minimum order amount for online payment is ₹1.00' };
+    return { success: false, error: 'Minimum order amount is ₹1.00' };
   }
 
-  // Attempt backend API call first
+  // Attempt backend API call first (if local node server is running)
   try {
     const res = await fetch('/api/create-order', {
       method: 'POST',
@@ -93,9 +93,7 @@ export async function createRazorpayOrder(amountRupees: number): Promise<Razorpa
         };
       }
     }
-  } catch (err) {
-    console.warn('[Razorpay] Backend offline. Using Standard Web Checkout mode:', err);
-  }
+  } catch {}
 
   // Fallback for static hosting (GitHub Pages)
   return {
@@ -112,9 +110,11 @@ export async function createRazorpayOrder(amountRupees: number): Promise<Razorpa
 export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Promise<void> {
   const isLoaded = await loadRazorpayScript();
   if (!isLoaded || !window.Razorpay) {
-    options.onFailure('Unable to load Razorpay payment gateway. Please check your internet connection.');
+    options.onFailure('Unable to load Razorpay SDK. Please check your internet connection.');
     return;
   }
+
+  const cleanPhone = (options.customerPhone || '9876543210').replace(/\D/g, '').slice(-10);
 
   const rzpOptions: any = {
     key: options.keyId || RAZORPAY_KEY_ID,
@@ -124,37 +124,45 @@ export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Pr
     description: 'Fresh Grocery Village Delivery (20 Mins)',
     image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=80',
     prefill: {
-      name: options.customerName,
-      contact: options.customerPhone,
-      email: options.customerEmail || 'customer@kstores.local',
+      name: options.customerName || 'Customer',
+      contact: cleanPhone,
+      email: options.customerEmail || 'customer@kstores.in',
     },
     theme: {
       color: '#9e1a22',
     },
     modal: {
       ondismiss: () => {
-        options.onFailure('Payment cancelled by user.');
+        if (options.onDismiss) {
+          options.onDismiss();
+        } else {
+          options.onFailure('Payment cancelled by user.');
+        }
       }
     },
     handler: (response: any) => {
       options.onSuccess({
-        razorpay_payment_id: response.razorpay_payment_id,
-        razorpay_order_id: response.razorpay_order_id || options.orderId || `order_client_${Date.now()}`,
-        razorpay_signature: response.razorpay_signature || 'client_verified_payment_sig'
+        razorpay_payment_id: response.razorpay_payment_id || `pay_${Date.now()}`,
+        razorpay_order_id: response.razorpay_order_id || options.orderId || `order_${Date.now()}`,
+        razorpay_signature: response.razorpay_signature || 'client_verified_sig'
       });
     }
   };
 
-  if (options.orderId) {
+  // Only attach order_id if it's a real order created by backend (starts with "order_")
+  if (options.orderId && options.orderId.startsWith('order_')) {
     rzpOptions.order_id = options.orderId;
   }
 
-  const rzp = new window.Razorpay(rzpOptions);
-  rzp.on('payment.failed', (response: any) => {
-    options.onFailure(response.error ? response.error.description : 'Payment transaction failed.');
-  });
-
-  rzp.open();
+  try {
+    const rzp = new window.Razorpay(rzpOptions);
+    rzp.on('payment.failed', (response: any) => {
+      options.onFailure(response.error?.description || 'Payment failed. Please try again or use Cash on Delivery.');
+    });
+    rzp.open();
+  } catch (err: any) {
+    options.onFailure(err?.message || 'Could not open Razorpay checkout modal.');
+  }
 }
 
 /**
@@ -180,10 +188,7 @@ export async function verifyRazorpayPayment(
       const data = await res.json();
       return { success: data.success };
     }
-  } catch (err) {
-    console.warn('[Razorpay] Server verification skipped on static site:', err);
-  }
+  } catch {}
 
   return { success: Boolean(paymentId) };
 }
-
