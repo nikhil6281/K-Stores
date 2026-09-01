@@ -1,479 +1,149 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import type { Product, CartItem, Order, OrderStatus, DeliveryType, DeliveryAddress, CustomerUser, StoreDeal, ToastMessage, Language } from '../types';
+﻿import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import type { 
+  Product, 
+  CartItem, 
+  Order, 
+  OrderStatus, 
+  DeliveryType, 
+  DeliveryAddress, 
+  CustomerUser, 
+  PaymentMethod,
+  Language,
+  ToastNotification 
+} from '../types';
 import { initialProducts } from '../data/initialProducts';
-import { translations } from '../i18n/translations';
-import { sounds } from '../utils/sound';
-import { fetchCloudStoreData, addOrderToCloud, updateCloudOrderStatus, onBroadcastOrderUpdate } from '../services/cloudSync';
+import { 
+  fetchCloudProducts, 
+  saveCloudProduct, 
+  deleteCloudProduct, 
+  fetchCloudStoreData, 
+  addOrderToCloud, 
+  updateCloudOrderStatus,
+  onBroadcastOrderUpdate 
+} from '../services/cloudSync';
+import { sounds } from '../utils/sounds';
+import { generateWhatsAppOrderURL } from '../utils/whatsapp';
 
-interface StoreContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  t: typeof translations['en'];
-  
-  // Products
+export interface StoreContextType {
   products: Product[];
+  addProduct: (product: Product) => void;
   updateProduct: (product: Product) => void;
-  addProduct: (product: Omit<Product, 'id'>) => void;
-  deleteProduct: (productId: string) => void;
-  resetInventory: () => void;
-
-  // Cart
+  deleteProduct: (id: string) => void;
+  toggleDeal: (productId: string) => void;
+  refreshProductsFromCloud: () => Promise<void>;
+  
   cart: CartItem[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
-  cartSubtotal: number;
-  cartDiscount: number;
   cartTotal: number;
-  cartItemsCount: number;
-  deliveryType: DeliveryType;
-  setDeliveryType: (type: DeliveryType) => void;
-  deliveryFee: number;
-  minOrderForFreeDelivery: number;
+  cartItemCount: number;
 
-  // Orders
   orders: Order[];
-  placeOrder: (details: {
-    customerName: string;
-    customerPhone: string;
-    deliveryType: DeliveryType;
-    address?: DeliveryAddress;
-    notes?: string;
-    paymentMethod?: 'cash_on_delivery' | 'pay_on_pickup' | 'online_razorpay';
-    razorpayPaymentId?: string;
-    razorpayOrderId?: string;
-  }) => Promise<Order>;
+  placeOrder: (orderData: any) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>;
-  reorder: (order: Order) => void;
-  activeOrder: Order | null;
-  setActiveOrderId: (id: string | null) => void;
   refreshOrdersFromCloud: () => Promise<void>;
+  activeOrderId: string | null;
+  setActiveOrderId: (id: string | null) => void;
 
-  // User & Owner Auth
   user: CustomerUser | null;
   setUser: (user: CustomerUser | null) => void;
-  isOwnerMode: boolean;
-  setIsOwnerMode: (val: boolean) => void;
-
-  // Modals & Drawers state
+  
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
-  isCheckoutOpen: boolean;
-  setIsCheckoutOpen: (open: boolean) => void;
-  isOrderSuccessOpen: boolean;
-  setIsOrderSuccessOpen: (open: boolean) => void;
-  isTrackingOpen: boolean;
-  setIsTrackingOpen: (open: boolean) => void;
-  isHistoryOpen: boolean;
-  setIsHistoryOpen: (open: boolean) => void;
-  isSupportOpen: boolean;
-  setIsSupportOpen: (open: boolean) => void;
   isAuthOpen: boolean;
   setIsAuthOpen: (open: boolean) => void;
+  isHistoryOpen: boolean;
+  setIsHistoryOpen: (open: boolean) => void;
+  isTrackingOpen: boolean;
+  setIsTrackingOpen: (open: boolean) => void;
+  isOwnerMode: boolean;
+  setIsOwnerMode: (open: boolean) => void;
   isAdminLoginOpen: boolean;
   setIsAdminLoginOpen: (open: boolean) => void;
+  isSuccessOpen: boolean;
+  setIsSuccessOpen: (open: boolean) => void;
 
-  // Search & Filter
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
-  selectedCategory: string;
-  setSelectedCategory: (cat: string) => void;
-
-  // Deals
-  deals: StoreDeal[];
-  toggleDeal: (id: string) => void;
-
-  // Toasts
-  toasts: ToastMessage[];
-  showToast: (type: ToastMessage['type'], title: string, message: string, duration?: number) => void;
+  toasts: ToastNotification[];
+  showToast: (type: 'success' | 'error' | 'info' | 'warning', title: string, message?: string) => void;
   removeToast: (id: string) => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_PRODUCTS = 'kstores_products_v2';
-const LOCAL_STORAGE_ORDERS = 'kstores_orders_v2';
-const LOCAL_STORAGE_CART = 'kstores_cart_v2';
-const LOCAL_STORAGE_USER = 'kstores_user_v2';
-const LOCAL_STORAGE_LANG = 'kstores_lang_v2';
-
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Language
-  const [language, setLanguageState] = useState<Language>(() => {
-    return (localStorage.getItem(LOCAL_STORAGE_LANG) as Language) || 'en';
-  });
-
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem(LOCAL_STORAGE_LANG, lang);
-  };
-
-  const t = translations[language];
-
-  // User state
-  const [user, setUserState] = useState<CustomerUser | null>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_USER);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  });
-
-  // Products state
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_PRODUCTS);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return initialProducts;
-      }
-    }
-    return initialProducts;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_PRODUCTS, JSON.stringify(products));
-  }, [products]);
-
-  // Cart state
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    // If user is currently saved, check their user-specific cart first
-    const savedUserStr = localStorage.getItem(LOCAL_STORAGE_USER);
-    if (savedUserStr) {
-      try {
-        const u = JSON.parse(savedUserStr);
-        if (u && u.phone) {
-          const userCart = localStorage.getItem(`kstores_cart_user_${u.phone}`);
-          if (userCart) return JSON.parse(userCart);
-        }
-      } catch {
-        // Fallback
-      }
-    }
-
-    const saved = localStorage.getItem(LOCAL_STORAGE_CART);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  });
-
-  // Persist cart
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_CART, JSON.stringify(cart));
-    if (user && user.phone) {
-      localStorage.setItem(`kstores_cart_user_${user.phone}`, JSON.stringify(cart));
-    }
-  }, [cart, user]);
-
-  // Handle Login and Logout with Cart Continuity
-  const setUser = (newUser: CustomerUser | null) => {
-    if (newUser) {
-      // Save user to active storage
-      localStorage.setItem(LOCAL_STORAGE_USER, JSON.stringify(newUser));
-      setUserState(newUser);
-
-      // Check if user has a previously saved cart from prior session
-      const savedUserCartKey = `kstores_cart_user_${newUser.phone}`;
-      const savedUserCartStr = localStorage.getItem(savedUserCartKey);
-
-      if (savedUserCartStr) {
-        try {
-          const savedItems: CartItem[] = JSON.parse(savedUserCartStr);
-          if (Array.isArray(savedItems) && savedItems.length > 0) {
-            // Merge with current guest cart without duplicates
-            setCart(prev => {
-              const itemMap = new Map<string, CartItem>();
-              savedItems.forEach(item => itemMap.set(item.product.id, item));
-              prev.forEach(item => {
-                if (itemMap.has(item.product.id)) {
-                  const existing = itemMap.get(item.product.id)!;
-                  itemMap.set(item.product.id, {
-                    ...existing,
-                    quantity: Math.max(existing.quantity, item.quantity)
-                  });
-                } else {
-                  itemMap.set(item.product.id, item);
-                }
-              });
-              return Array.from(itemMap.values());
-            });
-          }
-        } catch {
-          // Ignore
-        }
-      }
-    } else {
-      // User is logging out: save their cart first before clearing session
-      if (user && user.phone) {
-        localStorage.setItem(`kstores_cart_user_${user.phone}`, JSON.stringify(cart));
-      }
-      localStorage.removeItem(LOCAL_STORAGE_USER);
-      setUserState(null);
-      setCart([]);
-    }
-  };
-
-  // Delivery Mode
-  const [deliveryType, setDeliveryType] = useState<DeliveryType>('delivery_20min');
-
-  // Orders state
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_ORDERS);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_ORDERS, JSON.stringify(orders));
-  }, [orders]);
-
-  // Owner state
-  const [isOwnerMode, setIsOwnerMode] = useState<boolean>(false);
-
-  // Active tracked order
-  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
-
-  // Deals
-  const [deals, setDeals] = useState<StoreDeal[]>([
-    {
-      id: 'deal-1',
-      titleEn: 'Village Welcome Offer',
-      titleTe: 'గ్రామ ప్రజలకు స్వాగతం ఆఫర్',
-      subtitleEn: 'Free 20-min delivery on orders above ₹199',
-      subtitleTe: '₹199 పైన ఆర్డర్లకు ఉచిత 20 నిమిషాల డెలివరీ',
-      code: 'GRAMA20',
-      discountAmount: 15,
-      minOrder: 199,
-      active: true
-    },
-    {
-      id: 'deal-2',
-      titleEn: 'Fresh Farm Tuesday',
-      titleTe: 'తాజా కూరగాయల ప్రత్యేక డీల్',
-      subtitleEn: 'Extra ₹20 off on vegetable baskets above ₹299',
-      subtitleTe: 'కూరగాయలపై ₹299 పైన ₹20 తగ్గింపు',
-      code: 'FARM20',
-      discountAmount: 20,
-      minOrder: 299,
-      active: true
-    }
-  ]);
-
-  const toggleDeal = (id: string) => {
-    setDeals(prev => prev.map(d => d.id === id ? { ...d, active: !d.active } : d));
-  };
-
-  // Modal / UI visibility states
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [isOrderSuccessOpen, setIsOrderSuccessOpen] = useState(false);
-  const [isTrackingOpen, setIsTrackingOpen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isSupportOpen, setIsSupportOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
-
-  // Search & category
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-
-  // Toasts
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  }, []);
-
-  const showToast = useCallback((type: ToastMessage['type'], title: string, message: string, duration = 4000) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts(prev => [...prev, { id, type, title, message, duration }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, duration);
-  }, []);
-
-  // Keep track of order count for audio alert triggers
-  const prevOrdersCountRef = useRef<number>(orders.length);
-  const isOwnerModeRef = useRef<boolean>(isOwnerMode);
+  // 1. Products State with Cloud Sync
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   
-  useEffect(() => {
-    isOwnerModeRef.current = isOwnerMode;
-  }, [isOwnerMode]);
-
-  // Cloud Sync: Fetch latest orders from shared online cloud database
-  const refreshOrdersFromCloud = useCallback(async () => {
-    const cloudData = await fetchCloudStoreData();
-    if (cloudData && Array.isArray(cloudData.orders)) {
-      setOrders(prev => {
-        const cloudOrderMap = new Map<string, Order>();
-        
-        // Add cloud orders safely
-        cloudData.orders.forEach(o => {
-          if (o && o.id) cloudOrderMap.set(o.id, o);
-        });
-        
-        // Add any local pending orders not yet in cloud
-        prev.forEach(o => {
-          if (o && o.id && !cloudOrderMap.has(o.id)) {
-            cloudOrderMap.set(o.id, o);
-          }
-        });
-
-        const mergedOrders = Array.from(cloudOrderMap.values()).sort(
-          (a, b) => {
-            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            return timeB - timeA;
-          }
-        );
-
-        // If new orders arrived and count increased
-        if (mergedOrders.length > prevOrdersCountRef.current && prevOrdersCountRef.current > 0) {
-          const newestOrder = mergedOrders[0];
-          if (isOwnerModeRef.current && newestOrder) {
-            sounds.playOwnerNewOrderAlert();
-            showToast(
-              'success',
-              '🔔 New Live Customer Order!',
-              `Order #${newestOrder.id} for ₹${newestOrder.totalAmount} from ${newestOrder.customerName}`
-            );
-          }
-        }
-
-        prevOrdersCountRef.current = mergedOrders.length;
-        return mergedOrders;
-      });
+  const refreshProductsFromCloud = useCallback(async () => {
+    const cloudList = await fetchCloudProducts();
+    if (Array.isArray(cloudList) && cloudList.length > 0) {
+      setProducts(cloudList);
     }
-  }, [showToast]);
+  }, []);
 
-  // Initial cloud sync & continuous background live polling (every 4s in owner mode, 10s otherwise)
   useEffect(() => {
-    refreshOrdersFromCloud();
-    const interval = setInterval(() => {
-      refreshOrdersFromCloud();
-    }, isOwnerMode ? 4000 : 10_000);
+    refreshProductsFromCloud();
+    // Poll cloud products every 10 seconds so customer sees real-time price updates
+    const interval = setInterval(refreshProductsFromCloud, 10000);
     return () => clearInterval(interval);
-  }, [isOwnerMode, refreshOrdersFromCloud]);
+  }, [refreshProductsFromCloud]);
 
-  // BroadcastChannel: instant cross-tab sync on the same device (no API calls needed)
-  useEffect(() => {
-    const unsubscribe = onBroadcastOrderUpdate((incomingOrders) => {
-      if (Array.isArray(incomingOrders) && incomingOrders.length > 0) {
-        setOrders(prev => {
-          const orderMap = new Map<string, Order>();
-          incomingOrders.forEach(o => { if (o?.id) orderMap.set(o.id, o); });
-          prev.forEach(o => { if (o?.id && !orderMap.has(o.id)) orderMap.set(o.id, o); });
+  const addProduct = async (newProduct: Product) => {
+    setProducts(prev => [newProduct, ...prev]);
+    await saveCloudProduct(newProduct);
+  };
 
-          const merged = Array.from(orderMap.values()).sort((a, b) => {
-            const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            return tB - tA;
-          });
+  const updateProduct = async (updatedProduct: Product) => {
+    setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    await saveCloudProduct(updatedProduct);
+  };
 
-          if (merged.length > prevOrdersCountRef.current && prevOrdersCountRef.current > 0) {
-            if (isOwnerModeRef.current) {
-              sounds.playOwnerNewOrderAlert();
-              const newest = merged[0];
-              if (newest) {
-                showToast('success', '🔔 New Order!', `Order #${newest.id} — ₹${newest.totalAmount} from ${newest.customerName}`);
-              }
-            }
-          }
-          prevOrdersCountRef.current = merged.length;
-          return merged;
-        });
-      }
-    });
-    return unsubscribe;
-  }, [showToast]);
+  const deleteProduct = async (id: string) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+    await deleteCloudProduct(id);
+  };
 
-  // localStorage 'storage' event: cross-tab sync fallback for browsers without BroadcastChannel
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'kstores_cloud_orders_cache' && e.newValue) {
-        try {
-          const orders = JSON.parse(e.newValue);
-          if (Array.isArray(orders)) {
-            setOrders(prev => {
-              const orderMap = new Map<string, Order>();
-              orders.forEach((o: Order) => { if (o?.id) orderMap.set(o.id, o); });
-              prev.forEach(o => { if (o?.id && !orderMap.has(o.id)) orderMap.set(o.id, o); });
-              return Array.from(orderMap.values()).sort((a, b) => {
-                const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                return tB - tA;
-              });
-            });
-          }
-        } catch { /* ignore */ }
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  // Trigger immediate refresh when entering owner mode
-  useEffect(() => {
-    if (isOwnerMode) {
-      refreshOrdersFromCloud();
+  const toggleDeal = async (productId: string) => {
+    const target = products.find(p => p.id === productId);
+    if (target) {
+      const updated = { ...target, isDeal: !target.isDeal };
+      setProducts(prev => prev.map(p => p.id === productId ? updated : p));
+      await saveCloudProduct(updated);
     }
-  }, [isOwnerMode, refreshOrdersFromCloud]);
+  };
 
-  // Cart Calculations
-  const cartSubtotal = cart.reduce((sum, item) => sum + ((item?.product?.price ?? 0) * (item?.quantity ?? 1)), 0);
-  const cartMrpTotal = cart.reduce((sum, item) => sum + ((item?.product?.mrp ?? 0) * (item?.quantity ?? 1)), 0);
-  const cartDiscount = Math.max(0, cartMrpTotal - cartSubtotal);
-  const cartItemsCount = cart.reduce((sum, item) => sum + (item?.quantity ?? 1), 0);
-  
-  const minOrderForFreeDelivery = 199;
-  const deliveryFee = (deliveryType === 'store_pickup' || cartSubtotal >= minOrderForFreeDelivery || cartSubtotal === 0) ? 0 : 15;
-  const cartTotal = cartSubtotal + deliveryFee;
-
-  // Cart Actions
-  const addToCart = (product: Product) => {
-    if (!product || product.stock <= 0) {
-      showToast('warning', language === 'te' ? 'స్టాక్ లేదు' : 'Out of Stock', language === 'te' ? 'ఈ వస్తువు ప్రస్తుతం అందుబాటులో లేదు' : 'This item is currently out of stock');
-      return;
+  // 2. Cart State
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('kstores_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
     }
+  });
 
+  useEffect(() => {
+    localStorage.setItem('kstores_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  const addToCart = (product: Product, quantity = 1) => {
     setCart(prev => {
-      const existing = prev.find(item => item?.product?.id === product.id);
+      const existing = prev.find(item => item.product.id === product.id);
       if (existing) {
-        if (existing.quantity >= product.stock) {
-          showToast('warning', language === 'te' ? 'స్టాక్ పరిమితి' : 'Max Stock Reached', language === 'te' ? `కేవలం ${product.stock} మాత్రమే అందుబాటులో ఉన్నాయి` : `Only ${product.stock} available in store`);
-          return prev;
-        }
-        return prev.map(item =>
-          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      } else {
-        return [...prev, { product, quantity: 1 }];
+        return prev.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
       }
+      return [...prev, { product, quantity }];
     });
-
-    sounds.playCartAdd();
-    showToast('success', language === 'te' ? 'కార్ట్‌కు చేర్చబడింది' : 'Added to Cart', `${language === 'te' ? (product.nameTe || product.nameEn) : product.nameEn} x 1`, 2000);
+    sounds.playAddToCart();
   };
 
   const removeFromCart = (productId: string) => {
-    setCart(prev => prev.filter(item => item?.product?.id !== productId));
+    setCart(prev => prev.filter(item => item.product.id !== productId));
   };
 
   const updateCartQuantity = (productId: string, quantity: number) => {
@@ -481,255 +151,142 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       removeFromCart(productId);
       return;
     }
+    setCart(prev => prev.map(item => item.product.id === productId ? { ...item, quantity } : item));
+  };
 
-    const product = products.find(p => p.id === productId);
-    if (product && quantity > product.stock) {
-      showToast('warning', language === 'te' ? 'స్టాక్ పరిమితి' : 'Stock Limit', `${language === 'te' ? 'స్టాక్ నిల్వ' : 'Available stock'}: ${product.stock}`);
-      return;
+  const clearCart = () => setCart([]);
+
+  const cartTotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // 3. Orders State
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
+
+  const refreshOrdersFromCloud = useCallback(async () => {
+    const data = await fetchCloudStoreData();
+    if (data && Array.isArray(data.orders)) {
+      setOrders(data.orders);
     }
+  }, []);
 
-    setCart(prev =>
-      prev.map(item =>
-        item.product.id === productId ? { ...item, quantity } : item
-      )
-    );
-  };
-
-  const clearCart = () => {
-    setCart([]);
-    if (user && user.phone) {
-      localStorage.removeItem(`kstores_cart_user_${user.phone}`);
-    }
-  };
-
-  // Inventory Actions
-  const updateProduct = (updated: Product) => {
-    setProducts(prev => prev.map(p => p.id === updated.id ? updated : p));
-    showToast('success', language === 'te' ? 'సవరించబడింది' : 'Product Updated', language === 'te' ? 'వస్తువు వివరాలు నవీకరించబడ్డాయి' : 'Product updated successfully');
-  };
-
-  const addProduct = (newProductData: Omit<Product, 'id'>) => {
-    const newProduct: Product = {
-      ...newProductData,
-      id: `prod-${Date.now()}`
+  useEffect(() => {
+    refreshOrdersFromCloud();
+    const unsub = onBroadcastOrderUpdate((updatedOrders) => {
+      setOrders(updatedOrders);
+    });
+    const interval = setInterval(refreshOrdersFromCloud, 4000);
+    return () => {
+      unsub();
+      clearInterval(interval);
     };
-    setProducts(prev => [newProduct, ...prev]);
-    showToast('success', language === 'te' ? 'కొత్త వస్తువు చేర్చబడింది' : 'Product Added', language === 'te' ? 'కొత్త వస్తువు స్టాక్‌లో చేరింది' : 'New product added to inventory');
-  };
+  }, [refreshOrdersFromCloud]);
 
-  const deleteProduct = (productId: string) => {
-    setProducts(prev => prev.filter(p => p.id !== productId));
-    removeFromCart(productId);
-    showToast('info', language === 'te' ? 'తొలగించబడింది' : 'Deleted', language === 'te' ? 'వస్తువు తొలగించబడింది' : 'Product removed from catalog');
-  };
-
-  const resetInventory = () => {
-    setProducts(initialProducts);
-    localStorage.setItem(LOCAL_STORAGE_PRODUCTS, JSON.stringify(initialProducts));
-    showToast('success', 'Reset Done', 'Inventory restored to default village catalog');
-  };
-
-  // Order Placement with Live Cloud Sync
-  const placeOrder = async ({
-    customerName,
-    customerPhone,
-    deliveryType,
-    address,
-    notes,
-    paymentMethod,
-    razorpayPaymentId,
-    razorpayOrderId
-  }: {
-    customerName: string;
-    customerPhone: string;
-    deliveryType: DeliveryType;
-    address?: DeliveryAddress;
-    notes?: string;
-    paymentMethod?: 'cash_on_delivery' | 'pay_on_pickup' | 'online_razorpay';
-    razorpayPaymentId?: string;
-    razorpayOrderId?: string;
-  }): Promise<Order> => {
-    const orderId = `MK-${Math.floor(100000 + Math.random() * 900000)}`;
-    const resolvedPaymentMethod = paymentMethod || (deliveryType === 'store_pickup' ? 'pay_on_pickup' : 'cash_on_delivery');
-    
+  const placeOrder = async (orderData: any): Promise<Order> => {
     const newOrder: Order = {
-      id: orderId,
-      items: [...cart],
-      customerName,
-      customerPhone,
-      deliveryType,
-      address,
-      notes,
-      paymentMethod: resolvedPaymentMethod,
-      razorpayPaymentId,
-      razorpayOrderId,
-      paymentVerified: !!razorpayPaymentId,
-      status: 'pending',
-      subtotal: cartSubtotal,
-      deliveryFee,
-      totalDiscount: cartDiscount,
-      totalAmount: cartTotal,
+      ...orderData,
+      id: `MK-${Math.floor(100000 + Math.random() * 900000)}`,
       createdAt: new Date().toISOString(),
-      estimatedDeliveryMinutes: deliveryType === 'delivery_20min' ? 20 : 5,
+      status: 'pending'
     };
 
-    // 1. Deduct stock for ordered items
-    setProducts(prev =>
-      prev.map(p => {
-        const cartItem = cart.find(ci => ci.product.id === p.id);
-        if (cartItem) {
-          return { ...p, stock: Math.max(0, p.stock - cartItem.quantity) };
-        }
-        return p;
-      })
-    );
-
-    // 2. Save order locally
-    setOrders(prev => [newOrder, ...prev]);
-    setActiveOrderId(newOrder.id);
+    const updatedList = await addOrderToCloud(newOrder);
+    setOrders(updatedList);
     clearCart();
-    setIsCheckoutOpen(false);
-    setIsOrderSuccessOpen(true);
-
+    setActiveOrderId(newOrder.id);
     sounds.playOrderSuccess();
 
-    // 3. Push to shared central Cloud Database so ALL devices see it!
+    // Auto-open WhatsApp to owner
     try {
-      const updatedList = await addOrderToCloud(newOrder);
-      if (updatedList && updatedList.length > 0) {
-        setOrders(updatedList);
-      }
-    } catch (err) {
-      console.error('Background cloud sync error:', err);
-    }
+      window.open(generateWhatsAppOrderURL(newOrder, language === 'te'), '_blank');
+    } catch {}
 
     return newOrder;
   };
 
   const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
-    // 1. Update local state
-    setOrders(prev =>
-      prev.map(o => (o.id === orderId ? { ...o, status } : o))
-    );
-    sounds.playStatusUpdate();
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status, updatedAt: new Date().toISOString() } : o));
+    await updateCloudOrderStatus(orderId, status);
+  };
 
-    // 2. Update shared Cloud Database so customer device sees live delivery progress!
+  // 4. Modals and User State
+  const [user, setUser] = useState<CustomerUser | null>(() => {
     try {
-      await updateCloudOrderStatus(orderId, status);
-    } catch (err) {
-      console.error('Error syncing status update to cloud:', err);
+      const saved = localStorage.getItem('kstores_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
     }
+  });
 
-    const statusMapEn: Record<OrderStatus, string> = {
-      pending: 'Order Confirmed',
-      packing: 'Packing Groceries in Store',
-      out_for_delivery: 'Out for 20-Min Delivery 🛵',
-      delivered: 'Order Delivered Successfully ✅',
-      cancelled: 'Order Cancelled'
-    };
+  useEffect(() => {
+    if (user) localStorage.setItem('kstores_user', JSON.stringify(user));
+    else localStorage.removeItem('kstores_user');
+  }, [user]);
 
-    const statusMapTe: Record<OrderStatus, string> = {
-      pending: 'ఆర్డర్ కన్ఫర్మ్ అయింది',
-      packing: 'సరుకులు ప్యాకింగ్ అవుతున్నాయి',
-      out_for_delivery: 'డెలివరీ బయలుదేరింది 🛵',
-      delivered: 'డెలివరీ పూర్తయింది ✅',
-      cancelled: 'ఆర్డర్ రద్దు చేయబడింది'
-    };
+  const [language, setLanguage] = useState<Language>('en');
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isTrackingOpen, setIsTrackingOpen] = useState(false);
+  const [isOwnerMode, setIsOwnerMode] = useState(false);
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
 
-    showToast(
-      status === 'delivered' ? 'success' : 'info',
-      language === 'te' ? 'ఆర్డర్ అప్‌డేట్' : 'Order Update',
-      `Order #${orderId}: ${language === 'te' ? statusMapTe[status] : statusMapEn[status]}`
-    );
+  // 5. Toasts
+  const [toasts, setToasts] = useState<ToastNotification[]>([]);
+  const showToast = (type: 'success' | 'error' | 'info' | 'warning', title: string, message?: string) => {
+    const id = `t_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
+    setToasts(prev => [...prev, { id, type, title, message }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
   };
-
-  const reorder = (pastOrder: Order) => {
-    if (!pastOrder || !Array.isArray(pastOrder.items)) return;
-    pastOrder.items.forEach(item => {
-      if (!item || !item.product) return;
-      const currentProduct = products.find(p => p.id === item.product.id);
-      if (currentProduct && currentProduct.stock > 0) {
-        addToCart(currentProduct);
-      }
-    });
-    setIsHistoryOpen(false);
-    setIsTrackingOpen(false);
-    setIsCartOpen(true);
-    showToast('success', language === 'te' ? 'వస్తువులు చేర్చబడ్డాయి' : 'Items Reordered', language === 'te' ? 'గత ఆర్డర్ వస్తువులు కార్ట్‌కు చేరాయి' : 'Previous order items added to cart');
-  };
-
-  const activeOrder = orders.find(o => o?.id === activeOrderId) || orders[0] || null;
+  const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
   return (
-    <StoreContext.Provider
-      value={{
-        language,
-        setLanguage,
-        t,
-
-        products,
-        updateProduct,
-        addProduct,
-        deleteProduct,
-        resetInventory,
-
-        cart,
-        addToCart,
-        removeFromCart,
-        updateCartQuantity,
-        clearCart,
-        cartSubtotal,
-        cartDiscount,
-        cartTotal,
-        cartItemsCount,
-        deliveryType,
-        setDeliveryType,
-        deliveryFee,
-        minOrderForFreeDelivery,
-
-        orders,
-        placeOrder,
-        updateOrderStatus,
-        reorder,
-        activeOrder,
-        setActiveOrderId,
-        refreshOrdersFromCloud,
-
-        user,
-        setUser,
-        isOwnerMode,
-        setIsOwnerMode,
-
-        isCartOpen,
-        setIsCartOpen,
-        isCheckoutOpen,
-        setIsCheckoutOpen,
-        isOrderSuccessOpen,
-        setIsOrderSuccessOpen,
-        isTrackingOpen,
-        setIsTrackingOpen,
-        isHistoryOpen,
-        setIsHistoryOpen,
-        isSupportOpen,
-        setIsSupportOpen,
-        isAuthOpen,
-        setIsAuthOpen,
-        isAdminLoginOpen,
-        setIsAdminLoginOpen,
-
-        searchQuery,
-        setSearchQuery,
-        selectedCategory,
-        setSelectedCategory,
-
-        deals,
-        toggleDeal,
-
-        toasts,
-        showToast,
-        removeToast,
-      }}
-    >
+    <StoreContext.Provider value={{
+      products,
+      addProduct,
+      updateProduct,
+      deleteProduct,
+      toggleDeal,
+      refreshProductsFromCloud,
+      cart,
+      addToCart,
+      removeFromCart,
+      updateCartQuantity,
+      clearCart,
+      cartTotal,
+      cartItemCount,
+      orders,
+      placeOrder,
+      updateOrderStatus,
+      refreshOrdersFromCloud,
+      activeOrderId,
+      setActiveOrderId,
+      user,
+      setUser,
+      language,
+      setLanguage,
+      isCartOpen,
+      setIsCartOpen,
+      isAuthOpen,
+      setIsAuthOpen,
+      isHistoryOpen,
+      setIsHistoryOpen,
+      isTrackingOpen,
+      setIsTrackingOpen,
+      isOwnerMode,
+      setIsOwnerMode,
+      isAdminLoginOpen,
+      setIsAdminLoginOpen,
+      isSuccessOpen,
+      setIsSuccessOpen,
+      toasts,
+      showToast,
+      removeToast
+    }}>
       {children}
     </StoreContext.Provider>
   );
@@ -737,8 +294,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 export const useStore = () => {
   const context = useContext(StoreContext);
-  if (!context) {
-    throw new Error('useStore must be used within a StoreProvider');
-  }
+  if (!context) throw new Error('useStore must be used within StoreProvider');
   return context;
 };
