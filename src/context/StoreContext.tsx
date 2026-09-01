@@ -1,4 +1,4 @@
-﻿import { saveCloudProduct } from '../services/cloudSync';
+﻿import { subscribeToLiveCatalog, addProductToFirebase, updateProductInFirebase, deleteProductFromFirebase } from '../services/firebaseCatalog';
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { Product, CartItem, Order, OrderStatus, DeliveryType, DeliveryAddress, CustomerUser, StoreDeal, ToastMessage, Language } from '../types';
 import { initialProducts } from '../data/initialProducts';
@@ -514,7 +514,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ...newProductData,
       id: `prod-${Date.now()}`
     };
-    setProducts(prev => [newProduct, ...prev]); saveCloudProduct(newProduct);
+    setProducts(prev => [newProduct, ...prev]);
     showToast('success', language === 'te' ? 'à°•à±Šà°¤à±à°¤ à°µà°¸à±à°¤à±à°µà± à°šà±‡à°°à±à°šà°¬à°¡à°¿à°‚à°¦à°¿' : 'Product Added', language === 'te' ? 'à°•à±Šà°¤à±à°¤ à°µà°¸à±à°¤à±à°µà± à°¸à±à°Ÿà°¾à°•à±â€Œà°²à±‹ à°šà±‡à°°à°¿à°‚à°¦à°¿' : 'New product added to inventory');
   };
 
@@ -743,8 +743,4 @@ export const useStore = () => {
   }
   return context;
 };
-
-
-
-
 
