@@ -15,7 +15,7 @@ import {
 import type { ProductCategory } from '../types';
 
 interface CategoryItem {
-  id: ProductCategory;
+  id: ProductCategory | 'all';
   label: string;
   icon: React.ReactNode;
 }
@@ -62,3 +62,4 @@ export const CategoryNav: React.FC = () => {
     </div>
   );
 };
+

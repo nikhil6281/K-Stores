@@ -1,9 +1,8 @@
 ﻿import React from 'react';
-import { useStore } from '../context/StoreContext';
 import { Zap, ShieldCheck, ArrowRight, Sparkles, Clock } from 'lucide-react';
 
 export const HeroBanner: React.FC<{ onShopNow?: () => void }> = ({ onShopNow }) => {
-  const { t } = useStore();
+  
 
   const handleShop = () => {
     if (onShopNow) onShopNow();
@@ -95,3 +94,4 @@ export const HeroBanner: React.FC<{ onShopNow?: () => void }> = ({ onShopNow }) 
     </div>
   );
 };
+
