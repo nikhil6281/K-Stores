@@ -2,7 +2,7 @@
   en: {
     // Header & Brand
     storeName: 'K-Stores',
-    tagline: '20 Min Superfast Village Delivery',
+    tagline: '20-Min Village Delivery',
     villageLocation: 'Grama Center, Main Road',
     deliveryPromiseBadge: 'âš¡ 20 Mins Delivery',
     changeLocation: 'Change',
@@ -19,11 +19,11 @@
     bannerTitle: 'Fresh Groceries Delivered in 20 Minutes!',
     bannerSubtitle: 'Directly from our local Kirana store to your doorstep with Cash on Delivery.',
     bannerPerk1: 'âš¡ 20 Min Delivery Guarantee',
-    bannerPerk2: 'ðŸ’µ Cash on Delivery',
-    bannerPerk3: 'ðŸ“² WhatsApp Bill to Owner',
-    bannerPerk4: 'ðŸª Free Store Pickup Available',
+    bannerPerk2: '’µ Cash on Delivery',
+    bannerPerk3: '“² WhatsApp Bill to Owner',
+    bannerPerk4: 'ª Free Store Pickup Available',
     shopNow: 'Order Now',
-    tickerNotice: 'ðŸŽ‰ Special Offer: Free Village Delivery on orders above â‚¹199! Fresh farm vegetables just arrived.',
+    tickerNotice: 'Ž‰ Special Offer: Free Village Delivery on orders above â‚¹199! Fresh farm vegetables just arrived.',
 
     // Categories
     all: 'All Items',
@@ -57,7 +57,7 @@
     doorstep20MinDesc: 'Delivered in 20 mins to your home',
     storePickup: 'Store Counter Pickup',
     storePickupDesc: 'Ready in 5 mins for self-pickup',
-    freeDeliveryEligible: 'ðŸŽ‰ You have unlocked FREE Delivery!',
+    freeDeliveryEligible: 'Ž‰ You have unlocked FREE Delivery!',
     addMoreForFreeDelivery: 'Add items worth â‚¹{amount} more for FREE delivery',
     billDetails: 'Bill Summary',
     itemTotal: 'Item Total',
@@ -82,25 +82,25 @@
     enterDoorNo: 'e.g. 3-45/A',
     landmark: 'Prominent Village Landmark',
     enterLandmark: 'e.g. Near Water Tank, Opp Primary School, Ramalayam Temple',
-    useCurrentLocation: 'ðŸ“ Auto-detect My Location',
+    useCurrentLocation: '“ Auto-detect My Location',
     locationDetected: 'Location detected successfully!',
     deliveryNotes: 'Delivery Note (Optional)',
     enterNotes: 'e.g. Call before coming, drop at porch',
     paymentMethod: 'Payment Method',
-    cashOnDelivery: 'ðŸ’µ Cash on Delivery (COD)',
+    cashOnDelivery: '’µ Cash on Delivery (COD)',
     cashOnDeliveryDesc: 'Pay cash or GooglePay/PhonePe to the delivery person at your doorstep.',
-    payOnPickup: 'ðŸª Pay at Store Counter',
+    payOnPickup: 'ª Pay at Store Counter',
     payOnPickupDesc: 'Pay cash/UPI when you collect your parcel at the store.',
     placeOrder: 'Place Order (COD)',
     placingOrder: 'Placing your order...',
     orderSummary: 'Order Summary',
 
     // WhatsApp Bill & Confirmation
-    orderSuccessTitle: 'Order Placed Successfully! ðŸŽ‰',
+    orderSuccessTitle: 'Order Placed Successfully! Ž‰',
     orderSuccessSubtitle: 'Your order #{orderId} is being prepared for fast 20-minute delivery.',
     whatsappCardTitle: 'Send Bill to Store Owner on WhatsApp',
     whatsappCardDesc: 'Tap below to send the automated itemized bill directly to the store owner WhatsApp (+91 62817 30144) for immediate processing.',
-    sendWhatsAppBtn: 'ðŸ“² Send Bill via WhatsApp (+91 62817 30144)',
+    sendWhatsAppBtn: '“² Send Bill via WhatsApp (+91 62817 30144)',
     whatsappSentToast: 'Opening WhatsApp with complete bill details...',
     trackOrderBtn: 'Track 20-Min Live Delivery',
     printBillBtn: 'Print / Save Bill Receipt',
@@ -118,7 +118,7 @@
     stepOutDesc: 'Delivery partner on the way to your village location',
     stepDelivered: 'Order Delivered',
     stepDeliveredDesc: 'Received at doorstep. Enjoy fresh groceries!',
-    callStoreOwner: 'ðŸ“ž Call Store Owner',
+    callStoreOwner: '“ž Call Store Owner',
     needHelp: 'Need help with this order?',
     reorderBtn: 'Reorder All Items',
 
@@ -126,8 +126,8 @@
     supportTitle: 'Kirana Customer Support',
     storeOwnerName: 'RA General Store',
     ownerPhone: '+91 62817 30144',
-    storeHours: 'Everyday: 6:00 AM â€“ 10:00 PM',
-    storeAddress: 'Main Road, Center Junction, Near Panchayat Office',
+    storeHours: 'Everyday: 5:00 AM to 8:30 PM
+    storeAddress: 'on main road , on main road , Bommalatapalli beside chennampalli road',
     directWhatsApp: 'Chat on WhatsApp',
     faqTitle: 'Frequently Asked Questions (FAQs)',
     faq1Q: 'How does the 20-minute delivery work in our village?',
@@ -173,7 +173,7 @@
     markDelivered: 'Mark Delivered',
     openWhatsAppCustomer: 'WhatsApp Customer',
     callCustomer: 'Call Customer',
-    newOrderAlertSound: 'ðŸ”” Live order notifications active',
+    newOrderAlertSound: '”” Live order notifications active',
 
     // Admin Inventory Tab
     inventoryTitle: 'Inventory & Stock Management',
@@ -232,11 +232,11 @@
     bannerTitle: 'à°¤à°¾à°œà°¾ à°•à°¿à°°à°¾à°£à°¾ à°¸à°°à±à°•à±à°²à± - 20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°®à±€ à°‡à°‚à°Ÿà°¿à°•à°¿!',
     bannerSubtitle: 'à°®à°¾ à°²à±‹à°•à°²à± à°•à°¿à°°à°¾à°£à°¾ à°·à°¾à°ªà± à°¨à±à°‚à°¡à°¿ à°¨à±‡à°°à±à°—à°¾ à°®à±€ à°‡à°‚à°Ÿà°¿ à°®à±à°‚à°¦à±à°•à± - à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ (à°¸à°°à±à°•à±à°²à± à°µà°šà±à°šà°¾à°• à°¡à°¬à±à°¬à±à°²à± à°‡à°µà±à°µà°‚à°¡à°¿).',
     bannerPerk1: 'âš¡ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€ à°—à±à°¯à°¾à°°à±†à°‚à°Ÿà±€',
-    bannerPerk2: 'ðŸ’µ à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ (COD)',
-    bannerPerk3: 'ðŸ“² à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°“à°¨à°°à±â€Œà°•à°¿ à°¬à°¿à°²à±à°²à±',
-    bannerPerk4: 'ðŸª à°·à°¾à°ªà± à°µà°¦à±à°¦ à°¸à±†à°²à±à°«à± à°ªà°¿à°•à°ªà± à°•à±‚à°¡à°¾ à°•à°²à°¦à±',
+    bannerPerk2: '’µ à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ (COD)',
+    bannerPerk3: '“² à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°“à°¨à°°à±â€Œà°•à°¿ à°¬à°¿à°²à±à°²à±',
+    bannerPerk4: 'ª à°·à°¾à°ªà± à°µà°¦à±à°¦ à°¸à±†à°²à±à°«à± à°ªà°¿à°•à°ªà± à°•à±‚à°¡à°¾ à°•à°²à°¦à±',
     shopNow: 'à°‡à°ªà±à°ªà±à°¡à±‡ à°†à°°à±à°¡à°°à± à°šà±‡à°¯à°‚à°¡à°¿',
-    tickerNotice: 'ðŸŽ‰ à°ªà±à°°à°¤à±à°¯à±‡à°• à°†à°«à°°à±: â‚¹199 à°ªà±ˆà°¨ à°†à°°à±à°¡à°°à±à°²à°•à± à°‰à°šà°¿à°¤ à°—à±à°°à°¾à°®à±€à°£ à°¡à±†à°²à°¿à°µà°°à±€! à°¸à°°à°¿à°•à±Šà°¤à±à°¤ à°•à±‚à°°à°—à°¾à°¯à°²à± à°®à°°à°¿à°¯à± à°¸à°°à±à°•à±à°²à± à°¸à±à°Ÿà°¾à°•à± à°µà°šà±à°šà°¾à°¯à°¿.',
+    tickerNotice: 'Ž‰ à°ªà±à°°à°¤à±à°¯à±‡à°• à°†à°«à°°à±: â‚¹199 à°ªà±ˆà°¨ à°†à°°à±à°¡à°°à±à°²à°•à± à°‰à°šà°¿à°¤ à°—à±à°°à°¾à°®à±€à°£ à°¡à±†à°²à°¿à°µà°°à±€! à°¸à°°à°¿à°•à±Šà°¤à±à°¤ à°•à±‚à°°à°—à°¾à°¯à°²à± à°®à°°à°¿à°¯à± à°¸à°°à±à°•à±à°²à± à°¸à±à°Ÿà°¾à°•à± à°µà°šà±à°šà°¾à°¯à°¿.',
 
     // Categories
     all: 'à°…à°¨à±à°¨à°¿ à°µà°¸à±à°¤à±à°µà±à°²à±',
@@ -270,7 +270,7 @@
     doorstep20MinDesc: '20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°¨à±‡à°°à±à°—à°¾ à°®à±€ à°‡à°‚à°Ÿà°¿à°•à°¿ à°¡à±†à°²à°¿à°µà°°à±€',
     storePickup: 'à°·à°¾à°ªà± à°•à±Œà°‚à°Ÿà°°à± à°µà°¦à±à°¦ à°ªà°¿à°•à°ªà±',
     storePickupDesc: '5 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°·à°¾à°ªà±â€Œà°²à±‹ à°ªà°¾à°°à±à°¸à°¿à°²à± à°°à±†à°¡à±€à°—à°¾ à°‰à°‚à°Ÿà±à°‚à°¦à°¿',
-    freeDeliveryEligible: 'ðŸŽ‰ à°®à±€à°•à± à°‰à°šà°¿à°¤ à°¡à±†à°²à°¿à°µà°°à±€ à°²à°­à°¿à°‚à°šà°¿à°‚à°¦à°¿!',
+    freeDeliveryEligible: 'Ž‰ à°®à±€à°•à± à°‰à°šà°¿à°¤ à°¡à±†à°²à°¿à°µà°°à±€ à°²à°­à°¿à°‚à°šà°¿à°‚à°¦à°¿!',
     addMoreForFreeDelivery: 'à°‰à°šà°¿à°¤ à°¡à±†à°²à°¿à°µà°°à±€ à°•à±‹à°¸à°‚ à°‡à°‚à°•à°¾ â‚¹{amount} à°¸à°°à±à°•à±à°²à± à°šà±‡à°°à±à°šà°‚à°¡à°¿',
     billDetails: 'à°¬à°¿à°²à±à°²à± à°µà°¿à°µà°°à°¾à°²à±',
     itemTotal: 'à°¸à°°à±à°•à±à°² à°®à±Šà°¤à±à°¤à°‚',
@@ -295,25 +295,25 @@
     enterDoorNo: 'à°‰à°¦à°¾: 3-45/A',
     landmark: 'à°—à±à°°à±à°¤à± / à°²à±à°¯à°¾à°‚à°¡à±â€Œà°®à°¾à°°à±à°•à±',
     enterLandmark: 'à°‰à°¦à°¾: à°µà°¾à°Ÿà°°à± à°Ÿà±à°¯à°¾à°‚à°•à± à°¦à°—à±à°—à°°, à°ªà±à°°à±ˆà°®à°°à±€ à°¸à±à°•à±‚à°²à± à°Žà°¦à±à°°à±à°—à°¾, à°°à°¾à°®à°¾à°²à°¯à°‚',
-    useCurrentLocation: 'ðŸ“ à°¨à°¾ à°²à±Šà°•à±‡à°·à°¨à± à°—à±à°°à±à°¤à°¿à°‚à°šà±',
+    useCurrentLocation: '“ à°¨à°¾ à°²à±Šà°•à±‡à°·à°¨à± à°—à±à°°à±à°¤à°¿à°‚à°šà±',
     locationDetected: 'à°²à±Šà°•à±‡à°·à°¨à± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚à°—à°¾ à°—à±à°°à±à°¤à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿!',
     deliveryNotes: 'à°ªà±à°°à°¤à±à°¯à±‡à°• à°¸à±‚à°šà°¨à°²à± (à°à°šà±à°›à°¿à°•à°‚)',
     enterNotes: 'à°‰à°¦à°¾: à°µà°šà±à°šà±‡ à°®à±à°‚à°¦à± à°«à±‹à°¨à± à°šà±‡à°¯à°‚à°¡à°¿',
     paymentMethod: 'à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°µà°¿à°§à°¾à°¨à°‚',
-    cashOnDelivery: 'ðŸ’µ à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ (à°¸à°°à±à°•à±à°²à± à°µà°šà±à°šà°¾à°• à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿)',
+    cashOnDelivery: '’µ à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ (à°¸à°°à±à°•à±à°²à± à°µà°šà±à°šà°¾à°• à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿)',
     cashOnDeliveryDesc: 'à°¸à°°à±à°•à±à°²à± à°®à±€ à°‡à°‚à°Ÿà°¿à°•à°¿ à°šà±‡à°°à°¿à°¨ à°¤à°°à±à°µà°¾à°¤ à°¨à°—à°¦à± à°²à±‡à°¦à°¾ Google Pay / PhonePe à°¦à±à°µà°¾à°°à°¾ à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿.',
-    payOnPickup: 'ðŸª à°·à°¾à°ªà± à°µà°¦à±à°¦ à°šà±†à°²à±à°²à°¿à°‚à°ªà±',
+    payOnPickup: 'ª à°·à°¾à°ªà± à°µà°¦à±à°¦ à°šà±†à°²à±à°²à°¿à°‚à°ªà±',
     payOnPickupDesc: 'à°·à°¾à°ªà± à°•à±Œà°‚à°Ÿà°°à± à°µà°¦à±à°¦ à°¸à°°à±à°•à±à°²à± à°¤à±€à°¸à±à°•à±à°¨à±‡à°Ÿà°ªà±à°ªà±à°¡à± à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿.',
     placeOrder: 'à°†à°°à±à°¡à°°à± à°šà±‡à°¯à°‚à°¡à°¿ (COD)',
     placingOrder: 'à°†à°°à±à°¡à°°à± à°¨à°®à±‹à°¦à± à°…à°µà±à°¤à±‹à°‚à°¦à°¿...',
     orderSummary: 'à°†à°°à±à°¡à°°à± à°¸à°¾à°°à°¾à°‚à°¶à°‚',
 
     // WhatsApp Bill & Confirmation
-    orderSuccessTitle: 'à°†à°°à±à°¡à°°à± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚à°—à°¾ à°¨à°®à±‹à°¦à±ˆà°‚à°¦à°¿! ðŸŽ‰',
+    orderSuccessTitle: 'à°†à°°à±à°¡à°°à± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚à°—à°¾ à°¨à°®à±‹à°¦à±ˆà°‚à°¦à°¿! Ž‰',
     orderSuccessSubtitle: 'à°®à±€ à°†à°°à±à°¡à°°à± #{orderId} à°µà±‡à°—à°µà°‚à°¤à°®à±ˆà°¨ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€ à°•à±‹à°¸à°‚ à°¸à°¿à°¦à±à°§à°‚ à°šà±‡à°¯à°¬à°¡à±à°¤à±‹à°‚à°¦à°¿.',
     whatsappCardTitle: 'à°·à°¾à°ªà± à°“à°¨à°°à±â€Œà°•à°¿ à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¬à°¿à°²à±à°²à± à°ªà°‚à°ªà°‚à°¡à°¿',
     whatsappCardDesc: 'à°µà±†à°‚à°Ÿà°¨à±‡ à°ªà±à°¯à°¾à°•à°¿à°‚à°—à± à°ªà±à°°à°¾à°°à°‚à°­à°¿à°‚à°šà°¡à°¾à°¨à°¿à°•à°¿ à°•à±à°°à°¿à°‚à°¦à°¿ à°¬à°Ÿà°¨à± à°¨à±Šà°•à±à°•à°¿ à°µà°¿à°µà°°à°®à±ˆà°¨ à°¬à°¿à°²à±à°²à±à°¨à± à°“à°¨à°°à± à°µà°¾à°Ÿà±à°¸à°¾à°ªà± (+91 62817 30144) à°•à°¿ à°ªà°‚à°ªà°‚à°¡à°¿.',
-    sendWhatsAppBtn: 'ðŸ“² à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¬à°¿à°²à±à°²à± à°ªà°‚à°ªà°‚à°¡à°¿ (+91 62817 30144)',
+    sendWhatsAppBtn: '“² à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¬à°¿à°²à±à°²à± à°ªà°‚à°ªà°‚à°¡à°¿ (+91 62817 30144)',
     whatsappSentToast: 'à°ªà±‚à°°à±à°¤à°¿ à°¬à°¿à°²à±à°²à±à°¤à±‹ à°µà°¾à°Ÿà±à°¸à°¾à°ªà± à°“à°ªà±†à°¨à± à°…à°µà±à°¤à±‹à°‚à°¦à°¿...',
     trackOrderBtn: '20-à°¨à°¿à°®à°¿à°·à°¾à°² à°²à±ˆà°µà± à°¡à±†à°²à°¿à°µà°°à±€ à°Ÿà±à°°à°¾à°•à°¿à°‚à°—à±',
     printBillBtn: 'à°¬à°¿à°²à±à°²à± à°°à°¸à±€à°¦à± à°¸à±‡à°µà± / à°ªà±à°°à°¿à°‚à°Ÿà± à°šà±‡à°¯à°‚à°¡à°¿',
@@ -331,7 +331,7 @@
     stepOutDesc: 'à°¡à±†à°²à°¿à°µà°°à±€ à°¬à°¾à°¯à± à°®à±€ à°‡à°‚à°Ÿà°¿à°•à°¿ à°¬à°¯à°²à±à°¦à±‡à°°à°¾à°¡à±',
     stepDelivered: 'à°¡à±†à°²à°¿à°µà°°à±€ à°ªà±‚à°°à±à°¤à°¯à°¿à°‚à°¦à°¿',
     stepDeliveredDesc: 'à°¸à°°à±à°•à±à°²à± à°šà±‡à°°à°¾à°¯à°¿. à°¤à°¾à°œà°¾ à°•à°¿à°°à°¾à°£à°¾ à°†à°¨à°‚à°¦à°¿à°‚à°šà°‚à°¡à°¿!',
-    callStoreOwner: 'ðŸ“ž à°“à°¨à°°à±â€Œà°•à°¿ à°«à±‹à°¨à± à°šà±‡à°¯à°‚à°¡à°¿',
+    callStoreOwner: '“ž à°“à°¨à°°à±â€Œà°•à°¿ à°«à±‹à°¨à± à°šà±‡à°¯à°‚à°¡à°¿',
     needHelp: 'à°ˆ à°†à°°à±à°¡à°°à± à°ªà±ˆ à°¸à°¹à°¾à°¯à°‚ à°•à°¾à°µà°¾à°²à°¾?',
     reorderBtn: 'à°®à°³à±à°²à±€ à°‡à°¦à±‡ à°†à°°à±à°¡à°°à± à°šà±‡à°¯à°‚à°¡à°¿',
 
@@ -386,7 +386,7 @@
     markDelivered: 'à°¡à±†à°²à°¿à°µà°°à±€ à°ªà±‚à°°à±à°¤à°¯à°¿à°‚à°¦à°¿',
     openWhatsAppCustomer: 'à°•à°¸à±à°Ÿà°®à°°à±â€Œà°•à°¿ à°µà°¾à°Ÿà±à°¸à°¾à°ªà± à°šà±‡à°¯à°‚à°¡à°¿',
     callCustomer: 'à°•à°¸à±à°Ÿà°®à°°à±â€Œà°•à°¿ à°•à°¾à°²à± à°šà±‡à°¯à°‚à°¡à°¿',
-    newOrderAlertSound: 'ðŸ”” à°²à±ˆà°µà± à°†à°°à±à°¡à°°à± à°¸à±Œà°‚à°¡à± à°…à°²à°°à±à°Ÿà± à°†à°¨à±â€Œà°²à±‹ à°‰à°‚à°¦à°¿',
+    newOrderAlertSound: '”” à°²à±ˆà°µà± à°†à°°à±à°¡à°°à± à°¸à±Œà°‚à°¡à± à°…à°²à°°à±à°Ÿà± à°†à°¨à±â€Œà°²à±‹ à°‰à°‚à°¦à°¿',
 
     // Admin Inventory Tab
     inventoryTitle: 'à°¸à°°à±à°•à±à°²à± & à°¸à±à°Ÿà°¾à°•à± à°¨à°¿à°°à±à°µà°¹à°£',
@@ -425,4 +425,5 @@
     contactUs: 'à°·à°¾à°ªà±â€Œà°¨à± à°¸à°‚à°ªà±à°°à°¦à°¿à°‚à°šà°‚à°¡à°¿',
   }
 };
+
 

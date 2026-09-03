@@ -129,7 +129,7 @@ export const AppContent: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-[#166534] text-white flex items-center justify-center font-bold text-sm shadow-xs">
-                    ðŸ”¥
+                    ”¥
                   </div>
                   <div>
                     <h2 className="text-base sm:text-lg font-black uppercase tracking-wide text-slate-900 font-sans">
@@ -198,7 +198,7 @@ export const AppContent: React.FC = () => {
             {filteredProducts.length === 0 ? (
               <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 shadow-xs">
                 <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-3xl mx-auto mb-3">
-                  ðŸ”
+                  ”
                 </div>
                 <h3 className="font-bold text-slate-800 text-base mb-1">
                   {language === 'te' ? 'à°¸à°°à±à°•à±à°²à± à°•à°¨à±à°—à±Šà°¨à°¬à°¡à°²à±‡à°¦à±' : 'No items found'}
@@ -283,7 +283,7 @@ export const AppContent: React.FC = () => {
             <div className="w-3 h-3 rounded-full bg-amber-400 animate-ping" />
             <div className="text-left leading-tight">
               <div className="text-[10px] text-amber-300 font-bold">20-Min Order #{activeOrder.id}</div>
-              <div className="font-bold capitalize">{activeOrder.status.replace('_', ' ')} ðŸ›µ</div>
+              <div className="font-bold capitalize">{activeOrder.status.replace('_', ' ')} ›µ</div>
             </div>
             <ChevronRight className="w-4 h-4 text-amber-400 ml-1" />
           </button>
@@ -300,7 +300,7 @@ export const AppContent: React.FC = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-black text-lg">
-                  ðŸŒ¾
+                  
                 </div>
                 <div>
                   <span className="font-extrabold text-white text-base">{t.storeName}</span>
@@ -310,7 +310,7 @@ export const AppContent: React.FC = () => {
               <p className="text-slate-400 text-xs leading-relaxed">
                 {language === 'te'
                   ? 'à°®à°¨ à°—à±à°°à°¾à°® à°ªà±à°°à°œà°² à°•à±‹à°¸à°‚ à°ªà±à°°à°¤à±à°¯à±‡à°•à°‚à°—à°¾ à°ªà±à°°à°¾à°°à°‚à°­à°¿à°‚à°šà°¿à°¨ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¸à±‚à°ªà°°à± à°«à°¾à°¸à±à°Ÿà± à°•à°¿à°°à°¾à°£à°¾ à°¡à±†à°²à°¿à°µà°°à±€ à°¯à°¾à°ªà±.'
-                  : 'Fast 20-minute local village grocery delivery with Cash on Delivery and WhatsApp bill generation.'}
+                  : 'Everyday farm-fresh groceries delivered in 20 minutes.'}
               </p>
             </div>
 
@@ -412,4 +412,5 @@ export const AppContent: React.FC = () => {
 export default function App() {
   return <AppContent />;
 }
+
 

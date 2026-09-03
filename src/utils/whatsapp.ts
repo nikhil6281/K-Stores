@@ -1,8 +1,8 @@
-import type { Order } from '../types';
+﻿import type { Order } from '../types';
 
 export const STORE_OWNER_PHONE = '916281730144';
 export const STORE_OWNER_DISPLAY_PHONE = '+91 62817 30144';
-export const STORE_NAME = 'K-Stores (కె-స్టోర్స్)';
+export const STORE_NAME = 'K-Stores (à°•à±†-à°¸à±à°Ÿà±‹à°°à±à°¸à±)';
 
 /**
  * Format a detailed, beautiful itemized grocery bill for WhatsApp
@@ -14,32 +14,32 @@ export function formatWhatsAppOrderBill(order: Order, language: 'en' | 'te' = 'e
 
   const isDelivery = order.deliveryType === 'delivery_20min';
 
-  let message = `🛒 *${STORE_NAME} - ${isTe ? 'కొత్త ఆర్డర్ బిల్లు' : 'NEW ORDER BILL'}*\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━━\n`;
-  message += `📋 *${isTe ? 'ఆర్డర్ ID' : 'Order ID'}:* #${order.id}\n`;
-  message += `🕒 *${isTe ? 'సమయం' : 'Date & Time'}:* ${orderDate}, ${orderTime}\n`;
-  message += `⚡ *${isTe ? 'డెలివరీ రకం' : 'Delivery Mode'}:* ${isDelivery ? (isTe ? '🚀 20-నిమిషాల విలేజ్ హోమ్ డెలివరీ' : '🚀 20-Min Doorstep Delivery') : (isTe ? '🏪 షాప్ కౌంటర్ వద్ద పికప్' : '🏪 Store Counter Pickup')}\n\n`;
+  let message = `ðŸ›’ *${STORE_NAME} - ${isTe ? 'à°•à±Šà°¤à±à°¤ à°†à°°à±à°¡à°°à± à°¬à°¿à°²à±à°²à±' : 'NEW ORDER BILL'}*\n`;
+  message += `â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n`;
+  message += `ðŸ“‹ *${isTe ? 'à°†à°°à±à°¡à°°à± ID' : 'Order ID'}:* #${order.id}\n`;
+  message += `ðŸ•’ *${isTe ? 'à°¸à°®à°¯à°‚' : 'Date & Time'}:* ${orderDate}, ${orderTime}\n`;
+  message += `âš¡ *${isTe ? 'à°¡à±†à°²à°¿à°µà°°à±€ à°°à°•à°‚' : 'Delivery Mode'}:* ${isDelivery ? (isTe ? 'ðŸš€ 20-à°¨à°¿à°®à°¿à°·à°¾à°² à°µà°¿à°²à±‡à°œà± à°¹à±‹à°®à± à°¡à±†à°²à°¿à°µà°°à±€' : 'ðŸš€ 20-Min Doorstep Delivery') : (isTe ? 'ðŸª à°·à°¾à°ªà± à°•à±Œà°‚à°Ÿà°°à± à°µà°¦à±à°¦ à°ªà°¿à°•à°ªà±' : 'ðŸª Store Counter Pickup')}\n\n`;
 
-  message += `👤 *${isTe ? 'కస్టమర్ వివరాలు' : 'CUSTOMER DETAILS'}:*\n`;
-  message += `• *${isTe ? 'పేరు' : 'Name'}:* ${order.customerName}\n`;
-  message += `• *${isTe ? 'ఫోన్' : 'Phone'}:* +91 ${order.customerPhone}\n`;
+  message += `ðŸ‘¤ *${isTe ? 'à°•à°¸à±à°Ÿà°®à°°à± à°µà°¿à°µà°°à°¾à°²à±' : 'CUSTOMER DETAILS'}:*\n`;
+  message += `â€¢ *${isTe ? 'à°ªà±‡à°°à±' : 'Name'}:* ${order.customerName}\n`;
+  message += `â€¢ *${isTe ? 'à°«à±‹à°¨à±' : 'Phone'}:* +91 ${order.customerPhone}\n`;
 
   if (isDelivery && order.address) {
-    message += `• *${isTe ? 'గ్రామం / వీధి' : 'Village / Street'}:* ${order.address.villageName}\n`;
+    message += `â€¢ *${isTe ? 'à°—à±à°°à°¾à°®à°‚ / à°µà±€à°§à°¿' : 'Village / Street'}:* ${order.address.villageName}\n`;
     if (order.address.doorNo) {
-      message += `• *${isTe ? 'ఇంటి నంబర్' : 'Door No'}:* ${order.address.doorNo}\n`;
+      message += `â€¢ *${isTe ? 'à°‡à°‚à°Ÿà°¿ à°¨à°‚à°¬à°°à±' : 'Door No'}:* ${order.address.doorNo}\n`;
     }
     if (order.address.landmark) {
-      message += `• *📍 ${isTe ? 'ల్యాండ్‌మార్క్' : 'Landmark'}:* ${order.address.landmark}\n`;
+      message += `â€¢ *ðŸ“ ${isTe ? 'à°²à±à°¯à°¾à°‚à°¡à±â€Œà°®à°¾à°°à±à°•à±' : 'Landmark'}:* ${order.address.landmark}\n`;
     }
   }
 
   if (order.notes) {
-    message += `• *📝 ${isTe ? 'సూచన' : 'Note'}:* ${order.notes}\n`;
+    message += `â€¢ *ðŸ“ ${isTe ? 'à°¸à±‚à°šà°¨' : 'Note'}:* ${order.notes}\n`;
   }
 
-  message += `\n📦 *${isTe ? 'ఆర్డర్ చేసిన సరుకులు' : 'ITEMIZED GROCERY LIST'}:*\n`;
-  message += `─────────────────────\n`;
+  message += `\nðŸ“¦ *${isTe ? 'à°†à°°à±à°¡à°°à± à°šà±‡à°¸à°¿à°¨ à°¸à°°à±à°•à±à°²à±' : 'ITEMIZED GROCERY LIST'}:*\n`;
+  message += `â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n`;
 
   order.items.forEach((item, index) => {
     const p = item.product;
@@ -47,32 +47,32 @@ export function formatWhatsAppOrderBill(order: Order, language: 'en' | 'te' = 'e
     const unit = isTe ? p.unitTe : p.unit;
     const itemTotal = p.price * item.quantity;
     message += `${index + 1}. *${name}*\n`;
-    message += `   └─ ${item.quantity} x ₹${p.price} (${unit}) = *₹${itemTotal}*\n`;
+    message += `   â””â”€ ${item.quantity} x â‚¹${p.price} (${unit}) = *â‚¹${itemTotal}*\n`;
   });
 
-  message += `─────────────────────\n`;
-  message += `💰 *${isTe ? 'సరుకుల మొత్తం (Subtotal)' : 'Items Subtotal'}:* ₹${order.subtotal}\n`;
+  message += `â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n`;
+  message += `ðŸ’° *${isTe ? 'à°¸à°°à±à°•à±à°² à°®à±Šà°¤à±à°¤à°‚ (Subtotal)' : 'Items Subtotal'}:* â‚¹${order.subtotal}\n`;
   
   if (isDelivery) {
-    message += `🛵 *${isTe ? 'డెలివరీ ఛార్జ్' : 'Delivery Fee'}:* ${order.deliveryFee === 0 ? (isTe ? 'ఉచితం (FREE)' : 'FREE') : `₹${order.deliveryFee}`}\n`;
+    message += `ðŸ›µ *${isTe ? 'à°¡à±†à°²à°¿à°µà°°à±€ à°›à°¾à°°à±à°œà±' : 'Delivery Fee'}:* ${order.deliveryFee === 0 ? (isTe ? 'à°‰à°šà°¿à°¤à°‚ (FREE)' : 'FREE') : `â‚¹${order.deliveryFee}`}\n`;
   }
   
   if (order.totalDiscount > 0) {
-    message += `🎉 *${isTe ? 'మొత్తం ఆదా (Savings)' : 'Total Savings'}:* -₹${order.totalDiscount}\n`;
+    message += `ðŸŽ‰ *${isTe ? 'à°®à±Šà°¤à±à°¤à°‚ à°†à°¦à°¾ (Savings)' : 'Total Savings'}:* -â‚¹${order.totalDiscount}\n`;
   }
 
   const paymentStr = order.paymentMethod === 'online_razorpay'
-    ? (isTe ? `ఆన్‌లైన్ చెల్లింపు పూర్తయింది ✅ (Razorpay ID: ${order.razorpayPaymentId || 'PAID'})` : `PAID ONLINE via Razorpay ✅ (ID: ${order.razorpayPaymentId || 'PAID'})`)
+    ? (isTe ? `à°†à°¨à±â€Œà°²à±ˆà°¨à± à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°ªà±‚à°°à±à°¤à°¯à°¿à°‚à°¦à°¿ âœ… (Razorpay ID: ${order.razorpayPaymentId || 'PAID'})` : `PAID ONLINE via Razorpay âœ… (ID: ${order.razorpayPaymentId || 'PAID'})`)
     : order.paymentMethod === 'pay_on_pickup'
-    ? (isTe ? 'స్టోర్ కౌంటర్‌లో చెల్లింపు (Pay on Pickup)' : 'Pay on Pickup at Store')
-    : (isTe ? 'క్యాష్ ఆన్ డెలివరీ / UPI (COD)' : 'Cash on Delivery / UPI (COD)');
+    ? (isTe ? 'à°¸à±à°Ÿà±‹à°°à± à°•à±Œà°‚à°Ÿà°°à±â€Œà°²à±‹ à°šà±†à°²à±à°²à°¿à°‚à°ªà± (Pay on Pickup)' : 'Pay on Pickup at Store')
+    : (isTe ? 'à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ / UPI (COD)' : 'Cash on Delivery / UPI (COD)');
 
-  message += `\n💵 *${isTe ? 'మొత్తం బిల్లు (TOTAL BILL)' : 'TOTAL BILL'}:* *₹${order.totalAmount}*\n`;
-  message += `💳 *${isTe ? 'చెల్లింపు వివరాలు' : 'Payment'}:* *${paymentStr}*\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  message += `\nðŸ’µ *${isTe ? 'à°®à±Šà°¤à±à°¤à°‚ à°¬à°¿à°²à±à°²à± (TOTAL BILL)' : 'TOTAL BILL'}:* *â‚¹${order.totalAmount}*\n`;
+  message += `ðŸ’³ *${isTe ? 'à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°µà°¿à°µà°°à°¾à°²à±' : 'Payment'}:* *${paymentStr}*\n`;
+  message += `â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n`;
   message += isTe 
-    ? `🙏 *ధన్యవాదాలు! దయచేసి ఆర్డర్‌ను 20 నిమిషాల్లో డెలివరీ చేయగలరు.*` 
-    : `🙏 *Thank you! Please process and deliver within 20 minutes.*`;
+    ? `ðŸ™ *à°§à°¨à±à°¯à°µà°¾à°¦à°¾à°²à±! à°¦à°¯à°šà±‡à°¸à°¿ à°†à°°à±à°¡à°°à±â€Œà°¨à± 20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°¡à±†à°²à°¿à°µà°°à±€ à°šà±‡à°¯à°—à°²à°°à±.*` 
+    : `ðŸ™ *Thank you! Please process and deliver within 20 minutes.*`;
 
   return message;
 }
@@ -91,7 +91,7 @@ export function getWhatsAppOrderUrl(order: Order, language: 'en' | 'te' = 'en'):
  */
 export function getWhatsAppSupportUrl(language: 'en' | 'te' = 'en'): string {
   const text = language === 'te' 
-    ? 'నమస్కారం! కె-స్టోర్స్ షాప్ ఆర్డర్ లేదా సరుకుల గురించి సహాయం కావాలి.'
+    ? 'à°¨à°®à°¸à±à°•à°¾à°°à°‚! à°•à±†-à°¸à±à°Ÿà±‹à°°à±à°¸à± à°·à°¾à°ªà± à°†à°°à±à°¡à°°à± à°²à±‡à°¦à°¾ à°¸à°°à±à°•à±à°² à°—à±à°°à°¿à°‚à°šà°¿ à°¸à°¹à°¾à°¯à°‚ à°•à°¾à°µà°¾à°²à°¿.'
     : 'Hello! I need assistance with my K-Stores order or grocery inquiry.';
   return `https://wa.me/${STORE_OWNER_PHONE}?text=${encodeURIComponent(text)}`;
 }
@@ -101,6 +101,7 @@ export function getWhatsAppSupportUrl(language: 'en' | 'te' = 'en'): string {
  */
 export function getCustomerStatusUpdateWhatsAppUrl(order: Order, statusText: string): string {
   const cleanPhone = order.customerPhone.replace(/\D/g, '');
-  const message = `👋 Hello ${order.customerName},\n\nYour K-Stores order *#${order.id}* status update: *${statusText}*.\n\nTotal to Pay: ₹${order.totalAmount} (Cash on Delivery).\nEstimated Time: ~${order.estimatedDeliveryMinutes} mins.\n\nThank you for choosing K-Stores!`;
+  const message = `ðŸ‘‹ Hello ${order.customerName},\n\nYour K-Stores order *#${order.id}* status update: *${statusText}*.\n\nTotal to Pay: â‚¹${order.totalAmount} (Cash on Delivery).\nEstimated Time: ~${order.estimatedDeliveryMinutes} mins.\n\nThank you for choosing K-Stores!`;
   return `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(message)}`;
 }
+
