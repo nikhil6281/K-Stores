@@ -126,8 +126,8 @@
     supportTitle: 'Kirana Customer Support',
     storeOwnerName: 'RA General Store',
     ownerPhone: '+91 62817 30144',
-    storeHours: 'Everyday: 5:00 AM to 8:30 PM
-    storeAddress: 'on main road , on main road , Bommalatapalli beside chennampalli road',
+    storeHours: 'Everyday: 5:00 AM to 8:30 PM',
+    storeAddress: 'on main road , Bommalatapalli beside chennampalli road',
     directWhatsApp: 'Chat on WhatsApp',
     faqTitle: 'Frequently Asked Questions (FAQs)',
     faq1Q: 'How does the 20-minute delivery work in our village?',
@@ -339,8 +339,8 @@
     supportTitle: 'à°•à°¿à°°à°¾à°£à°¾ à°•à°¸à±à°Ÿà°®à°°à± à°•à±‡à°°à± & à°·à°¾à°ªà± à°µà°¿à°µà°°à°¾à°²à±',
     storeOwnerName: 'à°¶à±à°°à±€ à°µà±†à°‚à°•à°Ÿà±‡à°¶à±à°µà°° à°•à°¿à°°à°¾à°£à°¾ & à°œà°¨à°°à°²à± à°¸à±à°Ÿà±‹à°°à±à°¸à±',
     ownerPhone: '+91 62817 30144',
-    storeHours: 'à°ªà±à°°à°¤à°¿à°°à±‹à°œà±‚: à°‰à°¦à°¯à°‚ 6:00 à°¨à±à°‚à°¡à°¿ à°°à°¾à°¤à±à°°à°¿ 10:00 à°µà°°à°•à±',
-    storeAddress: 'à°®à±†à°¯à°¿à°¨à± à°°à±‹à°¡à±à°¡à±, à°¸à±†à°‚à°Ÿà°°à± à°œà°‚à°•à±à°·à°¨à±, à°ªà°‚à°šà°¾à°¯à°¤à±€ à°†à°«à±€à°¸à± à°¦à°—à±à°—à°°',
+    storeHours: 'Everyday: 5:00 AM to 8:30 PM',,
+    storeAddress: 'on main road , Bommalatapalli beside chennampalli road',
     directWhatsApp: 'à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¸à°‚à°ªà±à°°à°¦à°¿à°‚à°šà°‚à°¡à°¿',
     faqTitle: 'à°¤à°°à°šà±à°—à°¾ à°…à°¡à°¿à°—à±‡ à°ªà±à°°à°¶à±à°¨à°²à± (FAQs)',
     faq1Q: 'à°®à°¾ à°—à±à°°à°¾à°®à°‚à°²à±‹ 20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°¡à±†à°²à°¿à°µà°°à±€ à°Žà°²à°¾ à°¸à°¾à°§à±à°¯à°‚?',
@@ -425,5 +425,6 @@
     contactUs: 'à°·à°¾à°ªà±â€Œà°¨à± à°¸à°‚à°ªà±à°°à°¦à°¿à°‚à°šà°‚à°¡à°¿',
   }
 };
+
 
 
