@@ -73,7 +73,7 @@ export const CheckoutModal: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
           <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl mx-auto">
-            ðŸ”’
+            ”’
           </div>
           <div>
             <h3 className="font-extrabold text-lg text-white">Sign in Required</h3>
@@ -106,7 +106,7 @@ export const CheckoutModal: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
           <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-3xl mx-auto">
-            ðŸ›’
+            
           </div>
           <div>
             <h3 className="font-extrabold text-lg text-slate-900">{language === 'te' ? 'à°®à±€ à°•à°¾à°°à±à°Ÿà± à°–à°¾à°³à±€à°—à°¾ à°‰à°‚à°¦à°¿' : 'Your Cart is Empty'}</h3>
@@ -265,7 +265,7 @@ export const CheckoutModal: React.FC = () => {
               razorpayOrderId: response.razorpay_order_id,
             });
             showToast('success',
-              language === 'te' ? 'ðŸ’³ à°†à°¨à±â€Œà°²à±ˆà°¨à± à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚!' : 'ðŸ’³ Payment Successful!',
+              language === 'te' ? '’³ à°†à°¨à±â€Œà°²à±ˆà°¨à± à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚!' : '’³ Payment Successful!',
               language === 'te' ? 'à°®à±€ à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°§à±ƒà°µà±€à°•à°°à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿. à°†à°°à±à°¡à°°à± à°¨à°®à±‹à°¦à°¯à°¿à°‚à°¦à°¿!' : `Payment ₹${cartTotal} confirmed. Order placed!`
             );
           } finally {
@@ -321,14 +321,14 @@ export const CheckoutModal: React.FC = () => {
         <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-800 to-green-700 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-amber-400 text-emerald-950 flex items-center justify-center font-bold text-lg shadow-md">
-              ðŸ›µ
+              ›µ
             </div>
             <div>
               <h2 className="font-extrabold text-base sm:text-lg text-white leading-tight">
                 {t.checkoutTitle}
               </h2>
               <p className="text-xs text-emerald-100 font-medium">
-                {deliveryType === 'delivery_20min' ? 'âš¡ 20-Min Doorstep Delivery' : 'ðŸª 5-Min Store Pickup'}
+                {deliveryType === 'delivery_20min' ? ' 20-Min Doorstep Delivery' : 'ª 5-Min Store Pickup'}
               </p>
             </div>
           </div>

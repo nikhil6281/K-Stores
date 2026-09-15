@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Plus, Check } from 'lucide-react';
+import { Search, X, Plus, Check, ShoppingBag } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
-interface SearchOverlayProps { onClose: () => void; }
+interface SearchOverlayProps {
+  onClose: () => void;
+}
 
 export const SearchOverlay: React.FC<SearchOverlayProps> = ({ onClose }) => {
   const { products, addToCart } = useStore();
@@ -12,9 +14,11 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ onClose }) => {
 
   useEffect(() => {
     inputRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
   const categories = ['Vegetables', 'Dairy', 'Rice', 'Atta', 'Snacks', 'Oils', 'Pulses'];
@@ -22,86 +26,115 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ onClose }) => {
   const results = (products || []).filter(p => {
     const q = query.toLowerCase().trim();
     if (!q) return true;
-    return (p.nameEn || '').toLowerCase().includes(q) ||
-           (p.category || '').toLowerCase().includes(q);
+    return (
+      (p.nameEn && p.nameEn.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q))
+    );
   });
 
   const handleAdd = (product: any) => {
     addToCart(product);
     setAdded(prev => ({ ...prev, [product.id]: true }));
-    setTimeout(() => setAdded(prev => ({ ...prev, [product.id]: false })), 1500);
+    setTimeout(() => setAdded(prev => ({ ...prev, [product.id]: false })), 1200);
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ background: 'white', borderBottom: '1px solid #e5e7eb', padding: '16px' }}>
-        <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
-              <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Search vegetables, dairy, rice, snacks..."
-                style={{ width: '100%', paddingLeft: '42px', paddingRight: '40px', paddingTop: '12px', paddingBottom: '12px', border: '2px solid #16a34a', borderRadius: '10px', fontSize: '15px', outline: 'none' }}
-              />
-              {query && (
-                <button onClick={() => setQuery('')} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', color: '#9ca3af' }}>
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-            <button onClick={onClose} style={{ padding: '10px', border: '1px solid #e5e7eb', borderRadius: '8px', background: 'white', cursor: 'pointer', color: '#374151' }}>
-              <X size={18} />
-            </button>
+    <div className="fixed inset-0 z-50 flex flex-col bg-slate-900/60 backdrop-blur-sm">
+      <div className="bg-white border-b border-slate-200 p-4 shadow-sm">
+        <div className="max-w-2xl mx-auto flex items-center gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search vegetables, dairy, rice, snacks..."
+              className="w-full pl-11 pr-10 py-2.5 bg-slate-50 border-2 border-emerald-500 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
+          <button
+            onClick={onClose}
+            className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-          <div style={{ display: 'flex', gap: '8px', marginTop: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
-            <button onClick={() => setQuery('')} style={{ padding: '5px 14px', borderRadius: '999px', border: '1px solid #16a34a', background: query === '' ? '#16a34a' : 'white', color: query === '' ? 'white' : '#16a34a', fontSize: '12px', whiteSpace: 'nowrap', cursor: 'pointer' }}>All</button>
-            {categories.map(cat => (
-              <button key={cat} onClick={() => setQuery(cat)} style={{ padding: '5px 14px', borderRadius: '999px', border: '1px solid #d1d5db', background: query.toLowerCase() === cat.toLowerCase() ? '#16a34a' : 'white', color: query.toLowerCase() === cat.toLowerCase() ? 'white' : '#374151', fontSize: '12px', whiteSpace: 'nowrap', cursor: 'pointer' }}>{cat}</button>
-            ))}
-          </div>
+        {/* Category Pills */}
+        <div className="max-w-2xl mx-auto mt-2.5 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <button
+            onClick={() => setQuery('')}
+            className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors ${query === '' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+          >
+            All
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setQuery(cat)}
+              className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors ${query.toLowerCase() === cat.toLowerCase() ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', background: '#f9fafb' }}>
-        <div style={{ maxWidth: '700px', margin: '0 auto', padding: '16px' }}>
-          <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '12px' }}>
-            {query ? `${results.length} results for "${query}"` : `${results.length} products available`}
-          </p>
+      {/* Product Results */}
+      <div className="flex-1 overflow-y-auto max-w-2xl w-full mx-auto p-4">
+        <p className="text-xs text-slate-500 font-medium mb-3">
+          {query ? `${results.length} items found for "${query}"` : `All Products (${results.length})`}
+        </p>
 
-          {results.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: '#9ca3af' }}>
-              <p style={{ fontWeight: 600, marginBottom: '4px' }}>No products found</p>
-              <p style={{ fontSize: '13px' }}>Try "Tomato", "Milk" or "Rice"</p>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
-              {results.map(product => (
-                <div key={product.id} style={{ background: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-                  <img src={product.image} alt={product.nameEn} style={{ width: '100%', height: '120px', objectFit: 'cover' }} />
-                  <div style={{ padding: '10px' }}>
-                    <p style={{ fontWeight: 600, fontSize: '13px', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.nameEn}</p>
-                    <p style={{ fontSize: '11px', color: '#6b7280', marginBottom: '8px' }}>{product.category}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontWeight: 700, color: '#16a34a', fontSize: '15px' }}>&#8377;{product.price}</span>
-                      <button
-                        onClick={() => handleAdd(product)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 10px', borderRadius: '7px', border: 'none', background: added[product.id] ? '#dcfce7' : '#16a34a', color: added[product.id] ? '#15803d' : 'white', fontWeight: 600, fontSize: '12px', cursor: 'pointer' }}
-                      >
-                        {added[product.id] ? <Check size={13} /> : <Plus size={13} />}
-                        {added[product.id] ? 'Added' : 'Add'}
-                      </button>
-                    </div>
+        {results.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-6">
+            <ShoppingBag className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+            <p className="text-slate-700 font-semibold text-sm">No grocery items found</p>
+            <p className="text-slate-400 text-xs mt-1">Try searching "Tomato", "Milk", or "Rice"</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {results.map(product => (
+              <div
+                key={product.id}
+                className="bg-white rounded-xl border border-slate-200 p-2.5 flex flex-col justify-between shadow-sm hover:shadow transition-shadow"
+              >
+                <div>
+                  <div className="aspect-square rounded-lg overflow-hidden bg-slate-100 mb-2">
+                    <img
+                      src={product.image}
+                      alt={product.nameEn}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
                   </div>
+                  <h4 className="font-semibold text-xs text-slate-900 line-clamp-1">{product.nameEn}</h4>
+                  <p className="text-[11px] text-slate-500">{product.category}</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+
+                <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <span className="font-bold text-emerald-700 text-sm">₹{product.price}</span>
+                  <button
+                    onClick={() => handleAdd(product)}
+                    className={`px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ${added[product.id] ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
+                  >
+                    {added[product.id] ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                    <span>{added[product.id] ? 'Added' : 'Add'}</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

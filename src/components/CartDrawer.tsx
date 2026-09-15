@@ -144,7 +144,7 @@ export const CartDrawer: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Stepper & Trash matching Image 5: [ - 1 + ] [ ðŸ—‘ï¸ ] */}
+                      {/* Stepper & Trash matching Image 5: [ - 1 + ] [ —‘ï¸ ] */}
                       <div className="flex items-center gap-3">
                         <div className="inline-flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white">
                           <button

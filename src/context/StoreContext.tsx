@@ -357,7 +357,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             sounds.playOwnerNewOrderAlert();
             showToast(
               'success',
-              'ðŸ”” New Live Customer Order!',
+              '”” New Live Customer Order!',
               `Order #${newestOrder.id} for ₹${newestOrder.totalAmount} from ${newestOrder.customerName}`
             );
           }
@@ -398,7 +398,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               sounds.playOwnerNewOrderAlert();
               const newest = merged[0];
               if (newest) {
-                showToast('success', 'ðŸ”” New Order!', `Order #${newest.id} â€” ₹${newest.totalAmount} from ${newest.customerName}`);
+                showToast('success', '”” New Order!', `Order #${newest.id} â€” ₹${newest.totalAmount} from ${newest.customerName}`);
               }
             }
           }
@@ -629,7 +629,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const statusMapEn: Record<OrderStatus, string> = {
       pending: 'Order Confirmed',
       packing: 'Packing Groceries in Store',
-      out_for_delivery: 'Out for 20-Min Delivery ðŸ›µ',
+      out_for_delivery: 'Out for 20-Min Delivery ›µ',
       delivered: 'Order Delivered Successfully âœ…',
       cancelled: 'Order Cancelled'
     };
@@ -637,7 +637,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const statusMapTe: Record<OrderStatus, string> = {
       pending: 'à°†à°°à±à°¡à°°à± à°•à°¨à±à°«à°°à±à°®à± à°…à°¯à°¿à°‚à°¦à°¿',
       packing: 'à°¸à°°à±à°•à±à°²à± à°ªà±à°¯à°¾à°•à°¿à°‚à°—à± à°…à°µà±à°¤à±à°¨à±à°¨à°¾à°¯à°¿',
-      out_for_delivery: 'à°¡à±†à°²à°¿à°µà°°à±€ à°¬à°¯à°²à±à°¦à±‡à°°à°¿à°‚à°¦à°¿ ðŸ›µ',
+      out_for_delivery: 'à°¡à±†à°²à°¿à°µà°°à±€ à°¬à°¯à°²à±à°¦à±‡à°°à°¿à°‚à°¦à°¿ ›µ',
       delivered: 'à°¡à±†à°²à°¿à°µà°°à±€ à°ªà±‚à°°à±à°¤à°¯à°¿à°‚à°¦à°¿ âœ…',
       cancelled: 'à°†à°°à±à°¡à°°à± à°°à°¦à±à°¦à± à°šà±‡à°¯à°¬à°¡à°¿à°‚à°¦à°¿'
     };

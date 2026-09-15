@@ -1,47 +1,72 @@
 import React from 'react';
-import { Clock, ShieldCheck, Truck } from 'lucide-react';
+import { Clock, ShieldCheck, Truck, Phone } from 'lucide-react';
 
 export const HeroBanner: React.FC = () => {
+  const scrollToProducts = () => {
+    document.querySelector('main')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div>
-      {/* Main Hero */}
-      <div style={{
-        background: 'linear-gradient(135deg, #166534 0%, #15803d 100%)',
-        color: 'white',
-        padding: '48px 24px',
-        textAlign: 'center'
-      }}>
-        <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '12px', lineHeight: 1.2 }}>
+      {/* Main Banner */}
+      <div className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-green-700 text-white py-10 sm:py-14 px-4 text-center">
+        <div className="max-w-3xl mx-auto">
+          <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-emerald-100 text-xs sm:text-sm font-semibold mb-3">
+            ✨ Bommalatapalli Village Express
+          </span>
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
             RA General Store
           </h1>
-          <p style={{ fontSize: '1.1rem', opacity: 0.9, marginBottom: '8px' }}>
-            Fresh Groceries • 20-Min Village Delivery
+          <p className="text-base sm:text-lg text-emerald-100 font-medium mb-1">
+            Fresh Farm Groceries Delivered in 20 Minutes
           </p>
-          <p style={{ fontSize: '0.9rem', opacity: 0.75 }}>
-            on main road, Bommalatapalli beside Chennampalli road
+          <p className="text-xs sm:text-sm text-emerald-200">
+            on main road , Bommalatapalli beside chennampalli road
           </p>
-          <p style={{ fontSize: '0.85rem', opacity: 0.75, marginTop: '4px' }}>
+          <p className="text-xs text-emerald-200/90 mt-1">
             Open Everyday: 5:00 AM to 8:30 PM
           </p>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '28px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', padding: '8px 16px', borderRadius: '999px', fontSize: '0.85rem' }}>
-              <Clock size={15} /> 20-Min Delivery
+          {/* Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-6 text-xs sm:text-sm">
+            <div className="flex items-center gap-1.5 bg-black/20 px-3.5 py-1.5 rounded-full">
+              <Clock className="w-4 h-4 text-amber-300" />
+              <span>20-Min Fast Delivery</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', padding: '8px 16px', borderRadius: '999px', fontSize: '0.85rem' }}>
-              <ShieldCheck size={15} /> Quality Assured
+            <div className="flex items-center gap-1.5 bg-black/20 px-3.5 py-1.5 rounded-full">
+              <ShieldCheck className="w-4 h-4 text-emerald-300" />
+              <span>100% Quality Assured</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', padding: '8px 16px', borderRadius: '999px', fontSize: '0.85rem' }}>
-              <Truck size={15} /> Free Village Delivery
+            <div className="flex items-center gap-1.5 bg-black/20 px-3.5 py-1.5 rounded-full">
+              <Truck className="w-4 h-4 text-amber-300" />
+              <span>Cash on Delivery & UPI</span>
             </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-7">
+            <button
+              onClick={scrollToProducts}
+              className="w-full sm:w-auto px-6 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-xl text-sm transition-colors shadow-md"
+            >
+              Shop Groceries Now
+            </button>
+            <a
+              href="https://wa.me/916281730144?text=Hello%20RA%20General%20Store%2C%20I%20want%20to%20order%20groceries"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold rounded-xl text-sm transition-colors"
+            >
+              <Phone className="w-4 h-4 text-emerald-300" />
+              <span>WhatsApp: 62817 30144</span>
+            </a>
           </div>
         </div>
       </div>
 
       {/* Offer Strip */}
-      <div style={{ background: '#fef08a', color: '#713f12', textAlign: 'center', padding: '10px 16px', fontSize: '0.85rem', fontWeight: 600 }}>
-        Free Delivery on orders above &#8377;199 • Fresh vegetables just arrived!
+      <div className="bg-amber-300 text-slate-900 py-2 px-4 text-center text-xs sm:text-sm font-bold shadow-sm">
+        Special Offer: Free Village Delivery on orders above ₹199! Fresh farm vegetables just arrived.
       </div>
     </div>
   );

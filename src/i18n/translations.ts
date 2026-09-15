@@ -4,7 +4,7 @@
     storeName: 'K-Stores',
     tagline: '20-Min Village Delivery',
     villageLocation: 'Grama Center, Main Road',
-    deliveryPromiseBadge: 'âš¡ 20 Mins Delivery',
+    deliveryPromiseBadge: ' 20 Mins Delivery',
     changeLocation: 'Change',
     searchPlaceholder: 'Search for vegetables, rice, milk, snacks, dal...',
     languageName: 'à°¤à±†à°²à±à°—à±',
@@ -18,7 +18,7 @@
     // Banner & Ticker
     bannerTitle: 'Fresh Groceries Delivered in 20 Minutes!',
     bannerSubtitle: 'Directly from our local Kirana store to your doorstep with Cash on Delivery.',
-    bannerPerk1: 'âš¡ 20 Min Delivery Guarantee',
+    bannerPerk1: ' 20 Min Delivery Guarantee',
     bannerPerk2: '’µ Cash on Delivery',
     bannerPerk3: '“² WhatsApp Bill to Owner',
     bannerPerk4: 'ª Free Store Pickup Available',
@@ -118,7 +118,7 @@
     stepOutDesc: 'Delivery partner on the way to your village location',
     stepDelivered: 'Order Delivered',
     stepDeliveredDesc: 'Received at doorstep. Enjoy fresh groceries!',
-    callStoreOwner: '“ž Call Store Owner',
+    callStoreOwner: ' Call Store Owner',
     needHelp: 'Need help with this order?',
     reorderBtn: 'Reorder All Items',
 
@@ -217,7 +217,7 @@
     storeName: 'à°•à±†-à°¸à±à°Ÿà±‹à°°à±à°¸à±',
     tagline: '20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°—à±à°°à°¾à°®à°‚à°²à±‹ à°¸à±‚à°ªà°°à± à°«à°¾à°¸à±à°Ÿà± à°¡à±†à°²à°¿à°µà°°à±€',
     villageLocation: 'à°—à±à°°à°¾à°® à°¸à±†à°‚à°Ÿà°°à±, à°®à±†à°¯à°¿à°¨à± à°°à±‹à°¡à±à°¡à±',
-    deliveryPromiseBadge: 'âš¡ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€',
+    deliveryPromiseBadge: ' 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€',
     changeLocation: 'à°®à°¾à°°à±à°šà°‚à°¡à°¿',
     searchPlaceholder: 'à°•à±‚à°°à°—à°¾à°¯à°²à±, à°¬à°¿à°¯à±à°¯à°‚, à°ªà°¾à°²à±, à°¸à±à°¨à°¾à°•à±à°¸à±, à°ªà°ªà±à°ªà±à°²à± à°µà±†à°¤à°•à°‚à°¡à°¿...',
     languageName: 'English',
@@ -231,7 +231,7 @@
     // Banner & Ticker
     bannerTitle: 'à°¤à°¾à°œà°¾ à°•à°¿à°°à°¾à°£à°¾ à°¸à°°à±à°•à±à°²à± - 20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°®à±€ à°‡à°‚à°Ÿà°¿à°•à°¿!',
     bannerSubtitle: 'à°®à°¾ à°²à±‹à°•à°²à± à°•à°¿à°°à°¾à°£à°¾ à°·à°¾à°ªà± à°¨à±à°‚à°¡à°¿ à°¨à±‡à°°à±à°—à°¾ à°®à±€ à°‡à°‚à°Ÿà°¿ à°®à±à°‚à°¦à±à°•à± - à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ (à°¸à°°à±à°•à±à°²à± à°µà°šà±à°šà°¾à°• à°¡à°¬à±à°¬à±à°²à± à°‡à°µà±à°µà°‚à°¡à°¿).',
-    bannerPerk1: 'âš¡ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€ à°—à±à°¯à°¾à°°à±†à°‚à°Ÿà±€',
+    bannerPerk1: ' 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€ à°—à±à°¯à°¾à°°à±†à°‚à°Ÿà±€',
     bannerPerk2: '’µ à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ (COD)',
     bannerPerk3: '“² à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°“à°¨à°°à±â€Œà°•à°¿ à°¬à°¿à°²à±à°²à±',
     bannerPerk4: 'ª à°·à°¾à°ªà± à°µà°¦à±à°¦ à°¸à±†à°²à±à°«à± à°ªà°¿à°•à°ªà± à°•à±‚à°¡à°¾ à°•à°²à°¦à±',
@@ -331,7 +331,7 @@
     stepOutDesc: 'à°¡à±†à°²à°¿à°µà°°à±€ à°¬à°¾à°¯à± à°®à±€ à°‡à°‚à°Ÿà°¿à°•à°¿ à°¬à°¯à°²à±à°¦à±‡à°°à°¾à°¡à±',
     stepDelivered: 'à°¡à±†à°²à°¿à°µà°°à±€ à°ªà±‚à°°à±à°¤à°¯à°¿à°‚à°¦à°¿',
     stepDeliveredDesc: 'à°¸à°°à±à°•à±à°²à± à°šà±‡à°°à°¾à°¯à°¿. à°¤à°¾à°œà°¾ à°•à°¿à°°à°¾à°£à°¾ à°†à°¨à°‚à°¦à°¿à°‚à°šà°‚à°¡à°¿!',
-    callStoreOwner: '“ž à°“à°¨à°°à±â€Œà°•à°¿ à°«à±‹à°¨à± à°šà±‡à°¯à°‚à°¡à°¿',
+    callStoreOwner: ' à°“à°¨à°°à±â€Œà°•à°¿ à°«à±‹à°¨à± à°šà±‡à°¯à°‚à°¡à°¿',
     needHelp: 'à°ˆ à°†à°°à±à°¡à°°à± à°ªà±ˆ à°¸à°¹à°¾à°¯à°‚ à°•à°¾à°µà°¾à°²à°¾?',
     reorderBtn: 'à°®à°³à±à°²à±€ à°‡à°¦à±‡ à°†à°°à±à°¡à°°à± à°šà±‡à°¯à°‚à°¡à°¿',
 
