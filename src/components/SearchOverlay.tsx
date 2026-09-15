@@ -50,7 +50,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ onClose }) => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search vegetables, dairy, rice, snacks..."
-              className="w-full pl-11 pr-10 py-2.5 bg-slate-50 border-2 border-emerald-500 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white"
+              className="w-full pl-11 pr-10 py-2.5 bg-slate-50 border-2 border-emerald-600 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white"
             />
             {query && (
               <button
@@ -69,11 +69,11 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ onClose }) => {
           </button>
         </div>
 
-        {/* Category Pills */}
+        {/* Quick Filter Tags */}
         <div className="max-w-2xl mx-auto mt-2.5 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
           <button
             onClick={() => setQuery('')}
-            className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors ${query === '' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+            className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors ${query === '' ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
           >
             All
           </button>
@@ -81,7 +81,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ onClose }) => {
             <button
               key={cat}
               onClick={() => setQuery(cat)}
-              className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors ${query.toLowerCase() === cat.toLowerCase() ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+              className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors ${query.toLowerCase() === cat.toLowerCase() ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
             >
               {cat}
             </button>
@@ -89,10 +89,10 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ onClose }) => {
         </div>
       </div>
 
-      {/* Product Results */}
+      {/* Results Container */}
       <div className="flex-1 overflow-y-auto max-w-2xl w-full mx-auto p-4">
         <p className="text-xs text-slate-500 font-medium mb-3">
-          {query ? `${results.length} items found for "${query}"` : `All Products (${results.length})`}
+          {query ? `${results.length} items found for "${query}"` : `All Available Items (${results.length})`}
         </p>
 
         {results.length === 0 ? (
@@ -106,7 +106,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ onClose }) => {
             {results.map(product => (
               <div
                 key={product.id}
-                className="bg-white rounded-xl border border-slate-200 p-2.5 flex flex-col justify-between shadow-sm hover:shadow transition-shadow"
+                className="bg-white rounded-xl border border-slate-200 p-2.5 flex flex-col justify-between shadow-sm"
               >
                 <div>
                   <div className="aspect-square rounded-lg overflow-hidden bg-slate-100 mb-2">

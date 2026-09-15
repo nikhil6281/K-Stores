@@ -930,7 +930,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Product Image URL</label>
+                <label className="block font-bold text-slate-300 mb-1">Product Photo (Camera / Upload)</label>
                 <input
                   type="text"
                   value={newProductImage}
