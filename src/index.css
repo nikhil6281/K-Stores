@@ -2,35 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  html { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; scroll-behavior: smooth; }
-  h1,h2,h3,h4,h5,h6,.font-heading { font-family: 'Playfair Display', Georgia, serif; }
-  body { background-color: #040814; color: #ffffff; }
-}
-
-.gold-text {
-  background: linear-gradient(135deg,#FDE68A 0%,#F59E0B 50%,#D97706 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gold-btn {
-  background: linear-gradient(135deg,#F59E0B 0%,#D97706 100%);
-  color: #070C1A;
-  font-weight: 700;
-  box-shadow: 0 4px 18px rgba(217,119,6,0.4);
-  transition: all 0.2s ease;
-}
-.gold-btn:hover {
-  background: linear-gradient(135deg,#FBBF24 0%,#F59E0B 100%);
-  box-shadow: 0 6px 24px rgba(245,158,11,0.55);
-  transform: translateY(-1px);
-}
-
-.glass {
-  background: rgba(11,19,43,0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(245,158,11,0.15);
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; scroll-behavior: smooth; }
+body { background: #ffffff; color: #111827; }

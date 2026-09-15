@@ -23,7 +23,7 @@
     bannerPerk3: '“² WhatsApp Bill to Owner',
     bannerPerk4: 'ª Free Store Pickup Available',
     shopNow: 'Order Now',
-    tickerNotice: 'Ž‰ Special Offer: Free Village Delivery on orders above ₹199! Fresh farm vegetables just arrived.',
+    tickerNotice: '✨ Special Offer: Free Village Delivery on orders above ₹199! Fresh farm vegetables just arrived.',
 
     // Categories
     all: 'All Items',
@@ -57,7 +57,7 @@
     doorstep20MinDesc: 'Delivered in 20 mins to your home',
     storePickup: 'Store Counter Pickup',
     storePickupDesc: 'Ready in 5 mins for self-pickup',
-    freeDeliveryEligible: 'Ž‰ You have unlocked FREE Delivery!',
+    freeDeliveryEligible: '✨ You have unlocked FREE Delivery!',
     addMoreForFreeDelivery: 'Add items worth ₹{amount} more for FREE delivery',
     billDetails: 'Bill Summary',
     itemTotal: 'Item Total',
@@ -96,7 +96,7 @@
     orderSummary: 'Order Summary',
 
     // WhatsApp Bill & Confirmation
-    orderSuccessTitle: 'Order Placed Successfully! Ž‰',
+    orderSuccessTitle: 'Order Placed Successfully! ✨',
     orderSuccessSubtitle: 'Your order #{orderId} is being prepared for fast 20-minute delivery.',
     whatsappCardTitle: 'Send Bill to Store Owner on WhatsApp',
     whatsappCardDesc: 'Tap below to send the automated itemized bill directly to the store owner WhatsApp (+91 62817 30144) for immediate processing.',
@@ -236,7 +236,7 @@
     bannerPerk3: '“² à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°“à°¨à°°à±â€Œà°•à°¿ à°¬à°¿à°²à±à°²à±',
     bannerPerk4: 'ª à°·à°¾à°ªà± à°µà°¦à±à°¦ à°¸à±†à°²à±à°«à± à°ªà°¿à°•à°ªà± à°•à±‚à°¡à°¾ à°•à°²à°¦à±',
     shopNow: 'à°‡à°ªà±à°ªà±à°¡à±‡ à°†à°°à±à°¡à°°à± à°šà±‡à°¯à°‚à°¡à°¿',
-    tickerNotice: 'Ž‰ à°ªà±à°°à°¤à±à°¯à±‡à°• à°†à°«à°°à±: ₹199 à°ªà±ˆà°¨ à°†à°°à±à°¡à°°à±à°²à°•à± à°‰à°šà°¿à°¤ à°—à±à°°à°¾à°®à±€à°£ à°¡à±†à°²à°¿à°µà°°à±€! à°¸à°°à°¿à°•à±Šà°¤à±à°¤ à°•à±‚à°°à°—à°¾à°¯à°²à± à°®à°°à°¿à°¯à± à°¸à°°à±à°•à±à°²à± à°¸à±à°Ÿà°¾à°•à± à°µà°šà±à°šà°¾à°¯à°¿.',
+    tickerNotice: '✨ à°ªà±à°°à°¤à±à°¯à±‡à°• à°†à°«à°°à±: ₹199 à°ªà±ˆà°¨ à°†à°°à±à°¡à°°à±à°²à°•à± à°‰à°šà°¿à°¤ à°—à±à°°à°¾à°®à±€à°£ à°¡à±†à°²à°¿à°µà°°à±€! à°¸à°°à°¿à°•à±Šà°¤à±à°¤ à°•à±‚à°°à°—à°¾à°¯à°²à± à°®à°°à°¿à°¯à± à°¸à°°à±à°•à±à°²à± à°¸à±à°Ÿà°¾à°•à± à°µà°šà±à°šà°¾à°¯à°¿.',
 
     // Categories
     all: 'à°…à°¨à±à°¨à°¿ à°µà°¸à±à°¤à±à°µà±à°²à±',
@@ -270,7 +270,7 @@
     doorstep20MinDesc: '20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°¨à±‡à°°à±à°—à°¾ à°®à±€ à°‡à°‚à°Ÿà°¿à°•à°¿ à°¡à±†à°²à°¿à°µà°°à±€',
     storePickup: 'à°·à°¾à°ªà± à°•à±Œà°‚à°Ÿà°°à± à°µà°¦à±à°¦ à°ªà°¿à°•à°ªà±',
     storePickupDesc: '5 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°·à°¾à°ªà±â€Œà°²à±‹ à°ªà°¾à°°à±à°¸à°¿à°²à± à°°à±†à°¡à±€à°—à°¾ à°‰à°‚à°Ÿà±à°‚à°¦à°¿',
-    freeDeliveryEligible: 'Ž‰ à°®à±€à°•à± à°‰à°šà°¿à°¤ à°¡à±†à°²à°¿à°µà°°à±€ à°²à°­à°¿à°‚à°šà°¿à°‚à°¦à°¿!',
+    freeDeliveryEligible: '✨ à°®à±€à°•à± à°‰à°šà°¿à°¤ à°¡à±†à°²à°¿à°µà°°à±€ à°²à°­à°¿à°‚à°šà°¿à°‚à°¦à°¿!',
     addMoreForFreeDelivery: 'à°‰à°šà°¿à°¤ à°¡à±†à°²à°¿à°µà°°à±€ à°•à±‹à°¸à°‚ à°‡à°‚à°•à°¾ ₹{amount} à°¸à°°à±à°•à±à°²à± à°šà±‡à°°à±à°šà°‚à°¡à°¿',
     billDetails: 'à°¬à°¿à°²à±à°²à± à°µà°¿à°µà°°à°¾à°²à±',
     itemTotal: 'à°¸à°°à±à°•à±à°² à°®à±Šà°¤à±à°¤à°‚',
@@ -309,7 +309,7 @@
     orderSummary: 'à°†à°°à±à°¡à°°à± à°¸à°¾à°°à°¾à°‚à°¶à°‚',
 
     // WhatsApp Bill & Confirmation
-    orderSuccessTitle: 'à°†à°°à±à°¡à°°à± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚à°—à°¾ à°¨à°®à±‹à°¦à±ˆà°‚à°¦à°¿! Ž‰',
+    orderSuccessTitle: 'à°†à°°à±à°¡à°°à± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚à°—à°¾ à°¨à°®à±‹à°¦à±ˆà°‚à°¦à°¿! ✨',
     orderSuccessSubtitle: 'à°®à±€ à°†à°°à±à°¡à°°à± #{orderId} à°µà±‡à°—à°µà°‚à°¤à°®à±ˆà°¨ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€ à°•à±‹à°¸à°‚ à°¸à°¿à°¦à±à°§à°‚ à°šà±‡à°¯à°¬à°¡à±à°¤à±‹à°‚à°¦à°¿.',
     whatsappCardTitle: 'à°·à°¾à°ªà± à°“à°¨à°°à±â€Œà°•à°¿ à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¬à°¿à°²à±à°²à± à°ªà°‚à°ªà°‚à°¡à°¿',
     whatsappCardDesc: 'à°µà±†à°‚à°Ÿà°¨à±‡ à°ªà±à°¯à°¾à°•à°¿à°‚à°—à± à°ªà±à°°à°¾à°°à°‚à°­à°¿à°‚à°šà°¡à°¾à°¨à°¿à°•à°¿ à°•à±à°°à°¿à°‚à°¦à°¿ à°¬à°Ÿà°¨à± à°¨à±Šà°•à±à°•à°¿ à°µà°¿à°µà°°à°®à±ˆà°¨ à°¬à°¿à°²à±à°²à±à°¨à± à°“à°¨à°°à± à°µà°¾à°Ÿà±à°¸à°¾à°ªà± (+91 62817 30144) à°•à°¿ à°ªà°‚à°ªà°‚à°¡à°¿.',

@@ -58,7 +58,7 @@ export function formatWhatsAppOrderBill(order: Order, language: 'en' | 'te' = 'e
   }
   
   if (order.totalDiscount > 0) {
-    message += `ðŸŽ‰ *${isTe ? 'à°®à±Šà°¤à±à°¤à°‚ à°†à°¦à°¾ (Savings)' : 'Total Savings'}:* -₹${order.totalDiscount}\n`;
+    message += `ðŸ✨ *${isTe ? 'à°®à±Šà°¤à±à°¤à°‚ à°†à°¦à°¾ (Savings)' : 'Total Savings'}:* -₹${order.totalDiscount}\n`;
   }
 
   const paymentStr = order.paymentMethod === 'online_razorpay'

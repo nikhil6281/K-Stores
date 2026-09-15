@@ -1,63 +1,47 @@
 import React from 'react';
-import { Sparkles, Clock, ShieldCheck, ArrowRight, Phone } from 'lucide-react';
+import { Clock, ShieldCheck, Truck } from 'lucide-react';
 
 export const HeroBanner: React.FC = () => {
-  const scrollToProducts = () => {
-    document.querySelector('main')?.scrollIntoView({ behavior: 'smooth' });
-  };
   return (
-    <div className="relative w-full overflow-hidden bg-navy-950 text-white" style={{minHeight:'72vh', display:'flex', alignItems:'center'}}>
-      {/* Ambient hero image */}
-      <div className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage:"url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=2000&q=80')", opacity:0.18 }} />
-      <div className="absolute inset-0" style={{background:'linear-gradient(135deg,#040814 0%,rgba(7,12,26,0.92) 60%,rgba(11,19,43,0.7) 100%)'}} />
-      {/* Glow orbs */}
-      <div className="absolute top-0 left-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{background:'rgba(245,158,11,0.08)',transform:'translate(-30%,-30%)'}} />
-      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{background:'rgba(217,119,6,0.07)',transform:'translate(30%,30%)'}} />
+    <div>
+      {/* Main Hero */}
+      <div style={{
+        background: 'linear-gradient(135deg, #166534 0%, #15803d 100%)',
+        color: 'white',
+        padding: '48px 24px',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '12px', lineHeight: 1.2 }}>
+            RA General Store
+          </h1>
+          <p style={{ fontSize: '1.1rem', opacity: 0.9, marginBottom: '8px' }}>
+            Fresh Groceries • 20-Min Village Delivery
+          </p>
+          <p style={{ fontSize: '0.9rem', opacity: 0.75 }}>
+            on main road, Bommalatapalli beside Chennampalli road
+          </p>
+          <p style={{ fontSize: '0.85rem', opacity: 0.75, marginTop: '4px' }}>
+            Open Everyday: 5:00 AM to 8:30 PM
+          </p>
 
-      <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-8 py-20 flex flex-col items-center text-center">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-8"
-          style={{background:'rgba(245,158,11,0.08)',backdropFilter:'blur(8px)'}}>
-          <Sparkles className="w-4 h-4 text-amber-400" style={{animation:'pulse 2s infinite'}} />
-          RA General Store — Bommalatapalli Village
-        </div>
-
-        {/* Headline */}
-        <h1 className="font-serif text-4xl sm:text-6xl font-bold text-white mb-5" style={{lineHeight:1.15, letterSpacing:'-0.01em'}}>
-          Fresh Groceries,<br />
-          <span className="gold-text">Delivered in 20 Minutes</span>
-        </h1>
-        <p className="text-slate-300 text-base sm:text-xl max-w-2xl leading-relaxed mb-10" style={{fontFamily:'Lora,serif'}}>
-          Premium pantry staples, dairy, farm-fresh vegetables and household essentials — right beside Chennampalli road, Bommalatapalli.
-        </p>
-
-        {/* Feature pills */}
-        <div className="flex flex-wrap gap-3 justify-center mb-10 text-xs sm:text-sm">
-          {[
-            { icon: <Clock className="w-4 h-4 text-amber-400" />, text: '20-Min Express Delivery' },
-            { icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />, text: '100% Quality Assured' },
-            { icon: <span className="text-amber-400 font-bold text-base">₹</span>, text: 'Cash on Delivery & UPI' },
-          ].map((f, i) => (
-            <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-xl border border-navy-600/60 text-slate-200" style={{background:'rgba(11,19,43,0.7)',backdropFilter:'blur(8px)'}}>
-              {f.icon}<span>{f.text}</span>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '28px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', padding: '8px 16px', borderRadius: '999px', fontSize: '0.85rem' }}>
+              <Clock size={15} /> 20-Min Delivery
             </div>
-          ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', padding: '8px 16px', borderRadius: '999px', fontSize: '0.85rem' }}>
+              <ShieldCheck size={15} /> Quality Assured
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', padding: '8px 16px', borderRadius: '999px', fontSize: '0.85rem' }}>
+              <Truck size={15} /> Free Village Delivery
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <button onClick={scrollToProducts}
-            className="gold-btn flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl text-base tracking-wide">
-            Explore Store Catalog <ArrowRight className="w-4 h-4" />
-          </button>
-          <a href="https://wa.me/916281730144?text=Hello%20RA%20General%20Store%2C%20I%20want%20to%20order"
-            target="_blank" rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border border-amber-500/30 text-slate-200 hover:text-white hover:border-amber-400 transition-colors text-base font-semibold"
-            style={{background:'rgba(11,19,43,0.6)',backdropFilter:'blur(8px)'}}>
-            <Phone className="w-4 h-4 text-emerald-400" /> WhatsApp Quick Order
-          </a>
-        </div>
+      {/* Offer Strip */}
+      <div style={{ background: '#fef08a', color: '#713f12', textAlign: 'center', padding: '10px 16px', fontSize: '0.85rem', fontWeight: 600 }}>
+        Free Delivery on orders above &#8377;199 • Fresh vegetables just arrived!
       </div>
     </div>
   );
