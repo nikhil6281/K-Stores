@@ -241,8 +241,8 @@ export const AppContent: React.FC = () => {
               </h3>
               <p className="text-xs sm:text-sm text-emerald-100 max-w-xl">
                 {language === 'te'
-                  ? 'à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ â€¢ à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¸à±à°²à°­à°‚à°—à°¾ à°¬à°¿à°²à±à°²à± â€¢ à°·à°¾à°ªà± à°µà°¦à±à°¦ à°‰à°šà°¿à°¤ à°ªà°¿à°•à°ªà±'
-                  : 'Cash on Delivery â€¢ WhatsApp itemized billing â€¢ 100% genuine local kirana products'}
+                  ? 'à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ • à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¸à±à°²à°­à°‚à°—à°¾ à°¬à°¿à°²à±à°²à± • à°·à°¾à°ªà± à°µà°¦à±à°¦ à°‰à°šà°¿à°¤ à°ªà°¿à°•à°ªà±'
+                  : 'Cash on Delivery • WhatsApp itemized billing • 100% genuine local kirana products'}
               </p>
             </div>
 

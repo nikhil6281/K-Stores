@@ -266,7 +266,7 @@ export const CheckoutModal: React.FC = () => {
             });
             showToast('success',
               language === 'te' ? 'ðŸ’³ à°†à°¨à±â€Œà°²à±ˆà°¨à± à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚!' : 'ðŸ’³ Payment Successful!',
-              language === 'te' ? 'à°®à±€ à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°§à±ƒà°µà±€à°•à°°à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿. à°†à°°à±à°¡à°°à± à°¨à°®à±‹à°¦à°¯à°¿à°‚à°¦à°¿!' : `Payment â‚¹${cartTotal} confirmed. Order placed!`
+              language === 'te' ? 'à°®à±€ à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°§à±ƒà°µà±€à°•à°°à°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿. à°†à°°à±à°¡à°°à± à°¨à°®à±‹à°¦à°¯à°¿à°‚à°¦à°¿!' : `Payment ₹${cartTotal} confirmed. Order placed!`
             );
           } finally {
             setIsProcessingPayment(false);
@@ -583,21 +583,21 @@ export const CheckoutModal: React.FC = () => {
           <div className="bg-slate-50 rounded-2xl p-3 border border-slate-200 text-xs space-y-1.5">
             <div className="flex justify-between text-slate-600">
               <span>{cartItemsCount} {t.items} {t.itemTotal}</span>
-              <span>â‚¹{cartSubtotal}</span>
+              <span>₹{cartSubtotal}</span>
             </div>
             {cartDiscount > 0 && (
               <div className="flex justify-between text-emerald-700 font-semibold">
                 <span>{t.mrpSavings}</span>
-                <span>-â‚¹{cartDiscount}</span>
+                <span>-₹{cartDiscount}</span>
               </div>
             )}
             <div className="flex justify-between text-slate-600">
               <span>{t.deliveryFee}</span>
-              <span>{deliveryFee === 0 ? <span className="text-emerald-700 font-bold">{t.free}</span> : `â‚¹${deliveryFee}`}</span>
+              <span>{deliveryFee === 0 ? <span className="text-emerald-700 font-bold">{t.free}</span> : `₹${deliveryFee}`}</span>
             </div>
             <div className="pt-1.5 border-t border-slate-200 flex justify-between items-center text-sm font-extrabold text-slate-900">
               <span>{t.toPay}</span>
-              <span className="text-base text-emerald-800">â‚¹{cartTotal}</span>
+              <span className="text-base text-emerald-800">₹{cartTotal}</span>
             </div>
           </div>
 
@@ -624,12 +624,12 @@ export const CheckoutModal: React.FC = () => {
             ) : paymentMode === 'online' ? (
               <>
                 <CreditCard className="w-5 h-5 text-amber-300" />
-                <span>{language === 'te' ? `à°†à°¨à±â€Œà°²à±ˆà°¨à± à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿ â€¢ â‚¹${cartTotal}` : `Pay Online â€¢ â‚¹${cartTotal}`}</span>
+                <span>{language === 'te' ? `à°†à°¨à±â€Œà°²à±ˆà°¨à± à°šà±†à°²à±à°²à°¿à°‚à°šà°‚à°¡à°¿ • ₹${cartTotal}` : `Pay Online • ₹${cartTotal}`}</span>
               </>
             ) : (
               <>
                 <CheckCircle2 className="w-5 h-5 text-amber-300" />
-                <span>{`${t.placeOrder} â€¢ â‚¹${cartTotal}`}</span>
+                <span>{`${t.placeOrder} • ₹${cartTotal}`}</span>
               </>
             )}
           </button>

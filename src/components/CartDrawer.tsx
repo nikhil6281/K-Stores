@@ -140,7 +140,7 @@ export const CartDrawer: React.FC = () => {
                           {quantity} {quantity > 1 ? 'Units' : 'Unit'} ({unit})
                         </div>
                         <div className="text-xs font-bold text-slate-800 mt-0.5">
-                          â‚¹{product.price}
+                          ₹{product.price}
                         </div>
                       </div>
 
@@ -179,7 +179,7 @@ export const CartDrawer: React.FC = () => {
 
                     {/* Price on right */}
                     <div className="text-right font-black text-xs sm:text-sm text-slate-900">
-                      â‚¹{itemTotal}
+                      ₹{itemTotal}
                     </div>
                   </div>
                 );
@@ -237,7 +237,7 @@ export const CartDrawer: React.FC = () => {
                 Estimated total
               </span>
               <span className="font-black text-base sm:text-lg text-slate-900 font-sans">
-                â‚¹{cartTotal}
+                ₹{cartTotal}
               </span>
             </div>
 

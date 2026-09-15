@@ -1,40 +1,36 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans;
-    -webkit-tap-highlight-color: transparent;
-  }
+  html { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; scroll-behavior: smooth; }
+  h1,h2,h3,h4,h5,h6,.font-heading { font-family: 'Playfair Display', Georgia, serif; }
+  body { @apply bg-navy-950 text-white; }
 }
 
-/* Custom Kirana styles */
-.gradient-kirana {
-  background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
+.gold-text {
+  background: linear-gradient(135deg,#FDE68A 0%,#F59E0B 50%,#D97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.gradient-saffron {
-  background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fbbf24 100%);
+.gold-btn {
+  background: linear-gradient(135deg,#F59E0B 0%,#D97706 100%);
+  color: #070C1A;
+  font-weight: 700;
+  box-shadow: 0 4px 18px rgba(217,119,6,0.4);
+  transition: all 0.2s ease;
+}
+.gold-btn:hover {
+  background: linear-gradient(135deg,#FBBF24 0%,#F59E0B 100%);
+  box-shadow: 0 6px 24px rgba(245,158,11,0.55);
+  transform: translateY(-1px);
 }
 
-.gradient-dark {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-}
-
-/* Hide scrollbar for category pills */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Animations */
-@keyframes bounceSubtle {
-  0%, 100% { transform: translateY(-3%); }
-  50% { transform: translateY(0); }
-}
-
-.animate-bounce-subtle {
-  animation: bounceSubtle 2s infinite ease-in-out;
+.glass {
+  background: rgba(11,19,43,0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(245,158,11,0.15);
 }

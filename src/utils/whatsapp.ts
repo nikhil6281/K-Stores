@@ -21,21 +21,21 @@ export function formatWhatsAppOrderBill(order: Order, language: 'en' | 'te' = 'e
   message += `âš¡ *${isTe ? 'à°¡à±†à°²à°¿à°µà°°à±€ à°°à°•à°‚' : 'Delivery Mode'}:* ${isDelivery ? (isTe ? 'ðŸš€ 20-à°¨à°¿à°®à°¿à°·à°¾à°² à°µà°¿à°²à±‡à°œà± à°¹à±‹à°®à± à°¡à±†à°²à°¿à°µà°°à±€' : 'ðŸš€ 20-Min Doorstep Delivery') : (isTe ? 'ðŸª à°·à°¾à°ªà± à°•à±Œà°‚à°Ÿà°°à± à°µà°¦à±à°¦ à°ªà°¿à°•à°ªà±' : 'ðŸª Store Counter Pickup')}\n\n`;
 
   message += `ðŸ‘¤ *${isTe ? 'à°•à°¸à±à°Ÿà°®à°°à± à°µà°¿à°µà°°à°¾à°²à±' : 'CUSTOMER DETAILS'}:*\n`;
-  message += `â€¢ *${isTe ? 'à°ªà±‡à°°à±' : 'Name'}:* ${order.customerName}\n`;
-  message += `â€¢ *${isTe ? 'à°«à±‹à°¨à±' : 'Phone'}:* +91 ${order.customerPhone}\n`;
+  message += `• *${isTe ? 'à°ªà±‡à°°à±' : 'Name'}:* ${order.customerName}\n`;
+  message += `• *${isTe ? 'à°«à±‹à°¨à±' : 'Phone'}:* +91 ${order.customerPhone}\n`;
 
   if (isDelivery && order.address) {
-    message += `â€¢ *${isTe ? 'à°—à±à°°à°¾à°®à°‚ / à°µà±€à°§à°¿' : 'Village / Street'}:* ${order.address.villageName}\n`;
+    message += `• *${isTe ? 'à°—à±à°°à°¾à°®à°‚ / à°µà±€à°§à°¿' : 'Village / Street'}:* ${order.address.villageName}\n`;
     if (order.address.doorNo) {
-      message += `â€¢ *${isTe ? 'à°‡à°‚à°Ÿà°¿ à°¨à°‚à°¬à°°à±' : 'Door No'}:* ${order.address.doorNo}\n`;
+      message += `• *${isTe ? 'à°‡à°‚à°Ÿà°¿ à°¨à°‚à°¬à°°à±' : 'Door No'}:* ${order.address.doorNo}\n`;
     }
     if (order.address.landmark) {
-      message += `â€¢ *ðŸ“ ${isTe ? 'à°²à±à°¯à°¾à°‚à°¡à±â€Œà°®à°¾à°°à±à°•à±' : 'Landmark'}:* ${order.address.landmark}\n`;
+      message += `• *ðŸ“ ${isTe ? 'à°²à±à°¯à°¾à°‚à°¡à±â€Œà°®à°¾à°°à±à°•à±' : 'Landmark'}:* ${order.address.landmark}\n`;
     }
   }
 
   if (order.notes) {
-    message += `â€¢ *ðŸ“ ${isTe ? 'à°¸à±‚à°šà°¨' : 'Note'}:* ${order.notes}\n`;
+    message += `• *ðŸ“ ${isTe ? 'à°¸à±‚à°šà°¨' : 'Note'}:* ${order.notes}\n`;
   }
 
   message += `\nðŸ“¦ *${isTe ? 'à°†à°°à±à°¡à°°à± à°šà±‡à°¸à°¿à°¨ à°¸à°°à±à°•à±à°²à±' : 'ITEMIZED GROCERY LIST'}:*\n`;
@@ -47,18 +47,18 @@ export function formatWhatsAppOrderBill(order: Order, language: 'en' | 'te' = 'e
     const unit = isTe ? p.unitTe : p.unit;
     const itemTotal = p.price * item.quantity;
     message += `${index + 1}. *${name}*\n`;
-    message += `   â””â”€ ${item.quantity} x â‚¹${p.price} (${unit}) = *â‚¹${itemTotal}*\n`;
+    message += `   â””â”€ ${item.quantity} x ₹${p.price} (${unit}) = *₹${itemTotal}*\n`;
   });
 
   message += `â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n`;
-  message += `ðŸ’° *${isTe ? 'à°¸à°°à±à°•à±à°² à°®à±Šà°¤à±à°¤à°‚ (Subtotal)' : 'Items Subtotal'}:* â‚¹${order.subtotal}\n`;
+  message += `ðŸ’° *${isTe ? 'à°¸à°°à±à°•à±à°² à°®à±Šà°¤à±à°¤à°‚ (Subtotal)' : 'Items Subtotal'}:* ₹${order.subtotal}\n`;
   
   if (isDelivery) {
-    message += `ðŸ›µ *${isTe ? 'à°¡à±†à°²à°¿à°µà°°à±€ à°›à°¾à°°à±à°œà±' : 'Delivery Fee'}:* ${order.deliveryFee === 0 ? (isTe ? 'à°‰à°šà°¿à°¤à°‚ (FREE)' : 'FREE') : `â‚¹${order.deliveryFee}`}\n`;
+    message += `ðŸ›µ *${isTe ? 'à°¡à±†à°²à°¿à°µà°°à±€ à°›à°¾à°°à±à°œà±' : 'Delivery Fee'}:* ${order.deliveryFee === 0 ? (isTe ? 'à°‰à°šà°¿à°¤à°‚ (FREE)' : 'FREE') : `₹${order.deliveryFee}`}\n`;
   }
   
   if (order.totalDiscount > 0) {
-    message += `ðŸŽ‰ *${isTe ? 'à°®à±Šà°¤à±à°¤à°‚ à°†à°¦à°¾ (Savings)' : 'Total Savings'}:* -â‚¹${order.totalDiscount}\n`;
+    message += `ðŸŽ‰ *${isTe ? 'à°®à±Šà°¤à±à°¤à°‚ à°†à°¦à°¾ (Savings)' : 'Total Savings'}:* -₹${order.totalDiscount}\n`;
   }
 
   const paymentStr = order.paymentMethod === 'online_razorpay'
@@ -67,7 +67,7 @@ export function formatWhatsAppOrderBill(order: Order, language: 'en' | 'te' = 'e
     ? (isTe ? 'à°¸à±à°Ÿà±‹à°°à± à°•à±Œà°‚à°Ÿà°°à±â€Œà°²à±‹ à°šà±†à°²à±à°²à°¿à°‚à°ªà± (Pay on Pickup)' : 'Pay on Pickup at Store')
     : (isTe ? 'à°•à±à°¯à°¾à°·à± à°†à°¨à± à°¡à±†à°²à°¿à°µà°°à±€ / UPI (COD)' : 'Cash on Delivery / UPI (COD)');
 
-  message += `\nðŸ’µ *${isTe ? 'à°®à±Šà°¤à±à°¤à°‚ à°¬à°¿à°²à±à°²à± (TOTAL BILL)' : 'TOTAL BILL'}:* *â‚¹${order.totalAmount}*\n`;
+  message += `\nðŸ’µ *${isTe ? 'à°®à±Šà°¤à±à°¤à°‚ à°¬à°¿à°²à±à°²à± (TOTAL BILL)' : 'TOTAL BILL'}:* *₹${order.totalAmount}*\n`;
   message += `ðŸ’³ *${isTe ? 'à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°µà°¿à°µà°°à°¾à°²à±' : 'Payment'}:* *${paymentStr}*\n`;
   message += `â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n`;
   message += isTe 
@@ -101,7 +101,7 @@ export function getWhatsAppSupportUrl(language: 'en' | 'te' = 'en'): string {
  */
 export function getCustomerStatusUpdateWhatsAppUrl(order: Order, statusText: string): string {
   const cleanPhone = order.customerPhone.replace(/\D/g, '');
-  const message = `ðŸ‘‹ Hello ${order.customerName},\n\nYour K-Stores order *#${order.id}* status update: *${statusText}*.\n\nTotal to Pay: â‚¹${order.totalAmount} (Cash on Delivery).\nEstimated Time: ~${order.estimatedDeliveryMinutes} mins.\n\nThank you for choosing K-Stores!`;
+  const message = `ðŸ‘‹ Hello ${order.customerName},\n\nYour K-Stores order *#${order.id}* status update: *${statusText}*.\n\nTotal to Pay: ₹${order.totalAmount} (Cash on Delivery).\nEstimated Time: ~${order.estimatedDeliveryMinutes} mins.\n\nThank you for choosing K-Stores!`;
   return `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(message)}`;
 }
 

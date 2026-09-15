@@ -262,8 +262,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: 'deal-1',
       titleEn: 'Village Welcome Offer',
       titleTe: 'à°—à±à°°à°¾à°® à°ªà±à°°à°œà°²à°•à± à°¸à±à°µà°¾à°—à°¤à°‚ à°†à°«à°°à±',
-      subtitleEn: 'Free 20-min delivery on orders above â‚¹199',
-      subtitleTe: 'â‚¹199 à°ªà±ˆà°¨ à°†à°°à±à°¡à°°à±à°²à°•à± à°‰à°šà°¿à°¤ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€',
+      subtitleEn: 'Free 20-min delivery on orders above ₹199',
+      subtitleTe: '₹199 à°ªà±ˆà°¨ à°†à°°à±à°¡à°°à±à°²à°•à± à°‰à°šà°¿à°¤ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€',
       code: 'GRAMA20',
       discountAmount: 15,
       minOrder: 199,
@@ -273,8 +273,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: 'deal-2',
       titleEn: 'Fresh Farm Tuesday',
       titleTe: 'à°¤à°¾à°œà°¾ à°•à±‚à°°à°—à°¾à°¯à°² à°ªà±à°°à°¤à±à°¯à±‡à°• à°¡à±€à°²à±',
-      subtitleEn: 'Extra â‚¹20 off on vegetable baskets above â‚¹299',
-      subtitleTe: 'à°•à±‚à°°à°—à°¾à°¯à°²à°ªà±ˆ â‚¹299 à°ªà±ˆà°¨ â‚¹20 à°¤à°—à±à°—à°¿à°‚à°ªà±',
+      subtitleEn: 'Extra ₹20 off on vegetable baskets above ₹299',
+      subtitleTe: 'à°•à±‚à°°à°—à°¾à°¯à°²à°ªà±ˆ ₹299 à°ªà±ˆà°¨ ₹20 à°¤à°—à±à°—à°¿à°‚à°ªà±',
       code: 'FARM20',
       discountAmount: 20,
       minOrder: 299,
@@ -358,7 +358,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             showToast(
               'success',
               'ðŸ”” New Live Customer Order!',
-              `Order #${newestOrder.id} for â‚¹${newestOrder.totalAmount} from ${newestOrder.customerName}`
+              `Order #${newestOrder.id} for ₹${newestOrder.totalAmount} from ${newestOrder.customerName}`
             );
           }
         }
@@ -398,7 +398,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               sounds.playOwnerNewOrderAlert();
               const newest = merged[0];
               if (newest) {
-                showToast('success', 'ðŸ”” New Order!', `Order #${newest.id} â€” â‚¹${newest.totalAmount} from ${newest.customerName}`);
+                showToast('success', 'ðŸ”” New Order!', `Order #${newest.id} â€” ₹${newest.totalAmount} from ${newest.customerName}`);
               }
             }
           }
