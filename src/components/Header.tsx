@@ -1,8 +1,8 @@
 import React from 'react';
 import { Search, ShoppingCart, MapPin } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
-interface HeaderProps { onOpenSearch: () => void; }
-export const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
+interface HeaderProps { onOpenSearch?: () => void; }
+export const Header: React.FC<HeaderProps> = ({ onOpenSearch = () => {} }) => {
   const { cart } = useStore();
   const count = cart.reduce((s: number, i: any) => s + (i.quantity || 1), 0);
   return (
