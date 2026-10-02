@@ -1,4 +1,28 @@
-import React from 'react';
+// fix.cjs
+const fs = require('fs');
+
+// 1. REMOVE DARK FOOTER — replace with tiny clean strip
+fs.writeFileSync('./src/components/Footer.tsx',
+`import React from 'react';
+export const Footer: React.FC = () => (
+  <div style={{textAlign:'center',padding:'14px 16px 80px',fontSize:'11px',color:'#9ca3af',borderTop:'1px solid #e5e7eb',background:'#fff'}}>
+    © 2026 RA General Store, Bommalatapalli · All rights reserved
+  </div>
+);
+`, 'utf8');
+console.log('1. Footer removed');
+
+// 2. HIDE FAQ SECTION COMPLETELY
+const faqPath = './src/components/FAQSection.tsx';
+if (fs.existsSync(faqPath)) {
+  fs.writeFileSync(faqPath, `import React from 'react';\nexport const FAQSection: React.FC = () => null;\n`, 'utf8');
+  console.log('2. FAQSection hidden');
+} else { console.log('2. FAQSection not found - skipped'); }
+
+// 3. FIX HEADER — discreet Owner button, working search + cart
+// Header will fire a custom DOM event for cart — works without touching App.tsx
+fs.writeFileSync('./src/components/Header.tsx',
+`import React from 'react';
 import { Search, ShoppingCart, MapPin } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
@@ -97,3 +121,43 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+`, 'utf8');
+console.log('3. Header fixed — Owner button discreet top-right, cart fires event');
+
+// 4. PATCH App.tsx to listen to open-cart event and open-admin event
+const appPath = './src/App.tsx';
+let app = fs.readFileSync(appPath, 'utf8');
+
+// Add cart event listener — inject after first useEffect or before return
+if (!app.includes('open-cart')) {
+  const eventCode = `
+  // Listen for header cart/admin button events
+  React.useEffect(() => {
+    const openCart = () => setIsCartOpen(true);
+    const openAdmin = () => setShowAdmin(true);
+    window.addEventListener('open-cart', openCart);
+    window.addEventListener('open-admin', openAdmin);
+    return () => {
+      window.removeEventListener('open-cart', openCart);
+      window.removeEventListener('open-admin', openAdmin);
+    };
+  }, []);
+`;
+  // inject before the return statement
+  app = app.replace(/(\n\s*return\s*\()/, eventCode + '$1');
+  fs.writeFileSync(appPath, app, 'utf8');
+  console.log('4. App.tsx patched with cart + admin event listeners');
+} else {
+  console.log('4. App.tsx already has event listeners');
+}
+
+// 5. REMOVE CUSTOMER SUPPORT MODAL if it is cluttering the UI
+const csPath = './src/components/CustomerSupportModal.tsx';
+if (fs.existsSync(csPath)) {
+  let cs = fs.readFileSync(csPath, 'utf8');
+  if (cs.length > 50) {
+    console.log('5. CustomerSupportModal exists — leaving as is');
+  }
+}
+
+console.log('\nDone! Now run: npm run build');
