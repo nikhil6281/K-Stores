@@ -1,39 +1,106 @@
 import React, { useState } from 'react';
 import type { Product } from '../types';
 import { useStore } from '../context/StoreContext';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
+
 interface Props { product: Product; }
+
 export const ProductCard: React.FC<Props> = ({ product }) => {
   const { addToCart } = useStore();
-  const [added, setAdded] = useState(false);
-  const disc = product.mrp && product.mrp > product.price ? Math.round((product.mrp - product.price)/product.mrp*100) : 0;
-  const add = () => { addToCart(product); setAdded(true); setTimeout(()=>setAdded(false),1200); };
+  const [qty, setQty] = useState(0);
+
+  const add = () => {
+    addToCart(product);
+    setQty(q => q + 1);
+  };
+  const remove = () => setQty(q => Math.max(0, q - 1));
+
+  const disc = product.mrp && product.mrp > product.price
+    ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0;
+
   return (
-    <div style={{background:'#fff',borderRadius:'16px',border:'1px solid #e2e8f0',overflow:'hidden',display:'flex',flexDirection:'column',boxShadow:'0 1px 4px rgba(0,0,0,0.07)',transition:'box-shadow 0.2s'}}
-      onMouseEnter={e=>(e.currentTarget.style.boxShadow='0 6px 20px rgba(0,0,0,0.12)')}
-      onMouseLeave={e=>(e.currentTarget.style.boxShadow='0 1px 4px rgba(0,0,0,0.07)')}>
-      <div style={{position:'relative',width:'100%',paddingTop:'100%',overflow:'hidden',background:'#f1f5f9'}}>
-        <img src={product.image} alt={product.nameEn}
-          style={{position:'absolute',top:0,left:0,width:'100%',height:'100%',objectFit:'cover'}} loading="lazy" />
-        {disc>0&&<span style={{position:'absolute',top:'8px',left:'8px',background:'#15803d',color:'#fff',fontSize:'10px',fontWeight:700,padding:'3px 8px',borderRadius:'6px'}}>{disc}% OFF</span>}
-        {product.unit&&<span style={{position:'absolute',bottom:'8px',left:'8px',background:'rgba(0,0,0,0.55)',color:'#fff',fontSize:'10px',padding:'2px 7px',borderRadius:'5px'}}>{product.unit}</span>}
-      </div>
-      <div style={{padding:'12px',flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
-        <div>
-          <span style={{fontSize:'10px',fontWeight:700,color:'#15803d',textTransform:'uppercase',letterSpacing:'0.05em'}}>{product.category}</span>
-          <h3 style={{margin:'4px 0 0',fontSize:'14px',fontWeight:700,color:'#0f172a',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{product.nameEn}</h3>
+    <div style={{
+      background: '#fff',
+      borderRadius: '14px',
+      border: '1px solid #e8e8e8',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      transition: 'box-shadow 0.15s',
+    }}
+      onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)')}
+      onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
+    >
+      {/* Discount Badge */}
+      {disc > 0 && (
+        <div style={{position:'absolute',top:'8px',left:'8px',background:'#F8C200',color:'#1a1a1a',fontSize:'9px',fontWeight:800,padding:'2px 7px',borderRadius:'5px',zIndex:1,letterSpacing:'0.03em'}}>
+          {disc}% OFF
         </div>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:'12px',paddingTop:'10px',borderTop:'1px solid #f1f5f9'}}>
+      )}
+
+      {/* Image — white bg, object-contain like Blinkit */}
+      <div style={{width:'100%',aspectRatio:'1/1',background:'#f8f9fa',display:'flex',alignItems:'center',justifyContent:'center',padding:'12px',overflow:'hidden'}}>
+        <img
+          src={product.image}
+          alt={product.nameEn}
+          style={{width:'100%',height:'100%',objectFit:'contain'}}
+          loading="lazy"
+        />
+      </div>
+
+      {/* Info */}
+      <div style={{padding:'10px 12px 12px',flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
+        <div>
+          {product.unit && (
+            <p style={{margin:'0 0 2px',fontSize:'11px',color:'#888',fontWeight:500}}>{product.unit}</p>
+          )}
+          <h3 style={{margin:'0 0 4px',fontSize:'13px',fontWeight:700,color:'#1a1a1a',lineHeight:1.3,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>
+            {product.nameEn}
+          </h3>
+          {product.category && (
+            <p style={{margin:0,fontSize:'11px',color:'#0C831F',fontWeight:600}}>{product.category}</p>
+          )}
+        </div>
+
+        {/* Price + Add button */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:'10px'}}>
           <div>
-            <span style={{fontWeight:800,fontSize:'16px',color:'#0f172a'}}>₹{product.price}</span>
-            {product.mrp&&product.mrp>product.price&&<span style={{fontSize:'12px',color:'#94a3b8',textDecoration:'line-through',marginLeft:'5px'}}>₹{product.mrp}</span>}
+            <p style={{margin:0,fontSize:'15px',fontWeight:800,color:'#1a1a1a'}}>₹{product.price}</p>
+            {product.mrp && product.mrp > product.price && (
+              <p style={{margin:0,fontSize:'11px',color:'#aaa',textDecoration:'line-through'}}>₹{product.mrp}</p>
+            )}
           </div>
-          <button onClick={add} style={{display:'flex',alignItems:'center',gap:'5px',padding:'7px 13px',borderRadius:'10px',border:'none',cursor:'pointer',fontWeight:700,fontSize:'12px',background:added?'#dcfce7':'#15803d',color:added?'#15803d':'#fff',transition:'all 0.15s'}}>
-            {added?<Check size={13}/>:<Plus size={13}/>}{added?'Added':'Add'}
-          </button>
+
+          {/* Blinkit-style Add/Counter button */}
+          {qty === 0 ? (
+            <button onClick={add} style={{
+              display:'flex',alignItems:'center',justifyContent:'center',gap:'4px',
+              width:'72px',padding:'8px 0',borderRadius:'8px',
+              border:'2px solid #0C831F',background:'#fff',color:'#0C831F',
+              fontWeight:800,fontSize:'14px',cursor:'pointer',fontFamily:'inherit',
+              transition:'all 0.1s',
+            }}
+              onMouseEnter={e=>{e.currentTarget.style.background='#0C831F';e.currentTarget.style.color='#fff';}}
+              onMouseLeave={e=>{e.currentTarget.style.background='#fff';e.currentTarget.style.color='#0C831F';}}
+            >
+              <Plus size={14}/> Add
+            </button>
+          ) : (
+            <div style={{display:'flex',alignItems:'center',gap:'0',border:'2px solid #0C831F',borderRadius:'8px',overflow:'hidden',width:'88px'}}>
+              <button onClick={remove} style={{flex:1,padding:'7px 0',background:'#fff',border:'none',color:'#0C831F',fontWeight:800,fontSize:'16px',cursor:'pointer',fontFamily:'inherit'}}>
+                <Minus size={13}/>
+              </button>
+              <span style={{width:'28px',textAlign:'center',fontWeight:800,fontSize:'14px',color:'#0C831F',background:'#fff'}}>{qty}</span>
+              <button onClick={add} style={{flex:1,padding:'7px 0',background:'#0C831F',border:'none',color:'#fff',fontWeight:800,fontSize:'16px',cursor:'pointer',fontFamily:'inherit'}}>
+                <Plus size={13}/>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
+
 export const GroceryProductCard = ProductCard;
