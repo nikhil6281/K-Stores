@@ -14,7 +14,7 @@ export function formatWhatsAppOrderBill(order: Order, language: 'en' | 'te' = 'e
 
   const isDelivery = order.deliveryType === 'delivery_20min';
 
-  let message = ` *${STORE_NAME} - ${isTe ? 'à°•à±Šà°¤à±à°¤ à°†à°°à±à°¡à°°à± à°¬à°¿à°²à±à°²à±' : 'NEW ORDER BILL'}*\n`;
+  let message = `›’ *${STORE_NAME} - ${isTe ? 'à°•à±Šà°¤à±à°¤ à°†à°°à±à°¡à°°à± à°¬à°¿à°²à±à°²à±' : 'NEW ORDER BILL'}*\n`;
   message += `â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n`;
   message += `“‹ *${isTe ? 'à°†à°°à±à°¡à°°à± ID' : 'Order ID'}:* #${order.id}\n`;
   message += `•’ *${isTe ? 'à°¸à°®à°¯à°‚' : 'Date & Time'}:* ${orderDate}, ${orderTime}\n`;

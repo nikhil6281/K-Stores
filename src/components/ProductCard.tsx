@@ -1,83 +1,39 @@
 import React, { useState } from 'react';
-import { Plus, Check } from 'lucide-react';
 import type { Product } from '../types';
 import { useStore } from '../context/StoreContext';
-
-interface ProductCardProps {
-  product: Product;
-}
-
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+import { Plus, Check } from 'lucide-react';
+interface Props { product: Product; }
+export const ProductCard: React.FC<Props> = ({ product }) => {
   const { addToCart } = useStore();
   const [added, setAdded] = useState(false);
-
-  const handleAdd = () => {
-    addToCart(product);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1200);
-  };
-
-  const discount = product.mrp && product.mrp > product.price 
-    ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
-    : 0;
-
+  const disc = product.mrp && product.mrp > product.price ? Math.round((product.mrp - product.price)/product.mrp*100) : 0;
+  const add = () => { addToCart(product); setAdded(true); setTimeout(()=>setAdded(false),1200); };
   return (
-    <div className="group bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-sm hover:shadow-md hover:border-emerald-500/40 transition-all flex flex-col justify-between">
-      <div>
-        {/* Product Image: Strictly Constrained Aspect Ratio */}
-        <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-100 mb-3">
-          <img
-            src={product.image}
-            alt={product.nameEn}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-          />
-          {discount > 0 && (
-            <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-bold shadow-sm">
-              {discount}% OFF
-            </span>
-          )}
-          {product.unit && (
-            <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] font-medium backdrop-blur-sm">
-              {product.unit}
-            </span>
-          )}
-        </div>
-
-        {/* Product Meta */}
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-          {product.category}
-        </span>
-        <h3 className="mt-1.5 font-bold text-slate-900 text-sm sm:text-base line-clamp-1 group-hover:text-emerald-700 transition-colors">
-          {product.nameEn}
-        </h3>
+    <div style={{background:'#fff',borderRadius:'16px',border:'1px solid #e2e8f0',overflow:'hidden',display:'flex',flexDirection:'column',boxShadow:'0 1px 4px rgba(0,0,0,0.07)',transition:'box-shadow 0.2s'}}
+      onMouseEnter={e=>(e.currentTarget.style.boxShadow='0 6px 20px rgba(0,0,0,0.12)')}
+      onMouseLeave={e=>(e.currentTarget.style.boxShadow='0 1px 4px rgba(0,0,0,0.07)')}>
+      <div style={{position:'relative',width:'100%',paddingTop:'100%',overflow:'hidden',background:'#f1f5f9'}}>
+        <img src={product.image} alt={product.nameEn}
+          style={{position:'absolute',top:0,left:0,width:'100%',height:'100%',objectFit:'cover'}} loading="lazy" />
+        {disc>0&&<span style={{position:'absolute',top:'8px',left:'8px',background:'#15803d',color:'#fff',fontSize:'10px',fontWeight:700,padding:'3px 8px',borderRadius:'6px'}}>{disc}% OFF</span>}
+        {product.unit&&<span style={{position:'absolute',bottom:'8px',left:'8px',background:'rgba(0,0,0,0.55)',color:'#fff',fontSize:'10px',padding:'2px 7px',borderRadius:'5px'}}>{product.unit}</span>}
       </div>
-
-      {/* Pricing & Add to Cart */}
-      <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+      <div style={{padding:'12px',flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
         <div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-base sm:text-lg font-black text-slate-900">₹{product.price}</span>
-            {product.mrp && product.mrp > product.price && (
-              <span className="text-xs text-slate-400 line-through">₹{product.mrp}</span>
-            )}
-          </div>
+          <span style={{fontSize:'10px',fontWeight:700,color:'#15803d',textTransform:'uppercase',letterSpacing:'0.05em'}}>{product.category}</span>
+          <h3 style={{margin:'4px 0 0',fontSize:'14px',fontWeight:700,color:'#0f172a',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{product.nameEn}</h3>
         </div>
-
-        <button
-          onClick={handleAdd}
-          className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all shadow-sm ${
-            added
-              ? 'bg-emerald-100 text-emerald-800'
-              : 'bg-emerald-600 hover:bg-emerald-700 text-white active:scale-95'
-          }`}
-        >
-          {added ? <Check className="w-4 h-4 text-emerald-700" /> : <Plus className="w-4 h-4" />}
-          <span>{added ? 'Added' : 'Add'}</span>
-        </button>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:'12px',paddingTop:'10px',borderTop:'1px solid #f1f5f9'}}>
+          <div>
+            <span style={{fontWeight:800,fontSize:'16px',color:'#0f172a'}}>₹{product.price}</span>
+            {product.mrp&&product.mrp>product.price&&<span style={{fontSize:'12px',color:'#94a3b8',textDecoration:'line-through',marginLeft:'5px'}}>₹{product.mrp}</span>}
+          </div>
+          <button onClick={add} style={{display:'flex',alignItems:'center',gap:'5px',padding:'7px 13px',borderRadius:'10px',border:'none',cursor:'pointer',fontWeight:700,fontSize:'12px',background:added?'#dcfce7':'#15803d',color:added?'#15803d':'#fff',transition:'all 0.15s'}}>
+            {added?<Check size={13}/>:<Plus size={13}/>}{added?'Added':'Add'}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
-
 export const GroceryProductCard = ProductCard;

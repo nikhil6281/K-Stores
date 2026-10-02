@@ -1,140 +1,88 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Plus, Check, ShoppingBag } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
-
-interface SearchOverlayProps {
-  onClose: () => void;
-}
-
-export const SearchOverlay: React.FC<SearchOverlayProps> = ({ onClose }) => {
+interface Props { onClose: ()=>void; }
+export const SearchOverlay: React.FC<Props> = ({ onClose }) => {
   const { products, addToCart } = useStore();
-  const [query, setQuery] = useState('');
-  const [added, setAdded] = useState<Record<string, boolean>>({});
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [onClose]);
-
-  const categories = ['Vegetables', 'Dairy', 'Rice', 'Atta', 'Snacks', 'Oils', 'Pulses'];
-
-  const results = (products || []).filter(p => {
-    const q = query.toLowerCase().trim();
-    if (!q) return true;
-    return (
-      (p.nameEn && p.nameEn.toLowerCase().includes(q)) ||
-      (p.category && p.category.toLowerCase().includes(q))
-    );
+  const [q, setQ] = useState('');
+  const [added, setAdded] = useState<Record<string,boolean>>({});
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(()=>{
+    ref.current?.focus();
+    const fn=(e:KeyboardEvent)=>{ if(e.key==='Escape') onClose(); };
+    window.addEventListener('keydown',fn);
+    return ()=>window.removeEventListener('keydown',fn);
+  },[onClose]);
+  const cats=['Vegetables','Dairy','Rice','Atta','Snacks','Oils','Pulses'];
+  const results=(products||[]).filter(p=>{
+    const s=q.toLowerCase().trim();
+    if(!s) return true;
+    return (p.nameEn||'').toLowerCase().includes(s)||(p.category||'').toLowerCase().includes(s);
   });
-
-  const handleAdd = (product: any) => {
-    addToCart(product);
-    setAdded(prev => ({ ...prev, [product.id]: true }));
-    setTimeout(() => setAdded(prev => ({ ...prev, [product.id]: false })), 1200);
+  const add=(p:any)=>{
+    addToCart(p);
+    setAdded(prev=>({...prev,[p.id]:true}));
+    setTimeout(()=>setAdded(prev=>({...prev,[p.id]:false})),1200);
   };
-
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white border-b border-slate-200 p-4 shadow-sm">
-        <div className="max-w-2xl mx-auto flex items-center gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search vegetables, dairy, rice, snacks..."
-              className="w-full pl-11 pr-10 py-2.5 bg-slate-50 border-2 border-emerald-600 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white"
-            />
-            {query && (
-              <button
-                onClick={() => setQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Quick Filter Tags */}
-        <div className="max-w-2xl mx-auto mt-2.5 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-          <button
-            onClick={() => setQuery('')}
-            className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors ${query === '' ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
-          >
-            All
-          </button>
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setQuery(cat)}
-              className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors ${query.toLowerCase() === cat.toLowerCase() ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
-            >
-              {cat}
+    <div style={{position:'fixed',inset:0,zIndex:50,display:'flex',flexDirection:'column',background:'rgba(15,23,42,0.55)',backdropFilter:'blur(6px)'}}>
+      <div style={{background:'#fff',borderBottom:'1px solid #e2e8f0',padding:'16px',boxShadow:'0 4px 20px rgba(0,0,0,0.1)'}}>
+        <div style={{maxWidth:'680px',margin:'0 auto'}}>
+          <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
+            <div style={{position:'relative',flex:1}}>
+              <Search size={18} style={{position:'absolute',left:'13px',top:'50%',transform:'translateY(-50%)',color:'#64748b'}}/>
+              <input ref={ref} value={q} onChange={e=>setQ(e.target.value)}
+                placeholder="Search vegetables, dairy, rice, snacks..."
+                style={{width:'100%',paddingLeft:'42px',paddingRight:'38px',paddingTop:'11px',paddingBottom:'11px',border:'2px solid #15803d',borderRadius:'12px',fontSize:'14px',outline:'none',fontFamily:'inherit'}}/>
+              {q&&<button onClick={()=>setQ('')} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',border:'none',background:'none',cursor:'pointer',color:'#94a3b8'}}><X size={15}/></button>}
+            </div>
+            <button onClick={onClose} style={{padding:'10px',border:'1px solid #e2e8f0',borderRadius:'10px',background:'#fff',cursor:'pointer',color:'#374151',display:'flex'}}>
+              <X size={18}/>
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Results Container */}
-      <div className="flex-1 overflow-y-auto max-w-2xl w-full mx-auto p-4">
-        <p className="text-xs text-slate-500 font-medium mb-3">
-          {query ? `${results.length} items found for "${query}"` : `All Available Items (${results.length})`}
-        </p>
-
-        {results.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-6">
-            <ShoppingBag className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <p className="text-slate-700 font-semibold text-sm">No grocery items found</p>
-            <p className="text-slate-400 text-xs mt-1">Try searching "Tomato", "Milk", or "Rice"</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {results.map(product => (
-              <div
-                key={product.id}
-                className="bg-white rounded-xl border border-slate-200 p-2.5 flex flex-col justify-between shadow-sm"
-              >
-                <div>
-                  <div className="aspect-square rounded-lg overflow-hidden bg-slate-100 mb-2">
-                    <img
-                      src={product.image}
-                      alt={product.nameEn}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <h4 className="font-semibold text-xs text-slate-900 line-clamp-1">{product.nameEn}</h4>
-                  <p className="text-[11px] text-slate-500">{product.category}</p>
-                </div>
-
-                <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
-                  <span className="font-bold text-emerald-700 text-sm">₹{product.price}</span>
-                  <button
-                    onClick={() => handleAdd(product)}
-                    className={`px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors ${added[product.id] ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
-                  >
-                    {added[product.id] ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-                    <span>{added[product.id] ? 'Added' : 'Add'}</span>
-                  </button>
-                </div>
-              </div>
+          <div style={{display:'flex',gap:'8px',marginTop:'10px',overflowX:'auto',paddingBottom:'2px'}}>
+            {['All',...cats].map(cat=>(
+              <button key={cat} onClick={()=>setQ(cat==='All'?'':cat)}
+                style={{padding:'5px 14px',borderRadius:'999px',border:'1px solid',borderColor:(cat==='All'?q==='':q.toLowerCase()===cat.toLowerCase())?'#15803d':'#e2e8f0',background:(cat==='All'?q==='':q.toLowerCase()===cat.toLowerCase())?'#15803d':'#fff',color:(cat==='All'?q==='':q.toLowerCase()===cat.toLowerCase())?'#fff':'#374151',fontSize:'12px',fontWeight:600,whiteSpace:'nowrap',cursor:'pointer',fontFamily:'inherit'}}>
+                {cat}
+              </button>
             ))}
           </div>
-        )}
+        </div>
+      </div>
+      <div style={{flex:1,overflowY:'auto',background:'#f8fafc'}}>
+        <div style={{maxWidth:'680px',margin:'0 auto',padding:'16px'}}>
+          <p style={{fontSize:'12px',color:'#64748b',marginBottom:'12px',fontWeight:500}}>
+            {q?`${results.length} results for "${q}"`:`Showing all ${results.length} products`}
+          </p>
+          {results.length===0?(
+            <div style={{textAlign:'center',padding:'60px 20px',background:'#fff',borderRadius:'16px',border:'1px solid #e2e8f0'}}>
+              <ShoppingBag size={36} style={{color:'#cbd5e1',margin:'0 auto 12px'}}/>
+              <p style={{fontWeight:600,color:'#475569'}}>No items found</p>
+              <p style={{fontSize:'13px',color:'#94a3b8',marginTop:'4px'}}>Try "Tomato", "Milk" or "Rice"</p>
+            </div>
+          ):(
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(145px,1fr))',gap:'12px'}}>
+              {results.map(p=>(
+                <div key={p.id} style={{background:'#fff',borderRadius:'14px',border:'1px solid #e2e8f0',overflow:'hidden',boxShadow:'0 1px 3px rgba(0,0,0,0.06)'}}>
+                  <div style={{width:'100%',paddingTop:'100%',position:'relative',background:'#f1f5f9'}}>
+                    <img src={p.image} alt={p.nameEn} style={{position:'absolute',top:0,left:0,width:'100%',height:'100%',objectFit:'cover'}} loading="lazy"/>
+                  </div>
+                  <div style={{padding:'10px'}}>
+                    <p style={{fontWeight:700,fontSize:'13px',margin:'0 0 2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{p.nameEn}</p>
+                    <p style={{fontSize:'11px',color:'#64748b',margin:'0 0 8px'}}>{p.category}</p>
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                      <span style={{fontWeight:800,color:'#15803d',fontSize:'15px'}}>₹{p.price}</span>
+                      <button onClick={()=>add(p)} style={{display:'flex',alignItems:'center',gap:'4px',padding:'5px 10px',borderRadius:'8px',border:'none',background:added[p.id]?'#dcfce7':'#15803d',color:added[p.id]?'#15803d':'#fff',fontWeight:700,fontSize:'12px',cursor:'pointer',fontFamily:'inherit'}}>
+                        {added[p.id]?<Check size={12}/>:<Plus size={12}/>}{added[p.id]?'Added':'Add'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

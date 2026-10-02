@@ -106,7 +106,7 @@ export const CheckoutModal: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
           <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-3xl mx-auto">
-            
+            ›’
           </div>
           <div>
             <h3 className="font-extrabold text-lg text-slate-900">{language === 'te' ? 'à°®à±€ à°•à°¾à°°à±à°Ÿà± à°–à°¾à°³à±€à°—à°¾ à°‰à°‚à°¦à°¿' : 'Your Cart is Empty'}</h3>
