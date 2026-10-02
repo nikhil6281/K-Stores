@@ -93,15 +93,8 @@ export const AppContent: React.FC = () => {
 
   // If in Store Owner mode, render the Admin Portal
   if (isOwnerMode) {
-  // Listen for header cart/admin button events
   React.useEffect(() => {
-    const openCart = () => setIsCartOpen(true);
-    const openAdmin = () => setShowAdmin(true);
-    window.addEventListener('open-cart', openCart);
-    window.addEventListener('open-admin', openAdmin);
     return () => {
-      window.removeEventListener('open-cart', openCart);
-      window.removeEventListener('open-admin', openAdmin);
     };
   }, []);
 
