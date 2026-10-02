@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, ShieldCheck, Truck, Phone } from 'lucide-react';
+import { Phone } from 'lucide-react';
 export const HeroBanner: React.FC = () => (
   <div>
     <div style={{background:'linear-gradient(135deg,#14532d 0%,#15803d 100%)',color:'#fff',padding:'40px 20px',textAlign:'center'}}>
