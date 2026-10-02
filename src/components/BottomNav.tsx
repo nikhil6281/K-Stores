@@ -1,61 +1,36 @@
-﻿import React from 'react';
+import React, { useState } from 'react';
+import { Home, Search, ShoppingCart, ClipboardList, User } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
-import { Home, Search, ShoppingBag, User, MessageCircle } from 'lucide-react';
-
-export const BottomNav: React.FC<{ onOpenSearch?: () => void }> = ({ onOpenSearch }) => {
-  const {
-    cartItemsCount,
-    setIsCartOpen,
-    setIsAuthOpen,
-    setIsSupportOpen
-  } = useStore();
-
+export const BottomNav: React.FC = () => {
+  const { cart } = useStore();
+  const count = cart.reduce((s: number, i: any) => s + (i.quantity||1), 0);
+  const [active, setActive] = useState('home');
+  const tabs = [
+    { id:'home', icon:Home, label:'Home' },
+    { id:'search', icon:Search, label:'Search' },
+    { id:'cart', icon:ShoppingCart, label:'Cart' },
+    { id:'orders', icon:ClipboardList, label:'Orders' },
+    { id:'account', icon:User, label:'Account' },
+  ];
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200/80 px-2 py-1.5 shadow-lg flex items-center justify-around text-slate-600">
-      <button
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="flex flex-col items-center gap-0.5 p-1 text-[#166534] font-bold text-[10px] cursor-pointer"
-      >
-        <Home className="w-5 h-5" />
-        <span>Home</span>
-      </button>
-
-      <button
-        onClick={() => onOpenSearch && onOpenSearch()}
-        className="flex flex-col items-center gap-0.5 p-1 text-slate-600 hover:text-[#166534] text-[10px] font-semibold cursor-pointer"
-      >
-        <Search className="w-5 h-5" />
-        <span>Search</span>
-      </button>
-
-      <button
-        onClick={() => setIsCartOpen(true)}
-        className="flex flex-col items-center gap-0.5 p-1 text-slate-600 hover:text-[#166534] text-[10px] font-semibold relative cursor-pointer"
-      >
-        <ShoppingBag className="w-5 h-5" />
-        <span>Cart</span>
-        {cartItemsCount > 0 && (
-          <span className="absolute top-0 right-1 bg-[#166534] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
-            {cartItemsCount}
-          </span>
-        )}
-      </button>
-
-      <button
-        onClick={() => setIsSupportOpen(true)}
-        className="flex flex-col items-center gap-0.5 p-1 text-slate-600 hover:text-emerald-700 text-[10px] font-semibold cursor-pointer"
-      >
-        <MessageCircle className="w-5 h-5 text-emerald-600" />
-        <span>Help</span>
-      </button>
-
-      <button
-        onClick={() => setIsAuthOpen(true)}
-        className="flex flex-col items-center gap-0.5 p-1 text-slate-600 hover:text-[#166534] text-[10px] font-semibold cursor-pointer"
-      >
-        <User className="w-5 h-5" />
-        <span>Account</span>
-      </button>
+    <nav style={{position:'fixed',bottom:0,left:0,right:0,zIndex:40,background:'#fff',borderTop:'1px solid #e5e7eb',boxShadow:'0 -4px 16px rgba(0,0,0,0.08)'}}>
+      <div style={{maxWidth:'480px',margin:'0 auto',display:'flex'}}>
+        {tabs.map(({ id, icon: Icon, label }) => (
+          <button key={id} onClick={()=>setActive(id)}
+            style={{flex:1,padding:'10px 0 12px',border:'none',background:'none',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:'3px',color:active===id?'var(--green)':'#9ca3af',fontFamily:'inherit',position:'relative'}}>
+            <div style={{position:'relative'}}>
+              <Icon size={22} />
+              {id==='cart'&&count>0&&(
+                <span style={{position:'absolute',top:'-6px',right:'-8px',background:'var(--amber)',color:'#111',borderRadius:'999px',minWidth:'16px',height:'16px',fontSize:'9px',fontWeight:800,display:'flex',alignItems:'center',justifyContent:'center',padding:'0 3px'}}>
+                  {count}
+                </span>
+              )}
+            </div>
+            <span style={{fontSize:'10px',fontWeight:active===id?700:500}}>{label}</span>
+            {active===id&&<span style={{position:'absolute',top:0,left:'50%',transform:'translateX(-50%)',width:'24px',height:'2.5px',borderRadius:'0 0 3px 3px',background:'var(--green)'}} />}
+          </button>
+        ))}
+      </div>
     </nav>
   );
 };
