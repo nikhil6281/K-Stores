@@ -19,6 +19,7 @@
   --b-muted: #666666;
   --b-border: #E8E8E8;
   --b-red: #D9383A;
+  --b-blue: #1A73E8;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
@@ -26,12 +27,12 @@ body {
   background: var(--b-bg);
   color: var(--b-text);
   line-height: 1.4;
-  padding-bottom: 70px;
+  padding-bottom: 75px;
 }
 button { font-family: inherit; border: none; cursor: pointer; background: none; }
 input, textarea, select { font-family: inherit; }
 
-/* Sticky Blinkit Header */
+/* Sticky Header */
 header {
   position: sticky;
   top: 0;
@@ -75,7 +76,6 @@ header {
   margin-top: -3px;
 }
 
-/* Time Badge */
 .eta-badge {
   display: flex;
   align-items: center;
@@ -128,7 +128,7 @@ header {
   font-size: 1.1rem;
 }
 
-/* Top Nav Links */
+/* Nav Actions */
 .hdr-actions {
   display: flex;
   align-items: center;
@@ -146,7 +146,6 @@ header {
 .nav-link:hover { background: #f2f3f7; }
 .nav-link.active { color: var(--b-green); }
 
-/* Blinkit Green Cart Button */
 .cart-pill {
   background: var(--b-green);
   color: #ffffff;
@@ -161,47 +160,11 @@ header {
   transition: background 0.15s;
 }
 .cart-pill:hover { background: var(--b-green-dark); }
-.cart-pill .count-badge {
-  background: rgba(255,255,255,0.25);
-  padding: 2px 7px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-}
 
-/* Main Container */
 main {
   max-width: 1240px;
   margin: 0 auto;
   padding: 20px 16px;
-}
-
-/* Blinkit Promo Banners */
-.promo-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 14px;
-  margin-bottom: 24px;
-}
-.promo-card {
-  border-radius: 18px;
-  padding: 20px;
-  color: #111;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-.promo-card.c1 { background: linear-gradient(135deg, #e3f5e9 0%, #c9edd4 100%); border: 1px solid #b8e6c6; }
-.promo-card.c2 { background: linear-gradient(135deg, #fef4d8 0%, #fae6b1 100%); border: 1px solid #f4d896; }
-.promo-card.c3 { background: linear-gradient(135deg, #e8f0fe 0%, #d4e2fd 100%); border: 1px solid #c2d6fc; }
-.promo-card h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; }
-.promo-card p { font-size: 0.85rem; color: #444; margin-bottom: 12px; }
-.promo-card .shop-btn {
-  background: #111;
-  color: #fff;
-  padding: 7px 14px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.8rem;
 }
 
 /* Category Filter Row */
@@ -234,7 +197,6 @@ main {
   color: #fff;
 }
 
-/* Product Grid */
 .sec-title {
   font-size: 1.25rem;
   font-weight: 800;
@@ -254,7 +216,7 @@ main {
   .search-box { order: 3; flex: 1 1 100%; max-width: 100%; }
 }
 
-/* Blinkit Product Card */
+/* Product Card */
 .b-card {
   background: var(--b-card);
   border: 1px solid var(--b-border);
@@ -282,11 +244,7 @@ main {
   font-size: 3rem;
   position: relative;
 }
-.b-img-box img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.b-img-box img { width: 100%; height: 100%; object-fit: cover; }
 .b-timer {
   position: absolute;
   top: 6px;
@@ -298,10 +256,6 @@ main {
   font-size: 0.65rem;
   font-weight: 800;
   color: #111;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 .b-name {
   font-size: 0.88rem;
@@ -315,25 +269,10 @@ main {
   overflow: hidden;
   min-height: 2.3em;
 }
-.b-unit {
-  font-size: 0.75rem;
-  color: var(--b-muted);
-  font-weight: 500;
-  margin-bottom: 12px;
-}
-.b-price-row {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.b-price {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #111;
-}
+.b-unit { font-size: 0.75rem; color: var(--b-muted); font-weight: 500; margin-bottom: 12px; }
+.b-price-row { margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
+.b-price { font-size: 0.95rem; font-weight: 800; color: #111; }
 
-/* Authentic Blinkit ADD Button */
 .b-add-btn {
   background: #ffffff;
   border: 1.5px solid var(--b-green);
@@ -342,15 +281,10 @@ main {
   font-size: 0.82rem;
   padding: 6px 16px;
   border-radius: 8px;
-  letter-spacing: 0.02em;
   transition: all 0.15s;
 }
-.b-add-btn:hover {
-  background: var(--b-green);
-  color: #ffffff;
-}
+.b-add-btn:hover { background: var(--b-green); color: #ffffff; }
 
-/* Authentic Blinkit Stepper Counter */
 .b-stepper {
   background: var(--b-green);
   border-radius: 8px;
@@ -358,23 +292,11 @@ main {
   align-items: center;
   overflow: hidden;
 }
-.b-stepper button {
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 800;
-  padding: 4px 9px;
-  transition: background 0.1s;
-}
+.b-stepper button { color: #ffffff; font-size: 1rem; font-weight: 800; padding: 4px 9px; }
 .b-stepper button:hover { background: rgba(0,0,0,0.15); }
-.b-stepper span {
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 0.85rem;
-  min-width: 18px;
-  text-align: center;
-}
+.b-stepper span { color: #ffffff; font-weight: 800; font-size: 0.85rem; min-width: 18px; text-align: center; }
 
-/* Floating Bottom Cart Bar on Mobile */
+/* Floating Mobile Bar */
 .mobile-cart-bar {
   position: fixed;
   bottom: 14px;
@@ -394,7 +316,7 @@ main {
 }
 .mobile-cart-bar.show { display: flex; }
 
-/* Slide-in Cart Drawer */
+/* Drawer */
 .drawer-scrim {
   position: fixed;
   inset: 0;
@@ -407,9 +329,7 @@ main {
 .drawer-scrim.open { opacity: 1; pointer-events: auto; }
 .drawer-panel {
   position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; right: 0; bottom: 0;
   width: min(440px, 100%);
   background: #ffffff;
   z-index: 101;
@@ -419,50 +339,72 @@ main {
   flex-direction: column;
 }
 .drawer-scrim.open .drawer-panel { transform: translateX(0); }
+.drawer-hdr { padding: 18px 20px; border-bottom: 1px solid var(--b-border); display: flex; align-items: center; justify-content: space-between; }
+.drawer-body { flex: 1; overflow-y: auto; padding: 18px 20px; }
+.drawer-ftr { padding: 16px 20px; border-top: 1px solid var(--b-border); background: #fff; }
 
-.drawer-hdr {
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--b-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.drawer-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 18px 20px;
-}
-.drawer-ftr {
-  padding: 16px 20px;
-  border-top: 1px solid var(--b-border);
+/* Payment Selection Cards */
+.pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+.pay-card {
+  border: 1.5px solid var(--b-border);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
   background: #fff;
 }
+.pay-card.active { border-color: var(--b-green); background: var(--b-green-light); }
+.pay-card b { display: block; font-size: 0.85rem; margin-top: 4px; }
+.pay-card small { font-size: 0.72rem; color: #666; }
 
-/* Progress for free delivery */
-.free-bar {
-  background: #f2f7f4;
-  border: 1px solid #d4ebdc;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--b-green-dark);
-  margin-bottom: 14px;
+/* Status Tracker Progress Bar */
+.track-bar {
+  display: flex;
+  position: relative;
+  margin: 16px 0;
 }
+.track-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+}
+.track-step::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: -50%;
+  right: 50%;
+  height: 3px;
+  background: var(--b-border);
+  z-index: 1;
+}
+.track-step:first-child::before { display: none; }
+.track-step.done::before { background: var(--b-green); }
+.step-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--b-border);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 4px;
+}
+.track-step.done .step-dot { background: var(--b-green); }
+.track-step.active .step-dot { background: var(--b-yellow); color: #111; box-shadow: 0 0 0 3px rgba(248,203,70,0.3); }
+.step-lbl { font-size: 0.72rem; font-weight: 700; color: #777; display: block; }
+.track-step.active .step-lbl, .track-step.done .step-lbl { color: #111; }
 
-/* Form inputs */
 .f-lbl { display: block; font-size: 0.82rem; font-weight: 700; margin: 12px 0 4px; color: #333; }
-.f-inp {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #dcdcdc;
-  font-size: 0.9rem;
-  outline: none;
-}
+.f-inp { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #dcdcdc; font-size: 0.9rem; outline: none; }
 .f-inp:focus { border-color: var(--b-green); }
 
-/* Primary Button */
 .btn-primary {
   width: 100%;
   background: var(--b-green);
@@ -474,27 +416,32 @@ main {
   transition: background 0.15s;
 }
 .btn-primary:hover { background: var(--b-green-dark); }
+.btn-danger {
+  background: #fff;
+  border: 1px solid var(--b-red);
+  color: var(--b-red);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  transition: all 0.15s;
+}
+.btn-danger:hover { background: var(--b-red); color: #fff; }
 
-/* Toast */
 .toast-msg {
   position: fixed;
-  bottom: 24px;
-  left: 50%;
+  bottom: 24px; left: 50%;
   transform: translateX(-50%);
-  background: #111;
-  color: #fff;
+  background: #111; color: #fff;
   padding: 10px 20px;
   border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  z-index: 200;
-  display: none;
+  font-size: 0.85rem; font-weight: 600;
+  z-index: 200; display: none;
 }
 </style>
 </head>
 <body>
 
-<!-- Header -->
 <header>
   <div class="hdr-wrap">
     <div class="brand-logo" onclick="go('shop')">
@@ -502,23 +449,19 @@ main {
       <div class="logo-sub">groceries in minutes</div>
     </div>
 
-    <!-- ETA Badge -->
     <div class="eta-badge">
       <i></i> 15-20 MINS
     </div>
 
-    <!-- Search Bar -->
     <div class="search-box">
       <span class="icon">🔍</span>
       <input id="q" type="search" placeholder="Search 'milk', 'bread', 'tomatoes', 'atta'..." oninput="draw()">
     </div>
 
-    <!-- Actions -->
     <div class="hdr-actions">
       <button class="nav-link active" id="n-shop" onclick="go('shop')">Shop</button>
       <button class="nav-link" id="n-orders" onclick="go('orders')">Orders</button>
       <button class="nav-link" id="n-owner" onclick="go('owner')">Owner</button>
-
       <button class="cart-pill" onclick="openCart()">
         🛒 My Cart (<span id="cart-count">0</span>)
       </button>
@@ -526,10 +469,8 @@ main {
   </div>
 </header>
 
-<!-- Main Page View -->
 <main id="view"></main>
 
-<!-- Floating Bottom Mobile Bar -->
 <div class="mobile-cart-bar" id="mobile-bar" onclick="openCart()">
   <div>
     <b id="m-count">0 items</b> · <span id="m-total">₹0</span>
@@ -537,40 +478,37 @@ main {
   <div>View Cart ➔</div>
 </div>
 
-<!-- Cart Drawer -->
 <div class="drawer-scrim" id="drawer" onclick="if(event.target===this)closeCart()">
   <div class="drawer-panel" id="panel"></div>
 </div>
 
-<!-- Toast -->
 <div class="toast-msg" id="toast"></div>
 
 <script>
-// Catalog Database
 const DEFAULTS = [
-  { id: 0, name: "Hybrid Fresh Tomatoes", unit: "1 kg", price: 35, mrp: 45, cat: "Vegetables & Fruits", em: "🍅" },
-  { id: 1, name: "Fresh Red Onions", unit: "1 kg", price: 35, mrp: 42, cat: "Vegetables & Fruits", em: "🧅" },
-  { id: 2, name: "Pahari Potatoes", unit: "1 kg", price: 30, mrp: 38, cat: "Vegetables & Fruits", em: "🥔" },
-  { id: 3, name: "Fresh Green Chillies", unit: "250 g", price: 20, mrp: 25, cat: "Vegetables & Fruits", em: "🌶️" },
-  { id: 4, name: "Robusta Fresh Bananas", unit: "1 dozen", price: 60, mrp: 75, cat: "Vegetables & Fruits", em: "🍌" },
-  { id: 5, name: "Farm Fresh Spinach (Palak)", unit: "1 bunch", price: 20, mrp: 25, cat: "Vegetables & Fruits", em: "🥬" },
-  { id: 6, name: "Toned Fresh Milk", unit: "500 ml", price: 32, mrp: 34, cat: "Dairy & Breakfast", em: "🥛" },
-  { id: 7, name: "Fresh Pouch Curd (Dahi)", unit: "450 g", price: 35, mrp: 38, cat: "Dairy & Breakfast", em: "🥣" },
-  { id: 8, name: "Malai Fresh Paneer", unit: "200 g", price: 95, mrp: 110, cat: "Dairy & Breakfast", em: "🧀" },
-  { id: 9, name: "Farm Fresh White Eggs", unit: "6 pcs", price: 42, mrp: 48, cat: "Dairy & Breakfast", em: "🥚" },
-  { id: 10, name: "Chakki Fresh Atta", unit: "5 kg", price: 235, mrp: 260, cat: "Atta, Rice & Dal", em: "🌾" },
-  { id: 11, name: "Royal Basmati Rice", unit: "1 kg", price: 110, mrp: 135, cat: "Atta, Rice & Dal", em: "🌾" },
-  { id: 12, name: "Unpolished Toor Dal", unit: "1 kg", price: 165, mrp: 185, cat: "Atta, Rice & Dal", em: "🫘" },
-  { id: 13, name: "Refined Sunflower Cooking Oil", unit: "1 L", price: 135, mrp: 155, cat: "Oils & Masalas", em: "🛢️" },
-  { id: 14, name: "Pure Sulfur-Free Sugar", unit: "1 kg", price: 46, mrp: 50, cat: "Atta, Rice & Dal", em: "🧂" },
-  { id: 15, name: "Tata Vacuum Salt", unit: "1 kg", price: 25, mrp: 28, cat: "Atta, Rice & Dal", em: "🧂" },
-  { id: 16, name: "Premium CTC Leaf Tea", unit: "250 g", price: 115, mrp: 130, cat: "Tea & Coffee", em: "🍵" },
-  { id: 17, name: "Classic Blend Instant Coffee", unit: "500 g", price: 85, mrp: 100, cat: "Tea & Coffee", em: "☕" },
-  { id: 18, name: "Crispy Potato Chips", unit: "1 pack", price: 20, mrp: 20, cat: "Munchies & Snacks", em: "🥔" },
-  { id: 19, name: "Glucose Butter Biscuits", unit: "1 pack", price: 25, mrp: 30, cat: "Munchies & Snacks", em: "🍪" },
-  { id: 20, name: "Antibacterial Bath Soap", unit: "1 pc", price: 38, mrp: 42, cat: "Cleaning & Household", em: "🧼" },
-  { id: 21, name: "Active Detergent Powder", unit: "1 kg", price: 95, mrp: 115, cat: "Cleaning & Household", em: "🧺" },
-  { id: 22, name: "Lemon Dishwash Bar", unit: "1 pc", price: 30, mrp: 35, cat: "Cleaning & Household", em: "🧴" }
+  { id: 0, name: "Hybrid Fresh Tomatoes", unit: "1 kg", price: 35, cat: "Vegetables & Fruits", em: "🍅" },
+  { id: 1, name: "Fresh Red Onions", unit: "1 kg", price: 35, cat: "Vegetables & Fruits", em: "🧅" },
+  { id: 2, name: "Pahari Potatoes", unit: "1 kg", price: 30, cat: "Vegetables & Fruits", em: "🥔" },
+  { id: 3, name: "Fresh Green Chillies", unit: "250 g", price: 20, cat: "Vegetables & Fruits", em: "🌶️" },
+  { id: 4, name: "Robusta Fresh Bananas", unit: "1 dozen", price: 60, cat: "Vegetables & Fruits", em: "🍌" },
+  { id: 5, name: "Farm Fresh Spinach (Palak)", unit: "1 bunch", price: 20, cat: "Vegetables & Fruits", em: "🥬" },
+  { id: 6, name: "Toned Fresh Milk", unit: "500 ml", price: 32, cat: "Dairy & Breakfast", em: "🥛" },
+  { id: 7, name: "Fresh Pouch Curd (Dahi)", unit: "450 g", price: 35, cat: "Dairy & Breakfast", em: "🥣" },
+  { id: 8, name: "Malai Fresh Paneer", unit: "200 g", price: 95, cat: "Dairy & Breakfast", em: "🧀" },
+  { id: 9, name: "Farm Fresh White Eggs", unit: "6 pcs", price: 42, cat: "Dairy & Breakfast", em: "🥚" },
+  { id: 10, name: "Chakki Fresh Atta", unit: "5 kg", price: 235, cat: "Atta, Rice & Dal", em: "🌾" },
+  { id: 11, name: "Royal Basmati Rice", unit: "1 kg", price: 110, cat: "Atta, Rice & Dal", em: "🌾" },
+  { id: 12, name: "Unpolished Toor Dal", unit: "1 kg", price: 165, cat: "Atta, Rice & Dal", em: "🫘" },
+  { id: 13, name: "Refined Sunflower Cooking Oil", unit: "1 L", price: 135, cat: "Oils & Masalas", em: "🛢️" },
+  { id: 14, name: "Pure Sugar", unit: "1 kg", price: 46, cat: "Atta, Rice & Dal", em: "🧂" },
+  { id: 15, name: "Iodised Vacuum Salt", unit: "1 kg", price: 25, cat: "Atta, Rice & Dal", em: "🧂" },
+  { id: 16, name: "Premium Leaf Tea", unit: "250 g", price: 115, cat: "Tea & Coffee", em: "🍵" },
+  { id: 17, name: "Classic Instant Coffee", unit: "100 g", price: 85, cat: "Tea & Coffee", em: "☕" },
+  { id: 18, name: "Crispy Potato Chips", unit: "1 pack", price: 20, cat: "Munchies & Snacks", em: "🥔" },
+  { id: 19, name: "Glucose Butter Biscuits", unit: "1 pack", price: 25, cat: "Munchies & Snacks", em: "🍪" },
+  { id: 20, name: "Antibacterial Bath Soap", unit: "1 pc", price: 38, cat: "Cleaning & Household", em: "🧼" },
+  { id: 21, name: "Active Detergent Powder", unit: "1 kg", price: 95, cat: "Cleaning & Household", em: "🧺" },
+  { id: 22, name: "Lemon Dishwash Bar", unit: "1 pc", price: 30, cat: "Cleaning & Household", em: "🧴" }
 ];
 
 const store = {
@@ -583,6 +521,7 @@ let STATE = store.get('ra_blinkit_state', {
   free: 199,
   fee: 15,
   wa: "916281730144",
+  upi: "6281730144@upi",
   pin: "9874"
 });
 
@@ -592,6 +531,7 @@ const cats = () => ["All", ...new Set(STATE.products.map(p => p.cat))];
 let cart = store.get('ra_blinkit_cart', {});
 let orders = store.get('ra_blinkit_orders', []);
 let cat = "All", page = "shop";
+let selectedPayment = "upi";
 
 const $ = id => document.getElementById(id);
 const rs = n => "₹" + Number(n).toLocaleString("en-IN");
@@ -605,10 +545,8 @@ function save() {
 
 function toast(t) {
   const e = $('toast');
-  e.textContent = t;
-  e.style.display = 'block';
-  clearTimeout(toast.t);
-  toast.t = setTimeout(() => e.style.display = 'none', 1800);
+  e.textContent = t; e.style.display = 'block';
+  clearTimeout(toast.t); toast.t = setTimeout(() => e.style.display = 'none', 1800);
 }
 
 function go(p) {
@@ -623,8 +561,7 @@ function go(p) {
 function qty(id, d) {
   cart[id] = (cart[id] || 0) + d;
   if (cart[id] <= 0) delete cart[id];
-  save();
-  draw();
+  save(); draw();
   if ($('drawer').classList.contains('open')) cartView();
 }
 
@@ -655,37 +592,15 @@ function draw() {
   const list = STATE.products.filter(p => (cat === "All" || p.cat === cat) && p.name.toLowerCase().includes(q));
 
   $('view').innerHTML = `
-    <!-- Blinkit Visual Promotional Cards -->
-    <div class="promo-strip">
-      <div class="promo-card c1">
-        <h3>Farm Fresh Harvest 🥦</h3>
-        <p>Direct from local farms, hand-picked daily</p>
-        <button class="shop-btn" onclick="cat='Vegetables & Fruits';draw()">Shop Fresh</button>
-      </div>
-      <div class="promo-card c2">
-        <h3>Daily Dairy & Bakery 🥛</h3>
-        <p>Morning milk, curd & bakery essentials</p>
-        <button class="shop-btn" onclick="cat='Dairy & Breakfast';draw()">Explore</button>
-      </div>
-      <div class="promo-card c3">
-        <h3>Cooking Essentials 🌾</h3>
-        <p>Rice, Atta, Ghee & Premium Spices</p>
-        <button class="shop-btn" onclick="cat='Atta, Rice & Dal';draw()">Stock Up</button>
-      </div>
-    </div>
-
-    <!-- Category Pills -->
     <div class="cat-scroll">
       ${cats().map(c => '<button class="cat-pill '+(c===cat?'on':'')+'" onclick="cat=\''+c.replace(/'/g,"\\'")+'\';draw()">'+esc(c)+'</button>').join("")}
     </div>
 
-    <!-- Section Heading -->
     <div class="sec-title">
       <span>${cat === 'All' ? 'All Groceries' : cat} (${list.length})</span>
       <span style="font-size:0.8rem;color:var(--b-green);font-weight:700">⏱ 15-20 Mins Delivery</span>
     </div>
 
-    <!-- Grid -->
     ${list.length ? `
       <div class="product-grid">
         ${list.map(p => `
@@ -739,7 +654,6 @@ function cartView() {
           `;
         }).join("")}
 
-        <!-- Bill Details -->
         <div style="margin-top:20px;padding:14px;background:#fbfbfb;border-radius:12px;border:1px solid #eee">
           <b style="font-size:0.85rem;display:block;margin-bottom:8px">Bill Details</b>
           <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:4px">
@@ -762,11 +676,20 @@ function cartView() {
   `;
 }
 
+function setPay(m) {
+  selectedPayment = m;
+  checkout();
+}
+
 function checkout() {
   const s = subtotal(), f = fee(s), u = store.get('ra_user', {});
+  const tot = s + f;
+  const upiLink = 'upi://pay?pa=' + STATE.upi + '&pn=RA%20Store&am=' + tot + '&cu=INR&tn=RA-Groceries';
+  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(upiLink);
+
   $('panel').innerHTML = `
     <div class="drawer-hdr">
-      <b style="font-size:1.1rem">Delivery Details</b>
+      <b style="font-size:1.1rem">Delivery & Payment</b>
       <button onclick="closeCart()" style="font-size:1.2rem;color:#888">✕</button>
     </div>
     <div class="drawer-body">
@@ -777,15 +700,43 @@ function checkout() {
       <input class="f-inp" id="ph" type="tel" maxlength="10" value="${esc(u.ph||'')}" placeholder="10-digit mobile number">
 
       <label class="f-lbl">Delivery Address / Landmark</label>
-      <textarea class="f-inp" id="ad" rows="3" placeholder="House number, Street, Landmark">${esc(u.ad||'')}</textarea>
+      <textarea class="f-inp" id="ad" rows="2" placeholder="House number, Street, Landmark">${esc(u.ad||'')}</textarea>
 
-      <div style="background:#eef7f0;border:1px solid #d0ebd4;padding:12px;border-radius:10px;margin-top:16px;font-size:0.85rem">
-        💵 <b>Cash on Delivery / UPI:</b> Pay <b>${rs(s + f)}</b> when your groceries arrive at your doorstep in 15-20 minutes.
+      <!-- Payment Method Selection -->
+      <label class="f-lbl" style="margin-top:16px">Choose Payment Method</label>
+      <div class="pay-options">
+        <div class="pay-card ${selectedPayment==='upi'?'active':''}" onclick="setPay('upi')">
+          <span style="font-size:1.4rem">📱</span>
+          <b>Pay Online (UPI)</b>
+          <small>GPay, PhonePe, Paytm</small>
+        </div>
+        <div class="pay-card ${selectedPayment==='cod'?'active':''}" onclick="setPay('cod')">
+          <span style="font-size:1.4rem">💵</span>
+          <b>Cash on Delivery</b>
+          <small>Pay upon arrival</small>
+        </div>
       </div>
+
+      <!-- Online UPI Payment Details -->
+      ${selectedPayment === 'upi' ? `
+        <div style="background:#f0faf2;border:1.5px solid #c2e8cb;padding:16px;border-radius:14px;text-align:center;margin-top:8px">
+          <b style="font-size:0.9rem;color:var(--b-green-dark);display:block;margin-bottom:8px">Scan QR to Pay ${rs(tot)}</b>
+          <img src="${qrUrl}" alt="UPI QR" style="width:160px;height:160px;margin:0 auto 10px;border-radius:10px;border:1px solid #ddd;background:#fff;padding:6px">
+          <a href="${upiLink}" class="btn-primary" style="display:block;text-decoration:none;padding:10px;font-size:0.85rem;margin-bottom:6px">
+            📲 Pay via UPI App (GPay / PhonePe)
+          </a>
+          <span style="font-size:0.75rem;color:#666">UPI ID: <b>${STATE.upi}</b></span>
+        </div>
+      ` : `
+        <div style="background:#eef7f0;border:1px solid #d0ebd4;padding:12px;border-radius:10px;font-size:0.82rem;margin-top:8px">
+          💵 <b>Cash on Delivery:</b> Pay <b>${rs(tot)}</b> in cash when our rider arrives in 15-20 minutes.
+        </div>
+      `}
+
       <div id="err" style="color:var(--b-red);font-size:0.85rem;margin-top:8px"></div>
     </div>
     <div class="drawer-ftr">
-      <button class="btn-primary" onclick="placeOrder()">Send Order on WhatsApp · ${rs(s + f)}</button>
+      <button class="btn-primary" onclick="placeOrder()">Confirm & Place Order · ${rs(tot)}</button>
       <button style="width:100%;text-align:center;color:#666;font-size:0.85rem;margin-top:10px;font-weight:600" onclick="cartView()">Back to Cart</button>
     </div>
   `;
@@ -804,6 +755,7 @@ function placeOrder() {
     id: "BK" + Date.now().toString().slice(-6),
     t: Date.now(),
     nm, ph, ad,
+    pay: selectedPayment === 'upi' ? 'Online UPI' : 'Cash on Delivery (COD)',
     status: "placed",
     total: s + f,
     fee: f,
@@ -824,9 +776,10 @@ function placeOrder() {
     <div class="drawer-body" style="text-align:center;padding:40px 20px">
       <div style="font-size:3.5rem">🎉</div>
       <h2 style="font-size:1.3rem;margin:12px 0 6px">Order ${o.id} Placed!</h2>
-      <p style="color:#666;font-size:0.88rem;margin-bottom:20px">Your bill is ready to send to store WhatsApp.</p>
-      <a class="btn-primary" style="display:block;text-decoration:none;margin-bottom:10px" href="${waLink(o)}" target="_blank">Send Order on WhatsApp</a>
-      <button class="nav-link" style="width:100%" onclick="closeCart();go('orders')">View My Orders</button>
+      <p style="color:#666;font-size:0.85rem;margin-bottom:8px">Payment Method: <b>${o.pay}</b></p>
+      <p style="color:#666;font-size:0.85rem;margin-bottom:20px">We've saved your order. Click below to confirm with store WhatsApp.</p>
+      <a class="btn-primary" style="display:block;text-decoration:none;margin-bottom:10px" href="${waLink(o)}" target="_blank">Send Order to Store WhatsApp</a>
+      <button class="nav-link" style="width:100%" onclick="closeCart();go('orders')">View & Track Order</button>
     </div>
   `;
   draw();
@@ -835,38 +788,119 @@ function placeOrder() {
 const waLink = o => 'https://wa.me/' + STATE.wa + '?text=' + encodeURIComponent(
   `*🛍️ New Order ${o.id} - RA Store*\n\n` +
   o.items.map(i => `• ${i.n} (${i.u}) × ${i.q} = ${rs(i.p * i.q)}`).join("\n") +
-  `\n\nDelivery: ${o.fee ? rs(o.fee) : 'FREE'}\n*Grand Total: ${rs(o.total)} (Cash on Delivery)*\n\n` +
+  `\n\nDelivery: ${o.fee ? rs(o.fee) : 'FREE'}\n*Grand Total: ${rs(o.total)}*\n` +
+  `💳 Payment: *${o.pay}*\n\n` +
   `👤 Customer: ${o.nm}\n📞 Phone: ${o.ph}\n📍 Address: ${o.ad}`
 );
 
-// Orders Page
+// Customer Orders View with Progress Tracker & Cancel Rule
+function userCancelOrder(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  if (o.status === 'out_for_delivery' || o.status === 'delivered') {
+    return toast("Order is already out for delivery and cannot be cancelled.");
+  }
+  if (!confirm("Are you sure you want to cancel order " + id + "?")) return;
+  o.status = "cancelled";
+  save();
+  toast("Order " + id + " has been cancelled.");
+  ordersView();
+}
+
 function ordersView() {
   $('view').innerHTML = `
-    <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:16px">Your Past Orders</h2>
-    ${orders.length ? orders.map(o => `
-      <div style="background:#fff;border:1px solid var(--b-border);border-radius:14px;padding:16px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <b>${o.id}</b>
-          <span style="background:var(--b-green-light);color:var(--b-green);padding:3px 10px;border-radius:6px;font-size:0.75rem;font-weight:700">${o.status}</span>
+    <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:16px">Your Orders & Live Tracking</h2>
+    ${orders.length ? orders.map(o => {
+      const isPlaced = o.status === 'placed';
+      const isPacked = o.status === 'packed';
+      const isOut = o.status === 'out_for_delivery';
+      const isDelivered = o.status === 'delivered';
+      const isCancelled = o.status === 'cancelled';
+      const canCancel = isPlaced || isPacked;
+
+      return `
+        <div style="background:#fff;border:1px solid var(--b-border);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.03)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div>
+              <b style="font-size:1.05rem">${o.id}</b>
+              <div style="font-size:0.75rem;color:#888">${new Date(o.t).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</div>
+            </div>
+            <span style="font-size:0.75rem;font-weight:800;padding:4px 10px;border-radius:6px;background:${isCancelled?'#fde8e8':(isDelivered?'#e5f7ee':'#fff8e1')};color:${isCancelled?'var(--b-red)':(isDelivered?'var(--b-green)':'#b45309')}">
+              ${isCancelled ? '❌ CANCELLED' : (isDelivered ? '✅ DELIVERED' : (isOut ? '🛵 OUT FOR DELIVERY' : (isPacked ? '📦 PACKED' : '⏱ ORDER PLACED')))}
+            </span>
+          </div>
+
+          <!-- Progress Bar Tracker -->
+          ${!isCancelled ? `
+            <div class="track-bar">
+              <div class="track-step ${isPlaced||isPacked||isOut||isDelivered?'done':''} ${isPlaced?'active':''}">
+                <div class="step-dot">1</div>
+                <span class="step-lbl">Placed</span>
+              </div>
+              <div class="track-step ${isPacked||isOut||isDelivered?'done':''} ${isPacked?'active':''}">
+                <div class="step-dot">2</div>
+                <span class="step-lbl">Packed</span>
+              </div>
+              <div class="track-step ${isOut||isDelivered?'done':''} ${isOut?'active':''}">
+                <div class="step-dot">3</div>
+                <span class="step-lbl">Out</span>
+              </div>
+              <div class="track-step ${isDelivered?'done':''} ${isDelivered?'active':''}">
+                <div class="step-dot">4</div>
+                <span class="step-lbl">Delivered</span>
+              </div>
+            </div>
+          ` : `
+            <div style="padding:8px 12px;background:#fde8e8;color:var(--b-red);border-radius:8px;font-size:0.8rem;margin:10px 0;font-weight:600">
+              This order was cancelled.
+            </div>
+          `}
+
+          <!-- Items list -->
+          <div style="background:#fbfbfb;border:1px solid #f0f0f0;padding:12px;border-radius:10px;margin:12px 0;font-size:0.85rem">
+            ${o.items.map(i => `<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>${esc(i.n)} (${i.u}) × ${i.q}</span><b>${rs(i.p*i.q)}</b></div>`).join("")}
+            <div style="border-top:1px dashed #ddd;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-weight:800">
+              <span>Total (${o.pay||'COD'})</span><span>${rs(o.total)}</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px">
+            <a href="${waLink(o)}" target="_blank" style="color:var(--b-green);font-size:0.85rem;font-weight:700;text-decoration:none">
+              💬 Open in WhatsApp
+            </a>
+
+            ${canCancel ? `
+              <button class="btn-danger" onclick="userCancelOrder('${o.id}')">
+                ✕ Cancel Order
+              </button>
+            ` : (isOut ? `
+              <span style="font-size:0.75rem;color:#888;font-weight:600">
+                🛵 Order is out for delivery (Cannot cancel)
+              </span>
+            ` : '')}
+          </div>
         </div>
-        <div style="font-size:0.85rem;color:#555;margin-bottom:8px">
-          ${o.items.map(i => i.n + ' × ' + i.q).join(", ")}
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;padding-top:10px">
-          <b>Total: ${rs(o.total)}</b>
-          <a href="${waLink(o)}" target="_blank" style="color:var(--b-green);font-size:0.85rem;font-weight:700;text-decoration:none">Resend WhatsApp ➔</a>
-        </div>
-      </div>
-    `).join("") : '<div style="text-align:center;padding:50px;color:#888">No orders yet.</div>'}
+      `;
+    }).join("") : '<div style="text-align:center;padding:50px;color:#888">No past orders.</div>'}
   `;
 }
 
-// Owner Portal
-let unlocked = false, otab = 'prod';
+// Owner Portal with Packing Checklist & Status Controllers
+let unlocked = false, otab = 'orders';
 function unlock() {
   const p = $('pin').value;
   if (p === "9874" || p === "7894" || p === String(STATE.pin)) { unlocked = true; draw(); }
   else $('perr').textContent = "Wrong PIN. Try again.";
+}
+
+function updateOrderStatus(id, newStatus) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  o.status = newStatus;
+  save();
+  toast("Order " + id + " marked as " + newStatus);
+  ownerView();
 }
 
 function shrink(f) {
@@ -907,20 +941,20 @@ async function addP() {
 
 async function setImg(id, inp) {
   const f = inp.files[0]; if (!f) return;
-  try { P(id).img = await shrink(f); save(); ownerView(); toast("Photo updated!"); }
-  catch(e) { toast("Error reading photo"); }
+  try { P(id).img = await shrink(f); save(); ownerView(); toast("Photo updated!"); } catch(e) {}
 }
 
 function setP(id, v) { if (v >= 0) { P(id).price = v; save(); } }
 function toggleStock(id) { P(id).out = !P(id).out; save(); ownerView(); }
 function delP(id) { STATE.products = STATE.products.filter(p => p.id != id); delete cart[id]; save(); ownerView(); }
+function setCfg(k, v) { STATE[k] = v; save(); toast("Saved!"); }
 
 function ownerView() {
   if (!unlocked) {
     $('view').innerHTML = `
       <div style="max-width:360px;margin:50px auto;background:#fff;padding:26px;border-radius:18px;border:1px solid #ddd;text-align:center">
         <h2 style="font-size:1.3rem;margin-bottom:6px">Owner Dashboard</h2>
-        <p style="font-size:0.85rem;color:#666;margin-bottom:16px">Enter PIN to manage inventory & prices</p>
+        <p style="font-size:0.85rem;color:#666;margin-bottom:16px">Enter PIN to manage orders & inventory</p>
         <input class="f-inp" id="pin" type="password" maxlength="8" placeholder="Enter PIN (9874)" style="text-align:center;font-size:1.2rem;letter-spacing:4px;margin-bottom:10px" onkeydown="if(event.key==='Enter')unlock()">
         <div id="perr" style="color:var(--b-red);font-size:0.82rem;margin-bottom:8px"></div>
         <button class="btn-primary" onclick="unlock()">Unlock Dashboard</button>
@@ -935,48 +969,138 @@ function ownerView() {
       <button class="nav-link" onclick="unlocked=false;go('shop')">Lock & Exit</button>
     </div>
 
-    <!-- Add Product Card -->
-    <div style="background:#fff;padding:16px;border-radius:14px;border:1px solid #ddd;margin-bottom:16px">
-      <b style="font-size:0.95rem;display:block;margin-bottom:10px">+ Add New Grocery Product</b>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
-        <input class="f-inp" id="np-n" placeholder="Name (e.g. Tomatoes)">
-        <input class="f-inp" id="np-u" placeholder="Unit (e.g. 1 kg)">
-        <input class="f-inp" id="np-p" type="number" placeholder="Price (₹)">
-        <input class="f-inp" id="np-c" placeholder="Category (e.g. Vegetables)">
-        <label class="b-add-btn" style="display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer">
-          📷 Camera / Photo
-          <input type="file" id="np-i" accept="image/*" capture="environment" hidden>
-        </label>
-      </div>
-      <button class="btn-primary" style="margin-top:10px;padding:10px" onclick="addP()">Add Product to Store</button>
+    <!-- Owner Tabs -->
+    <div class="cat-scroll" style="margin-bottom:16px">
+      <button class="cat-pill ${otab==='orders'?'on':''}" onclick="otab='orders';ownerView()">
+        📦 Orders (${orders.length})
+      </button>
+      <button class="cat-pill ${otab==='products'?'on':''}" onclick="otab='products';ownerView()">
+        🛒 Manage Products
+      </button>
+      <button class="cat-pill ${otab==='settings'?'on':''}" onclick="otab='settings';ownerView()">
+        ⚙️ Settings & UPI
+      </button>
     </div>
 
-    <!-- Product Table List -->
-    <div style="background:#fff;border-radius:14px;border:1px solid #ddd;overflow:hidden">
-      ${STATE.products.map(p => `
-        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f0f0f0">
-          <div style="width:40px;height:40px;background:#f8f8f8;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-            ${pic(p)}
+    ${otab === 'orders' ? `
+      <!-- Orders List with Packing List & Status Changers -->
+      <div>
+        ${orders.length ? orders.map(o => `
+          <div style="background:#fff;border:1px solid var(--b-border);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.03)">
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f0f0;padding-bottom:10px;margin-bottom:10px">
+              <div>
+                <b style="font-size:1.05rem">${o.id}</b>
+                <span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:5px;background:#f0faf2;color:var(--b-green);font-weight:700">
+                  ${o.pay || 'COD'}
+                </span>
+                <div style="font-size:0.75rem;color:#888">${new Date(o.t).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</div>
+              </div>
+              <div style="text-align:right">
+                <span style="font-size:0.75rem;font-weight:800;padding:4px 8px;border-radius:6px;background:${o.status==='cancelled'?'#fde8e8':(o.status==='delivered'?'#e5f7ee':'#fff8e1')};color:${o.status==='cancelled'?'var(--b-red)':(o.status==='delivered'?'var(--b-green)':'#b45309')}">
+                  ${o.status.toUpperCase()}
+                </span>
+                <b style="display:block;font-size:1rem;color:#111;margin-top:2px">${rs(o.total)}</b>
+              </div>
+            </div>
+
+            <!-- Customer Details -->
+            <div style="font-size:0.85rem;margin-bottom:10px">
+              <div>👤 <b>${esc(o.nm)}</b> · 📞 <a href="tel:${esc(o.ph)}" style="color:var(--b-green);font-weight:700">${esc(o.ph)}</a></div>
+              <div style="color:#555;margin-top:2px">📍 ${esc(o.ad)}</div>
+            </div>
+
+            <!-- Packing Checklist -->
+            <div style="background:#fbfbfb;border:1.5px solid #eaeaea;border-radius:12px;padding:12px;margin-bottom:12px">
+              <b style="font-size:0.8rem;text-transform:uppercase;color:#555;display:block;margin-bottom:6px">📋 Packing Checklist (${o.items.length} items):</b>
+              ${o.items.map(i => `
+                <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.85rem;border-bottom:1px dashed #eee">
+                  <input type="checkbox" style="width:16px;height:16px;cursor:pointer">
+                  <span style="flex:1"><b>${esc(i.n)}</b> (${i.u}) × ${i.q}</span>
+                  <b>${rs(i.p * i.q)}</b>
+                </div>
+              `).join("")}
+            </div>
+
+            <!-- Status Buttons Workflow -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <span style="font-size:0.75rem;font-weight:700;color:#666">Update:</span>
+              <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='packed'?'var(--b-green)':'#f0f0f0'};color:${o.status==='packed'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','packed')">
+                📦 Packed
+              </button>
+              <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='out_for_delivery'?'var(--b-green)':'#f0f0f0'};color:${o.status==='out_for_delivery'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','out_for_delivery')">
+                🛵 Out for Delivery
+              </button>
+              <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='delivered'?'var(--b-green)':'#f0f0f0'};color:${o.status==='delivered'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','delivered')">
+                ✅ Delivered
+              </button>
+              <a href="https://wa.me/91${o.ph}?text=${encodeURIComponent('Hello '+o.nm+', update regarding your RA Store Order '+o.id+': Status is now '+o.status.toUpperCase()+'!')}" target="_blank" style="margin-left:auto;color:var(--b-green);font-size:0.8rem;font-weight:700;text-decoration:none">
+                💬 Message Customer
+              </a>
+            </div>
           </div>
-          <div style="flex:1">
-            <b>${esc(p.name)}</b>
-            <div style="font-size:0.75rem;color:#888">${p.unit} · ${p.cat}</div>
-          </div>
-          <label style="cursor:pointer;font-size:1.1rem" title="Update photo">
-            📷<input type="file" accept="image/*" capture="environment" hidden onchange="setImg(${p.id},this)">
+        `).join("") : '<div style="text-align:center;padding:50px;color:#888">No orders yet.</div>'}
+      </div>
+    ` : (otab === 'products' ? `
+      <!-- Products Manager -->
+      <div style="background:#fff;padding:16px;border-radius:14px;border:1px solid #ddd;margin-bottom:16px">
+        <b style="font-size:0.95rem;display:block;margin-bottom:10px">+ Add New Grocery Product</b>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
+          <input class="f-inp" id="np-n" placeholder="Name (e.g. Tomatoes)">
+          <input class="f-inp" id="np-u" placeholder="Unit (e.g. 1 kg)">
+          <input class="f-inp" id="np-p" type="number" placeholder="Price (₹)">
+          <input class="f-inp" id="np-c" placeholder="Category (e.g. Vegetables)">
+          <label class="b-add-btn" style="display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer">
+            📷 Camera / Photo
+            <input type="file" id="np-i" accept="image/*" capture="environment" hidden>
           </label>
-          <input class="f-inp" style="width:70px;padding:6px 8px" type="number" value="${p.price}" onchange="setP(${p.id},+this.value)">
-          <button style="padding:4px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;background:${p.out?'#fde8e8':'#e5f7ee'};color:${p.out?'var(--b-red)':'var(--b-green)'}" onclick="toggleStock(${p.id})">
-            ${p.out ? 'Out' : 'In Stock'}
-          </button>
-          <button onclick="delP(${p.id})" style="color:#aaa;font-size:1.1rem;padding:4px">🗑</button>
         </div>
-      `).join("")}
-    </div>
+        <button class="btn-primary" style="margin-top:10px;padding:10px" onclick="addP()">Add Product to Store</button>
+      </div>
+
+      <div style="background:#fff;border-radius:14px;border:1px solid #ddd;overflow:hidden">
+        ${STATE.products.map(p => `
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f0f0f0">
+            <div style="width:40px;height:40px;background:#f8f8f8;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+              ${pic(p)}
+            </div>
+            <div style="flex:1">
+              <b>${esc(p.name)}</b>
+              <div style="font-size:0.75rem;color:#888">${p.unit} · ${p.cat}</div>
+            </div>
+            <label style="cursor:pointer;font-size:1.1rem" title="Update photo">
+              📷<input type="file" accept="image/*" capture="environment" hidden onchange="setImg(${p.id},this)">
+            </label>
+            <input class="f-inp" style="width:70px;padding:6px 8px" type="number" value="${p.price}" onchange="setP(${p.id},+this.value)">
+            <button style="padding:4px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;background:${p.out?'#fde8e8':'#e5f7ee'};color:${p.out?'var(--b-red)':'var(--b-green)'}" onclick="toggleStock(${p.id})">
+              ${p.out ? 'Out' : 'In Stock'}
+            </button>
+            <button onclick="delP(${p.id})" style="color:#aaa;font-size:1.1rem;padding:4px">🗑</button>
+          </div>
+        `).join("")}
+      </div>
+    ` : `
+      <!-- Store Settings & UPI -->
+      <div style="background:#fff;padding:20px;border-radius:14px;border:1px solid #ddd">
+        <label class="f-lbl">Store UPI ID for Online Payments</label>
+        <input class="f-inp" value="${esc(STATE.upi||'6281730144@upi')}" onchange="setCfg('upi',this.value.trim())" placeholder="e.g. 6281730144@upi">
+
+        <label class="f-lbl">Store WhatsApp Number (with country code)</label>
+        <input class="f-inp" value="${esc(STATE.wa)}" onchange="setCfg('wa',this.value.trim())">
+
+        <label class="f-lbl">Delivery Fee (₹)</label>
+        <input class="f-inp" type="number" value="${STATE.fee}" onchange="setCfg('fee',+this.value)">
+
+        <label class="f-lbl">Free Delivery Threshold (₹)</label>
+        <input class="f-inp" type="number" value="${STATE.free}" onchange="setCfg('free',+this.value)">
+
+        <label class="f-lbl">Owner Dashboard PIN</label>
+        <input class="f-inp" value="${esc(STATE.pin)}" onchange="setCfg('pin',this.value.trim())">
+      </div>
+    `)}
   `;
 }
 
-// Initial Render
+// Initial Launch
 go('shop');
 </script>
 </body>
