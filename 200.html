@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Official Razorpay Checkout SDK -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
 :root {
   --b-yellow: #F8CB46;
@@ -343,7 +345,7 @@ main {
 .drawer-body { flex: 1; overflow-y: auto; padding: 18px 20px; }
 .drawer-ftr { padding: 16px 20px; border-top: 1px solid var(--b-border); background: #fff; }
 
-/* Payment Selection Cards */
+/* Payment Options */
 .pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
 .pay-card {
   border: 1.5px solid var(--b-border);
@@ -358,43 +360,17 @@ main {
 .pay-card b { display: block; font-size: 0.85rem; margin-top: 4px; }
 .pay-card small { font-size: 0.72rem; color: #666; }
 
-/* Status Tracker Progress Bar */
-.track-bar {
-  display: flex;
-  position: relative;
-  margin: 16px 0;
-}
-.track-step {
-  flex: 1;
-  text-align: center;
-  position: relative;
-}
+/* Progress Tracker */
+.track-bar { display: flex; position: relative; margin: 16px 0; }
+.track-step { flex: 1; text-align: center; position: relative; }
 .track-step::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: -50%;
-  right: 50%;
-  height: 3px;
-  background: var(--b-border);
-  z-index: 1;
+  content: ''; position: absolute; top: 10px; left: -50%; right: 50%; height: 3px; background: var(--b-border); z-index: 1;
 }
 .track-step:first-child::before { display: none; }
 .track-step.done::before { background: var(--b-green); }
 .step-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--b-border);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  font-weight: 800;
-  position: relative;
-  z-index: 2;
-  margin-bottom: 4px;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--b-border); color: #fff; display: inline-flex;
+  align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; position: relative; z-index: 2; margin-bottom: 4px;
 }
 .track-step.done .step-dot { background: var(--b-green); }
 .track-step.active .step-dot { background: var(--b-yellow); color: #111; box-shadow: 0 0 0 3px rgba(248,203,70,0.3); }
@@ -521,7 +497,7 @@ let STATE = store.get('ra_blinkit_state', {
   free: 199,
   fee: 15,
   wa: "916281730144",
-  upi: "6281730144@upi",
+  razorpay_key: "rzp_test_51t58Q7k4x9r4q",
   pin: "9874"
 });
 
@@ -531,7 +507,7 @@ const cats = () => ["All", ...new Set(STATE.products.map(p => p.cat))];
 let cart = store.get('ra_blinkit_cart', {});
 let orders = store.get('ra_blinkit_orders', []);
 let cat = "All", page = "shop";
-let selectedPayment = "upi";
+let selectedPayment = "razorpay";
 
 const $ = id => document.getElementById(id);
 const rs = n => "₹" + Number(n).toLocaleString("en-IN");
@@ -684,8 +660,6 @@ function setPay(m) {
 function checkout() {
   const s = subtotal(), f = fee(s), u = store.get('ra_user', {});
   const tot = s + f;
-  const upiLink = 'upi://pay?pa=' + STATE.upi + '&pn=RA%20Store&am=' + tot + '&cu=INR&tn=RA-Groceries';
-  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(upiLink);
 
   $('panel').innerHTML = `
     <div class="drawer-hdr">
@@ -705,10 +679,10 @@ function checkout() {
       <!-- Payment Method Selection -->
       <label class="f-lbl" style="margin-top:16px">Choose Payment Method</label>
       <div class="pay-options">
-        <div class="pay-card ${selectedPayment==='upi'?'active':''}" onclick="setPay('upi')">
-          <span style="font-size:1.4rem">📱</span>
-          <b>Pay Online (UPI)</b>
-          <small>GPay, PhonePe, Paytm</small>
+        <div class="pay-card ${selectedPayment==='razorpay'?'active':''}" onclick="setPay('razorpay')">
+          <span style="font-size:1.4rem">💳</span>
+          <b>Pay via Razorpay</b>
+          <small>UPI, Cards, GPay</small>
         </div>
         <div class="pay-card ${selectedPayment==='cod'?'active':''}" onclick="setPay('cod')">
           <span style="font-size:1.4rem">💵</span>
@@ -717,32 +691,34 @@ function checkout() {
         </div>
       </div>
 
-      <!-- Online UPI Payment Details -->
-      ${selectedPayment === 'upi' ? `
-        <div style="background:#f0faf2;border:1.5px solid #c2e8cb;padding:16px;border-radius:14px;text-align:center;margin-top:8px">
-          <b style="font-size:0.9rem;color:var(--b-green-dark);display:block;margin-bottom:8px">Scan QR to Pay ${rs(tot)}</b>
-          <img src="${qrUrl}" alt="UPI QR" style="width:160px;height:160px;margin:0 auto 10px;border-radius:10px;border:1px solid #ddd;background:#fff;padding:6px">
-          <a href="${upiLink}" class="btn-primary" style="display:block;text-decoration:none;padding:10px;font-size:0.85rem;margin-bottom:6px">
-            📲 Pay via UPI App (GPay / PhonePe)
-          </a>
-          <span style="font-size:0.75rem;color:#666">UPI ID: <b>${STATE.upi}</b></span>
+      ${selectedPayment === 'razorpay' ? `
+        <div style="background:#eef7f0;border:1.5px solid #bce6c6;padding:14px;border-radius:12px;margin-top:8px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-size:1.1rem">🔒</span>
+            <b style="font-size:0.85rem;color:var(--b-green-dark)">Instant & Secure Razorpay Payment</b>
+          </div>
+          <p style="font-size:0.78rem;color:#555">
+            Pay safely via Google Pay, PhonePe, Paytm, Debit/Credit Card, or NetBanking. Your order will be placed automatically after payment.
+          </p>
         </div>
       ` : `
         <div style="background:#eef7f0;border:1px solid #d0ebd4;padding:12px;border-radius:10px;font-size:0.82rem;margin-top:8px">
-          💵 <b>Cash on Delivery:</b> Pay <b>${rs(tot)}</b> in cash when our rider arrives in 15-20 minutes.
+          💵 <b>Cash on Delivery:</b> Pay <b>${rs(tot)}</b> in cash when our rider arrives at your doorstep in 15-20 minutes.
         </div>
       `}
 
       <div id="err" style="color:var(--b-red);font-size:0.85rem;margin-top:8px"></div>
     </div>
     <div class="drawer-ftr">
-      <button class="btn-primary" onclick="placeOrder()">Confirm & Place Order · ${rs(tot)}</button>
+      <button class="btn-primary" onclick="initiateOrder()">
+        ${selectedPayment === 'razorpay' ? `Pay Online · ${rs(tot)}` : `Place Order (COD) · ${rs(tot)}`}
+      </button>
       <button style="width:100%;text-align:center;color:#666;font-size:0.85rem;margin-top:10px;font-weight:600" onclick="cartView()">Back to Cart</button>
     </div>
   `;
 }
 
-function placeOrder() {
+function initiateOrder() {
   const nm = $('nm').value.trim();
   const ph = $('ph').value.trim();
   const ad = $('ad').value.trim();
@@ -751,15 +727,56 @@ function placeOrder() {
   if (ad.length < 5) return $('err').textContent = "Please enter your full address or landmark.";
 
   const s = subtotal(), f = fee(s);
+  const tot = s + f;
+  const orderId = "BK" + Date.now().toString().slice(-6);
+
+  if (selectedPayment === 'razorpay') {
+    // Check if Razorpay script is loaded
+    if (typeof window.Razorpay === 'undefined') {
+      return alert("Razorpay SDK is loading. Please check your internet connection.");
+    }
+
+    const options = {
+      key: STATE.razorpay_key || 'rzp_test_51t58Q7k4x9r4q',
+      amount: tot * 100, // amount in paise
+      currency: "INR",
+      name: "RA General Store",
+      description: "Order #" + orderId,
+      image: "https://cdn-icons-png.flaticon.com/512/3724/3724720.png",
+      prefill: {
+        name: nm,
+        contact: ph
+      },
+      theme: {
+        color: "#0C831F"
+      },
+      handler: function (response) {
+        completeOrderPlacement(orderId, nm, ph, ad, tot, f, "Paid Online (Razorpay: " + response.razorpay_payment_id + ")");
+      },
+      modal: {
+        ondismiss: function () {
+          toast("Payment cancelled by user.");
+        }
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  } else {
+    completeOrderPlacement(orderId, nm, ph, ad, tot, f, "Cash on Delivery (COD)");
+  }
+}
+
+function completeOrderPlacement(id, nm, ph, ad, tot, fee, payMethod) {
   const o = {
-    id: "BK" + Date.now().toString().slice(-6),
+    id,
     t: Date.now(),
     nm, ph, ad,
-    pay: selectedPayment === 'upi' ? 'Online UPI' : 'Cash on Delivery (COD)',
+    pay: payMethod,
     status: "placed",
-    total: s + f,
-    fee: f,
-    items: Object.entries(cart).map(([id, q]) => ({ n: P(id).name, u: P(id).unit, p: P(id).price, q }))
+    total: tot,
+    fee,
+    items: Object.entries(cart).map(([itemId, q]) => ({ n: P(itemId).name, u: P(itemId).unit, p: P(itemId).price, q }))
   };
   orders.unshift(o);
   cart = {};
@@ -776,9 +793,11 @@ function placeOrder() {
     <div class="drawer-body" style="text-align:center;padding:40px 20px">
       <div style="font-size:3.5rem">🎉</div>
       <h2 style="font-size:1.3rem;margin:12px 0 6px">Order ${o.id} Placed!</h2>
-      <p style="color:#666;font-size:0.85rem;margin-bottom:8px">Payment Method: <b>${o.pay}</b></p>
-      <p style="color:#666;font-size:0.85rem;margin-bottom:20px">We've saved your order. Click below to confirm with store WhatsApp.</p>
-      <a class="btn-primary" style="display:block;text-decoration:none;margin-bottom:10px" href="${waLink(o)}" target="_blank">Send Order to Store WhatsApp</a>
+      <p style="color:#666;font-size:0.85rem;margin-bottom:6px">Status: <b>Order Placed</b></p>
+      <p style="color:#666;font-size:0.85rem;margin-bottom:20px">Payment: <b>${o.pay}</b></p>
+      <a class="btn-primary" style="display:block;text-decoration:none;margin-bottom:10px" href="${waLink(o)}" target="_blank">
+        💬 Send Confirmation to Store WhatsApp
+      </a>
       <button class="nav-link" style="width:100%" onclick="closeCart();go('orders')">View & Track Order</button>
     </div>
   `;
@@ -793,7 +812,7 @@ const waLink = o => 'https://wa.me/' + STATE.wa + '?text=' + encodeURIComponent(
   `👤 Customer: ${o.nm}\n📞 Phone: ${o.ph}\n📍 Address: ${o.ad}`
 );
 
-// Customer Orders View with Progress Tracker & Cancel Rule
+// Customer Orders View with Cancel Option Before Out of Delivery
 function userCancelOrder(id) {
   const o = orders.find(x => x.id === id);
   if (!o) return;
@@ -978,7 +997,7 @@ function ownerView() {
         🛒 Manage Products
       </button>
       <button class="cat-pill ${otab==='settings'?'on':''}" onclick="otab='settings';ownerView()">
-        ⚙️ Settings & UPI
+        ⚙️ Settings & Razorpay
       </button>
     </div>
 
@@ -1079,21 +1098,22 @@ function ownerView() {
         `).join("")}
       </div>
     ` : `
-      <!-- Store Settings & UPI -->
+      <!-- Store Settings & Razorpay -->
       <div style="background:#fff;padding:20px;border-radius:14px;border:1px solid #ddd">
-        <label class="f-lbl">Store UPI ID for Online Payments</label>
-        <input class="f-inp" value="${esc(STATE.upi||'6281730144@upi')}" onchange="setCfg('upi',this.value.trim())" placeholder="e.g. 6281730144@upi">
+        <label class="f-lbl">Razorpay Key ID (for Online Payments)</label>
+        <input class="f-inp" value="${esc(STATE.razorpay_key||'')}" onchange="setCfg('razorpay_key',this.value.trim())" placeholder="rzp_test_... or rzp_live_...">
+        <small style="color:#888;display:block;margin-top:3px">Get this from your Razorpay Dashboard ➔ Settings ➔ API Keys</small>
 
-        <label class="f-lbl">Store WhatsApp Number (with country code)</label>
+        <label class="f-lbl" style="margin-top:14px">Store WhatsApp Number (with country code)</label>
         <input class="f-inp" value="${esc(STATE.wa)}" onchange="setCfg('wa',this.value.trim())">
 
-        <label class="f-lbl">Delivery Fee (₹)</label>
+        <label class="f-lbl" style="margin-top:14px">Delivery Fee (₹)</label>
         <input class="f-inp" type="number" value="${STATE.fee}" onchange="setCfg('fee',+this.value)">
 
-        <label class="f-lbl">Free Delivery Threshold (₹)</label>
+        <label class="f-lbl" style="margin-top:14px">Free Delivery Threshold (₹)</label>
         <input class="f-inp" type="number" value="${STATE.free}" onchange="setCfg('free',+this.value)">
 
-        <label class="f-lbl">Owner Dashboard PIN</label>
+        <label class="f-lbl" style="margin-top:14px">Owner Dashboard PIN</label>
         <input class="f-inp" value="${esc(STATE.pin)}" onchange="setCfg('pin',this.value.trim())">
       </div>
     `)}
