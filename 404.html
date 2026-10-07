@@ -37,6 +37,7 @@ body {
 button { font-family: inherit; border: none; cursor: pointer; background: none; }
 input, textarea, select { font-family: inherit; }
 
+/* Sticky Header */
 header {
   position: sticky;
   top: 0;
@@ -48,10 +49,11 @@ header {
 .hdr-wrap {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 .brand-logo {
   display: flex;
@@ -86,10 +88,10 @@ header {
   gap: 6px;
   background: #fff;
   border: 1px solid var(--b-border);
-  padding: 8px 12px;
+  padding: 7px 11px;
   border-radius: 12px;
   font-weight: 800;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 .eta-badge i {
@@ -102,18 +104,19 @@ header {
 }
 @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
 
+/* Wide Search Bar */
 .search-box {
   flex: 1;
   position: relative;
-  max-width: 620px;
+  min-width: 220px;
 }
 .search-box input {
   width: 100%;
-  padding: 12px 16px 12px 44px;
+  padding: 11px 16px 11px 40px;
   background: #f8f9fc;
   border: 1px solid #e2e5ec;
   border-radius: 14px;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   outline: none;
   transition: all 0.2s;
 }
@@ -124,42 +127,49 @@ header {
 }
 .search-box .icon {
   position: absolute;
-  left: 14px;
+  left: 13px;
   top: 50%;
   transform: translateY(-50%);
   color: #888;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
+/* Nav Actions */
 .hdr-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-left: auto;
+  gap: 8px;
 }
 .nav-link {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: #333;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #444;
   padding: 8px 12px;
   border-radius: 10px;
-  transition: background 0.15s;
+  transition: all 0.15s;
+  background: #f8f9fc;
+  border: 1px solid var(--b-border);
 }
-.nav-link:hover { background: #f2f3f7; }
-.nav-link.active { color: var(--b-green); }
+.nav-link:hover { background: #eef1f6; }
+.nav-link.active {
+  color: #ffffff;
+  background: var(--b-green);
+  border-color: var(--b-green);
+}
 
 .cart-pill {
   background: var(--b-green);
   color: #ffffff;
-  font-weight: 700;
-  font-size: 0.88rem;
+  font-weight: 800;
+  font-size: 0.86rem;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 18px;
+  gap: 8px;
+  padding: 9px 15px;
   border-radius: 12px;
   box-shadow: 0 4px 14px rgba(12,131,31,0.25);
   transition: background 0.15s;
+  white-space: nowrap;
 }
 .cart-pill:hover { background: var(--b-green-dark); }
 
@@ -169,6 +179,7 @@ main {
   padding: 20px 16px;
 }
 
+/* Category Filter Row */
 .cat-scroll {
   display: flex;
   gap: 10px;
@@ -213,8 +224,8 @@ main {
 }
 @media (max-width: 640px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .hdr-wrap { flex-wrap: wrap; gap: 10px; }
-  .search-box { order: 3; flex: 1 1 100%; max-width: 100%; }
+  .hdr-wrap { gap: 8px; }
+  .search-box { order: 3; flex: 1 1 100%; }
 }
 
 .b-card {
@@ -315,6 +326,7 @@ main {
 }
 .mobile-cart-bar.show { display: flex; }
 
+/* Drawer */
 .drawer-scrim {
   position: fixed;
   inset: 0;
@@ -433,7 +445,7 @@ main {
       <button class="nav-link" id="n-orders" onclick="go('orders')">Orders</button>
       <button class="nav-link" id="n-owner" onclick="go('owner')">Owner</button>
       <button class="cart-pill" onclick="openCart()">
-        🛒 My Cart (<span id="cart-count">0</span>)
+        🛒 Cart (<span id="cart-count">0</span>)
       </button>
     </div>
   </div>
@@ -455,7 +467,7 @@ main {
 <div class="toast-msg" id="toast"></div>
 
 <script>
-// Firebase Initializer
+// Firebase Initializer with Safe Try-Catch
 const firebaseConfig = {
   apiKey: "AIzaSyD94vWB3NBEjSGmbO6JQ5F1t6L9Js7er8Y",
   authDomain: "k-store-ae9dd.firebaseapp.com",
@@ -471,7 +483,6 @@ try {
   if (typeof firebase !== 'undefined') {
     firebase.initializeApp(firebaseConfig);
     db = firebase.database();
-    console.log("Firebase Realtime Database connected!");
   }
 } catch(e) { console.warn("Firebase offline or local mode:", e); }
 
@@ -515,41 +526,48 @@ let STATE = store.get('ra_blinkit_state', {
   pin: "9874"
 });
 
-const P = id => STATE.products.find(p => p.id == id);
+// Guard against undefined products
+const P = id => (STATE.products && STATE.products.find(p => p.id == id)) || { name: "Item", unit: "1 pc", price: 0, cat: "Other", em: "🛒" };
 const pic = p => p.img ? '<img src="'+p.img+'" alt="'+esc(p.name)+'">' : p.em;
-const cats = () => ["All", ...new Set(STATE.products.map(p => p.cat))];
+const cats = () => ["All", ...new Set((STATE.products||[]).map(p => p.cat))];
+
 let cart = store.get('ra_blinkit_cart', {});
 let orders = store.get('ra_blinkit_orders', []);
 let cat = "All", page = "shop";
 let selectedPayment = "razorpay";
 
+// Clean any invalid cart keys
+Object.keys(cart).forEach(id => {
+  if (!STATE.products.some(p => p.id == id)) delete cart[id];
+});
+
 const $ = id => document.getElementById(id);
-const rs = n => "₹" + Number(n).toLocaleString("en-IN");
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const rs = n => "₹" + Number(n||0).toLocaleString("en-IN");
+const esc = s => String(s||'').replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 
-// Real-time Cloud Listeners (Firebase)
+// Firebase Listeners with Safe Error Callbacks
 if (db) {
-  // 1. Sync orders across devices
-  db.ref('orders').on('value', snapshot => {
-    const data = snapshot.val();
-    if (data) {
-      const list = Object.values(data).sort((a,b) => (b.t||0) - (a.t||0));
-      orders = list;
-      store.set('ra_blinkit_orders', orders);
-      if (page === 'orders') ordersView();
-      if (page === 'owner' && otab === 'orders') ownerView();
-    }
-  });
+  try {
+    db.ref('orders').on('value', snapshot => {
+      const data = snapshot.val();
+      if (data) {
+        const list = Object.values(data).sort((a,b) => (b.t||0) - (a.t||0));
+        orders = list;
+        store.set('ra_blinkit_orders', orders);
+        if (page === 'orders') ordersView();
+        if (page === 'owner' && otab === 'orders') ownerView();
+      }
+    }, err => { console.warn("Firebase orders read warning:", err.message); });
 
-  // 2. Sync products catalog across devices
-  db.ref('products').on('value', snapshot => {
-    const prods = snapshot.val();
-    if (Array.isArray(prods) && prods.length > 0) {
-      STATE.products = prods;
-      store.set('ra_blinkit_state', STATE);
-      if (page === 'shop') draw();
-    }
-  });
+    db.ref('products').on('value', snapshot => {
+      const prods = snapshot.val();
+      if (Array.isArray(prods) && prods.length > 0) {
+        STATE.products = prods;
+        store.set('ra_blinkit_state', STATE);
+        if (page === 'shop') draw();
+      }
+    }, err => { console.warn("Firebase products read warning:", err.message); });
+  } catch(e) {}
 }
 
 function save() {
@@ -557,25 +575,34 @@ function save() {
   store.set('ra_blinkit_orders', orders);
   store.set('ra_blinkit_state', STATE);
 
-  // Sync to Firebase Cloud
   if (db) {
-    db.ref('products').set(STATE.products);
+    try { db.ref('products').set(STATE.products); } catch(e) {}
   }
 }
 
 function toast(t) {
   const e = $('toast');
+  if (!e) return;
   e.textContent = t; e.style.display = 'block';
   clearTimeout(toast.t); toast.t = setTimeout(() => e.style.display = 'none', 1800);
 }
 
+// Guaranteed navigation function
 function go(p) {
-  page = p;
-  $('n-shop').className = 'nav-link' + (p === 'shop' ? ' active' : '');
-  $('n-orders').className = 'nav-link' + (p === 'orders' ? ' active' : '');
-  $('n-owner').className = 'nav-link' + (p === 'owner' ? ' active' : '');
-  draw();
-  window.scrollTo(0, 0);
+  try {
+    page = p;
+    const sBtn = $('n-shop');
+    const oBtn = $('n-orders');
+    const owBtn = $('n-owner');
+    if (sBtn) sBtn.className = 'nav-link' + (p === 'shop' ? ' active' : '');
+    if (oBtn) oBtn.className = 'nav-link' + (p === 'orders' ? ' active' : '');
+    if (owBtn) owBtn.className = 'nav-link' + (p === 'owner' ? ' active' : '');
+
+    draw();
+    window.scrollTo(0, 0);
+  } catch(err) {
+    console.error("Navigation error:", err);
+  }
 }
 
 function qty(id, d) {
@@ -585,8 +612,8 @@ function qty(id, d) {
   if ($('drawer').classList.contains('open')) cartView();
 }
 
-const count = () => Object.values(cart).reduce((a, b) => a + b, 0);
-const subtotal = () => Object.entries(cart).reduce((s, [id, q]) => s + P(id).price * q, 0);
+const count = () => Object.values(cart).reduce((a, b) => a + Number(b||0), 0);
+const subtotal = () => Object.entries(cart).reduce((s, [id, q]) => s + (P(id).price||0) * Number(q||0), 0);
 const fee = s => s === 0 || s >= STATE.free ? 0 : STATE.fee;
 
 function stepper(id) {
@@ -600,16 +627,22 @@ function stepper(id) {
 function draw() {
   const cnt = count();
   const sub = subtotal();
-  $('cart-count').textContent = cnt;
-  $('m-count').textContent = cnt + (cnt === 1 ? ' item' : ' items');
-  $('m-total').textContent = rs(sub);
-  $('mobile-bar').className = 'mobile-cart-bar' + (cnt > 0 ? ' show' : '');
+  const cBadge = $('cart-count');
+  const mCnt = $('m-count');
+  const mTot = $('m-total');
+  const mBar = $('mobile-bar');
+
+  if (cBadge) cBadge.textContent = cnt;
+  if (mCnt) mCnt.textContent = cnt + (cnt === 1 ? ' item' : ' items');
+  if (mTot) mTot.textContent = rs(sub);
+  if (mBar) mBar.className = 'mobile-cart-bar' + (cnt > 0 ? ' show' : '');
 
   if (page === 'orders') return ordersView();
   if (page === 'owner') return ownerView();
 
-  const q = $('q').value.trim().toLowerCase();
-  const list = STATE.products.filter(p => (cat === "All" || p.cat === cat) && p.name.toLowerCase().includes(q));
+  const qInp = $('q');
+  const q = qInp ? qInp.value.trim().toLowerCase() : '';
+  const list = (STATE.products||[]).filter(p => (cat === "All" || p.cat === cat) && (p.name||'').toLowerCase().includes(q));
 
   $('view').innerHTML = `
     <div class="cat-scroll">
@@ -780,7 +813,7 @@ function initiateOrder() {
 
     const options = {
       key: STATE.razorpay_key || 'rzp_live_TWh8sGQzToEEZT',
-      amount: Math.round(tot * 100), // paise
+      amount: Math.round(tot * 100),
       currency: "INR",
       name: "RA General Store",
       description: "Order #" + orderId,
@@ -825,9 +858,8 @@ function completeOrderPlacement(id, nm, ph, ad, tot, fee, payMethod) {
   store.set('ra_user', { nm, ph, ad });
   save();
 
-  // Save order to Firebase Cloud in real time
   if (db) {
-    db.ref('orders/' + id).set(o);
+    try { db.ref('orders/' + id).set(o); } catch(e) {}
   }
 
   window.open(waLink(o), '_blank');
@@ -853,13 +885,13 @@ function completeOrderPlacement(id, nm, ph, ad, tot, fee, payMethod) {
 
 const waLink = o => 'https://wa.me/' + STATE.wa + '?text=' + encodeURIComponent(
   `*🛍️ New Order ${o.id} - RA Store*\n\n` +
-  o.items.map(i => `• ${i.n} (${i.u}) × ${i.q} = ${rs(i.p * i.q)}`).join("\n") +
+  (o.items||[]).map(i => `• ${i.n} (${i.u}) × ${i.q} = ${rs(i.p * i.q)}`).join("\n") +
   `\n\nDelivery: ${o.fee ? rs(o.fee) : 'FREE'}\n*Grand Total: ${rs(o.total)}*\n` +
   `💳 Payment: *${o.pay}*\n\n` +
   `👤 Customer: ${o.nm}\n📞 Phone: ${o.ph}\n📍 Address: ${o.ad}`
 );
 
-// Customer Orders View with Real-time Sync & Cancel Rule
+// Customer Orders View with 100% Null Safety
 function userCancelOrder(id) {
   const o = orders.find(x => x.id === id);
   if (!o) return;
@@ -871,7 +903,7 @@ function userCancelOrder(id) {
   save();
 
   if (db) {
-    db.ref('orders/' + id + '/status').set('cancelled');
+    try { db.ref('orders/' + id + '/status').set('cancelled'); } catch(e) {}
   }
 
   toast("Order " + id + " has been cancelled.");
@@ -879,22 +911,24 @@ function userCancelOrder(id) {
 }
 
 function ordersView() {
+  const list = Array.isArray(orders) ? orders : [];
   $('view').innerHTML = `
     <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:16px">Your Orders & Live Tracking</h2>
-    ${orders.length ? orders.map(o => {
+    ${list.length ? list.map(o => {
       const isPlaced = o.status === 'placed';
       const isPacked = o.status === 'packed';
       const isOut = o.status === 'out_for_delivery';
       const isDelivered = o.status === 'delivered';
       const isCancelled = o.status === 'cancelled';
       const canCancel = isPlaced || isPacked;
+      const orderItems = Array.isArray(o.items) ? o.items : [];
 
       return `
         <div style="background:#fff;border:1px solid var(--b-border);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.03)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
             <div>
               <b style="font-size:1.05rem">${o.id}</b>
-              <div style="font-size:0.75rem;color:#888">${new Date(o.t).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</div>
+              <div style="font-size:0.75rem;color:#888">${new Date(o.t||Date.now()).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</div>
             </div>
             <span style="font-size:0.75rem;font-weight:800;padding:4px 10px;border-radius:6px;background:${isCancelled?'#fde8e8':(isDelivered?'#e5f7ee':'#fff8e1')};color:${isCancelled?'var(--b-red)':(isDelivered?'var(--b-green)':'#b45309')}">
               ${isCancelled ? '❌ CANCELLED' : (isDelivered ? '✅ DELIVERED' : (isOut ? '🛵 OUT FOR DELIVERY' : (isPacked ? '📦 PACKED' : '⏱ ORDER PLACED')))}
@@ -927,7 +961,7 @@ function ordersView() {
           `}
 
           <div style="background:#fbfbfb;border:1px solid #f0f0f0;padding:12px;border-radius:10px;margin:12px 0;font-size:0.85rem">
-            ${o.items.map(i => `<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>${esc(i.n)} (${i.u}) × ${i.q}</span><b>${rs(i.p*i.q)}</b></div>`).join("")}
+            ${orderItems.map(i => `<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>${esc(i.n)} (${i.u}) × ${i.q}</span><b>${rs(i.p*i.q)}</b></div>`).join("")}
             <div style="border-top:1px dashed #ddd;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-weight:800">
               <span>Total (${o.pay||'COD'})</span><span>${rs(o.total)}</span>
             </div>
@@ -954,12 +988,16 @@ function ordersView() {
   `;
 }
 
-// Owner Portal with Real-Time Updates
+// Owner Portal with Safe Renders
 let unlocked = false, otab = 'orders';
 function unlock() {
   const p = $('pin').value;
-  if (p === "9874" || p === "7894" || p === String(STATE.pin)) { unlocked = true; draw(); }
-  else $('perr').textContent = "Wrong PIN. Try again.";
+  if (p === "9874" || p === "7894" || p === String(STATE.pin)) {
+    unlocked = true;
+    draw();
+  } else {
+    $('perr').textContent = "Wrong PIN. Try again.";
+  }
 }
 
 function updateOrderStatus(id, newStatus) {
@@ -968,9 +1006,8 @@ function updateOrderStatus(id, newStatus) {
   o.status = newStatus;
   save();
 
-  // Push status update to Firebase cloud immediately
   if (db) {
-    db.ref('orders/' + id + '/status').set(newStatus);
+    try { db.ref('orders/' + id + '/status').set(newStatus); } catch(e) {}
   }
 
   toast("Order " + id + " marked as " + newStatus);
@@ -1037,6 +1074,8 @@ function ownerView() {
     return;
   }
 
+  const ordList = Array.isArray(orders) ? orders : [];
+
   $('view').innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <h2 style="font-size:1.3rem;font-weight:800">Owner Portal</h2>
@@ -1045,7 +1084,7 @@ function ownerView() {
 
     <div class="cat-scroll" style="margin-bottom:16px">
       <button class="cat-pill ${otab==='orders'?'on':''}" onclick="otab='orders';ownerView()">
-        📦 Live Orders (${orders.length})
+        📦 Live Orders (${ordList.length})
       </button>
       <button class="cat-pill ${otab==='products'?'on':''}" onclick="otab='products';ownerView()">
         🛒 Manage Products
@@ -1057,57 +1096,60 @@ function ownerView() {
 
     ${otab === 'orders' ? `
       <div>
-        ${orders.length ? orders.map(o => `
-          <div style="background:#fff;border:1px solid var(--b-border);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.03)">
-            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f0f0;padding-bottom:10px;margin-bottom:10px">
-              <div>
-                <b style="font-size:1.05rem">${o.id}</b>
-                <span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:5px;background:#f0faf2;color:var(--b-green);font-weight:700">
-                  ${o.pay || 'COD'}
-                </span>
-                <div style="font-size:0.75rem;color:#888">${new Date(o.t).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</div>
-              </div>
-              <div style="text-align:right">
-                <span style="font-size:0.75rem;font-weight:800;padding:4px 8px;border-radius:6px;background:${o.status==='cancelled'?'#fde8e8':(o.status==='delivered'?'#e5f7ee':'#fff8e1')};color:${o.status==='cancelled'?'var(--b-red)':(o.status==='delivered'?'var(--b-green)':'#b45309')}">
-                  ${o.status.toUpperCase()}
-                </span>
-                <b style="display:block;font-size:1rem;color:#111;margin-top:2px">${rs(o.total)}</b>
-              </div>
-            </div>
-
-            <div style="font-size:0.85rem;margin-bottom:10px">
-              <div>👤 <b>${esc(o.nm)}</b> · 📞 <a href="tel:${esc(o.ph)}" style="color:var(--b-green);font-weight:700">${esc(o.ph)}</a></div>
-              <div style="color:#555;margin-top:2px">📍 ${esc(o.ad)}</div>
-            </div>
-
-            <div style="background:#fbfbfb;border:1.5px solid #eaeaea;border-radius:12px;padding:12px;margin-bottom:12px">
-              <b style="font-size:0.8rem;text-transform:uppercase;color:#555;display:block;margin-bottom:6px">📋 Packing Checklist (${o.items.length} items):</b>
-              ${o.items.map(i => `
-                <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.85rem;border-bottom:1px dashed #eee">
-                  <input type="checkbox" style="width:16px;height:16px;cursor:pointer">
-                  <span style="flex:1"><b>${esc(i.n)}</b> (${i.u}) × ${i.q}</span>
-                  <b>${rs(i.p * i.q)}</b>
+        ${ordList.length ? ordList.map(o => {
+          const oItems = Array.isArray(o.items) ? o.items : [];
+          return `
+            <div style="background:#fff;border:1px solid var(--b-border);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.03)">
+              <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f0f0;padding-bottom:10px;margin-bottom:10px">
+                <div>
+                  <b style="font-size:1.05rem">${o.id}</b>
+                  <span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:5px;background:#f0faf2;color:var(--b-green);font-weight:700">
+                    ${o.pay || 'COD'}
+                  </span>
+                  <div style="font-size:0.75rem;color:#888">${new Date(o.t||Date.now()).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</div>
                 </div>
-              `).join("")}
-            </div>
+                <div style="text-align:right">
+                  <span style="font-size:0.75rem;font-weight:800;padding:4px 8px;border-radius:6px;background:${o.status==='cancelled'?'#fde8e8':(o.status==='delivered'?'#e5f7ee':'#fff8e1')};color:${o.status==='cancelled'?'var(--b-red)':(o.status==='delivered'?'var(--b-green)':'#b45309')}">
+                    ${(o.status||'placed').toUpperCase()}
+                  </span>
+                  <b style="display:block;font-size:1rem;color:#111;margin-top:2px">${rs(o.total)}</b>
+                </div>
+              </div>
 
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <span style="font-size:0.75rem;font-weight:700;color:#666">Update:</span>
-              <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='packed'?'var(--b-green)':'#f0f0f0'};color:${o.status==='packed'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','packed')">
-                📦 Packed
-              </button>
-              <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='out_for_delivery'?'var(--b-green)':'#f0f0f0'};color:${o.status==='out_for_delivery'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','out_for_delivery')">
-                🛵 Out for Delivery
-              </button>
-              <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='delivered'?'var(--b-green)':'#f0f0f0'};color:${o.status==='delivered'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','delivered')">
-                ✅ Delivered
-              </button>
-              <a href="https://wa.me/91${o.ph}?text=${encodeURIComponent('Hello '+o.nm+', update regarding your RA Store Order '+o.id+': Status is now '+o.status.toUpperCase()+'!')}" target="_blank" style="margin-left:auto;color:var(--b-green);font-size:0.8rem;font-weight:700;text-decoration:none">
-                💬 Message Customer
-              </a>
+              <div style="font-size:0.85rem;margin-bottom:10px">
+                <div>👤 <b>${esc(o.nm)}</b> · 📞 <a href="tel:${esc(o.ph)}" style="color:var(--b-green);font-weight:700">${esc(o.ph)}</a></div>
+                <div style="color:#555;margin-top:2px">📍 ${esc(o.ad)}</div>
+              </div>
+
+              <div style="background:#fbfbfb;border:1.5px solid #eaeaea;border-radius:12px;padding:12px;margin-bottom:12px">
+                <b style="font-size:0.8rem;text-transform:uppercase;color:#555;display:block;margin-bottom:6px">📋 Packing Checklist (${oItems.length} items):</b>
+                ${oItems.map(i => `
+                  <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.85rem;border-bottom:1px dashed #eee">
+                    <input type="checkbox" style="width:16px;height:16px;cursor:pointer">
+                    <span style="flex:1"><b>${esc(i.n)}</b> (${i.u}) × ${i.q}</span>
+                    <b>${rs(i.p * i.q)}</b>
+                  </div>
+                `).join("")}
+              </div>
+
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                <span style="font-size:0.75rem;font-weight:700;color:#666">Update:</span>
+                <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='packed'?'var(--b-green)':'#f0f0f0'};color:${o.status==='packed'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','packed')">
+                  📦 Packed
+                </button>
+                <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='out_for_delivery'?'var(--b-green)':'#f0f0f0'};color:${o.status==='out_for_delivery'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','out_for_delivery')">
+                  🛵 Out for Delivery
+                </button>
+                <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='delivered'?'var(--b-green)':'#f0f0f0'};color:${o.status==='delivered'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','delivered')">
+                  ✅ Delivered
+                </button>
+                <a href="https://wa.me/91${o.ph}?text=${encodeURIComponent('Hello '+o.nm+', update regarding your RA Store Order '+o.id+': Status is now '+o.status.toUpperCase()+'!')}" target="_blank" style="margin-left:auto;color:var(--b-green);font-size:0.8rem;font-weight:700;text-decoration:none">
+                  💬 Message Customer
+                </a>
+              </div>
             </div>
-          </div>
-        `).join("") : '<div style="text-align:center;padding:50px;color:#888">No orders yet.</div>'}
+          `;
+        }).join("") : '<div style="text-align:center;padding:50px;color:#888">No orders yet.</div>'}
       </div>
     ` : (otab === 'products' ? `
       <div style="background:#fff;padding:16px;border-radius:14px;border:1px solid #ddd;margin-bottom:16px">
@@ -1126,7 +1168,7 @@ function ownerView() {
       </div>
 
       <div style="background:#fff;border-radius:14px;border:1px solid #ddd;overflow:hidden">
-        ${STATE.products.map(p => `
+        ${(STATE.products||[]).map(p => `
           <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f0f0f0">
             <div style="width:40px;height:40px;background:#f8f8f8;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden">
               ${pic(p)}
@@ -1139,7 +1181,7 @@ function ownerView() {
               📷<input type="file" accept="image/*" capture="environment" hidden onchange="setImg(${p.id},this)">
             </label>
             <input class="f-inp" style="width:70px;padding:6px 8px" type="number" value="${p.price}" onchange="setP(${p.id},+this.value)">
-            <button style="padding:4px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;background:${p.out?'#fde8e8':'#e5f7ee'};color:${p.out?'var(--b-red)':'var(--b-green)'}" onclick="toggleStock(${p.id})">
+            <button style="padding:4px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;background:${p.out?'#fde8e8':'#e5f7ee'};color:${p.out?'var(--b-red)':(p.out?'var(--b-red)':'var(--b-green)')}" onclick="toggleStock(${p.id})">
               ${p.out ? 'Out' : 'In Stock'}
             </button>
             <button onclick="delP(${p.id})" style="color:#aaa;font-size:1.1rem;padding:4px">🗑</button>
