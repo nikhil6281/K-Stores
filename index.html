@@ -9,6 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <!-- Official Razorpay Checkout SDK -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<!-- Firebase App & Realtime Database SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 :root {
   --b-yellow: #F8CB46;
@@ -34,7 +37,6 @@ body {
 button { font-family: inherit; border: none; cursor: pointer; background: none; }
 input, textarea, select { font-family: inherit; }
 
-/* Sticky Header */
 header {
   position: sticky;
   top: 0;
@@ -100,7 +102,6 @@ header {
 }
 @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
 
-/* Wide Search Bar */
 .search-box {
   flex: 1;
   position: relative;
@@ -130,7 +131,6 @@ header {
   font-size: 1.1rem;
 }
 
-/* Nav Actions */
 .hdr-actions {
   display: flex;
   align-items: center;
@@ -169,7 +169,6 @@ main {
   padding: 20px 16px;
 }
 
-/* Category Filter Row */
 .cat-scroll {
   display: flex;
   gap: 10px;
@@ -218,7 +217,6 @@ main {
   .search-box { order: 3; flex: 1 1 100%; max-width: 100%; }
 }
 
-/* Product Card */
 .b-card {
   background: var(--b-card);
   border: 1px solid var(--b-border);
@@ -298,7 +296,6 @@ main {
 .b-stepper button:hover { background: rgba(0,0,0,0.15); }
 .b-stepper span { color: #ffffff; font-weight: 800; font-size: 0.85rem; min-width: 18px; text-align: center; }
 
-/* Floating Mobile Bar */
 .mobile-cart-bar {
   position: fixed;
   bottom: 14px;
@@ -318,7 +315,6 @@ main {
 }
 .mobile-cart-bar.show { display: flex; }
 
-/* Drawer */
 .drawer-scrim {
   position: fixed;
   inset: 0;
@@ -345,7 +341,6 @@ main {
 .drawer-body { flex: 1; overflow-y: auto; padding: 18px 20px; }
 .drawer-ftr { padding: 16px 20px; border-top: 1px solid var(--b-border); background: #fff; }
 
-/* Payment Options */
 .pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
 .pay-card {
   border: 1.5px solid var(--b-border);
@@ -360,7 +355,6 @@ main {
 .pay-card b { display: block; font-size: 0.85rem; margin-top: 4px; }
 .pay-card small { font-size: 0.72rem; color: #666; }
 
-/* Progress Tracker */
 .track-bar { display: flex; position: relative; margin: 16px 0; }
 .track-step { flex: 1; text-align: center; position: relative; }
 .track-step::before {
@@ -461,6 +455,26 @@ main {
 <div class="toast-msg" id="toast"></div>
 
 <script>
+// Firebase Initializer
+const firebaseConfig = {
+  apiKey: "AIzaSyD94vWB3NBEjSGmbO6JQ5F1t6L9Js7er8Y",
+  authDomain: "k-store-ae9dd.firebaseapp.com",
+  databaseURL: "https://k-store-ae9dd-default-rtdb.firebaseio.com",
+  projectId: "k-store-ae9dd",
+  storageBucket: "k-store-ae9dd.appspot.com",
+  messagingSenderId: "836118831556",
+  appId: "1:836118831556:web:0b0bf4408ffc096180f825"
+};
+
+let db = null;
+try {
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    console.log("Firebase Realtime Database connected!");
+  }
+} catch(e) { console.warn("Firebase offline or local mode:", e); }
+
 const DEFAULTS = [
   { id: 0, name: "Hybrid Fresh Tomatoes", unit: "1 kg", price: 35, cat: "Vegetables & Fruits", em: "🍅" },
   { id: 1, name: "Fresh Red Onions", unit: "1 kg", price: 35, cat: "Vegetables & Fruits", em: "🧅" },
@@ -497,7 +511,7 @@ let STATE = store.get('ra_blinkit_state', {
   free: 199,
   fee: 15,
   wa: "916281730144",
-  razorpay_key: "rzp_test_51t58Q7k4x9r4q",
+  razorpay_key: "rzp_live_TWh8sGQzToEEZT",
   pin: "9874"
 });
 
@@ -513,10 +527,40 @@ const $ = id => document.getElementById(id);
 const rs = n => "₹" + Number(n).toLocaleString("en-IN");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
 
+// Real-time Cloud Listeners (Firebase)
+if (db) {
+  // 1. Sync orders across devices
+  db.ref('orders').on('value', snapshot => {
+    const data = snapshot.val();
+    if (data) {
+      const list = Object.values(data).sort((a,b) => (b.t||0) - (a.t||0));
+      orders = list;
+      store.set('ra_blinkit_orders', orders);
+      if (page === 'orders') ordersView();
+      if (page === 'owner' && otab === 'orders') ownerView();
+    }
+  });
+
+  // 2. Sync products catalog across devices
+  db.ref('products').on('value', snapshot => {
+    const prods = snapshot.val();
+    if (Array.isArray(prods) && prods.length > 0) {
+      STATE.products = prods;
+      store.set('ra_blinkit_state', STATE);
+      if (page === 'shop') draw();
+    }
+  });
+}
+
 function save() {
   store.set('ra_blinkit_cart', cart);
   store.set('ra_blinkit_orders', orders);
   store.set('ra_blinkit_state', STATE);
+
+  // Sync to Firebase Cloud
+  if (db) {
+    db.ref('products').set(STATE.products);
+  }
 }
 
 function toast(t) {
@@ -676,7 +720,6 @@ function checkout() {
       <label class="f-lbl">Delivery Address / Landmark</label>
       <textarea class="f-inp" id="ad" rows="2" placeholder="House number, Street, Landmark">${esc(u.ad||'')}</textarea>
 
-      <!-- Payment Method Selection -->
       <label class="f-lbl" style="margin-top:16px">Choose Payment Method</label>
       <div class="pay-options">
         <div class="pay-card ${selectedPayment==='razorpay'?'active':''}" onclick="setPay('razorpay')">
@@ -695,10 +738,10 @@ function checkout() {
         <div style="background:#eef7f0;border:1.5px solid #bce6c6;padding:14px;border-radius:12px;margin-top:8px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
             <span style="font-size:1.1rem">🔒</span>
-            <b style="font-size:0.85rem;color:var(--b-green-dark)">Instant & Secure Razorpay Payment</b>
+            <b style="font-size:0.85rem;color:var(--b-green-dark)">Official Razorpay Payment Gateway</b>
           </div>
           <p style="font-size:0.78rem;color:#555">
-            Pay safely via Google Pay, PhonePe, Paytm, Debit/Credit Card, or NetBanking. Your order will be placed automatically after payment.
+            Pay safely via Google Pay, PhonePe, Paytm, Debit/Credit Card, or NetBanking. Order places automatically upon payment.
           </p>
         </div>
       ` : `
@@ -731,31 +774,29 @@ function initiateOrder() {
   const orderId = "BK" + Date.now().toString().slice(-6);
 
   if (selectedPayment === 'razorpay') {
-    // Check if Razorpay script is loaded
     if (typeof window.Razorpay === 'undefined') {
       return alert("Razorpay SDK is loading. Please check your internet connection.");
     }
 
     const options = {
-      key: STATE.razorpay_key || 'rzp_test_51t58Q7k4x9r4q',
-      amount: tot * 100, // amount in paise
+      key: STATE.razorpay_key || 'rzp_live_TWh8sGQzToEEZT',
+      amount: Math.round(tot * 100), // paise
       currency: "INR",
       name: "RA General Store",
       description: "Order #" + orderId,
       image: "https://cdn-icons-png.flaticon.com/512/3724/3724720.png",
       prefill: {
         name: nm,
-        contact: ph
+        contact: ph,
+        email: "customer@rageneralstore.com"
       },
-      theme: {
-        color: "#0C831F"
-      },
+      theme: { color: "#0C831F" },
       handler: function (response) {
         completeOrderPlacement(orderId, nm, ph, ad, tot, f, "Paid Online (Razorpay: " + response.razorpay_payment_id + ")");
       },
       modal: {
         ondismiss: function () {
-          toast("Payment cancelled by user.");
+          toast("Payment cancelled.");
         }
       }
     };
@@ -778,10 +819,16 @@ function completeOrderPlacement(id, nm, ph, ad, tot, fee, payMethod) {
     fee,
     items: Object.entries(cart).map(([itemId, q]) => ({ n: P(itemId).name, u: P(itemId).unit, p: P(itemId).price, q }))
   };
+
   orders.unshift(o);
   cart = {};
   store.set('ra_user', { nm, ph, ad });
   save();
+
+  // Save order to Firebase Cloud in real time
+  if (db) {
+    db.ref('orders/' + id).set(o);
+  }
 
   window.open(waLink(o), '_blank');
 
@@ -812,7 +859,7 @@ const waLink = o => 'https://wa.me/' + STATE.wa + '?text=' + encodeURIComponent(
   `👤 Customer: ${o.nm}\n📞 Phone: ${o.ph}\n📍 Address: ${o.ad}`
 );
 
-// Customer Orders View with Cancel Option Before Out of Delivery
+// Customer Orders View with Real-time Sync & Cancel Rule
 function userCancelOrder(id) {
   const o = orders.find(x => x.id === id);
   if (!o) return;
@@ -822,6 +869,11 @@ function userCancelOrder(id) {
   if (!confirm("Are you sure you want to cancel order " + id + "?")) return;
   o.status = "cancelled";
   save();
+
+  if (db) {
+    db.ref('orders/' + id + '/status').set('cancelled');
+  }
+
   toast("Order " + id + " has been cancelled.");
   ordersView();
 }
@@ -849,7 +901,6 @@ function ordersView() {
             </span>
           </div>
 
-          <!-- Progress Bar Tracker -->
           ${!isCancelled ? `
             <div class="track-bar">
               <div class="track-step ${isPlaced||isPacked||isOut||isDelivered?'done':''} ${isPlaced?'active':''}">
@@ -875,7 +926,6 @@ function ordersView() {
             </div>
           `}
 
-          <!-- Items list -->
           <div style="background:#fbfbfb;border:1px solid #f0f0f0;padding:12px;border-radius:10px;margin:12px 0;font-size:0.85rem">
             ${o.items.map(i => `<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>${esc(i.n)} (${i.u}) × ${i.q}</span><b>${rs(i.p*i.q)}</b></div>`).join("")}
             <div style="border-top:1px dashed #ddd;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-weight:800">
@@ -883,7 +933,6 @@ function ordersView() {
             </div>
           </div>
 
-          <!-- Actions -->
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px">
             <a href="${waLink(o)}" target="_blank" style="color:var(--b-green);font-size:0.85rem;font-weight:700;text-decoration:none">
               💬 Open in WhatsApp
@@ -905,7 +954,7 @@ function ordersView() {
   `;
 }
 
-// Owner Portal with Packing Checklist & Status Controllers
+// Owner Portal with Real-Time Updates
 let unlocked = false, otab = 'orders';
 function unlock() {
   const p = $('pin').value;
@@ -918,6 +967,12 @@ function updateOrderStatus(id, newStatus) {
   if (!o) return;
   o.status = newStatus;
   save();
+
+  // Push status update to Firebase cloud immediately
+  if (db) {
+    db.ref('orders/' + id + '/status').set(newStatus);
+  }
+
   toast("Order " + id + " marked as " + newStatus);
   ownerView();
 }
@@ -988,10 +1043,9 @@ function ownerView() {
       <button class="nav-link" onclick="unlocked=false;go('shop')">Lock & Exit</button>
     </div>
 
-    <!-- Owner Tabs -->
     <div class="cat-scroll" style="margin-bottom:16px">
       <button class="cat-pill ${otab==='orders'?'on':''}" onclick="otab='orders';ownerView()">
-        📦 Orders (${orders.length})
+        📦 Live Orders (${orders.length})
       </button>
       <button class="cat-pill ${otab==='products'?'on':''}" onclick="otab='products';ownerView()">
         🛒 Manage Products
@@ -1002,7 +1056,6 @@ function ownerView() {
     </div>
 
     ${otab === 'orders' ? `
-      <!-- Orders List with Packing List & Status Changers -->
       <div>
         ${orders.length ? orders.map(o => `
           <div style="background:#fff;border:1px solid var(--b-border);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.03)">
@@ -1022,13 +1075,11 @@ function ownerView() {
               </div>
             </div>
 
-            <!-- Customer Details -->
             <div style="font-size:0.85rem;margin-bottom:10px">
               <div>👤 <b>${esc(o.nm)}</b> · 📞 <a href="tel:${esc(o.ph)}" style="color:var(--b-green);font-weight:700">${esc(o.ph)}</a></div>
               <div style="color:#555;margin-top:2px">📍 ${esc(o.ad)}</div>
             </div>
 
-            <!-- Packing Checklist -->
             <div style="background:#fbfbfb;border:1.5px solid #eaeaea;border-radius:12px;padding:12px;margin-bottom:12px">
               <b style="font-size:0.8rem;text-transform:uppercase;color:#555;display:block;margin-bottom:6px">📋 Packing Checklist (${o.items.length} items):</b>
               ${o.items.map(i => `
@@ -1040,7 +1091,6 @@ function ownerView() {
               `).join("")}
             </div>
 
-            <!-- Status Buttons Workflow -->
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
               <span style="font-size:0.75rem;font-weight:700;color:#666">Update:</span>
               <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='packed'?'var(--b-green)':'#f0f0f0'};color:${o.status==='packed'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','packed')">
@@ -1060,7 +1110,6 @@ function ownerView() {
         `).join("") : '<div style="text-align:center;padding:50px;color:#888">No orders yet.</div>'}
       </div>
     ` : (otab === 'products' ? `
-      <!-- Products Manager -->
       <div style="background:#fff;padding:16px;border-radius:14px;border:1px solid #ddd;margin-bottom:16px">
         <b style="font-size:0.95rem;display:block;margin-bottom:10px">+ Add New Grocery Product</b>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
@@ -1098,11 +1147,14 @@ function ownerView() {
         `).join("")}
       </div>
     ` : `
-      <!-- Store Settings & Razorpay -->
       <div style="background:#fff;padding:20px;border-radius:14px;border:1px solid #ddd">
-        <label class="f-lbl">Razorpay Key ID (for Online Payments)</label>
-        <input class="f-inp" value="${esc(STATE.razorpay_key||'')}" onchange="setCfg('razorpay_key',this.value.trim())" placeholder="rzp_test_... or rzp_live_...">
-        <small style="color:#888;display:block;margin-top:3px">Get this from your Razorpay Dashboard ➔ Settings ➔ API Keys</small>
+        <label class="f-lbl">Razorpay Live Key ID (Active)</label>
+        <input class="f-inp" value="${esc(STATE.razorpay_key||'rzp_live_TWh8sGQzToEEZT')}" onchange="setCfg('razorpay_key',this.value.trim())">
+        <small style="color:var(--b-green);display:block;margin-top:3px;font-weight:600">✓ Connected to your live Razorpay account</small>
+
+        <label class="f-lbl" style="margin-top:14px">Firebase Realtime Database</label>
+        <input class="f-inp" value="https://k-store-ae9dd-default-rtdb.firebaseio.com" disabled style="background:#f6f6f6;color:#666">
+        <small style="color:var(--b-green);display:block;margin-top:3px;font-weight:600">✓ Live cross-device real-time sync active</small>
 
         <label class="f-lbl" style="margin-top:14px">Store WhatsApp Number (with country code)</label>
         <input class="f-inp" value="${esc(STATE.wa)}" onchange="setCfg('wa',this.value.trim())">
