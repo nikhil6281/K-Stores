@@ -1,0 +1,19 @@
+improvements :
+1.if they need to order something they must be logged in with their google account if not they cant order
+2.in the front page image like 100 percent refund if you cancel your order before out of delivery to your bank account
+3.for owner portral we need to improve the security (the way)
+4.Your database is almost certainly open. The owner updates orders and products without any Firebase login. For that to work, the rules must let anyone write. Anyone could therefore change prices, delete products, or edit orders.
+5.Every visitor downloads every customer's order. The page subscribes to the whole orders list, so other people's names, phone numbers and addresses reach every browser and are cached in localStorage. This is a privacy risk under India's DPDP Act.
+6.Every cart tap rewrites the shared catalog. save() writes the visitor's local product list to Firebase, so a stale or offline visitor can overwrite your prices and stock.
+7.Settings don't reach customers. Delivery fee, free-delivery limit and WhatsApp number are saved only on the owner's device.
+8.Failed orders look successful. If the Firebase write fails, the customer still sees "Order Placed 🎉" and you never get the order.
+9.Switching payment method wipes the form. setPay() redraws checkout, so the name, phone and address the customer typed are lost.
+10.The owner's packing checkboxes reset whenever a new order arrives.
+Deleting a product has no confirmation.
+Cancelling a paid order doesn't refund it.
+11.WhatsApp opens automatically after ordering, which can be blocked after online payment and pulls COD customers away from the confirmation screen.
+12.Also restrict your Firebase API key to your site's domain in Google Cloud Console, turn on App Check, and set the SMS region policy to India only so nobody can run up your OTP bill.
+13.Order IDs are the last 6 digits of the timestamp (BK123456). They can repeat and overwrite an order.
+14. store opening and closing timings , store open and close button if store is closed but they can view items and add to cart but they dont order 
+15.(idea) - if the store is closed then can order cod but it will show like delivery will begin when the store is open approx 12 hrs specify the delivery time and date or it will deliver when the store is open
+16.

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RA Store — Owner Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    :root {
+      --primary: #0C831F;
+      --primary-dark: #096818;
+      --accent: #F8CB46;
+      --dark: #1C1C1C;
+      --danger: #D9383A;
+      --bg: #F4F6F8;
+      --surface: #FFFFFF;
+      --border: #E5E7EB;
+      --text: #1F2937;
+      --muted: #6B7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+    .header { background: var(--dark); color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .header h1 span { background: var(--accent); color: var(--dark); padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+    .btn { padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid #4B5563; color: #E5E7EB; }
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
+    .auth-box { max-width: 420px; margin: 80px auto; background: var(--surface); padding: 32px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .tab-btn { background: none; border: none; font-size: 15px; font-weight: 600; color: var(--muted); padding: 8px 16px; cursor: pointer; border-radius: 6px; }
+    .tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 18px; margin-bottom: 16px; }
+    .order-card { border-left: 5px solid var(--primary); }
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .badge-paid { background: #DCFCE7; color: #166534; }
+    .badge-pending { background: #FEF3C7; color: #92400E; }
+    .badge-cancelled { background: #FEE2E2; color: #991B1B; }
+    .badge-refunded { background: #E0E7FF; color: #3730A3; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--dark); color: #fff; padding: 12px 20px; border-radius: 8px; display: none; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .toast-undo { background: var(--accent); color: var(--dark); font-weight: 700; margin-left: 10px; cursor: pointer; border: none; padding: 3px 8px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>RA Store <span>OWNER PORTAL</span></h1>
+    <div id="authActions" style="display: none; align-items: center; gap: 12px;">
+      <span id="userBadge" style="font-size: 13px; color: #9CA3AF;"></span>
+      <button class="btn btn-outline" onclick="logoutAdmin()">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Login Screen -->
+    <div id="loginView" class="auth-box">
+      <h2 style="font-size: 20px; margin-bottom: 8px;">Authorized Owner Access</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Sign in with your verified owner Google account to manage store operations.</p>
+      <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="loginWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z"/></svg>
+        Sign In with Google
+      </button>
+      <p id="authError" style="color: var(--danger); font-size: 12px; margin-top: 14px; display: none;"></p>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardView" style="display: none;">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('orders')">Live Orders</button>
+        <button class="tab-btn" onclick="switchTab('settings')">Store Settings</button>
+      </div>
+
+      <!-- Orders Section -->
+      <div id="ordersTab">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h2 style="font-size: 18px; font-weight: 700;">Recent Orders</h2>
+          <span style="font-size: 13px; color: var(--muted);">Auto-refreshes in real-time</span>
+        </div>
+        <div id="ordersList">Loading orders...</div>
+      </div>
+
+      <!-- Settings Section -->
+      <div id="settingsTab" style="display: none;">
+        <div class="card" style="max-width: 600px;">
+          <h3 style="font-size: 16px; margin-bottom: 16px;">Store Configuration</h3>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 12px; font-weight: 600;">Delivery Fee (₹)</label>
+            <input type="number" id="settingDeliveryFee" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-top: 4px;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 12px; font-weight: 600;">Free Delivery Order Threshold (₹)</label>
+            <input type="number" id="settingFreeThreshold" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-top: 4px;">
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 12px; font-weight: 600;">Store WhatsApp Number (with country code)</label>
+            <input type="text" id="settingWhatsapp" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-top: 4px;">
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="font-size: 12px; font-weight: 600;">Store Mode</label>
+            <select id="settingStoreMode" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-top: 4px;">
+              <option value="auto">Auto (7:00 AM - 7:00 PM IST)</option>
+              <option value="force_open">Force Open (Always Open)</option>
+              <option value="force_closed">Force Closed (Closed Now)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <span id="toastMsg"></span>
+    <button id="toastUndoBtn" class="toast-undo" style="display: none;" onclick="undoDelete()">UNDO</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD94vWB3NBEjSGmbO6JQ5F1t6L9Js7er8Y",
+      authDomain: "k-store-ae9dd.firebaseapp.com",
+      databaseURL: "https://k-store-ae9dd-default-rtdb.firebaseio.com",
+      projectId: "k-store-ae9dd"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // Your Cloudflare Worker URL
+    const WORKER_API = "https://ra-store-api.chowdarynikhil095.workers.dev";
+
+    let currentUser = null;
+    let inactivityTimer = null;
+
+    // 15-Minute Inactivity Auto-Logout
+    function resetInactivityTimer() {
+      clearTimeout(inactivityTimer);
+      if (currentUser) {
+        inactivityTimer = setTimeout(() => {
+          showToast("Session expired due to 15 minutes of inactivity.");
+          logoutAdmin();
+        }, 15 * 60 * 1000);
+      }
+    }
+    ['mousemove', 'keydown', 'click', 'scroll'].forEach(evt => window.addEventListener(evt, resetInactivityTimer));
+
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        // Authorize strictly via /admins/{uid} allowlist
+        const snap = await db.ref(`admins/${user.uid}`).once('value');
+        if (snap.val() === true) {
+          currentUser = user;
+          document.getElementById('loginView').style.display = 'none';
+          document.getElementById('dashboardView').style.display = 'block';
+          document.getElementById('authActions').style.display = 'flex';
+          document.getElementById('userBadge').innerText = user.email;
+          resetInactivityTimer();
+          loadOrders();
+          loadSettings();
+        } else {
+          auth.signOut();
+          document.getElementById('authError').innerText = "Access Denied: Google Account is not on the /admins allowlist.";
+          document.getElementById('authError').style.display = 'block';
+        }
+      } else {
+        currentUser = null;
+        document.getElementById('loginView').style.display = 'block';
+        document.getElementById('dashboardView').style.display = 'none';
+        document.getElementById('authActions').style.display = 'none';
+      }
+    });
+
+    async function loginWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        await auth.signInWithPopup(provider);
+      } catch (err) {
+        document.getElementById('authError').innerText = err.message;
+        document.getElementById('authError').style.display = 'block';
+      }
+    }
+
+    function logoutAdmin() {
+      auth.signOut();
+    }
+
+    // Live Orders Listener
+    function loadOrders() {
+      db.ref('orders').limitToLast(50).on('value', snap => {
+        const list = document.getElementById('ordersList');
+        const orders = snap.val();
+        if (!orders) {
+          list.innerHTML = "<p style='color: var(--muted);'>No orders found.</p>";
+          return;
+        }
+
+        const sortedKeys = Object.keys(orders).reverse();
+        list.innerHTML = sortedKeys.map(key => {
+          const ord = orders[key];
+          const checks = ord.packingChecks || {};
+          const isCancelled = ord.status === 'cancelled';
+
+          return `
+            <div class="card order-card" style="border-left-color: ${isCancelled ? 'var(--danger)' : 'var(--primary)'}">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div>
+                  <strong style="font-size: 15px;">#${ord.id}</strong>
+                  <span style="font-size: 12px; color: var(--muted); margin-left: 8px;">${new Date(ord.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+                <div>
+                  <span class="badge badge-${ord.paymentStatus}">${ord.paymentStatus}</span>
+                  <span class="badge" style="background: #E5E7EB; color: #3730A3;">${ord.status}</span>
+                </div>
+              </div>
+              <div style="font-size: 13px; margin-bottom: 10px;">
+                <strong>${ord.customer?.name}</strong> (${ord.customer?.phone}) • ${ord.customer?.address}
+              </div>
+              
+              <!-- Persistent Packing Checklist -->
+              <div style="background: #F9FAFB; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">PACKING CHECKLIST:</div>
+                ${(ord.items || []).map((it, idx) => `
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 4px; cursor: pointer;">
+                    <input type="checkbox" ${checks[it.id] ? 'checked' : ''} onchange="togglePackCheck('${key}', '${it.id}', this.checked)">
+                    <span style="${checks[it.id] ? 'text-decoration: line-through; color: var(--muted);' : ''}">${it.name} (${it.quantity} × ₹${it.price})</span>
+                  </label>
+                `).join('')}
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 700; font-size: 15px;">Total: ₹${ord.total}</span>
+                <div style="display: flex; gap: 8px;">
+                  ${!isCancelled && ord.status !== 'delivered' ? `
+                    <button class="btn btn-danger" onclick="cancelOrderWithRefund('${key}', '${ord.id}', '${ord.paymentMethod}', '${ord.paymentStatus}')">Cancel & Refund</button>
+                    <button class="btn btn-primary" onclick="updateOrderStatus('${key}', 'out_for_delivery')">Out for Delivery</button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      });
+    }
+
+    async function togglePackCheck(orderKey, itemId, isChecked) {
+      await db.ref(`orders/${orderKey}/packingChecks/${itemId}`).set(isChecked);
+    }
+
+    async function cancelOrderWithRefund(pushKey, humanId, method, paymentStatus) {
+      if (!confirm(`Are you sure you want to cancel order #${humanId}? If paid online, a full refund will be processed immediately via Razorpay.`)) return;
+
+      try {
+        const res = await fetch(`${WORKER_API}/api/cancel-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pushKey, uid: currentUser.uid, reason: 'Admin cancelled' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`Order #${humanId} cancelled successfully.`);
+        } else {
+          alert('Cancellation error: ' + (data.error || 'Server error'));
+        }
+      } catch (e) {
+        alert('Network error connecting to worker backend.');
+      }
+    }
+
+    async function updateOrderStatus(pushKey, newStatus) {
+      await db.ref(`orders/${pushKey}/status`).set(newStatus);
+    }
+
+    async function loadSettings() {
+      const snap = await db.ref('settings').once('value');
+      const s = snap.val() || {};
+      document.getElementById('settingDeliveryFee').value = s.deliveryFee || 25;
+      document.getElementById('settingFreeThreshold').value = s.freeDeliveryThreshold || 299;
+      document.getElementById('settingWhatsapp').value = s.whatsappNumber || '916281730144';
+      document.getElementById('settingStoreMode').value = s.storeHours?.mode || 'auto';
+    }
+
+    async function saveSettings() {
+      const updates = {
+        deliveryFee: Number(document.getElementById('settingDeliveryFee').value),
+        freeDeliveryThreshold: Number(document.getElementById('settingFreeThreshold').value),
+        whatsappNumber: document.getElementById('settingWhatsapp').value,
+        storeHours: {
+          open: "07:00",
+          close: "19:00",
+          mode: document.getElementById('settingStoreMode').value
+        }
+      };
+      await db.ref('settings').update(updates);
+      await db.ref('audit').push({
+        adminUid: currentUser.uid,
+        adminEmail: currentUser.email,
+        action: 'UPDATE_SETTINGS',
+        details: updates,
+        timestamp: new Date().toISOString()
+      });
+      showToast('Settings saved successfully.');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function switchTab(t) {
+      ['orders', 'settings'].forEach(tab => {
+        document.getElementById(tab + 'Tab').style.display = tab === t ? 'block' : 'none';
+      });
+      document.querySelectorAll('.tab-btn').forEach((b, idx) => {
+        b.classList.toggle('active', ['orders', 'settings'][idx] === t);
+      });
+    }
+  </script>
+</body>
+</html>

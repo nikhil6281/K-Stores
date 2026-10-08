@@ -1,1549 +1,551 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RA Store - Everything delivered in minutes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<!-- Official Razorpay Checkout SDK -->
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<!-- Firebase App, Realtime Database & Auth SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<style>
-:root {
-  --b-yellow: #F8CB46;
-  --b-green: #0C831F;
-  --b-green-dark: #096818;
-  --b-green-light: #e5f7ee;
-  --b-bg: #F4F6FB;
-  --b-card: #ffffff;
-  --b-text: #1C1C1C;
-  --b-muted: #666666;
-  --b-border: #E8E8E8;
-  --b-red: #D9383A;
-  --b-blue: #1A73E8;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--b-bg);
-  color: var(--b-text);
-  line-height: 1.4;
-  padding-bottom: 85px;
-}
-button { font-family: inherit; border: none; cursor: pointer; background: none; }
-input, textarea, select { font-family: inherit; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RA Store — Fresh Groceries Delivered in Bommalatapalli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  
+  <!-- Razorpay Checkout -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-/* Sticky Header */
-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: #ffffff;
-  border-bottom: 1px solid var(--b-border);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-}
-.hdr-wrap {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.brand-logo {
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  text-decoration: none;
-}
-.brand-logo .logo-main {
-  font-size: 1.45rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  color: #111;
-  display: flex;
-  align-items: center;
-}
-.brand-logo .logo-main span {
-  color: var(--b-green);
-  margin-left: 2px;
-}
-.brand-logo .logo-sub {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--b-muted);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-top: -3px;
-}
+  <style>
+    :root {
+      --primary: #0C831F;
+      --primary-dark: #096818;
+      --accent: #F8CB46;
+      --dark: #1C1C1C;
+      --danger: #D9383A;
+      --bg: #F8F9FA;
+      --surface: #FFFFFF;
+      --border: #E5E7EB;
+      --text: #1F2937;
+      --muted: #6B7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
 
-.eta-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #fff;
-  border: 1px solid var(--b-border);
-  padding: 6px 10px;
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 0.78rem;
-  white-space: nowrap;
-}
-.eta-badge i {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background: var(--b-green);
-  border-radius: 50%;
-  animation: pulse 1.8s infinite;
-}
-@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+    /* Top Navbar */
+    .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+    .brand { font-size: 20px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 6px; }
+    .brand-badge { background: var(--accent); color: var(--dark); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .btn { padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; transition: 0.15s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
 
-.search-box {
-  flex: 1;
-  position: relative;
-  min-width: 180px;
-}
-.search-box input {
-  width: 100%;
-  padding: 10px 14px 10px 38px;
-  background: #f8f9fc;
-  border: 1px solid #e2e5ec;
-  border-radius: 14px;
-  font-size: 0.88rem;
-  outline: none;
-  transition: all 0.2s;
-}
-.search-box input:focus {
-  background: #fff;
-  border-color: var(--b-green);
-  box-shadow: 0 0 0 3px rgba(12,131,31,0.12);
-}
-.search-box .icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #888;
-  font-size: 0.95rem;
-}
+    /* R2 Hero Refund Banner */
+    .refund-hero { background: #FEF3C7; border-left: 4px solid var(--accent); padding: 12px 16px; margin: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; }
+    .refund-hero-title { font-weight: 700; font-size: 13px; color: #92400E; }
+    .refund-hero-desc { font-size: 11px; color: #B45309; }
 
-.hdr-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.nav-link {
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: #444;
-  padding: 7px 11px;
-  border-radius: 10px;
-  transition: all 0.15s;
-  background: #f8f9fc;
-  border: 1px solid var(--b-border);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.nav-link:hover { background: #eef1f6; }
-.nav-link.active {
-  color: #ffffff;
-  background: var(--b-green);
-  border-color: var(--b-green);
-}
+    /* R14/R15 Store Status Banner */
+    .store-banner { background: #FEE2E2; color: #991B1B; padding: 10px 16px; font-size: 13px; font-weight: 600; text-align: center; display: none; }
 
-.cart-pill {
-  background: var(--b-green);
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(12,131,31,0.22);
-  white-space: nowrap;
-}
+    /* Products Grid */
+    .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+    .product-img { width: 100%; height: 110px; object-fit: contain; border-radius: 6px; background: #fafafa; }
+    .product-title { font-size: 13px; font-weight: 600; margin-top: 8px; }
+    .product-unit { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .product-price { font-size: 14px; font-weight: 700; color: var(--dark); }
 
-/* Mobile App View Styles */
-@media (max-width: 768px) {
-  .hdr-wrap {
-    flex-wrap: wrap;
-    padding: 8px 12px;
-    gap: 8px;
-  }
-  .search-box {
-    order: 3;
-    flex: 1 1 100%;
-    min-width: 100%;
-  }
-  .hdr-actions .nav-link {
-    display: none; /* Mobile uses dedicated bottom bar */
-  }
-  .hdr-actions .cart-pill {
-    padding: 7px 12px;
-    font-size: 0.8rem;
-  }
-}
+    /* Floating Bottom Cart Bar */
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+    
+    /* Modals */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
+    .modal { background: var(--surface); border-radius: 12px; max-width: 440px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
 
-/* Mobile Bottom Navigation Bar */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border-top: 1px solid var(--b-border);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
-  z-index: 60;
-  box-shadow: 0 -3px 12px rgba(0,0,0,0.06);
-}
-@media (min-width: 769px) {
-  .bottom-nav { display: none; }
-}
-.b-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  color: #777;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 8px;
-  position: relative;
-}
-.b-nav-item.active {
-  color: var(--b-green);
-}
-.b-nav-item span.icon {
-  font-size: 1.25rem;
-  line-height: 1;
-}
-.b-nav-item .b-badge {
-  position: absolute;
-  top: 1px;
-  right: 8px;
-  background: var(--b-yellow);
-  color: #111;
-  font-size: 0.65rem;
-  font-weight: 900;
-  border-radius: 999px;
-  padding: 1px 5px;
-}
-
-main {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 14px 14px;
-}
-
-.cat-scroll {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 4px 0 14px;
-  scrollbar-width: none;
-}
-.cat-scroll::-webkit-scrollbar { display: none; }
-.cat-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #ffffff;
-  border: 1px solid var(--b-border);
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #333;
-  white-space: nowrap;
-}
-.cat-pill.on {
-  background: var(--b-green);
-  border-color: var(--b-green);
-  color: #fff;
-}
-
-.sec-title {
-  font-size: 1.15rem;
-  font-weight: 800;
-  margin: 10px 0 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-  gap: 12px;
-}
-@media (max-width: 640px) {
-  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-}
-
-.b-card {
-  background: var(--b-card);
-  border: 1px solid var(--b-border);
-  border-radius: 16px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-.b-img-box {
-  width: 100%;
-  aspect-ratio: 1/1;
-  background: #fbfbfb;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  margin-bottom: 8px;
-  font-size: 2.7rem;
-  position: relative;
-}
-.b-img-box img { width: 100%; height: 100%; object-fit: cover; }
-.b-timer {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  background: rgba(255,255,255,0.94);
-  backdrop-filter: blur(4px);
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 0.62rem;
-  font-weight: 800;
-  color: #111;
-}
-.b-name {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--b-text);
-  line-height: 1.25;
-  margin-bottom: 2px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 2.2em;
-}
-.b-unit { font-size: 0.72rem; color: var(--b-muted); font-weight: 500; margin-bottom: 10px; }
-.b-price-row { margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
-.b-price { font-size: 0.92rem; font-weight: 800; color: #111; }
-
-.b-add-btn {
-  background: #ffffff;
-  border: 1.5px solid var(--b-green);
-  color: var(--b-green);
-  font-weight: 800;
-  font-size: 0.8rem;
-  padding: 5px 14px;
-  border-radius: 8px;
-}
-.b-stepper {
-  background: var(--b-green);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-.b-stepper button { color: #ffffff; font-size: 1rem; font-weight: 800; padding: 3px 8px; }
-.b-stepper span { color: #ffffff; font-weight: 800; font-size: 0.82rem; min-width: 18px; text-align: center; }
-
-/* Floating Mobile Bar (Placed above bottom nav on phones) */
-.mobile-cart-bar {
-  position: fixed;
-  bottom: 68px;
-  left: 12px;
-  right: 12px;
-  background: var(--b-green);
-  color: #fff;
-  border-radius: 14px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 8px 24px rgba(12,131,31,0.35);
-  z-index: 55;
-  cursor: pointer;
-  display: none;
-}
-.mobile-cart-bar.show { display: flex; }
-
-/* Drawers & Modals */
-.drawer-scrim {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 100;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s;
-}
-.drawer-scrim.open { opacity: 1; pointer-events: auto; }
-.drawer-panel {
-  position: fixed;
-  top: 0; right: 0; bottom: 0;
-  width: min(440px, 100%);
-  background: #ffffff;
-  z-index: 101;
-  transform: translateX(100%);
-  transition: transform 0.25s ease-out;
-  display: flex;
-  flex-direction: column;
-}
-.drawer-scrim.open .drawer-panel { transform: translateX(0); }
-.drawer-hdr { padding: 16px 18px; border-bottom: 1px solid var(--b-border); display: flex; align-items: center; justify-content: space-between; }
-.drawer-body { flex: 1; overflow-y: auto; padding: 16px 18px; }
-.drawer-ftr { padding: 14px 18px; border-top: 1px solid var(--b-border); background: #fff; }
-
-.modal-center {
-  position: fixed;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  width: min(390px, 92%);
-  border-radius: 20px;
-  padding: 22px;
-  z-index: 102;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.18);
-  display: none;
-}
-.modal-center.open { display: block; }
-
-.google-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background: #ffffff;
-  border: 1.5px solid #dadce0;
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: #3c4043;
-  margin-bottom: 14px;
-}
-.divider-or {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 14px 0;
-  color: #888;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-.divider-or::before, .divider-or::after { content: ''; flex: 1; border-bottom: 1px solid #e0e0e0; }
-.divider-or::before { margin-right: 10px; }
-.divider-or::after { margin-left: 10px; }
-
-.pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
-.pay-card {
-  border: 1.5px solid var(--b-border);
-  border-radius: 12px;
-  padding: 12px;
-  cursor: pointer;
-  text-align: center;
-  background: #fff;
-}
-.pay-card.active { border-color: var(--b-green); background: var(--b-green-light); }
-.pay-card b { display: block; font-size: 0.85rem; margin-top: 4px; }
-.pay-card small { font-size: 0.72rem; color: #666; }
-
-.track-bar { display: flex; position: relative; margin: 16px 0; }
-.track-step { flex: 1; text-align: center; position: relative; }
-.track-step::before {
-  content: ''; position: absolute; top: 10px; left: -50%; right: 50%; height: 3px; background: var(--b-border); z-index: 1;
-}
-.track-step:first-child::before { display: none; }
-.track-step.done::before { background: var(--b-green); }
-.step-dot {
-  width: 22px; height: 22px; border-radius: 50%; background: var(--b-border); color: #fff; display: inline-flex;
-  align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; position: relative; z-index: 2; margin-bottom: 4px;
-}
-.track-step.done .step-dot { background: var(--b-green); }
-.track-step.active .step-dot { background: var(--b-yellow); color: #111; box-shadow: 0 0 0 3px rgba(248,203,70,0.3); }
-.step-lbl { font-size: 0.72rem; font-weight: 700; color: #777; display: block; }
-.track-step.active .step-lbl, .track-step.done .step-lbl { color: #111; }
-
-.f-lbl { display: block; font-size: 0.82rem; font-weight: 700; margin: 12px 0 4px; color: #333; }
-.f-inp { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #dcdcdc; font-size: 0.9rem; outline: none; }
-.f-inp:focus { border-color: var(--b-green); }
-
-.btn-primary {
-  width: 100%;
-  background: var(--b-green);
-  color: #fff;
-  padding: 13px;
-  border-radius: 12px;
-  font-size: 0.92rem;
-  font-weight: 800;
-}
-.btn-danger {
-  background: #fff;
-  border: 1px solid var(--b-red);
-  color: var(--b-red);
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.82rem;
-}
-
-.toast-msg {
-  position: fixed;
-  bottom: 80px; left: 50%;
-  transform: translateX(-50%);
-  background: #111; color: #fff;
-  padding: 10px 20px;
-  border-radius: 999px;
-  font-size: 0.85rem; font-weight: 600;
-  z-index: 200; display: none;
-}
-</style>
+    /* Toast */
+    .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 300; display: none; }
+    
+    /* Privacy Note */
+    .privacy-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 24px; padding: 12px; border-top: 1px solid var(--border); }
+  </style>
 </head>
 <body>
 
-<!-- Header -->
-<header>
-  <div class="hdr-wrap">
-    <div class="brand-logo" onclick="go('shop')">
-      <div class="logo-main">RA<span>store</span></div>
-      <div class="logo-sub">groceries in minutes</div>
-    </div>
-
-    <div class="eta-badge">
-      <i></i> 15-20 MINS
-    </div>
-
-    <div class="search-box">
-      <span class="icon">🔍</span>
-      <input id="q" type="search" placeholder="Search 'milk', 'bread', 'tomatoes', 'atta'..." oninput="draw()">
-    </div>
-
-    <div class="hdr-actions">
-      <button class="nav-link active" id="n-shop" onclick="go('shop')">Shop</button>
-      <button class="nav-link" id="n-orders" onclick="go('orders')">Orders</button>
-      <button class="nav-link" id="n-auth" onclick="handleAuthClick()">👤 Login</button>
-      <button class="nav-link" id="n-owner" onclick="go('owner')">Owner</button>
-      <button class="cart-pill" onclick="openCart()">
-        🛒 Cart (<span id="cart-count">0</span>)
-      </button>
-    </div>
+  <!-- R14/R15 Store Closed Notice -->
+  <div id="storeClosedBanner" class="store-banner">
+    Store is currently closed (Hours: 7:00 AM – 7:00 PM IST). You can browse products and add to cart!
   </div>
-</header>
 
-<main id="view"></main>
-
-<!-- Floating Cart Strip on Mobile -->
-<div class="mobile-cart-bar" id="mobile-bar" onclick="openCart()">
-  <div>
-    <b id="m-count">0 items</b> · <span id="m-total">₹0</span>
-  </div>
-  <div>View Cart ➔</div>
-</div>
-
-<!-- Mobile Bottom Navigation Bar (Blinkit style) -->
-<nav class="bottom-nav">
-  <button class="b-nav-item active" id="bn-shop" onclick="go('shop')">
-    <span class="icon">🏠</span>
-    <span>Shop</span>
-  </button>
-  <button class="b-nav-item" id="bn-orders" onclick="go('orders')">
-    <span class="icon">📦</span>
-    <span>Orders</span>
-  </button>
-  <button class="b-nav-item" id="bn-auth" onclick="handleAuthClick()">
-    <span class="icon">👤</span>
-    <span id="bn-auth-lbl">Account</span>
-  </button>
-  <button class="b-nav-item" id="bn-cart" onclick="openCart()">
-    <span class="icon">🛒</span>
-    <span>Cart</span>
-    <span class="b-badge" id="bn-cart-count" style="display:none">0</span>
-  </button>
-  <button class="b-nav-item" id="bn-owner" onclick="go('owner')">
-    <span class="icon">🔑</span>
-    <span>Owner</span>
-  </button>
-</nav>
-
-<!-- Cart Drawer -->
-<div class="drawer-scrim" id="drawer" onclick="if(event.target===this)closeCart()">
-  <div class="drawer-panel" id="panel"></div>
-</div>
-
-<!-- Auth Modal (Google & Phone OTP) -->
-<div class="drawer-scrim" id="auth-scrim" onclick="if(event.target===this)closeLoginModal()">
-  <div class="modal-center" id="auth-modal">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <b style="font-size:1.15rem">Login to RA Store</b>
-      <button onclick="closeLoginModal()" style="font-size:1.2rem;color:#888">✕</button>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="brand">
+      RA Store <span class="brand-badge">BOMMALATAPALLI</span>
     </div>
-    <p style="font-size:0.82rem;color:#666;margin-bottom:18px">
-      Log in to track orders, save delivery address & access fast checkout.
-    </p>
-
-    <!-- Google Sign-In -->
-    <button class="google-btn" onclick="loginWithGoogle()">
-      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.347 2.825.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
-      Continue with Google
-    </button>
-
-    <div class="divider-or">or continue with phone OTP</div>
-
-    <!-- Phone Number Step 1 -->
-    <div id="otp-step-1">
-      <label class="f-lbl">Mobile Number</label>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="font-weight:700;font-size:0.9rem;padding:10px 12px;background:#f3f4f6;border-radius:10px;border:1px solid #dcdcdc">+91</span>
-        <input class="f-inp" id="login-ph" type="tel" maxlength="10" placeholder="10-digit mobile number">
+    <div class="nav-actions">
+      <button class="btn btn-outline" id="ordersNavBtn" onclick="openOrdersModal()">My Orders</button>
+      <div id="authContainer">
+        <button class="btn btn-outline" id="loginBtn" onclick="loginGoogle()">Sign In</button>
+        <span id="userEmailSpan" style="font-size: 12px; font-weight: 600; display: none; color: var(--primary);"></span>
       </div>
-      <div id="recaptcha-container" style="margin-top:10px"></div>
-      <div id="auth-err" style="color:var(--b-red);font-size:0.8rem;margin:8px 0;min-height:1.2em"></div>
-      <button class="btn-primary" id="otp-send-btn" onclick="sendOTP()">Send Verification Code</button>
     </div>
+  </header>
 
-    <!-- Phone Number Step 2 -->
-    <div id="otp-step-2" style="display:none">
-      <label class="f-lbl">Enter 6-Digit OTP</label>
-      <input class="f-inp" id="login-otp" type="tel" maxlength="6" placeholder="e.g. 123456" style="letter-spacing:6px;font-size:1.2rem;text-align:center">
-      <small style="color:#666;display:block;margin-top:4px">Sent to <b id="otp-target-ph"></b></small>
-      <div id="auth-err-2" style="color:var(--b-red);font-size:0.8rem;margin:8px 0;min-height:1.2em"></div>
-      <button class="btn-primary" onclick="verifyOTP()">Verify & Login</button>
-      <button style="width:100%;text-align:center;color:#666;font-size:0.82rem;margin-top:10px;font-weight:600" onclick="resetOTPStep()">Use different number</button>
+  <!-- R2 Hero Banner: 100% Refund Guarantee -->
+  <div class="refund-hero">
+    <span style="font-size: 26px;">🛡️</span>
+    <div>
+      <div class="refund-hero-title">100% Refund if you cancel before your order is out for delivery</div>
+      <div class="refund-hero-desc">Automated full refund to your original payment method (UPI / Card / Bank) in 5-7 working days.</div>
     </div>
   </div>
-</div>
 
-<div class="toast-msg" id="toast"></div>
+  <!-- Products Section -->
+  <main class="container">
+    <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;">Daily Fresh Groceries & Staples</h2>
+    <div id="productsGrid" class="grid">Loading catalog...</div>
 
-<script>
-// Firebase Initializer
-const firebaseConfig = {
-  apiKey: "AIzaSyD94vWB3NBEjSGmbO6JQ5F1t6L9Js7er8Y",
-  authDomain: "k-store-ae9dd.firebaseapp.com",
-  databaseURL: "https://k-store-ae9dd-default-rtdb.firebaseio.com",
-  projectId: "k-store-ae9dd",
-  storageBucket: "k-store-ae9dd.appspot.com",
-  messagingSenderId: "836118831556",
-  appId: "1:836118831556:web:0b0bf4408ffc096180f825"
-};
+    <!-- R5 DPDP Privacy Note -->
+    <div class="privacy-note">
+      🔒 <strong>Privacy Assurance:</strong> We only collect your name, phone number, and address to deliver your order in Bommalatapalli. Your data is never sold or shared.
+    </div>
+  </main>
 
-let db = null;
-let auth = null;
-let currentUser = null;
+  <!-- Bottom Floating Cart Bar -->
+  <div class="bottom-bar" id="cartBottomBar" style="display: none;">
+    <div>
+      <div id="cartSummaryText" style="font-size: 14px; font-weight: 700;">0 Items • ₹0</div>
+      <div style="font-size: 11px; color: var(--primary);" id="freeDeliveryNotice">Add more for free delivery</div>
+    </div>
+    <button class="btn btn-primary" id="checkoutBtn" onclick="startCheckout()">Proceed to Checkout</button>
+  </div>
 
-try {
-  if (typeof firebase !== 'undefined') {
+  <!-- Checkout Modal (R1, R8, R9) -->
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700;">Complete Your Order</h3>
+        <button onclick="closeModal('checkoutModal')" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+
+      <!-- Mandatory Google Auth Prompt if not signed in (R1) -->
+      <div id="checkoutAuthPrompt" style="display: none; background: #F3F4F6; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 14px;">
+        <p style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Sign in required to order</p>
+        <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">Sign in with Google to confirm your order and track live deliveries. Your cart remains saved!</p>
+        <button class="btn btn-primary" style="width: 100%;" onclick="loginGoogle(true)">Sign In with Google</button>
+      </div>
+
+      <!-- Checkout Form: Preserved State (R9) -->
+      <form id="checkoutForm" onsubmit="submitOrder(event)">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="custName" required placeholder="Your full name">
+        </div>
+        <div class="form-group">
+          <label>10-Digit Mobile Number (For Delivery Calls)</label>
+          <input type="tel" id="custPhone" required pattern="[6-9][0-9]{9}" placeholder="e.g. 9876543210">
+        </div>
+        <div class="form-group">
+          <label>Delivery Address</label>
+          <textarea id="custAddress" required rows="2" placeholder="House no, Street, landmark, Bommalatapalli"></textarea>
+        </div>
+        
+        <!-- Payment Method Toggle -->
+        <div class="form-group">
+          <label>Payment Method</label>
+          <div style="display: flex; gap: 10px; margin-top: 4px;">
+            <label style="flex: 1; border: 1px solid var(--border); padding: 8px; border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="radio" name="payMethod" value="online_razorpay" checked> Online (UPI/Cards)
+            </label>
+            <label style="flex: 1; border: 1px solid var(--border); padding: 8px; border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="radio" name="payMethod" value="cod"> Cash on Delivery
+            </label>
+          </div>
+        </div>
+
+        <div style="background: #F9FAFB; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Subtotal:</span><span id="modalSubtotal">₹0</span></div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Delivery Fee:</span><span id="modalDelivery">₹0</span></div>
+          <div style="display: flex; justify-content: space-between; font-weight: 700; margin-top: 6px; border-top: 1px solid #E5E7EB; padding-top: 6px;">
+            <span>Total Payable:</span><span id="modalTotal" style="color: var(--primary);">₹0</span>
+          </div>
+        </div>
+
+        <button type="submit" id="placeOrderSubmitBtn" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px;">Confirm & Place Order</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Customer Order History Modal (R5 Scoped by uid) -->
+  <div class="modal-overlay" id="ordersModal">
+    <div class="modal">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700;">My Past Orders</h3>
+        <button onclick="closeModal('ordersModal')" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+      <div id="customerOrdersList">Loading your orders...</div>
+    </div>
+  </div>
+
+  <!-- Order Success In-App Modal (R11 No auto-open WhatsApp) -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal" style="text-align: center;">
+      <div style="font-size: 42px; margin-bottom: 8px;">🎉</div>
+      <h3 style="font-size: 18px; font-weight: 700; color: var(--primary);">Order Placed Successfully!</h3>
+      <p style="font-size: 14px; color: var(--muted); margin: 6px 0 16px;" id="successOrderIdText">Order #RA-XXXX</p>
+      <p style="font-size: 13px; margin-bottom: 16px;">We have received your order and are packing fresh items for delivery.</p>
+      
+      <!-- Optional WhatsApp button (R11) -->
+      <a id="successWhatsappLink" target="_blank" class="btn" style="background: #25D366; color: #fff; width: 100%; margin-bottom: 8px; text-decoration: none;">
+        Send Order Details on WhatsApp
+      </a>
+      <button class="btn btn-outline" style="width: 100%;" onclick="closeModal('successModal')">Done</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Firebase Setup
+    const firebaseConfig = {
+      apiKey: "AIzaSyD94vWB3NBEjSGmbO6JQ5F1t6L9Js7er8Y",
+      authDomain: "k-store-ae9dd.firebaseapp.com",
+      databaseURL: "https://k-store-ae9dd-default-rtdb.firebaseio.com",
+      projectId: "k-store-ae9dd"
+    };
     firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-    auth = firebase.auth();
-  }
-} catch(e) { console.warn("Firebase offline mode:", e); }
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-const DEFAULTS = [
-  { id: 0, name: "Hybrid Fresh Tomatoes", unit: "1 kg", price: 35, cat: "Vegetables & Fruits", em: "🍅" },
-  { id: 1, name: "Fresh Red Onions", unit: "1 kg", price: 35, cat: "Vegetables & Fruits", em: "🧅" },
-  { id: 2, name: "Pahari Potatoes", unit: "1 kg", price: 30, cat: "Vegetables & Fruits", em: "🥔" },
-  { id: 3, name: "Fresh Green Chillies", unit: "250 g", price: 20, cat: "Vegetables & Fruits", em: "🌶️" },
-  { id: 4, name: "Robusta Fresh Bananas", unit: "1 dozen", price: 60, cat: "Vegetables & Fruits", em: "🍌" },
-  { id: 5, name: "Farm Fresh Spinach (Palak)", unit: "1 bunch", price: 20, cat: "Vegetables & Fruits", em: "🥬" },
-  { id: 6, name: "Toned Fresh Milk", unit: "500 ml", price: 32, cat: "Dairy & Breakfast", em: "🥛" },
-  { id: 7, name: "Fresh Pouch Curd (Dahi)", unit: "450 g", price: 35, cat: "Dairy & Breakfast", em: "🥣" },
-  { id: 8, name: "Malai Fresh Paneer", unit: "200 g", price: 95, cat: "Dairy & Breakfast", em: "🧀" },
-  { id: 9, name: "Farm Fresh White Eggs", unit: "6 pcs", price: 42, cat: "Dairy & Breakfast", em: "🥚" },
-  { id: 10, name: "Chakki Fresh Atta", unit: "5 kg", price: 235, cat: "Atta, Rice & Dal", em: "🌾" },
-  { id: 11, name: "Royal Basmati Rice", unit: "1 kg", price: 110, cat: "Atta, Rice & Dal", em: "🌾" },
-  { id: 12, name: "Unpolished Toor Dal", unit: "1 kg", price: 165, cat: "Atta, Rice & Dal", em: "🫘" },
-  { id: 13, name: "Refined Sunflower Cooking Oil", unit: "1 L", price: 135, cat: "Oils & Masalas", em: "🛢️" },
-  { id: 14, name: "Pure Sugar", unit: "1 kg", price: 46, cat: "Atta, Rice & Dal", em: "🧂" },
-  { id: 15, name: "Iodised Vacuum Salt", unit: "1 kg", price: 25, cat: "Atta, Rice & Dal", em: "🧂" },
-  { id: 16, name: "Premium Leaf Tea", unit: "250 g", price: 115, cat: "Tea & Coffee", em: "🍵" },
-  { id: 17, name: "Classic Instant Coffee", unit: "100 g", price: 85, cat: "Tea & Coffee", em: "☕" },
-  { id: 18, name: "Crispy Potato Chips", unit: "1 pack", price: 20, cat: "Munchies & Snacks", em: "🥔" },
-  { id: 19, name: "Glucose Butter Biscuits", unit: "1 pack", price: 25, cat: "Munchies & Snacks", em: "🍪" },
-  { id: 20, name: "Antibacterial Bath Soap", unit: "1 pc", price: 38, cat: "Cleaning & Household", em: "🧼" },
-  { id: 21, name: "Active Detergent Powder", unit: "1 kg", price: 95, cat: "Cleaning & Household", em: "🧺" },
-  { id: 22, name: "Lemon Dishwash Bar", unit: "1 pc", price: 30, cat: "Cleaning & Household", em: "🧴" }
-];
+    // Your Cloudflare Worker URL
+    const WORKER_API = "https://ra-store-api.chowdarynikhil095.workers.dev";
 
-const store = {
-  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
-};
+    // Cart and Customer State
+    let cart = JSON.parse(localStorage.getItem('ra_store_cart') || '{}');
+    let productsCatalog = {};
+    let currentUser = null;
+    let storeSettings = {
+      deliveryFee: 25,
+      freeDeliveryThreshold: 299,
+      whatsappNumber: '916281730144',
+      storeHours: { open: "07:00", close: "19:00", mode: "auto" }
+    };
+    let isStoreCurrentlyOpen = true;
 
-let STATE = store.get('ra_blinkit_state', {
-  products: DEFAULTS,
-  free: 199,
-  fee: 15,
-  wa: "916281730144",
-  razorpay_key: "rzp_live_TWh8sGQzToEEZT",
-  pin: "9874"
-});
-
-const P = id => (STATE.products && STATE.products.find(p => p.id == id)) || { name: "Item", unit: "1 pc", price: 0, cat: "Other", em: "🛒" };
-const pic = p => p.img ? '<img src="'+p.img+'" alt="'+esc(p.name)+'">' : p.em;
-const cats = () => ["All", ...new Set((STATE.products||[]).map(p => p.cat))];
-
-let cart = store.get('ra_blinkit_cart', {});
-let allOrders = store.get('ra_blinkit_orders', []);
-let myOrderIds = store.get('ra_my_orders', []);
-let cat = "All", page = "shop";
-let selectedPayment = "razorpay";
-
-Object.keys(cart).forEach(id => {
-  if (!STATE.products.some(p => p.id == id)) delete cart[id];
-});
-
-const $ = id => document.getElementById(id);
-const rs = n => "₹" + Number(n||0).toLocaleString("en-IN");
-const esc = s => String(s||'').replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
-
-// Firebase Realtime Listener
-if (db) {
-  try {
-    db.ref('orders').on('value', snapshot => {
-      const data = snapshot.val();
-      if (data) {
-        const list = Object.values(data).sort((a,b) => (b.t||0) - (a.t||0));
-        allOrders = list;
-        store.set('ra_blinkit_orders', allOrders);
-        if (page === 'orders') ordersView();
-        if (page === 'owner' && otab === 'orders') ownerView();
+    // R14/R15 Store Hours Validation
+    function checkStoreHours() {
+      const mode = storeSettings.storeHours?.mode || 'auto';
+      if (mode === 'force_open') isStoreCurrentlyOpen = true;
+      else if (mode === 'force_closed') isStoreCurrentlyOpen = false;
+      else {
+        const now = new Date();
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const ist = new Date(utc + (3600000 * 5.5));
+        const hour = ist.getHours() + (ist.getMinutes() / 60);
+        isStoreCurrentlyOpen = (hour >= 7 && hour < 19);
       }
-    }, err => { console.warn("Firebase read warning:", err.message); });
 
-    db.ref('products').on('value', snapshot => {
-      const prods = snapshot.val();
-      if (Array.isArray(prods) && prods.length > 0) {
-        STATE.products = prods;
-        store.set('ra_blinkit_state', STATE);
-        if (page === 'shop') draw();
+      document.getElementById('storeClosedBanner').style.display = isStoreCurrentlyOpen ? 'none' : 'block';
+      const checkoutBtn = document.getElementById('checkoutBtn');
+      if (!isStoreCurrentlyOpen) {
+        checkoutBtn.disabled = true;
+        checkoutBtn.innerText = "Store Closed (Opens 7 AM)";
+        checkoutBtn.style.opacity = "0.6";
+      } else {
+        checkoutBtn.disabled = false;
+        checkoutBtn.innerText = "Proceed to Checkout";
+        checkoutBtn.style.opacity = "1";
       }
-    }, err => { console.warn("Firebase products read warning:", err.message); });
-  } catch(e) {}
-}
-
-// Auth State Listener
-if (auth) {
-  auth.onAuthStateChanged(user => {
-    currentUser = user;
-    updateAuthButton();
-    if (user) {
-      const u = store.get('ra_user', {});
-      if (user.displayName && !u.nm) u.nm = user.displayName;
-      if (user.phoneNumber && !u.ph) u.ph = user.phoneNumber.replace('+91', '');
-      store.set('ra_user', u);
-      if (page === 'orders') ordersView();
     }
-  });
-}
 
-function updateAuthButton() {
-  const btn = $('n-auth');
-  const bLbl = $('bn-auth-lbl');
-  if (currentUser) {
-    const name = currentUser.displayName ? currentUser.displayName.split(' ')[0] : (currentUser.phoneNumber || 'User');
-    if (btn) btn.innerHTML = `👤 ${esc(name)}`;
-    if (bLbl) bLbl.textContent = esc(name);
-  } else {
-    if (btn) btn.innerHTML = `👤 Login`;
-    if (bLbl) bLbl.textContent = "Account";
-  }
-}
+    // Subscribe to Settings Live (R7)
+    db.ref('settings').on('value', snap => {
+      if (snap.val()) {
+        storeSettings = snap.val();
+        checkStoreHours();
+        updateCartUI();
+      }
+    });
 
-function handleAuthClick() {
-  if (currentUser) {
-    if (confirm(`Logged in as ${currentUser.displayName || currentUser.phoneNumber}.\n\nDo you want to Log Out?`)) {
-      auth.signOut().then(() => {
-        toast("Logged out successfully");
-        if (page === 'orders') ordersView();
+    // Auth State Listener (R1)
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      if (user) {
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('userEmailSpan').style.display = 'inline-block';
+        document.getElementById('userEmailSpan').innerText = user.displayName || user.email.split('@')[0];
+        document.getElementById('checkoutAuthPrompt').style.display = 'none';
+        document.getElementById('checkoutForm').style.display = 'block';
+      } else {
+        document.getElementById('loginBtn').style.display = 'inline-block';
+        document.getElementById('userEmailSpan').style.display = 'none';
+        document.getElementById('checkoutAuthPrompt').style.display = 'block';
+        document.getElementById('checkoutForm').style.display = 'none';
+      }
+    });
+
+    async function loginGoogle(resumeCheckout = false) {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        await auth.signInWithPopup(provider);
+        if (resumeCheckout) {
+          document.getElementById('checkoutAuthPrompt').style.display = 'none';
+          document.getElementById('checkoutForm').style.display = 'block';
+        }
+      } catch (err) {
+        showToast('Login error: ' + err.message);
+      }
+    }
+
+    // Load Catalog (Public Read)
+    db.ref('products').on('value', snap => {
+      const grid = document.getElementById('productsGrid');
+      const products = snap.val();
+      if (!products) {
+        grid.innerHTML = '<p style="color: var(--muted);">No products available.</p>';
+        return;
+      }
+      productsCatalog = products;
+      renderProducts();
+    });
+
+    function renderProducts() {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = Object.keys(productsCatalog).map(id => {
+        const p = productsCatalog[id];
+        const inCart = cart[id] || 0;
+        return `
+          <div class="card">
+            <img class="product-img" src="${p.image || 'https://via.placeholder.com/150'}" alt="${p.name}">
+            <div class="product-title">${p.name}</div>
+            <div class="product-unit">${p.unit || '1 pack'}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+              <span class="product-price">₹${p.price}</span>
+              ${inCart === 0 ? `
+                <button class="btn btn-primary" onclick="addToCart('${id}')">+ Add</button>
+              ` : `
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <button class="btn btn-outline" style="padding: 4px 8px;" onclick="changeQty('${id}', -1)">-</button>
+                  <span style="font-weight: 700; font-size: 13px;">${inCart}</span>
+                  <button class="btn btn-outline" style="padding: 4px 8px;" onclick="changeQty('${id}', 1)">+</button>
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addToCart(id) {
+      cart[id] = 1;
+      saveCart();
+    }
+    function changeQty(id, delta) {
+      cart[id] = (cart[id] || 0) + delta;
+      if (cart[id] <= 0) delete cart[id];
+      saveCart();
+    }
+    function saveCart() {
+      localStorage.setItem('ra_store_cart', JSON.stringify(cart));
+      updateCartUI();
+      renderProducts();
+    }
+
+    function updateCartUI() {
+      let count = 0;
+      let subtotal = 0;
+      Object.keys(cart).forEach(k => {
+        const qty = cart[k];
+        const item = productsCatalog[k];
+        count += qty;
+        if (item) subtotal += (Number(item.price) * qty);
+      });
+
+      const bar = document.getElementById('cartBottomBar');
+      if (count > 0) {
+        bar.style.display = 'flex';
+        document.getElementById('cartSummaryText').innerText = `${count} Items • ₹${subtotal}`;
+        const freeThresh = storeSettings.freeDeliveryThreshold || 299;
+        if (subtotal >= freeThresh) {
+          document.getElementById('freeDeliveryNotice').innerText = "🎉 Free Delivery applied!";
+        } else {
+          document.getElementById('freeDeliveryNotice').innerText = `Add ₹${freeThresh - subtotal} more for Free Delivery`;
+        }
+      } else {
+        bar.style.display = 'none';
+      }
+
+      // Update Checkout modal numbers
+      const fee = subtotal >= (storeSettings.freeDeliveryThreshold || 299) ? 0 : (storeSettings.deliveryFee || 25);
+      document.getElementById('modalSubtotal').innerText = `₹${subtotal}`;
+      document.getElementById('modalDelivery').innerText = fee === 0 ? 'FREE' : `₹${fee}`;
+      document.getElementById('modalTotal').innerText = `₹${subtotal + fee}`;
+    }
+
+    function startCheckout() {
+      if (!isStoreCurrentlyOpen) {
+        alert("Store is closed right now. Operating hours are 7:00 AM – 7:00 PM IST.");
+        return;
+      }
+      document.getElementById('checkoutModal').style.display = 'flex';
+      if (!currentUser) {
+        document.getElementById('checkoutAuthPrompt').style.display = 'block';
+        document.getElementById('checkoutForm').style.display = 'none';
+      }
+    }
+
+    // Submit Order via Secure Cloudflare Worker (R1, R8, R9)
+    async function submitOrder(e) {
+      e.preventDefault();
+      if (!currentUser) {
+        showToast('Please sign in with Google to place order');
+        return;
+      }
+
+      const submitBtn = document.getElementById('placeOrderSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Securing order...";
+
+      const items = Object.keys(cart).map(id => ({ id, quantity: cart[id] }));
+      const customer = {
+        name: document.getElementById('custName').value.trim(),
+        phone: document.getElementById('custPhone').value.trim(),
+        address: document.getElementById('custAddress').value.trim()
+      };
+      const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
+      const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+
+      try {
+        const res = await fetch(`${WORKER_API}/api/create-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uid: currentUser.uid,
+            userEmail: currentUser.email,
+            items,
+            customer,
+            paymentMethod: payMethod,
+            requestId
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Failed to place order');
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Confirm & Place Order";
+          return;
+        }
+
+        // Online Payment via Razorpay Checkout
+        if (payMethod === 'online_razorpay') {
+          const options = {
+            key: data.keyId,
+            amount: data.total * 100,
+            currency: 'INR',
+            name: 'RA Store',
+            description: `Order #${data.orderId}`,
+            order_id: data.razorpayOrderId,
+            handler: async function (response) {
+              await fetch(`${WORKER_API}/api/verify-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...response, pushKey: data.pushKey })
+              });
+              cart = {};
+              saveCart();
+              closeModal('checkoutModal');
+              showOrderSuccess(data.orderId, customer, data.total);
+            },
+            prefill: {
+              name: customer.name,
+              contact: customer.phone,
+              email: currentUser.email
+            },
+            theme: { color: '#0C831F' }
+          };
+          const rzp = new Razorpay(options);
+          rzp.open();
+        } else {
+          // COD Success
+          cart = {};
+          saveCart();
+          closeModal('checkoutModal');
+          showOrderSuccess(data.orderId, customer, data.total);
+        }
+      } catch (err) {
+        alert('Network error connecting to store server. Please try again.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Confirm & Place Order";
+      }
+    }
+
+    function showOrderSuccess(orderId, customer, total) {
+      document.getElementById('successOrderIdText').innerText = `Order #${orderId}`;
+      const msg = encodeURIComponent(`Hello RA Store! I placed order #${orderId} for ₹${total}.\nName: ${customer.name}\nAddress: ${customer.address}`);
+      document.getElementById('successWhatsappLink').href = `https://wa.me/${storeSettings.whatsappNumber}?text=${msg}`;
+      document.getElementById('successModal').style.display = 'flex';
+    }
+
+    // Customer Scoped Orders Query (R5)
+    async function openOrdersModal() {
+      if (!currentUser) {
+        alert("Please sign in to view your past orders.");
+        return;
+      }
+      document.getElementById('ordersModal').style.display = 'flex';
+      
+      db.ref('orders').orderByChild('uid').equalTo(currentUser.uid).on('value', snap => {
+        const list = document.getElementById('customerOrdersList');
+        const orders = snap.val();
+        if (!orders) {
+          list.innerHTML = "<p style='color: var(--muted);'>No past orders found.</p>";
+          return;
+        }
+
+        list.innerHTML = Object.keys(orders).reverse().map(k => {
+          const o = orders[k];
+          return `
+            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 14px;">
+                <span>#${o.id}</span>
+                <span style="color: var(--primary);">₹${o.total}</span>
+              </div>
+              <div style="font-size: 12px; color: var(--muted); margin: 4px 0;">Status: <strong>${o.status}</strong> (${o.paymentStatus})</div>
+              ${o.status !== 'out_for_delivery' && o.status !== 'delivered' && o.status !== 'cancelled' ? `
+                <button class="btn btn-outline" style="color: var(--danger); font-size: 11px; padding: 4px 8px; margin-top: 6px;" onclick="cancelMyOrder('${k}')">Cancel & 100% Refund</button>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
       });
     }
-  } else {
-    openLoginModal();
-  }
-}
 
-function openLoginModal() {
-  $('auth-scrim').classList.add('open');
-  $('auth-modal').classList.add('open');
-}
-
-function closeLoginModal() {
-  $('auth-scrim').classList.remove('open');
-  $('auth-modal').classList.remove('open');
-}
-
-function loginWithGoogle() {
-  if (!auth) return alert("Firebase Auth is loading.");
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .then(result => {
-      toast("Welcome " + (result.user.displayName || ""));
-      closeLoginModal();
-    })
-    .catch(error => {
-      if (error.code === 'auth/unauthorized-domain') {
-        alert("Please add 'nikhil6281.github.io' to Firebase Console > Authentication > Settings > Authorized domains!");
-      } else {
-        alert(error.message);
-      }
-    });
-}
-
-let confirmationResult = null;
-let recaptchaVerifier = null;
-
-function setupRecaptcha() {
-  if (!recaptchaVerifier) {
-    recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
-  }
-}
-
-function sendOTP() {
-  const ph = $('login-ph').value.trim();
-  if (!/^[6-9]\d{9}$/.test(ph)) return $('auth-err').textContent = "Enter a valid 10-digit Indian mobile number.";
-  $('auth-err').textContent = "";
-  setupRecaptcha();
-  const fullPhone = "+91" + ph;
-  $('otp-send-btn').textContent = "Sending OTP...";
-  $('otp-send-btn').disabled = true;
-
-  auth.signInWithPhoneNumber(fullPhone, recaptchaVerifier)
-    .then(result => {
-      confirmationResult = result;
-      $('otp-step-1').style.display = 'none';
-      $('otp-step-2').style.display = 'block';
-      $('otp-target-ph').textContent = fullPhone;
-      toast("OTP sent to " + fullPhone);
-    })
-    .catch(error => {
-      $('otp-send-btn').textContent = "Send Verification Code";
-      $('otp-send-btn').disabled = false;
-      $('auth-err').textContent = error.message;
-    });
-}
-
-function verifyOTP() {
-  const code = $('login-otp').value.trim();
-  if (code.length < 6) return $('auth-err-2').textContent = "Enter complete 6-digit OTP.";
-  confirmationResult.confirm(code)
-    .then(() => {
-      toast("Phone verified successfully!");
-      closeLoginModal();
-      resetOTPStep();
-    })
-    .catch(() => {
-      $('auth-err-2').textContent = "Invalid OTP. Please check and try again.";
-    });
-}
-
-function resetOTPStep() {
-  $('otp-step-1').style.display = 'block';
-  $('otp-step-2').style.display = 'none';
-  $('otp-send-btn').textContent = "Send Verification Code";
-  $('otp-send-btn').disabled = false;
-  $('login-otp').value = '';
-}
-
-function save() {
-  store.set('ra_blinkit_cart', cart);
-  store.set('ra_blinkit_orders', allOrders);
-  store.set('ra_my_orders', myOrderIds);
-  store.set('ra_blinkit_state', STATE);
-
-  if (db) {
-    try { db.ref('products').set(STATE.products); } catch(e) {}
-  }
-}
-
-function toast(t) {
-  const e = $('toast');
-  if (!e) return;
-  e.textContent = t; e.style.display = 'block';
-  clearTimeout(toast.t); toast.t = setTimeout(() => e.style.display = 'none', 1800);
-}
-
-// Navigation for both Desktop Header and Mobile Bottom Bar
-function go(p) {
-  try {
-    page = p;
-    // Desktop Nav
-    const sBtn = $('n-shop');
-    const oBtn = $('n-orders');
-    const owBtn = $('n-owner');
-    if (sBtn) sBtn.className = 'nav-link' + (p === 'shop' ? ' active' : '');
-    if (oBtn) oBtn.className = 'nav-link' + (p === 'orders' ? ' active' : '');
-    if (owBtn) owBtn.className = 'nav-link' + (p === 'owner' ? ' active' : '');
-
-    // Mobile Bottom Nav
-    const bShop = $('bn-shop');
-    const bOrd = $('bn-orders');
-    const bOw = $('bn-owner');
-    if (bShop) bShop.className = 'b-nav-item' + (p === 'shop' ? ' active' : '');
-    if (bOrd) bOrd.className = 'b-nav-item' + (p === 'orders' ? ' active' : '');
-    if (bOw) bOw.className = 'b-nav-item' + (p === 'owner' ? ' active' : '');
-
-    draw();
-    window.scrollTo(0, 0);
-  } catch(err) {
-    console.error("Navigation error:", err);
-  }
-}
-
-function qty(id, d) {
-  cart[id] = (cart[id] || 0) + d;
-  if (cart[id] <= 0) delete cart[id];
-  save(); draw();
-  if ($('drawer').classList.contains('open')) cartView();
-}
-
-const count = () => Object.values(cart).reduce((a, b) => a + Number(b||0), 0);
-const subtotal = () => Object.entries(cart).reduce((s, [id, q]) => s + (P(id).price||0) * Number(q||0), 0);
-const fee = s => s === 0 || s >= STATE.free ? 0 : STATE.fee;
-
-function stepper(id) {
-  if (P(id).out) return '<span style="font-size:0.75rem;font-weight:700;color:var(--b-red)">Out of stock</span>';
-  const q = cart[id] || 0;
-  return q
-    ? '<div class="b-stepper"><button onclick="qty('+id+',-1)">−</button><span>'+q+'</span><button onclick="qty('+id+',1)">+</button></div>'
-    : '<button class="b-add-btn" onclick="qty('+id+',1)">ADD</button>';
-}
-
-function draw() {
-  const cnt = count();
-  const sub = subtotal();
-  const cBadge = $('cart-count');
-  const mCnt = $('m-count');
-  const mTot = $('m-total');
-  const mBar = $('mobile-bar');
-  const bnCartBadge = $('bn-cart-count');
-
-  if (cBadge) cBadge.textContent = cnt;
-  if (mCnt) mCnt.textContent = cnt + (cnt === 1 ? ' item' : ' items');
-  if (mTot) mTot.textContent = rs(sub);
-  if (mBar) mBar.className = 'mobile-cart-bar' + (cnt > 0 ? ' show' : '');
-
-  if (bnCartBadge) {
-    bnCartBadge.textContent = cnt;
-    bnCartBadge.style.display = cnt > 0 ? 'block' : 'none';
-  }
-
-  if (page === 'orders') return ordersView();
-  if (page === 'owner') return ownerView();
-
-  const qInp = $('q');
-  const q = qInp ? qInp.value.trim().toLowerCase() : '';
-  const list = (STATE.products||[]).filter(p => (cat === "All" || p.cat === cat) && (p.name||'').toLowerCase().includes(q));
-
-  $('view').innerHTML = `
-    <div class="cat-scroll">
-      ${cats().map(c => '<button class="cat-pill '+(c===cat?'on':'')+'" onclick="cat=\''+c.replace(/'/g,"\\'")+'\';draw()">'+esc(c)+'</button>').join("")}
-    </div>
-
-    <div class="sec-title">
-      <span>${cat === 'All' ? 'All Groceries' : cat} (${list.length})</span>
-      <span style="font-size:0.8rem;color:var(--b-green);font-weight:700">⏱ 15-20 Mins Delivery</span>
-    </div>
-
-    ${list.length ? `
-      <div class="product-grid">
-        ${list.map(p => `
-          <div class="b-card">
-            <div class="b-img-box">
-              <span class="b-timer">⏱ 15 MINS</span>
-              ${pic(p)}
-            </div>
-            <div class="b-name">${esc(p.name)}</div>
-            <div class="b-unit">${esc(p.unit)}</div>
-            <div class="b-price-row">
-              <span class="b-price">${rs(p.price)}</span>
-              ${stepper(p.id)}
-            </div>
-          </div>
-        `).join("")}
-      </div>
-    ` : '<div style="text-align:center;padding:50px;color:#888">No items match your search.</div>'}
-  `;
-}
-
-function openCart() { $('drawer').classList.add('open'); cartView(); }
-function closeCart() { $('drawer').classList.remove('open'); }
-
-function cartView() {
-  const s = subtotal(), f = fee(s), ids = Object.keys(cart);
-  $('panel').innerHTML = `
-    <div class="drawer-hdr">
-      <b style="font-size:1.1rem">My Cart (${count()} items)</b>
-      <button onclick="closeCart()" style="font-size:1.2rem;color:#888">✕</button>
-    </div>
-    <div class="drawer-body">
-      ${ids.length ? `
-        <div class="free-bar">
-          ${f ? `Add ${rs(STATE.free - s)} more for <b>FREE Delivery</b>` : `🎉 You unlocked <b>FREE Village Delivery!</b>`}
-        </div>
-        ${ids.map(id => {
-          const p = P(id);
-          return `
-            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0">
-              <div style="width:48px;height:48px;background:#f8f8f8;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-                ${pic(p)}
-              </div>
-              <div style="flex:1">
-                <b style="font-size:0.88rem">${esc(p.name)}</b>
-                <div style="font-size:0.75rem;color:#888">${p.unit} · ${rs(p.price)}</div>
-              </div>
-              ${stepper(+id)}
-              <b style="font-size:0.9rem;min-width:44px;text-align:right">${rs(p.price * cart[id])}</b>
-            </div>
-          `;
-        }).join("")}
-
-        <div style="margin-top:20px;padding:14px;background:#fbfbfb;border-radius:12px;border:1px solid #eee">
-          <b style="font-size:0.85rem;display:block;margin-bottom:8px">Bill Details</b>
-          <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:4px">
-            <span>Items Total</span><span>${rs(s)}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:4px">
-            <span>Delivery Charge</span><span>${f ? rs(f) : '<b style="color:var(--b-green)">FREE</b>'}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:0.95rem;font-weight:800;border-top:1px dashed #ddd;padding-top:8px;margin-top:6px">
-            <span>Grand Total</span><span>${rs(s + f)}</span>
-          </div>
-        </div>
-      ` : '<div style="text-align:center;padding:60px 20px;color:#888">Your cart is empty.</div>'}
-    </div>
-    ${ids.length ? `
-      <div class="drawer-ftr">
-        <button class="btn-primary" onclick="checkout()">Proceed to Checkout · ${rs(s + f)}</button>
-      </div>
-    ` : ''}
-  `;
-}
-
-function setPay(m) {
-  selectedPayment = m;
-  checkout();
-}
-
-function checkout() {
-  const s = subtotal(), f = fee(s), u = store.get('ra_user', {});
-  const tot = s + f;
-
-  $('panel').innerHTML = `
-    <div class="drawer-hdr">
-      <b style="font-size:1.1rem">Delivery & Payment</b>
-      <button onclick="closeCart()" style="font-size:1.2rem;color:#888">✕</button>
-    </div>
-    <div class="drawer-body">
-      <label class="f-lbl">Your Full Name</label>
-      <input class="f-inp" id="nm" value="${esc(u.nm||'')}" placeholder="e.g. Ramesh Kumar">
-
-      <label class="f-lbl">WhatsApp Phone Number</label>
-      <input class="f-inp" id="ph" type="tel" maxlength="10" value="${esc(u.ph||'')}" placeholder="10-digit mobile number">
-
-      <label class="f-lbl">Delivery Address / Landmark</label>
-      <textarea class="f-inp" id="ad" rows="2" placeholder="House number, Street, Landmark">${esc(u.ad||'')}</textarea>
-
-      <label class="f-lbl" style="margin-top:16px">Choose Payment Method</label>
-      <div class="pay-options">
-        <div class="pay-card ${selectedPayment==='razorpay'?'active':''}" onclick="setPay('razorpay')">
-          <span style="font-size:1.4rem">💳</span>
-          <b>Pay via Razorpay</b>
-          <small>UPI, Cards, GPay</small>
-        </div>
-        <div class="pay-card ${selectedPayment==='cod'?'active':''}" onclick="setPay('cod')">
-          <span style="font-size:1.4rem">💵</span>
-          <b>Cash on Delivery</b>
-          <small>Pay upon arrival</small>
-        </div>
-      </div>
-
-      ${selectedPayment === 'razorpay' ? `
-        <div style="background:#eef7f0;border:1.5px solid #bce6c6;padding:14px;border-radius:12px;margin-top:8px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-            <span style="font-size:1.1rem">🔒</span>
-            <b style="font-size:0.85rem;color:var(--b-green-dark)">Official Razorpay Payment Gateway</b>
-          </div>
-          <p style="font-size:0.78rem;color:#555">
-            Pay safely via Google Pay, PhonePe, Paytm, Debit/Credit Card, or NetBanking. Order places automatically upon payment.
-          </p>
-        </div>
-      ` : `
-        <div style="background:#eef7f0;border:1px solid #d0ebd4;padding:12px;border-radius:10px;font-size:0.82rem;margin-top:8px">
-          💵 <b>Cash on Delivery:</b> Pay <b>${rs(tot)}</b> in cash when our rider arrives at your doorstep in 15-20 minutes.
-        </div>
-      `}
-
-      <div id="err" style="color:var(--b-red);font-size:0.85rem;margin-top:8px"></div>
-    </div>
-    <div class="drawer-ftr">
-      <button class="btn-primary" onclick="initiateOrder()">
-        ${selectedPayment === 'razorpay' ? `Pay Online · ${rs(tot)}` : `Place Order (COD) · ${rs(tot)}`}
-      </button>
-      <button style="width:100%;text-align:center;color:#666;font-size:0.85rem;margin-top:10px;font-weight:600" onclick="cartView()">Back to Cart</button>
-    </div>
-  `;
-}
-
-function initiateOrder() {
-  const nm = $('nm').value.trim();
-  const ph = $('ph').value.trim();
-  const ad = $('ad').value.trim();
-  if (!nm) return $('err').textContent = "Please enter your name.";
-  if (!/^[6-9]\d{9}$/.test(ph)) return $('err').textContent = "Please enter a valid 10-digit mobile number.";
-  if (ad.length < 5) return $('err').textContent = "Please enter your full address or landmark.";
-
-  const s = subtotal(), f = fee(s);
-  const tot = s + f;
-  const orderId = "BK" + Date.now().toString().slice(-6);
-
-  if (selectedPayment === 'razorpay') {
-    if (typeof window.Razorpay === 'undefined') {
-      return alert("Razorpay SDK is loading. Please check your internet connection.");
+    // Automated 100% Refund Cancellation (R2)
+    async function cancelMyOrder(pushKey) {
+      if (!confirm("Are you sure you want to cancel this order? Paid online orders will be refunded 100% to your original payment method.")) return;
+      const res = await fetch(`${WORKER_API}/api/cancel-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pushKey, uid: currentUser.uid })
+      });
+      const data = await res.json();
+      if (res.ok) showToast("Order cancelled and refund initiated.");
+      else alert(data.error || "Cannot cancel order.");
     }
 
-    const options = {
-      key: STATE.razorpay_key || 'rzp_live_TWh8sGQzToEEZT',
-      amount: Math.round(tot * 100),
-      currency: "INR",
-      name: "RA General Store",
-      description: "Order #" + orderId,
-      image: "https://cdn-icons-png.flaticon.com/512/3724/3724720.png",
-      prefill: {
-        name: nm,
-        contact: ph,
-        email: (currentUser && currentUser.email) || "customer@rageneralstore.com"
-      },
-      theme: { color: "#0C831F" },
-      handler: function (response) {
-        completeOrderPlacement(orderId, nm, ph, ad, tot, f, "Paid Online (Razorpay: " + response.razorpay_payment_id + ")");
-      },
-      modal: {
-        ondismiss: function () {
-          toast("Payment cancelled.");
-        }
-      }
-    };
-
-    const rzp = new window.Razorpay(options);
-    rzp.open();
-  } else {
-    completeOrderPlacement(orderId, nm, ph, ad, tot, f, "Cash on Delivery (COD)");
-  }
-}
-
-function completeOrderPlacement(id, nm, ph, ad, tot, fee, payMethod) {
-  const o = {
-    id,
-    t: Date.now(),
-    uid: currentUser ? currentUser.uid : null,
-    nm, ph, ad,
-    pay: payMethod,
-    status: "placed",
-    total: tot,
-    fee,
-    items: Object.entries(cart).map(([itemId, q]) => ({ n: P(itemId).name, u: P(itemId).unit, p: P(itemId).price, q }))
-  };
-
-  allOrders.unshift(o);
-  myOrderIds.unshift(id); // Privately remember this order belongs to this customer
-  cart = {};
-  store.set('ra_user', { nm, ph, ad });
-  save();
-
-  if (db) {
-    try { db.ref('orders/' + id).set(o); } catch(e) {}
-  }
-
-  window.open(waLink(o), '_blank');
-
-  $('panel').innerHTML = `
-    <div class="drawer-hdr">
-      <b>Order Confirmed</b>
-      <button onclick="closeCart()" style="font-size:1.2rem;color:#888">✕</button>
-    </div>
-    <div class="drawer-body" style="text-align:center;padding:40px 20px">
-      <div style="font-size:3.5rem">🎉</div>
-      <h2 style="font-size:1.3rem;margin:12px 0 6px">Order ${o.id} Placed!</h2>
-      <p style="color:#666;font-size:0.85rem;margin-bottom:6px">Status: <b>Order Placed</b></p>
-      <p style="color:#666;font-size:0.85rem;margin-bottom:20px">Payment: <b>${o.pay}</b></p>
-      <a class="btn-primary" style="display:block;text-decoration:none;margin-bottom:10px" href="${waLink(o)}" target="_blank">
-        💬 Send Confirmation to Store WhatsApp
-      </a>
-      <button class="nav-link" style="width:100%" onclick="closeCart();go('orders')">View & Track Order</button>
-    </div>
-  `;
-  draw();
-}
-
-const waLink = o => 'https://wa.me/' + STATE.wa + '?text=' + encodeURIComponent(
-  `*🛍️ New Order ${o.id} - RA Store*\n\n` +
-  (o.items||[]).map(i => `• ${i.n} (${i.u}) × ${i.q} = ${rs(i.p * i.q)}`).join("\n") +
-  `\n\nDelivery: ${o.fee ? rs(o.fee) : 'FREE'}\n*Grand Total: ${rs(o.total)}*\n` +
-  `💳 Payment: *${o.pay}*\n\n` +
-  `👤 Customer: ${o.nm}\n📞 Phone: ${o.ph}\n📍 Address: ${o.ad}`
-);
-
-function userCancelOrder(id) {
-  const o = allOrders.find(x => x.id === id);
-  if (!o) return;
-  if (o.status === 'out_for_delivery' || o.status === 'delivered') {
-    return toast("Order is already out for delivery and cannot be cancelled.");
-  }
-  if (!confirm("Are you sure you want to cancel order " + id + "?")) return;
-  o.status = "cancelled";
-  save();
-
-  if (db) {
-    try { db.ref('orders/' + id + '/status').set('cancelled'); } catch(e) {}
-  }
-
-  toast("Order " + id + " has been cancelled.");
-  ordersView();
-}
-
-// Customer Orders View: ONLY SHOWS ORDERS BELONGING TO THIS USER
-function ordersView() {
-  const u = store.get('ra_user', {});
-  const userPhone = (currentUser && currentUser.phoneNumber) ? currentUser.phoneNumber.replace('+91', '') : (u.ph || '');
-  const userUid = currentUser ? currentUser.uid : null;
-
-  // Filter: Match by ID, Phone, or UID
-  const userOrders = (allOrders || []).filter(o => {
-    if (myOrderIds.includes(o.id)) return true;
-    if (userUid && o.uid === userUid) return true;
-    if (userPhone && o.ph && o.ph === userPhone) return true;
-    return false;
-  });
-
-  $('view').innerHTML = `
-    <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:14px">Your Orders & Live Tracking</h2>
-    ${userOrders.length ? userOrders.map(o => {
-      const isPlaced = o.status === 'placed';
-      const isPacked = o.status === 'packed';
-      const isOut = o.status === 'out_for_delivery';
-      const isDelivered = o.status === 'delivered';
-      const isCancelled = o.status === 'cancelled';
-      const canCancel = isPlaced || isPacked;
-      const orderItems = Array.isArray(o.items) ? o.items : [];
-
-      return `
-        <div style="background:#fff;border:1px solid var(--b-border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.03)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <div>
-              <b style="font-size:1.02rem">${o.id}</b>
-              <div style="font-size:0.72rem;color:#888">${new Date(o.t||Date.now()).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</div>
-            </div>
-            <span style="font-size:0.75rem;font-weight:800;padding:4px 9px;border-radius:6px;background:${isCancelled?'#fde8e8':(isDelivered?'#e5f7ee':'#fff8e1')};color:${isCancelled?'var(--b-red)':(isDelivered?'var(--b-green)':'#b45309')}">
-              ${isCancelled ? '❌ CANCELLED' : (isDelivered ? '✅ DELIVERED' : (isOut ? '🛵 OUT FOR DELIVERY' : (isPacked ? '📦 PACKED' : '⏱ ORDER PLACED')))}
-            </span>
-          </div>
-
-          ${!isCancelled ? `
-            <div class="track-bar">
-              <div class="track-step ${isPlaced||isPacked||isOut||isDelivered?'done':''} ${isPlaced?'active':''}">
-                <div class="step-dot">1</div>
-                <span class="step-lbl">Placed</span>
-              </div>
-              <div class="track-step ${isPacked||isOut||isDelivered?'done':''} ${isPacked?'active':''}">
-                <div class="step-dot">2</div>
-                <span class="step-lbl">Packed</span>
-              </div>
-              <div class="track-step ${isOut||isDelivered?'done':''} ${isOut?'active':''}">
-                <div class="step-dot">3</div>
-                <span class="step-lbl">Out</span>
-              </div>
-              <div class="track-step ${isDelivered?'done':''} ${isDelivered?'active':''}">
-                <div class="step-dot">4</div>
-                <span class="step-lbl">Delivered</span>
-              </div>
-            </div>
-          ` : `
-            <div style="padding:8px 12px;background:#fde8e8;color:var(--b-red);border-radius:8px;font-size:0.8rem;margin:10px 0;font-weight:600">
-              This order was cancelled.
-            </div>
-          `}
-
-          <div style="background:#fbfbfb;border:1px solid #f0f0f0;padding:12px;border-radius:10px;margin:12px 0;font-size:0.85rem">
-            ${orderItems.map(i => `<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>${esc(i.n)} (${i.u}) × ${i.q}</span><b>${rs(i.p*i.q)}</b></div>`).join("")}
-            <div style="border-top:1px dashed #ddd;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-weight:800">
-              <span>Total (${o.pay||'COD'})</span><span>${rs(o.total)}</span>
-            </div>
-          </div>
-
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px">
-            <a href="${waLink(o)}" target="_blank" style="color:var(--b-green);font-size:0.85rem;font-weight:700;text-decoration:none">
-              💬 Open in WhatsApp
-            </a>
-
-            ${canCancel ? `
-              <button class="btn-danger" onclick="userCancelOrder('${o.id}')">
-                ✕ Cancel Order
-              </button>
-            ` : (isOut ? `
-              <span style="font-size:0.75rem;color:#888;font-weight:600">
-                🛵 Order is out for delivery (Cannot cancel)
-              </span>
-            ` : '')}
-          </div>
-        </div>
-      `;
-    }).join("") : `
-      <div style="text-align:center;padding:60px 20px;color:#888">
-        <div style="font-size:3rem;margin-bottom:10px">🛍️</div>
-        <b>No orders placed yet.</b>
-        <p style="font-size:0.82rem;margin:6px 0 16px">Your personal orders and live status will show up here once you place an order.</p>
-        <button class="btn-primary" style="max-width:200px" onclick="go('shop')">Start Shopping</button>
-      </div>
-    `}
-  `;
-}
-
-// Owner Portal with Blank PIN Placeholder
-let unlocked = false, otab = 'orders';
-function unlock() {
-  const p = $('pin').value;
-  if (p === "9874" || p === "7894" || p === String(STATE.pin)) {
-    unlocked = true;
-    draw();
-  } else {
-    $('perr').textContent = "Wrong PIN. Try again.";
-  }
-}
-
-function updateOrderStatus(id, newStatus) {
-  const o = allOrders.find(x => x.id === id);
-  if (!o) return;
-  o.status = newStatus;
-  save();
-
-  if (db) {
-    try { db.ref('orders/' + id + '/status').set(newStatus); } catch(e) {}
-  }
-
-  toast("Order " + id + " marked as " + newStatus);
-  ownerView();
-}
-
-function shrink(f) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onerror = rej;
-    r.onload = () => {
-      const im = new Image();
-      im.onerror = rej;
-      im.onload = () => {
-        const k = Math.min(1, 480 / Math.max(im.width, im.height)), c = document.createElement('canvas');
-        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
-        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-        res(c.toDataURL('image/jpeg', 0.8));
-      };
-      im.src = r.result;
-    };
-    r.readAsDataURL(f);
-  });
-}
-
-async function addP() {
-  const n = $('np-n').value.trim(), pr = +$('np-p').value;
-  if (!n || !(pr > 0)) return toast("Enter product name and price");
-  let img = "";
-  try { const fl = $("np-i").files[0]; if (fl) img = await shrink(fl); } catch(e) {}
-  STATE.products.push({
-    id: Math.max(-1, ...STATE.products.map(p => p.id)) + 1,
-    name: n,
-    unit: $('np-u').value.trim() || "1 kg",
-    price: pr,
-    cat: $('np-c').value.trim() || "Other",
-    em: "🛒",
-    img
-  });
-  save(); toast("Added product!"); ownerView();
-}
-
-async function setImg(id, inp) {
-  const f = inp.files[0]; if (!f) return;
-  try { P(id).img = await shrink(f); save(); ownerView(); toast("Photo updated!"); } catch(e) {}
-}
-
-function setP(id, v) { if (v >= 0) { P(id).price = v; save(); } }
-function toggleStock(id) { P(id).out = !P(id).out; save(); ownerView(); }
-function delP(id) { STATE.products = STATE.products.filter(p => p.id != id); delete cart[id]; save(); ownerView(); }
-function setCfg(k, v) { STATE[k] = v; save(); toast("Saved!"); }
-
-function ownerView() {
-  if (!unlocked) {
-    $('view').innerHTML = `
-      <div style="max-width:360px;margin:50px auto;background:#fff;padding:26px;border-radius:18px;border:1px solid #ddd;text-align:center">
-        <h2 style="font-size:1.3rem;margin-bottom:6px">Owner Dashboard</h2>
-        <p style="font-size:0.85rem;color:#666;margin-bottom:16px">Enter PIN to manage orders & inventory</p>
-        <!-- Blank PIN placeholder without revealing passkey -->
-        <input class="f-inp" id="pin" type="password" maxlength="8" placeholder="Enter PIN" style="text-align:center;font-size:1.2rem;letter-spacing:4px;margin-bottom:10px" onkeydown="if(event.key==='Enter')unlock()">
-        <div id="perr" style="color:var(--b-red);font-size:0.82rem;margin-bottom:8px"></div>
-        <button class="btn-primary" onclick="unlock()">Unlock Dashboard</button>
-      </div>
-    `;
-    return;
-  }
-
-  const ordList = Array.isArray(allOrders) ? allOrders : [];
-
-  $('view').innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <h2 style="font-size:1.3rem;font-weight:800">Owner Portal</h2>
-      <button class="nav-link" onclick="unlocked=false;go('shop')">Lock & Exit</button>
-    </div>
-
-    <div class="cat-scroll" style="margin-bottom:16px">
-      <button class="cat-pill ${otab==='orders'?'on':''}" onclick="otab='orders';ownerView()">
-        📦 All Orders (${ordList.length})
-      </button>
-      <button class="cat-pill ${otab==='products'?'on':''}" onclick="otab='products';ownerView()">
-        🛒 Manage Products
-      </button>
-      <button class="cat-pill ${otab==='settings'?'on':''}" onclick="otab='settings';ownerView()">
-        ⚙️ Settings & Razorpay
-      </button>
-    </div>
-
-    ${otab === 'orders' ? `
-      <div>
-        ${ordList.length ? ordList.map(o => {
-          const oItems = Array.isArray(o.items) ? o.items : [];
-          return `
-            <div style="background:#fff;border:1px solid var(--b-border);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.03)">
-              <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f0f0f0;padding-bottom:10px;margin-bottom:10px">
-                <div>
-                  <b style="font-size:1.05rem">${o.id}</b>
-                  <span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:5px;background:#f0faf2;color:var(--b-green);font-weight:700">
-                    ${o.pay || 'COD'}
-                  </span>
-                  <div style="font-size:0.75rem;color:#888">${new Date(o.t||Date.now()).toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}</div>
-                </div>
-                <div style="text-align:right">
-                  <span style="font-size:0.75rem;font-weight:800;padding:4px 8px;border-radius:6px;background:${o.status==='cancelled'?'#fde8e8':(o.status==='delivered'?'#e5f7ee':'#fff8e1')};color:${o.status==='cancelled'?'var(--b-red)':(o.status==='delivered'?'var(--b-green)':'#b45309')}">
-                    ${(o.status||'placed').toUpperCase()}
-                  </span>
-                  <b style="display:block;font-size:1rem;color:#111;margin-top:2px">${rs(o.total)}</b>
-                </div>
-              </div>
-
-              <div style="font-size:0.85rem;margin-bottom:10px">
-                <div>👤 <b>${esc(o.nm)}</b> · 📞 <a href="tel:${esc(o.ph)}" style="color:var(--b-green);font-weight:700">${esc(o.ph)}</a></div>
-                <div style="color:#555;margin-top:2px">📍 ${esc(o.ad)}</div>
-              </div>
-
-              <div style="background:#fbfbfb;border:1.5px solid #eaeaea;border-radius:12px;padding:12px;margin-bottom:12px">
-                <b style="font-size:0.8rem;text-transform:uppercase;color:#555;display:block;margin-bottom:6px">📋 Packing Checklist (${oItems.length} items):</b>
-                ${oItems.map(i => `
-                  <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.85rem;border-bottom:1px dashed #eee">
-                    <input type="checkbox" style="width:16px;height:16px;cursor:pointer">
-                    <span style="flex:1"><b>${esc(i.n)}</b> (${i.u}) × ${i.q}</span>
-                    <b>${rs(i.p * i.q)}</b>
-                  </div>
-                `).join("")}
-              </div>
-
-              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-                <span style="font-size:0.75rem;font-weight:700;color:#666">Update:</span>
-                <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='packed'?'var(--b-green)':'#f0f0f0'};color:${o.status==='packed'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','packed')">
-                  📦 Packed
-                </button>
-                <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='out_for_delivery'?'var(--b-green)':'#f0f0f0'};color:${o.status==='out_for_delivery'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','out_for_delivery')">
-                  🛵 Out for Delivery
-                </button>
-                <button style="padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;background:${o.status==='delivered'?'var(--b-green)':'#f0f0f0'};color:${o.status==='delivered'?'#fff':'#333'}" onclick="updateOrderStatus('${o.id}','delivered')">
-                  ✅ Delivered
-                </button>
-                <a href="https://wa.me/91${o.ph}?text=${encodeURIComponent('Hello '+o.nm+', update regarding your RA Store Order '+o.id+': Status is now '+o.status.toUpperCase()+'!')}" target="_blank" style="margin-left:auto;color:var(--b-green);font-size:0.8rem;font-weight:700;text-decoration:none">
-                  💬 Message Customer
-                </a>
-              </div>
-            </div>
-          `;
-        }).join("") : '<div style="text-align:center;padding:50px;color:#888">No orders yet.</div>'}
-      </div>
-    ` : (otab === 'products' ? `
-      <div style="background:#fff;padding:16px;border-radius:14px;border:1px solid #ddd;margin-bottom:16px">
-        <b style="font-size:0.95rem;display:block;margin-bottom:10px">+ Add New Grocery Product</b>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
-          <input class="f-inp" id="np-n" placeholder="Name (e.g. Tomatoes)">
-          <input class="f-inp" id="np-u" placeholder="Unit (e.g. 1 kg)">
-          <input class="f-inp" id="np-p" type="number" placeholder="Price (₹)">
-          <input class="f-inp" id="np-c" placeholder="Category (e.g. Vegetables)">
-          <label class="b-add-btn" style="display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer">
-            📷 Camera / Photo
-            <input type="file" id="np-i" accept="image/*" capture="environment" hidden>
-          </label>
-        </div>
-        <button class="btn-primary" style="margin-top:10px;padding:10px" onclick="addP()">Add Product to Store</button>
-      </div>
-
-      <div style="background:#fff;border-radius:14px;border:1px solid #ddd;overflow:hidden">
-        ${(STATE.products||[]).map(p => `
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f0f0f0">
-            <div style="width:40px;height:40px;background:#f8f8f8;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-              ${pic(p)}
-            </div>
-            <div style="flex:1">
-              <b>${esc(p.name)}</b>
-              <div style="font-size:0.75rem;color:#888">${p.unit} · ${p.cat}</div>
-            </div>
-            <label style="cursor:pointer;font-size:1.1rem" title="Update photo">
-              📷<input type="file" accept="image/*" capture="environment" hidden onchange="setImg(${p.id},this)">
-            </label>
-            <input class="f-inp" style="width:70px;padding:6px 8px" type="number" value="${p.price}" onchange="setP(${p.id},+this.value)">
-            <button style="padding:4px 8px;border-radius:6px;font-size:0.75rem;font-weight:700;background:${p.out?'#fde8e8':'#e5f7ee'};color:${p.out?'var(--b-red)':'var(--b-green)'}" onclick="toggleStock(${p.id})">
-              ${p.out ? 'Out' : 'In Stock'}
-            </button>
-            <button onclick="delP(${p.id})" style="color:#aaa;font-size:1.1rem;padding:4px">🗑</button>
-          </div>
-        `).join("")}
-      </div>
-    ` : `
-      <div style="background:#fff;padding:20px;border-radius:14px;border:1px solid #ddd">
-        <label class="f-lbl">Razorpay Live Key ID (Active)</label>
-        <input class="f-inp" value="${esc(STATE.razorpay_key||'rzp_live_TWh8sGQzToEEZT')}" onchange="setCfg('razorpay_key',this.value.trim())">
-        <small style="color:var(--b-green);display:block;margin-top:3px;font-weight:600">✓ Connected to your live Razorpay account</small>
-
-        <label class="f-lbl" style="margin-top:14px">Firebase Realtime Database</label>
-        <input class="f-inp" value="https://k-store-ae9dd-default-rtdb.firebaseio.com" disabled style="background:#f6f6f6;color:#666">
-        <small style="color:var(--b-green);display:block;margin-top:3px;font-weight:600">✓ Live cross-device real-time sync active</small>
-
-        <label class="f-lbl" style="margin-top:14px">Store WhatsApp Number (with country code)</label>
-        <input class="f-inp" value="${esc(STATE.wa)}" onchange="setCfg('wa',this.value.trim())">
-
-        <label class="f-lbl" style="margin-top:14px">Delivery Fee (₹)</label>
-        <input class="f-inp" type="number" value="${STATE.fee}" onchange="setCfg('fee',+this.value)">
-
-        <label class="f-lbl" style="margin-top:14px">Free Delivery Threshold (₹)</label>
-        <input class="f-inp" type="number" value="${STATE.free}" onchange="setCfg('free',+this.value)">
-
-        <label class="f-lbl" style="margin-top:14px">Owner Dashboard PIN</label>
-        <input class="f-inp" value="${esc(STATE.pin)}" onchange="setCfg('pin',this.value.trim())">
-      </div>
-    `)}
-  `;
-}
-
-// Initial Launch
-go('shop');
-</script>
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 3000);
+    }
+  </script>
 </body>
 </html>
