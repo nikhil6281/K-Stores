@@ -3,14 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO & Social Meta -->
   <title>RA Store — Fresh Groceries Delivered in Bommalatapalli</title>
+  <meta name="description" content="Order fresh vegetables, milk, and groceries online in Bommalatapalli. 100% refund guarantee before dispatch. Fast village delivery.">
+  <link rel="canonical" href="https://nikhil6281.github.io/K-Stores/">
+  <meta property="og:title" content="RA Store — Fresh Groceries Delivered in Bommalatapalli">
+  <meta property="og:description" content="Local grocery delivery for Bommalatapalli. Browse fresh items, order online, or choose Cash on Delivery.">
+  <meta property="og:url" content="https://nikhil6281.github.io/K-Stores/">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#0C831F">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230C831F'/%3E%3Ctext x='50' y='65' font-size='45' font-weight='bold' fill='%23F8CB46' text-anchor='middle'%3ERA%3C/text%3E%3C/svg%3E">
+
+  <!-- Schema.org JSON-LD for Bommalatapalli -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "GroceryStore",
+    "name": "RA Store",
+    "telephone": "+916281730144",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Main Road beside Chennampalli Road",
+      "addressLocality": "Bommalatapalli",
+      "addressRegion": "Andhra Pradesh",
+      "postalCode": "515134",
+      "addressCountry": "IN"
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      "opens": "07:00",
+      "closes": "19:00"
+    },
+    "priceRange": "₹"
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <style>
     :root {
@@ -28,7 +67,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
     body { background: var(--bg); color: var(--text); padding-bottom: 85px; }
 
-    /* Sticky Navbar */
     .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
     .brand { font-size: 20px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 6px; }
     .brand-badge { background: var(--accent); color: var(--dark); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
@@ -39,23 +77,19 @@
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
     .btn-lang { background: #F3F4F6; border: 1px solid var(--border); padding: 6px 10px; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; min-height: 36px; }
 
-    /* Sticky Search & Chips Header */
     .sticky-controls { position: sticky; top: 57px; z-index: 90; background: var(--surface); border-bottom: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-    
     .search-wrapper { padding: 8px 16px; position: relative; }
     .search-input { width: 100%; padding: 10px 38px 10px 36px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; background: #F9FAFB; outline: none; transition: border-color 0.15s; }
     .search-input:focus { border-color: var(--primary); background: #fff; }
     .search-icon { position: absolute; left: 28px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--muted); pointer-events: none; }
     .search-clear { position: absolute; right: 26px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 16px; color: var(--muted); cursor: pointer; display: none; }
 
-    /* Horizontal Category Chips */
     .chips-bar { display: flex; gap: 8px; overflow-x: auto; padding: 6px 16px 10px; scrollbar-width: none; }
     .chips-bar::-webkit-scrollbar { display: none; }
     .chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #F3F4F6; border: 1px solid var(--border); color: var(--text); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; }
     .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     .chip-count { font-size: 10px; opacity: 0.8; }
 
-    /* Banners */
     .refund-hero { background: #FEF3C7; border-left: 4px solid var(--accent); padding: 10px 16px; margin: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; }
     .refund-hero-title { font-weight: 700; font-size: 13px; color: #92400E; }
     .refund-hero-desc { font-size: 11px; color: #B45309; }
@@ -64,7 +98,6 @@
     .inapp-banner { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; padding: 8px 16px; font-size: 12px; text-align: center; display: none; }
     .announcement-banner { background: #DCFCE7; color: #166534; padding: 8px 16px; font-size: 13px; font-weight: 600; text-align: center; display: none; }
 
-    /* Products Grid */
     .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
@@ -75,47 +108,43 @@
     
     .out-of-stock-badge { position: absolute; top: 10px; right: 10px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
 
-    /* Floating Cart Bar */
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
 
-    /* Modals */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
     .modal { background: var(--surface); border-radius: 12px; max-width: 440px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
     .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
 
-    /* Empty Search State */
     .empty-state { text-align: center; padding: 40px 20px; }
     .empty-icon { font-size: 40px; margin-bottom: 8px; }
 
-    /* Toast */
+    /* Footer */
+    .site-footer { background: var(--dark); color: #9CA3AF; padding: 32px 16px 20px; margin-top: 40px; font-size: 12px; text-align: center; border-radius: 16px 16px 0 0; }
+    .footer-links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+    .footer-links a { color: #E5E7EB; text-decoration: none; font-weight: 600; }
+    .footer-fssai { background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 6px; display: inline-block; margin-bottom: 12px; font-family: monospace; }
+
     .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 300; display: none; }
-    .privacy-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 24px; padding: 12px; border-top: 1px solid var(--border); }
   </style>
 </head>
 <body>
 
-  <!-- In-app Browser Warning -->
   <div id="inAppBrowserBanner" class="inapp-banner">
     ⚠️ Using WhatsApp / Instagram? If Google Login doesn't open, tap <strong>⋮</strong> (top right) $\rightarrow$ <strong>Open in Chrome</strong>.
   </div>
 
-  <!-- Store Announcements -->
   <div id="announcementBanner" class="announcement-banner"></div>
 
-  <!-- Store Closed Banner -->
   <div id="storeClosedBanner" class="store-banner">
     Store is currently closed (Hours: 7:00 AM – 7:00 PM IST). You can browse and add items to cart!
   </div>
 
-  <!-- Top Navbar -->
   <header class="navbar">
     <div class="brand">
       RA Store <span class="brand-badge">BOMMALATAPALLI</span>
     </div>
     <div class="nav-actions">
-      <!-- Telugu / English Toggle -->
       <button class="btn-lang" id="langToggleBtn" aria-label="Change Language">తెలుగు</button>
       <button class="btn btn-outline" id="ordersNavBtn" aria-label="View My Orders">My Orders</button>
       <div id="authContainer">
@@ -125,7 +154,6 @@
     </div>
   </header>
 
-  <!-- Sticky Search Bar & Category Chips -->
   <div class="sticky-controls">
     <div class="search-wrapper" role="search">
       <span class="search-icon">🔍</span>
@@ -133,13 +161,11 @@
       <button id="searchClearBtn" class="search-clear" aria-label="Clear search">✕</button>
     </div>
 
-    <!-- Category Chips Bar -->
     <div class="chips-bar" id="categoryChipsBar">
       <div class="chip active" data-cat="all">All Items</div>
     </div>
   </div>
 
-  <!-- 100% Refund Hero Banner -->
   <div class="refund-hero">
     <span style="font-size: 26px;">🛡️</span>
     <div>
@@ -148,7 +174,6 @@
     </div>
   </div>
 
-  <!-- Main Catalog Grid -->
   <main class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
       <h2 style="font-size: 16px; font-weight: 700;" id="tCatalogHeading">Fresh Groceries & Village Staples</h2>
@@ -158,11 +183,20 @@
     <div id="productsGrid" class="grid">
       <p style="color: var(--muted); padding: 20px;">Loading fresh catalog...</p>
     </div>
-
-    <div class="privacy-note">
-      🔒 <strong>Privacy Assurance:</strong> We only collect your name, phone number, and address to deliver your order in Bommalatapalli.
-    </div>
   </main>
+
+  <!-- Site Footer (Phase 5) -->
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="./privacy-policy.html">Privacy Policy (DPDP)</a>
+      <a href="./refund-policy.html">Refund & Cancellation</a>
+      <a href="./terms.html">Terms of Service</a>
+    </div>
+    <div class="footer-fssai">FSSAI Lic. No: [FSSAI_REGISTRATION_NUMBER_HERE]</div>
+    <div><strong>RA Store</strong> • Main Road beside Chennampalli Road, Bommalatapalli, AP</div>
+    <div style="margin-top: 4px;">Helpline / WhatsApp: +91 62817 30144</div>
+    <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">© 2026 RA Store. All rights reserved. Fast local grocery delivery.</div>
+  </footer>
 
   <!-- Floating Checkout Bar -->
   <div class="bottom-bar" id="cartBottomBar" style="display: none;">
@@ -230,7 +264,7 @@
     </div>
   </div>
 
-  <!-- Orders Modal with Timeline & Refund Status -->
+  <!-- Orders Modal -->
   <div class="modal-overlay" id="ordersModal" role="dialog" aria-modal="true" aria-labelledby="ordersModalTitle">
     <div class="modal">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -258,6 +292,13 @@
   <div id="toast" class="toast"></div>
 
   <script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -273,7 +314,18 @@
       return SVG_PLACEHOLDER;
     }
 
-    // In-App Browser Detection
+    // Lazy load Razorpay Checkout only on-demand
+    function loadRazorpaySdk() {
+      return new Promise((resolve, reject) => {
+        if (window.Razorpay) return resolve();
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Failed to load Razorpay payment gateway'));
+        document.body.appendChild(script);
+      });
+    }
+
     const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|Twitter|Snapchat/i.test(navigator.userAgent);
     if (isInApp) {
       document.getElementById('inAppBrowserBanner').style.display = 'block';
@@ -291,7 +343,6 @@
 
     const WORKER_API = "https://ra-store-api.chowdarynikhil095.workers.dev";
 
-    // State
     let cart = JSON.parse(localStorage.getItem('ra_store_cart') || '{}');
     let productsCatalog = {};
     let categoriesCatalog = {};
@@ -310,9 +361,6 @@
     };
     let isStoreCurrentlyOpen = true;
 
-    // =========================================================
-    // LANGUAGE DICTIONARY & TOGGLE (EN <-> TE)
-    // =========================================================
     let currentLang = localStorage.getItem('ra_store_lang') || 'en';
 
     const I18N = {
@@ -375,7 +423,6 @@
       applyLanguage(currentLang === 'en' ? 'te' : 'en');
     });
 
-    // Check store hours every 60 seconds
     function parseHourToDecimal(val, defaultVal) {
       if (!val) return defaultVal;
       const parts = String(val).split(':');
@@ -411,7 +458,6 @@
     }
     setInterval(checkStoreHours, 60000);
 
-    // Subscribe to Settings
     db.ref('settings').on('value', snap => {
       if (snap.val()) {
         storeSettings = snap.val();
@@ -425,7 +471,6 @@
       }
     });
 
-    // Restore Redirect Login or Auth State
     auth.getRedirectResult().catch(() => {});
     auth.onAuthStateChanged(user => {
       currentUser = user;
@@ -463,17 +508,14 @@
     document.getElementById('loginBtn').addEventListener('click', () => loginGoogle(false));
     document.getElementById('checkoutLoginGoogleBtn').addEventListener('click', () => loginGoogle(true));
 
-    // Categories Listener
     db.ref('categories').on('value', snap => {
       categoriesCatalog = snap.val() || {};
       renderCategoryChips();
       renderProducts();
     });
 
-    // Products Listener
     db.ref('products').on('value', snap => {
       productsCatalog = snap.val() || {};
-      // Self-heal cart: remove deleted items
       let cartChanged = false;
       Object.keys(cart).forEach(id => {
         if (!productsCatalog[id]) { delete cart[id]; cartChanged = true; }
@@ -485,7 +527,6 @@
       updateCartUI();
     });
 
-    // Check Reorder Button
     const lastOrder = JSON.parse(localStorage.getItem('ra_last_order') || 'null');
     if (lastOrder && Array.isArray(lastOrder.items) && lastOrder.items.length) {
       document.getElementById('reorderLastBtn').style.display = 'inline-flex';
@@ -503,9 +544,6 @@
       }
     });
 
-    // =========================================================
-    // CATEGORY CHIPS RENDERING
-    // =========================================================
     function renderCategoryChips() {
       const bar = document.getElementById('categoryChipsBar');
       const catKeys = Object.keys(categoriesCatalog).sort((a,b) => (categoriesCatalog[a].order || 0) - (categoriesCatalog[b].order || 0));
@@ -542,9 +580,6 @@
       }
     });
 
-    // =========================================================
-    // SEARCH BAR WITH 250ms DEBOUNCE & MISS LOGGING
-    // =========================================================
     const searchInput = document.getElementById('searchInput');
     const searchClearBtn = document.getElementById('searchClearBtn');
 
@@ -579,7 +614,6 @@
       history.replaceState(null, '', url);
     }
 
-    // Restore URL params on initial load
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('cat')) currentCategory = urlParams.get('cat');
     if (urlParams.get('q')) {
@@ -588,19 +622,14 @@
       searchClearBtn.style.display = 'block';
     }
 
-    // =========================================================
-    // PRODUCTS RENDERING & FILTERING
-    // =========================================================
     function renderProducts() {
       const grid = document.getElementById('productsGrid');
       let pKeys = Object.keys(productsCatalog);
 
       pKeys = pKeys.filter(id => {
         const p = productsCatalog[id];
-        // Category Filter
         if (currentCategory !== 'all' && p.categoryId !== currentCategory) return false;
 
-        // Search Filter (Fuzzy, Prefix, Telugu, English & Keywords)
         if (searchQuery) {
           const nameEn = (p.name || '').toLowerCase();
           const nameTe = (p.nameTe || '').toLowerCase();
@@ -618,7 +647,6 @@
         return true;
       });
 
-      // Handle Empty Search State & Missing Term Logging
       if (!pKeys.length) {
         if (searchQuery && !loggedMisses.has(searchQuery)) {
           loggedMisses.add(searchQuery);
@@ -731,13 +759,11 @@
       document.getElementById('modalTotal').innerText = `₹${subtotal + fee}`;
     }
 
-    // Checkout Flow & Profile Pre-fill
     document.getElementById('checkoutBtn').addEventListener('click', () => {
       if (!isStoreCurrentlyOpen) {
         alert("Store is closed right now. Operating hours are 7:00 AM – 7:00 PM IST.");
         return;
       }
-      // Pre-fill profile
       const prof = JSON.parse(localStorage.getItem('ra_customer_profile') || '{}');
       if (prof.name) document.getElementById('custName').value = prof.name;
       if (prof.phone) document.getElementById('custPhone').value = prof.phone;
@@ -769,7 +795,6 @@
         notes: document.getElementById('custNotes').value.trim()
       };
 
-      // Save customer profile back for next time
       localStorage.setItem('ra_customer_profile', JSON.stringify({
         name: customer.name,
         phone: customer.phone,
@@ -803,11 +828,13 @@
           return;
         }
 
-        // Save last order for 1-click reorder
         localStorage.setItem('ra_last_order', JSON.stringify({ items, total: data.total }));
         document.getElementById('reorderLastBtn').style.display = 'inline-flex';
 
         if (payMethod === 'online_razorpay') {
+          // Lazy load Razorpay Checkout SDK
+          await loadRazorpaySdk();
+
           const options = {
             key: data.keyId,
             amount: data.amountPaise,
@@ -882,9 +909,6 @@
       document.getElementById('successModal').style.display = 'flex';
     }
 
-    // =========================================================
-    // CUSTOMER ORDERS MODAL WITH TIMELINE & DEDUPED LISTENER
-    // =========================================================
     document.getElementById('ordersNavBtn').addEventListener('click', () => {
       if (!currentUser) {
         alert("Please sign in to view your past orders.");
@@ -967,7 +991,6 @@
       }
     });
 
-    // Close Modals & Escape key accessibility
     document.querySelectorAll('.modal-close-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const modalId = btn.getAttribute('data-modal');
@@ -997,7 +1020,6 @@
       setTimeout(() => t.style.display = 'none', 3000);
     }
 
-    // Initialize with default language
     applyLanguage(currentLang);
   </script>
 </body>
