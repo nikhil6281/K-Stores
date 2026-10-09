@@ -33,45 +33,52 @@
     .header h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .header h1 span { background: var(--accent); color: var(--dark); padding: 2px 8px; border-radius: 4px; font-size: 12px; }
     
-    .btn { padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
+    .btn { padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; justify-content: center; text-decoration: none; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-outline { background: transparent; border: 1px solid #4B5563; color: #E5E7EB; }
     .btn-light { background: #E5E7EB; color: #374151; }
+    .btn-success { background: #16A34A; color: #fff; }
 
     .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
     .auth-box { max-width: 420px; margin: 80px auto; background: var(--surface); padding: 32px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
     
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x: auto; }
-    .tab-btn { background: none; border: none; font-size: 14px; font-weight: 600; color: var(--muted); padding: 8px 16px; cursor: pointer; border-radius: 6px; white-space: nowrap; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x: auto; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { background: none; border: none; font-size: 13px; font-weight: 600; color: var(--muted); padding: 8px 14px; cursor: pointer; border-radius: 6px; white-space: nowrap; }
     .tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
     .card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 16px; margin-bottom: 16px; }
     .order-card { border-left: 5px solid var(--primary); }
 
-    .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
     .badge-paid { background: #DCFCE7; color: #166534; }
     .badge-pending { background: #FEF3C7; color: #92400E; }
     .badge-failed { background: #FEE2E2; color: #991B1B; }
     .badge-cancelled { background: #FEE2E2; color: #991B1B; }
     .badge-delivered { background: #E0E7FF; color: #3730A3; }
-    
+    .badge-risk { background: #FEE2E2; color: #DC2626; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+
     .unpaid-warning { background: #FFFBEB; border: 1px solid #FDE68A; color: #B45309; padding: 6px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; font-weight: 600; }
 
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .stat-card { background: #fff; padding: 16px; border-radius: 10px; border: 1px solid var(--border); }
+    .stat-num { font-size: 22px; font-weight: 800; color: var(--primary); margin-top: 4px; }
+    .stat-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
-    .modal { background: var(--surface); border-radius: 12px; max-width: 500px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto; }
+    .modal { background: var(--surface); border-radius: 12px; max-width: 520px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
 
-    /* Filter Bar */
     .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
     .filter-bar input, .filter-bar select { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
 
     .toast { position: fixed; bottom: 20px; right: 20px; background: var(--dark); color: #fff; padding: 12px 20px; border-radius: 8px; display: none; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .toast-undo { background: var(--accent); color: var(--dark); font-weight: 700; margin-left: 10px; cursor: pointer; border: none; padding: 3px 8px; border-radius: 4px; }
 
-    /* Printable Slip Styling */
     @media print {
       body * { visibility: hidden; }
       #printableSlip, #printableSlip * { visibility: visible; }
@@ -90,7 +97,6 @@
   </div>
 
   <div class="container">
-    <!-- Login Screen -->
     <div id="loginView" class="auth-box">
       <h2 style="font-size: 20px; margin-bottom: 8px;">Authorized Owner Access</h2>
       <p style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Sign in with your verified owner Google account.</p>
@@ -100,12 +106,14 @@
       <p id="authError" style="color: var(--danger); font-size: 12px; margin-top: 14px; display: none;"></p>
     </div>
 
-    <!-- Main Dashboard -->
     <div id="dashboardView" style="display: none;">
       <div class="tabs">
         <button class="tab-btn active" data-tab="orders">📦 Live Orders</button>
-        <button class="tab-btn" data-tab="products">🛒 Products Catalog</button>
+        <button class="tab-btn" data-tab="products">🛒 Products</button>
         <button class="tab-btn" data-tab="categories">🏷️ Categories</button>
+        <button class="tab-btn" data-tab="customers">👥 Customers CRM</button>
+        <button class="tab-btn" data-tab="reports">📊 Sales Reports</button>
+        <button class="tab-btn" data-tab="misses">🔍 Search Misses</button>
         <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
       </div>
 
@@ -151,7 +159,7 @@
             </select>
           </div>
           <div style="display: flex; gap: 8px;">
-            <button class="btn btn-outline" id="quickAddModeBtn" style="color: var(--primary); border-color: var(--primary);">⚡ Quick Add (Shop Stocking)</button>
+            <button class="btn btn-outline" id="quickAddModeBtn" style="color: var(--primary); border-color: var(--primary);">⚡ Quick Add</button>
             <button class="btn btn-primary" id="openAddProductModalBtn">+ Add Product</button>
           </div>
         </div>
@@ -160,7 +168,7 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- TAB 3: CATEGORIES MANAGEMENT -->
+      <!-- TAB 3: CATEGORIES -->
       <!-- ============================================== -->
       <div id="categoriesTab" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -174,7 +182,74 @@
       </div>
 
       <!-- ============================================== -->
-      <!-- TAB 4: STORE SETTINGS -->
+      <!-- TAB 4: CUSTOMERS CRM (Phase 4) -->
+      <!-- ============================================== -->
+      <div id="customersTab" style="display: none;">
+        <div class="filter-bar">
+          <input type="text" id="customerSearchInput" placeholder="Search customer by name, phone, or email..." style="flex: 1; min-width: 200px;">
+          <select id="customerSortSelect">
+            <option value="orders">Sort: Most Orders</option>
+            <option value="spend">Sort: Highest Spend (₹)</option>
+            <option value="recent">Sort: Most Recent</option>
+          </select>
+        </div>
+        <div id="customersListContainer">Loading customer profiles...</div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- TAB 5: SALES REPORTS & CSV EXPORT (Phase 4) -->
+      <!-- ============================================== -->
+      <div id="reportsTab" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 style="font-size: 18px; font-weight: 700;">Sales Overview</h2>
+          <button class="btn btn-success" id="exportOrdersCsvBtn">📥 Export Orders (CSV)</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Today's Sales</div>
+            <div class="stat-num" id="statTodaySales">₹0</div>
+            <div style="font-size: 11px; color: var(--muted);" id="statTodayOrders">0 orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">This Week's Sales</div>
+            <div class="stat-num" id="statWeekSales">₹0</div>
+            <div style="font-size: 11px; color: var(--muted);" id="statWeekOrders">0 orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">All-Time Revenue</div>
+            <div class="stat-num" id="statTotalSales">₹0</div>
+            <div style="font-size: 11px; color: var(--muted);" id="statTotalOrders">0 orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg Order Value</div>
+            <div class="stat-num" id="statAov">₹0</div>
+            <div style="font-size: 11px; color: var(--muted);">Per completed order</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">Top-Selling Items</h3>
+          <div id="topItemsContainer">Calculating...</div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- TAB 6: SEARCH MISSES (Phase 4) -->
+      <!-- ============================================== -->
+      <div id="missesTab" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div>
+            <h2 style="font-size: 16px; font-weight: 700;">Customer Search Misses</h2>
+            <p style="font-size: 12px; color: var(--muted);">Items searched by villagers that returned zero results in your catalog.</p>
+          </div>
+          <button class="btn btn-outline" id="clearSearchMissesBtn" style="color: var(--danger); border-color: var(--danger); font-size: 12px;">Clear History</button>
+        </div>
+        <div id="searchMissesContainer">Loading misses...</div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- TAB 7: SETTINGS -->
       <!-- ============================================== -->
       <div id="settingsTab" style="display: none;">
         <div class="card" style="max-width: 600px;">
@@ -215,7 +290,7 @@
           </div>
           <div style="margin-bottom: 16px;">
             <label style="font-size: 12px; font-weight: 600;">Announcement Banner Text (Optional)</label>
-            <input type="text" id="settingAnnouncement" placeholder="e.g. Fresh Mangoes & Village Milk arrived today!">
+            <input type="text" id="settingAnnouncement" placeholder="e.g. Fresh Village Milk arrived today!">
           </div>
           <button class="btn btn-primary" id="saveSettingsBtn">Save All Settings</button>
         </div>
@@ -223,9 +298,7 @@
     </div>
   </div>
 
-  <!-- ============================================== -->
-  <!-- MODAL: ADD / EDIT PRODUCT -->
-  <!-- ============================================== -->
+  <!-- PRODUCT MODAL -->
   <div class="modal-overlay" id="productModal">
     <div class="modal">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -258,28 +331,24 @@
         </div>
 
         <div class="form-group">
-          <label>Keywords (Optional - for search)</label>
+          <label>Keywords (Optional)</label>
           <input type="text" id="prodKeywords" placeholder="e.g. tamata, tomato, kura">
         </div>
 
-        <!-- CAMERA-TO-WEBSITE SECTION -->
         <div class="form-group" style="background: #F9FAFB; padding: 12px; border-radius: 8px; border: 1px dashed var(--border);">
           <label style="margin-bottom: 6px;">Product Photo (Compressed to &lt;100 KB)</label>
           
           <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-            <!-- Native Phone Camera Trigger -->
             <label class="btn btn-primary" style="flex: 1; font-size: 12px; cursor: pointer;">
               📸 Take Photo
               <input type="file" id="phoneCameraInput" accept="image/*" capture="environment" style="display: none;">
             </label>
-            <!-- Gallery Picker -->
             <label class="btn btn-outline" style="flex: 1; font-size: 12px; color: var(--text); border-color: var(--border); cursor: pointer;">
               🖼️ From Gallery
               <input type="file" id="galleryFileInput" accept="image/*" style="display: none;">
             </label>
           </div>
 
-          <!-- In-Page Live Web Camera View -->
           <div id="liveCameraContainer" style="display: none; margin-bottom: 10px; text-align: center;">
             <video id="cameraVideo" autoplay playsinline style="width: 100%; max-height: 200px; background: #000; border-radius: 6px;"></video>
             <div style="display: flex; gap: 6px; margin-top: 6px;">
@@ -311,9 +380,7 @@
     </div>
   </div>
 
-  <!-- ============================================== -->
-  <!-- MODAL: ADD / EDIT CATEGORY -->
-  <!-- ============================================== -->
+  <!-- CATEGORY MODAL -->
   <div class="modal-overlay" id="categoryModal">
     <div class="modal">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -340,9 +407,17 @@
     </div>
   </div>
 
-  <!-- ============================================== -->
-  <!-- PRINTABLE PACKING SLIP -->
-  <!-- ============================================== -->
+  <!-- CUSTOMER DETAIL MODAL -->
+  <div class="modal-overlay" id="customerDetailModal">
+    <div class="modal">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700;" id="custDetailTitle">Customer Profile</h3>
+        <button class="modal-close-btn" data-modal="customerDetailModal" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+      <div id="custDetailContent">Loading details...</div>
+    </div>
+  </div>
+
   <div id="printableSlip" style="display: none;"></div>
 
   <div id="toast" class="toast">
@@ -372,12 +447,12 @@
     let allOrders = {};
     let allProducts = {};
     let allCategories = {};
+    let allSearchMisses = {};
     let isQuickAddActive = false;
     let deletedProductBackup = null;
     let deleteTimeout = null;
     let previousOrdersCount = null;
 
-    // Web Audio Chime Generator
     function playNewOrderChime() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -385,20 +460,17 @@
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15);
         gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.6);
       } catch (e) {}
-
-      // Browser notification
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification("RA Store: New Order Received!", { body: "A new grocery delivery order just arrived in Bommalatapalli." });
       }
     }
-
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
@@ -415,7 +487,7 @@
           initRealtimeListeners();
         } else {
           auth.signOut();
-          document.getElementById('authError').innerText = "Access Denied: Google Account is not in /admins.";
+          document.getElementById('authError').innerText = "Access Denied: Google Account is not on the /admins allowlist.";
           document.getElementById('authError').style.display = 'block';
         }
       } else {
@@ -433,7 +505,6 @@
     document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
     function initRealtimeListeners() {
-      // 1. Orders Listener with Audio Chime
       db.ref('orders').on('value', snap => {
         const val = snap.val() || {};
         const count = Object.keys(val).length;
@@ -443,22 +514,26 @@
         previousOrdersCount = count;
         allOrders = val;
         renderOrdersList();
+        renderCustomersList();
+        calculateReports();
       });
 
-      // 2. Categories Listener
       db.ref('categories').on('value', snap => {
         allCategories = snap.val() || {};
         renderCategoriesList();
         populateCategoryDropdowns();
       });
 
-      // 3. Products Catalog Listener
       db.ref('products').on('value', snap => {
         allProducts = snap.val() || {};
         renderProductsCatalog();
       });
 
-      // 4. Settings
+      db.ref('searchMisses').on('value', snap => {
+        allSearchMisses = snap.val() || {};
+        renderSearchMisses();
+      });
+
       db.ref('settings').once('value', snap => {
         const s = snap.val() || {};
         document.getElementById('settingOpenTime').value = s.storeHours?.open || '07:00';
@@ -473,7 +548,7 @@
     }
 
     // =========================================================
-    // ORDERS RENDERING & FULL STATUS PROGRESSION
+    // ORDERS TAB
     // =========================================================
     function renderOrdersList() {
       const list = document.getElementById('ordersList');
@@ -521,7 +596,7 @@
 
         return `
           <div class="card order-card" style="border-left-color: ${isCancelled ? 'var(--danger)' : (isDelivered ? '#3730A3' : 'var(--primary)')}">
-            ${isUnpaidOnline ? `<div class="unpaid-warning">⚠️ Customer has NOT paid online yet. Await payment before packing.</div>` : ''}
+            ${isUnpaidOnline ? `<div class="unpaid-warning">⚠️ Customer has NOT paid online yet. Do NOT pack until marked PAID.</div>` : ''}
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <div>
@@ -538,7 +613,6 @@
               <strong>${escapeHtml(ord.customer?.name)}</strong> (${escapeHtml(ord.customer?.phone)}) • ${escapeHtml(ord.customer?.address)}
             </div>
 
-            <!-- Packing Checklist -->
             <div style="background: #F9FAFB; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
               <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">PACKING CHECKLIST:</div>
               ${(ord.items || []).map(it => `
@@ -576,24 +650,20 @@
       }).join('');
     }
 
-    // Orders Filter Events
     ['orderSearchInput', 'orderDateFilter', 'orderStatusFilter', 'orderPaymentFilter'].forEach(id => {
       document.getElementById(id).addEventListener('input', renderOrdersList);
     });
 
-    // Orders Actions Delegation
     document.getElementById('ordersList').addEventListener('click', async (e) => {
       if (e.target.classList.contains('action-status')) {
         const key = e.target.getAttribute('data-key');
         const st = e.target.getAttribute('data-status');
         await db.ref(`orders/${key}/status`).set(st);
       }
-
       if (e.target.classList.contains('action-print')) {
         const key = e.target.getAttribute('data-key');
         printOrderSlip(allOrders[key]);
       }
-
       if (e.target.classList.contains('action-cancel-refund')) {
         const key = e.target.getAttribute('data-key');
         const humanId = e.target.getAttribute('data-id');
@@ -622,7 +692,6 @@
       }
     });
 
-    // Packing Bill Print
     function printOrderSlip(ord) {
       if (!ord) return;
       const slip = document.getElementById('printableSlip');
@@ -659,35 +728,311 @@
     }
 
     // =========================================================
-    // CAMERA-TO-WEBSITE IMAGE COMPRESSION & UPLOAD
+    // TAB 4: CUSTOMERS CRM LOGIC (Phase 4)
+    // =========================================================
+    let customerProfiles = {};
+
+    function buildCustomerProfiles() {
+      customerProfiles = {};
+      Object.keys(allOrders).forEach(key => {
+        const o = allOrders[key];
+        const phone = o.customer?.phone || 'unknown';
+        if (!customerProfiles[phone]) {
+          customerProfiles[phone] = {
+            name: o.customer?.name || 'Customer',
+            phone: phone,
+            email: o.userEmail || '',
+            totalOrders: 0,
+            totalSpent: 0,
+            lastOrderDate: o.createdAt,
+            codOrders: 0,
+            onlineOrders: 0,
+            cancelledOrders: 0,
+            orders: []
+          };
+        }
+
+        const cp = customerProfiles[phone];
+        cp.totalOrders++;
+        cp.orders.push(o);
+
+        if (o.status !== 'cancelled') {
+          cp.totalSpent += (Number(o.total) || 0);
+        } else {
+          cp.cancelledOrders++;
+        }
+
+        if (o.paymentMethod === 'cod') cp.codOrders++;
+        else cp.onlineOrders++;
+
+        if (new Date(o.createdAt) > new Date(cp.lastOrderDate)) {
+          cp.lastOrderDate = o.createdAt;
+          cp.name = o.customer?.name || cp.name;
+        }
+      });
+    }
+
+    function renderCustomersList() {
+      buildCustomerProfiles();
+      const container = document.getElementById('customersListContainer');
+      const search = document.getElementById('customerSearchInput').value.toLowerCase().trim();
+      const sort = document.getElementById('customerSortSelect').value;
+
+      let phones = Object.keys(customerProfiles);
+
+      phones = phones.filter(p => {
+        const c = customerProfiles[p];
+        if (search) {
+          const matchName = c.name.toLowerCase().includes(search);
+          const matchPhone = c.phone.includes(search);
+          const matchEmail = c.email.toLowerCase().includes(search);
+          if (!matchName && !matchPhone && !matchEmail) return false;
+        }
+        return true;
+      });
+
+      phones.sort((a, b) => {
+        const ca = customerProfiles[a];
+        const cb = customerProfiles[b];
+        if (sort === 'spend') return cb.totalSpent - ca.totalSpent;
+        if (sort === 'recent') return new Date(cb.lastOrderDate) - new Date(ca.lastOrderDate);
+        return cb.totalOrders - ca.totalOrders;
+      });
+
+      if (!phones.length) {
+        container.innerHTML = "<p style='color: var(--muted); padding: 20px; text-align: center;'>No customer profiles found.</p>";
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px;">
+          ${phones.map(phone => {
+            const c = customerProfiles[phone];
+            const isRisk = c.cancelledOrders >= 2;
+
+            return `
+              <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <div style="font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    ${escapeHtml(c.name)}
+                    ${isRisk ? `<span class="badge-risk">⚠️ High Cancellation Risk</span>` : ''}
+                  </div>
+                  <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">
+                    📞 ${escapeHtml(c.phone)} • ✉️ ${escapeHtml(c.email || 'No Email')}
+                  </div>
+                  <div style="font-size: 12px; margin-top: 4px;">
+                    <strong>${c.totalOrders} orders</strong> (${c.codOrders} COD / ${c.onlineOrders} Online) • Spent: <strong style="color: var(--primary);">₹${c.totalSpent}</strong>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                  <a href="tel:${escapeHtml(c.phone)}" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary); font-size: 12px;">📞 Call</a>
+                  <a href="https://wa.me/91${escapeHtml(c.phone.replace(/\D/g,''))}?text=${encodeURIComponent(`Hello ${c.name}, this is RA Store Bommalatapalli regarding your grocery orders.`)}" target="_blank" class="btn" style="background: #25D366; color: #fff; font-size: 12px;">💬 WhatsApp</a>
+                  <button class="btn btn-light action-view-cust-orders" data-phone="${escapeHtml(phone)}" style="font-size: 12px;">History</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    ['customerSearchInput', 'customerSortSelect'].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderCustomersList);
+    });
+
+    document.getElementById('customersListContainer').addEventListener('click', (e) => {
+      if (e.target.classList.contains('action-view-cust-orders')) {
+        const phone = e.target.getAttribute('data-phone');
+        const c = customerProfiles[phone];
+        if (!c) return;
+
+        document.getElementById('custDetailTitle').innerText = `${c.name} (${c.phone})`;
+        document.getElementById('custDetailContent').innerHTML = `
+          <div style="margin-bottom: 12px; font-size: 13px;">
+            Total Orders: <strong>${c.totalOrders}</strong> | Total Spent: <strong>₹${c.totalSpent}</strong> | Cancellations: <strong>${c.cancelledOrders}</strong>
+          </div>
+          <div style="max-height: 350px; overflow-y: auto;">
+            ${c.orders.map(o => `
+              <div style="border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 13px;">
+                  <span>#${escapeHtml(o.id)}</span>
+                  <span>₹${escapeHtml(o.total)}</span>
+                </div>
+                <div style="font-size: 11px; color: var(--muted);">${new Date(o.createdAt).toLocaleString()} | Status: ${escapeHtml(o.status)}</div>
+                <div style="font-size: 12px; margin-top: 4px;">
+                  ${(o.items || []).map(i => `${escapeHtml(i.name)} × ${i.quantity}`).join(', ')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        document.getElementById('customerDetailModal').style.display = 'flex';
+      }
+    });
+
+    // =========================================================
+    // TAB 5: REPORTS & CSV EXPORT LOGIC (Phase 4)
+    // =========================================================
+    function calculateReports() {
+      const now = new Date();
+      let todaySales = 0, todayOrders = 0;
+      let weekSales = 0, weekOrders = 0;
+      let totalSales = 0, completedOrders = 0;
+      const itemCounts = {};
+
+      Object.values(allOrders).forEach(o => {
+        const orderDate = new Date(o.createdAt);
+        const isNotCancelled = o.status !== 'cancelled';
+        const total = Number(o.total) || 0;
+
+        if (isNotCancelled) {
+          totalSales += total;
+          completedOrders++;
+
+          if (orderDate.toDateString() === now.toDateString()) {
+            todaySales += total;
+            todayOrders++;
+          }
+          if ((now - orderDate) <= 7 * 24 * 3600 * 1000) {
+            weekSales += total;
+            weekOrders++;
+          }
+
+          // Top items
+          (o.items || []).forEach(it => {
+            const name = it.name || 'Unknown';
+            if (!itemCounts[name]) itemCounts[name] = { qty: 0, revenue: 0 };
+            itemCounts[name].qty += (it.quantity || 1);
+            itemCounts[name].revenue += ((Number(it.price) || 0) * (it.quantity || 1));
+          });
+        }
+      });
+
+      document.getElementById('statTodaySales').innerText = `₹${todaySales}`;
+      document.getElementById('statTodayOrders').innerText = `${todayOrders} orders today`;
+      document.getElementById('statWeekSales').innerText = `₹${weekSales}`;
+      document.getElementById('statWeekOrders').innerText = `${weekOrders} orders this week`;
+      document.getElementById('statTotalSales').innerText = `₹${totalSales}`;
+      document.getElementById('statTotalOrders').innerText = `${completedOrders} total orders`;
+      document.getElementById('statAov').innerText = completedOrders > 0 ? `₹${Math.round(totalSales / completedOrders)}` : '₹0';
+
+      // Render Top Items
+      const sortedItems = Object.keys(itemCounts).sort((a,b) => itemCounts[b].qty - itemCounts[a].qty).slice(0, 8);
+      const topContainer = document.getElementById('topItemsContainer');
+      if (!sortedItems.length) {
+        topContainer.innerHTML = "<p style='color: var(--muted); font-size: 13px;'>No sales recorded yet.</p>";
+        return;
+      }
+
+      topContainer.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tr style="border-bottom: 2px solid var(--border); text-align: left; color: var(--muted); font-size: 11px;">
+            <th style="padding: 6px 0;">ITEM NAME</th>
+            <th style="text-align: center;">UNITS SOLD</th>
+            <th style="text-align: right;">TOTAL REVENUE</th>
+          </tr>
+          ${sortedItems.map(name => `
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 8px 0; font-weight: 600;">${escapeHtml(name)}</td>
+              <td style="text-align: center;">${itemCounts[name].qty}</td>
+              <td style="text-align: right; font-weight: 700; color: var(--primary);">₹${itemCounts[name].revenue}</td>
+            </tr>
+          `).join('')}
+        </table>
+      `;
+    }
+
+    // CSV Download
+    document.getElementById('exportOrdersCsvBtn').addEventListener('click', () => {
+      const orders = Object.values(allOrders);
+      if (!orders.length) { alert('No orders to export.'); return; }
+
+      let csv = "Order ID,Date,Customer Name,Phone,Address,Payment Method,Payment Status,Order Status,Subtotal,Delivery Fee,Total,Items\n";
+
+      orders.forEach(o => {
+        const date = new Date(o.createdAt).toISOString();
+        const items = (o.items || []).map(i => `${i.name} (${i.quantity}x${i.price})`).join('; ');
+        const cleanName = (o.customer?.name || '').replace(/,/g, ' ');
+        const cleanAddr = (o.customer?.address || '').replace(/,/g, ' ');
+
+        csv += `"${o.id}","${date}","${cleanName}","${o.customer?.phone}","${cleanAddr}","${o.paymentMethod}","${o.paymentStatus}","${o.status}",${o.subtotal},${o.deliveryFee},${o.total},"${items}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `RA_Store_Orders_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // =========================================================
+    // TAB 6: SEARCH MISSES LOGIC (Phase 4)
+    // =========================================================
+    function renderSearchMisses() {
+      const container = document.getElementById('searchMissesContainer');
+      const mKeys = Object.keys(allSearchMisses).reverse();
+
+      if (!mKeys.length) {
+        container.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No missed searches recorded yet. Whenever a customer searches for an unstocked item, it will show here!</p>";
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px;">
+          ${mKeys.map(k => {
+            const m = allSearchMisses[k];
+            return `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border);">
+                <div>
+                  <strong style="font-size: 14px;">"${escapeHtml(m.term)}"</strong>
+                  <span style="font-size: 11px; color: var(--muted); margin-left: 8px;">${new Date(m.timestamp).toLocaleString()}</span>
+                </div>
+                <button class="btn btn-primary action-stock-miss" data-term="${escapeHtml(m.term)}" style="font-size: 11px; padding: 4px 10px;">+ Stock Item</button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    document.getElementById('searchMissesContainer').addEventListener('click', (e) => {
+      if (e.target.classList.contains('action-stock-miss')) {
+        const term = e.target.getAttribute('data-term');
+        document.getElementById('productForm').reset();
+        document.getElementById('editProductId').value = '';
+        document.getElementById('prodName').value = term.charAt(0).toUpperCase() + term.slice(1);
+        document.getElementById('productModalTitle').innerText = `Stock "${term}"`;
+        document.getElementById('imagePreview').src = 'https://via.placeholder.com/80';
+        document.getElementById('prodImageUrl').value = '';
+        document.getElementById('productModal').style.display = 'flex';
+      }
+    });
+
+    document.getElementById('clearSearchMissesBtn').addEventListener('click', async () => {
+      if (!confirm('Clear all search misses history?')) return;
+      await db.ref('searchMisses').remove();
+      showToast('Search misses cleared.');
+    });
+
+    // =========================================================
+    // CAMERA-TO-WEBSITE COMPRESSION & UPLOAD (From Phase 2)
     // =========================================================
     async function compressImageToBlob(file) {
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.src = URL.createObjectURL(file);
         img.onload = () => {
-          let width = img.width;
-          let height = img.height;
-          const maxDim = 800; // Resize longest side <= 800px
-
-          if (width > height && width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-
+          let width = img.width, height = img.height;
+          const maxDim = 800;
+          if (width > height && width > maxDim) { height = Math.round((height * maxDim) / width); width = maxDim; }
+          else if (height > maxDim) { width = Math.round((width * maxDim) / height); height = maxDim; }
           const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Convert to WebP (fallback to JPEG)
-          canvas.toBlob(blob => {
-            resolve(blob);
-          }, 'image/webp', 0.8);
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          canvas.toBlob(blob => resolve(blob), 'image/webp', 0.8);
         };
         img.onerror = reject;
       });
@@ -722,7 +1067,7 @@
           statusText.innerText = "Upload failed. Try again.";
         }
       } catch (e) {
-        alert('Image processing error: ' + e.message);
+        alert('Image error: ' + e.message);
         statusText.innerText = "Error. Try again.";
       } finally {
         progress.style.display = 'none';
@@ -732,23 +1077,17 @@
     document.getElementById('phoneCameraInput').addEventListener('change', (e) => handleFileSelected(e.target.files[0]));
     document.getElementById('galleryFileInput').addEventListener('change', (e) => handleFileSelected(e.target.files[0]));
 
-    // =========================================================
-    // IN-PAGE LIVE CAMERA STREAM
-    // =========================================================
     let cameraStream = null;
     let cameraFacingMode = 'environment';
 
     async function startLiveCamera() {
       try {
         if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: cameraFacingMode }
-        });
-        const video = document.getElementById('cameraVideo');
-        video.srcObject = cameraStream;
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: cameraFacingMode } });
+        document.getElementById('cameraVideo').srcObject = cameraStream;
         document.getElementById('liveCameraContainer').style.display = 'block';
       } catch (e) {
-        alert('Could not open camera stream. Please use "Take Photo" button instead.');
+        alert('Could not open live stream. Use "Take Photo" button instead.');
       }
     }
 
@@ -767,9 +1106,7 @@
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth || 640;
       canvas.height = video.videoHeight || 480;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
       canvas.toBlob(blob => {
         handleFileSelected(blob);
         if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
@@ -778,13 +1115,12 @@
     });
 
     // =========================================================
-    // PRODUCTS MANAGEMENT (ADD, EDIT, DELETE WITH UNDO)
+    // PRODUCTS MANAGEMENT
     // =========================================================
     function populateCategoryDropdowns() {
       const select = document.getElementById('prodCategory');
       const filterSelect = document.getElementById('catalogCategoryFilter');
       const catKeys = Object.keys(allCategories);
-
       select.innerHTML = catKeys.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(allCategories[k].name)}</option>`).join('');
       filterSelect.innerHTML = `<option value="all">All Categories</option>` + catKeys.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(allCategories[k].name)}</option>`).join('');
     }
@@ -868,21 +1204,13 @@
       };
 
       await db.ref(`products/${id}`).update(prodData);
-      await db.ref('audit').push({
-        adminUid: currentUser.uid,
-        adminEmail: currentUser.email,
-        action: 'SAVE_PRODUCT',
-        productId: id,
-        timestamp: new Date().toISOString()
-      });
-
       showToast(`Product "${prodData.name}" saved!`);
 
       if (isQuickAddActive) {
         document.getElementById('productForm').reset();
         document.getElementById('imagePreview').src = 'https://via.placeholder.com/80';
         document.getElementById('prodImageUrl').value = '';
-        startLiveCamera(); // Immediately reopen camera for next product!
+        startLiveCamera();
       } else {
         document.getElementById('productModal').style.display = 'none';
       }
@@ -904,16 +1232,13 @@
         document.getElementById('productModalTitle').innerText = 'Edit Product';
         document.getElementById('productModal').style.display = 'flex';
       }
-
       if (e.target.classList.contains('action-delete-prod')) {
         const id = e.target.getAttribute('data-id');
         const p = allProducts[id];
         if (!confirm(`Delete "${p.name}"? You will have 10 seconds to undo.`)) return;
-        
         deletedProductBackup = { id, data: p };
         await db.ref(`products/${id}`).remove();
         showToast(`Deleted "${p.name}".`, true);
-
         deleteTimeout = setTimeout(() => { deletedProductBackup = null; }, 10000);
       }
     });
@@ -929,33 +1254,27 @@
     });
 
     // =========================================================
-    // CATEGORIES MANAGEMENT
+    // CATEGORIES
     // =========================================================
     function renderCategoriesList() {
       const container = document.getElementById('categoriesListContainer');
       const cKeys = Object.keys(allCategories);
       if (!cKeys.length) {
-        container.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No categories yet. Click New Category.</p>";
+        container.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No categories yet.</p>";
         return;
       }
-
       container.innerHTML = `
         <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px;">
-          ${cKeys.map(k => {
-            const cat = allCategories[k];
-            return `
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border);">
-                <div>
-                  <span style="font-size: 16px; margin-right: 8px;">${escapeHtml(cat.icon || '🏷️')}</span>
-                  <strong>${escapeHtml(cat.name)}</strong>
-                  ${cat.nameTe ? `<span style="font-size: 12px; color: var(--muted); margin-left: 6px;">(${escapeHtml(cat.nameTe)})</span>` : ''}
-                </div>
-                <div style="display: flex; gap: 8px;">
-                  <button class="btn btn-outline action-delete-cat" data-id="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); font-size: 11px; padding: 4px 8px;">Delete</button>
-                </div>
+          ${cKeys.map(k => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border);">
+              <div>
+                <span style="font-size: 16px; margin-right: 8px;">${escapeHtml(allCategories[k].icon || '🏷️')}</span>
+                <strong>${escapeHtml(allCategories[k].name)}</strong>
+                ${allCategories[k].nameTe ? `<span style="font-size: 12px; color: var(--muted); margin-left: 6px;">(${escapeHtml(allCategories[k].nameTe)})</span>` : ''}
               </div>
-            `;
-          }).join('')}
+              <button class="btn btn-outline action-delete-cat" data-id="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); font-size: 11px; padding: 4px 8px;">Delete</button>
+            </div>
+          `).join('')}
         </div>
       `;
     }
@@ -979,13 +1298,12 @@
       showToast('Category created!');
     });
 
-    // Prevent deletion if items exist
     document.getElementById('categoriesListContainer').addEventListener('click', async (e) => {
       if (e.target.classList.contains('action-delete-cat')) {
         const catId = e.target.getAttribute('data-id');
-        const itemsInCat = Object.values(allProducts).filter(p => p.categoryId === catId);
-        if (itemsInCat.length > 0) {
-          alert(`Cannot delete this category: ${itemsInCat.length} products belong to it! Please reassign them first.`);
+        const items = Object.values(allProducts).filter(p => p.categoryId === catId);
+        if (items.length > 0) {
+          alert(`Cannot delete: ${items.length} products belong to this category!`);
           return;
         }
         await db.ref(`categories/${catId}`).remove();
@@ -993,16 +1311,13 @@
       }
     });
 
-    // One-time Migration for existing products
     document.getElementById('migrateCategoriesBtn').addEventListener('click', async () => {
       const defaultCatId = 'cat_general';
       await db.ref(`categories/${defaultCatId}`).set({ name: 'General', nameTe: 'ఇతరాలు', icon: '🛒', order: 1, active: true });
       for (const pId of Object.keys(allProducts)) {
-        if (!allProducts[pId].categoryId) {
-          await db.ref(`products/${pId}/categoryId`).set(defaultCatId);
-        }
+        if (!allProducts[pId].categoryId) await db.ref(`products/${pId}/categoryId`).set(defaultCatId);
       }
-      showToast('1-Click migration complete: All items assigned to General.');
+      showToast('1-Click migration complete.');
     });
 
     // =========================================================
@@ -1022,13 +1337,6 @@
         announcement: document.getElementById('settingAnnouncement').value.trim()
       };
       await db.ref('settings').update(updates);
-      await db.ref('audit').push({
-        adminUid: currentUser.uid,
-        adminEmail: currentUser.email,
-        action: 'UPDATE_SETTINGS',
-        details: updates,
-        timestamp: new Date().toISOString()
-      });
       showToast('Store settings saved successfully!');
     });
 
@@ -1036,7 +1344,7 @@
     document.querySelector('.tabs').addEventListener('click', (e) => {
       if (e.target.classList.contains('tab-btn')) {
         const t = e.target.getAttribute('data-tab');
-        ['orders', 'products', 'categories', 'settings'].forEach(tab => {
+        ['orders', 'products', 'categories', 'customers', 'reports', 'misses', 'settings'].forEach(tab => {
           document.getElementById(tab + 'Tab').style.display = tab === t ? 'block' : 'none';
         });
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tab') === t));
