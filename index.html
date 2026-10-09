@@ -7,12 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  
-  <!-- Razorpay Checkout -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <style>
@@ -29,37 +26,58 @@
       --muted: #6B7280;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 85px; }
 
-    /* Top Navbar */
-    .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+    /* Sticky Navbar */
+    .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
     .brand { font-size: 20px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 6px; }
     .brand-badge { background: var(--accent); color: var(--dark); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
-    .nav-actions { display: flex; align-items: center; gap: 10px; }
-    .btn { padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; transition: 0.15s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+    
+    .btn { padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; transition: 0.15s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-lang { background: #F3F4F6; border: 1px solid var(--border); padding: 6px 10px; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; min-height: 36px; }
 
-    /* R2 Hero Refund Banner */
-    .refund-hero { background: #FEF3C7; border-left: 4px solid var(--accent); padding: 12px 16px; margin: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; }
+    /* Sticky Search & Chips Header */
+    .sticky-controls { position: sticky; top: 57px; z-index: 90; background: var(--surface); border-bottom: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+    
+    .search-wrapper { padding: 8px 16px; position: relative; }
+    .search-input { width: 100%; padding: 10px 38px 10px 36px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; background: #F9FAFB; outline: none; transition: border-color 0.15s; }
+    .search-input:focus { border-color: var(--primary); background: #fff; }
+    .search-icon { position: absolute; left: 28px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--muted); pointer-events: none; }
+    .search-clear { position: absolute; right: 26px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 16px; color: var(--muted); cursor: pointer; display: none; }
+
+    /* Horizontal Category Chips */
+    .chips-bar { display: flex; gap: 8px; overflow-x: auto; padding: 6px 16px 10px; scrollbar-width: none; }
+    .chips-bar::-webkit-scrollbar { display: none; }
+    .chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #F3F4F6; border: 1px solid var(--border); color: var(--text); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; }
+    .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .chip-count { font-size: 10px; opacity: 0.8; }
+
+    /* Banners */
+    .refund-hero { background: #FEF3C7; border-left: 4px solid var(--accent); padding: 10px 16px; margin: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; }
     .refund-hero-title { font-weight: 700; font-size: 13px; color: #92400E; }
     .refund-hero-desc { font-size: 11px; color: #B45309; }
 
-    /* R14/R15 Store Status Banner */
     .store-banner { background: #FEE2E2; color: #991B1B; padding: 10px 16px; font-size: 13px; font-weight: 600; text-align: center; display: none; }
+    .inapp-banner { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; padding: 8px 16px; font-size: 12px; text-align: center; display: none; }
+    .announcement-banner { background: #DCFCE7; color: #166534; padding: 8px 16px; font-size: 13px; font-weight: 600; text-align: center; display: none; }
 
     /* Products Grid */
     .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
     .product-img { width: 100%; height: 110px; object-fit: contain; border-radius: 6px; background: #fafafa; }
-    .product-title { font-size: 13px; font-weight: 600; margin-top: 8px; }
+    .product-title { font-size: 13px; font-weight: 600; margin-top: 8px; line-height: 1.3; }
     .product-unit { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
     .product-price { font-size: 14px; font-weight: 700; color: var(--dark); }
-
-    /* Floating Bottom Cart Bar */
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
     
+    .out-of-stock-badge { position: absolute; top: 10px; right: 10px; background: rgba(220, 38, 38, 0.9); color: #fff; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+
+    /* Floating Cart Bar */
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+
     /* Modals */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
     .modal { background: var(--surface); border-radius: 12px; max-width: 440px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto; }
@@ -67,96 +85,128 @@
     .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
     .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
 
+    /* Empty Search State */
+    .empty-state { text-align: center; padding: 40px 20px; }
+    .empty-icon { font-size: 40px; margin-bottom: 8px; }
+
     /* Toast */
     .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 300; display: none; }
-    
-    /* Privacy Note */
     .privacy-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 24px; padding: 12px; border-top: 1px solid var(--border); }
   </style>
 </head>
 <body>
 
-  <!-- R14/R15 Store Closed Notice -->
-  <div id="storeClosedBanner" class="store-banner">
-    Store is currently closed (Hours: 7:00 AM – 7:00 PM IST). You can browse products and add to cart!
+  <!-- In-app Browser Warning -->
+  <div id="inAppBrowserBanner" class="inapp-banner">
+    ⚠️ Using WhatsApp / Instagram? If Google Login doesn't open, tap <strong>⋮</strong> (top right) $\rightarrow$ <strong>Open in Chrome</strong>.
   </div>
 
-  <!-- Navbar -->
+  <!-- Store Announcements -->
+  <div id="announcementBanner" class="announcement-banner"></div>
+
+  <!-- Store Closed Banner -->
+  <div id="storeClosedBanner" class="store-banner">
+    Store is currently closed (Hours: 7:00 AM – 7:00 PM IST). You can browse and add items to cart!
+  </div>
+
+  <!-- Top Navbar -->
   <header class="navbar">
     <div class="brand">
       RA Store <span class="brand-badge">BOMMALATAPALLI</span>
     </div>
     <div class="nav-actions">
-      <button class="btn btn-outline" id="ordersNavBtn" onclick="openOrdersModal()">My Orders</button>
+      <!-- Telugu / English Toggle -->
+      <button class="btn-lang" id="langToggleBtn" aria-label="Change Language">తెలుగు</button>
+      <button class="btn btn-outline" id="ordersNavBtn" aria-label="View My Orders">My Orders</button>
       <div id="authContainer">
-        <button class="btn btn-outline" id="loginBtn" onclick="loginGoogle()">Sign In</button>
+        <button class="btn btn-outline" id="loginBtn" aria-label="Sign in">Sign In</button>
         <span id="userEmailSpan" style="font-size: 12px; font-weight: 600; display: none; color: var(--primary);"></span>
       </div>
     </div>
   </header>
 
-  <!-- R2 Hero Banner: 100% Refund Guarantee -->
-  <div class="refund-hero">
-    <span style="font-size: 26px;">🛡️</span>
-    <div>
-      <div class="refund-hero-title">100% Refund if you cancel before your order is out for delivery</div>
-      <div class="refund-hero-desc">Automated full refund to your original payment method (UPI / Card / Bank) in 5-7 working days.</div>
+  <!-- Sticky Search Bar & Category Chips -->
+  <div class="sticky-controls">
+    <div class="search-wrapper" role="search">
+      <span class="search-icon">🔍</span>
+      <input type="search" id="searchInput" class="search-input" aria-label="Search groceries" placeholder="Search fresh groceries (e.g. Milk, Tomato, పాలు)...">
+      <button id="searchClearBtn" class="search-clear" aria-label="Clear search">✕</button>
+    </div>
+
+    <!-- Category Chips Bar -->
+    <div class="chips-bar" id="categoryChipsBar">
+      <div class="chip active" data-cat="all">All Items</div>
     </div>
   </div>
 
-  <!-- Products Section -->
-  <main class="container">
-    <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;">Daily Fresh Groceries & Staples</h2>
-    <div id="productsGrid" class="grid">Loading catalog...</div>
+  <!-- 100% Refund Hero Banner -->
+  <div class="refund-hero">
+    <span style="font-size: 26px;">🛡️</span>
+    <div>
+      <div class="refund-hero-title" id="tRefundTitle">100% Refund if you cancel before order is out for delivery</div>
+      <div class="refund-hero-desc" id="tRefundDesc">Automated full refund to your original payment method (UPI / Card / Bank) in 5-7 working days.</div>
+    </div>
+  </div>
 
-    <!-- R5 DPDP Privacy Note -->
+  <!-- Main Catalog Grid -->
+  <main class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 style="font-size: 16px; font-weight: 700;" id="tCatalogHeading">Fresh Groceries & Village Staples</h2>
+      <button id="reorderLastBtn" class="btn btn-outline" style="font-size: 11px; padding: 4px 8px; display: none;" aria-label="Reorder last items">🔁 Reorder Last</button>
+    </div>
+    
+    <div id="productsGrid" class="grid">
+      <p style="color: var(--muted); padding: 20px;">Loading fresh catalog...</p>
+    </div>
+
     <div class="privacy-note">
-      🔒 <strong>Privacy Assurance:</strong> We only collect your name, phone number, and address to deliver your order in Bommalatapalli. Your data is never sold or shared.
+      🔒 <strong>Privacy Assurance:</strong> We only collect your name, phone number, and address to deliver your order in Bommalatapalli.
     </div>
   </main>
 
-  <!-- Bottom Floating Cart Bar -->
+  <!-- Floating Checkout Bar -->
   <div class="bottom-bar" id="cartBottomBar" style="display: none;">
     <div>
       <div id="cartSummaryText" style="font-size: 14px; font-weight: 700;">0 Items • ₹0</div>
       <div style="font-size: 11px; color: var(--primary);" id="freeDeliveryNotice">Add more for free delivery</div>
     </div>
-    <button class="btn btn-primary" id="checkoutBtn" onclick="startCheckout()">Proceed to Checkout</button>
+    <button class="btn btn-primary" id="checkoutBtn" aria-label="Proceed to checkout">Proceed to Checkout</button>
   </div>
 
-  <!-- Checkout Modal (R1, R8, R9) -->
-  <div class="modal-overlay" id="checkoutModal">
+  <!-- Checkout Modal -->
+  <div class="modal-overlay" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="checkoutModalTitle">
     <div class="modal">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 700;">Complete Your Order</h3>
-        <button onclick="closeModal('checkoutModal')" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+        <h3 style="font-size: 16px; font-weight: 700;" id="checkoutModalTitle">Complete Your Order</h3>
+        <button class="modal-close-btn" data-modal="checkoutModal" aria-label="Close modal" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
       </div>
 
-      <!-- Mandatory Google Auth Prompt if not signed in (R1) -->
       <div id="checkoutAuthPrompt" style="display: none; background: #F3F4F6; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 14px;">
-        <p style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Sign in required to order</p>
-        <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">Sign in with Google to confirm your order and track live deliveries. Your cart remains saved!</p>
-        <button class="btn btn-primary" style="width: 100%;" onclick="loginGoogle(true)">Sign In with Google</button>
+        <p style="font-size: 13px; font-weight: 600; margin-bottom: 4px;" id="tAuthReq">Sign in required to order</p>
+        <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">Sign in with Google to confirm your order and track live deliveries. Your cart is preserved!</p>
+        <button class="btn btn-primary" style="width: 100%;" id="checkoutLoginGoogleBtn">Sign In with Google</button>
       </div>
 
-      <!-- Checkout Form: Preserved State (R9) -->
-      <form id="checkoutForm" onsubmit="submitOrder(event)">
+      <form id="checkoutForm">
         <div class="form-group">
-          <label>Full Name</label>
+          <label id="tLabelName">Full Name</label>
           <input type="text" id="custName" required placeholder="Your full name">
         </div>
         <div class="form-group">
-          <label>10-Digit Mobile Number (For Delivery Calls)</label>
+          <label id="tLabelPhone">10-Digit Mobile Number (For Delivery Calls)</label>
           <input type="tel" id="custPhone" required pattern="[6-9][0-9]{9}" placeholder="e.g. 9876543210">
         </div>
         <div class="form-group">
-          <label>Delivery Address</label>
+          <label id="tLabelAddress">Delivery Address</label>
           <textarea id="custAddress" required rows="2" placeholder="House no, Street, landmark, Bommalatapalli"></textarea>
         </div>
-        
-        <!-- Payment Method Toggle -->
         <div class="form-group">
-          <label>Payment Method</label>
+          <label id="tLabelNotes">Delivery Instructions (Optional)</label>
+          <input type="text" id="custNotes" placeholder="e.g. Leave near front gate or call before arrival">
+        </div>
+        
+        <div class="form-group">
+          <label id="tLabelPay">Payment Method</label>
           <div style="display: flex; gap: 10px; margin-top: 4px;">
             <label style="flex: 1; border: 1px solid var(--border); padding: 8px; border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
               <input type="radio" name="payMethod" value="online_razorpay" checked> Online (UPI/Cards)
@@ -168,10 +218,10 @@
         </div>
 
         <div style="background: #F9FAFB; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 14px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Subtotal:</span><span id="modalSubtotal">₹0</span></div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Delivery Fee:</span><span id="modalDelivery">₹0</span></div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span id="tSubtotalText">Subtotal:</span><span id="modalSubtotal">₹0</span></div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span id="tDeliveryText">Delivery Fee:</span><span id="modalDelivery">₹0</span></div>
           <div style="display: flex; justify-content: space-between; font-weight: 700; margin-top: 6px; border-top: 1px solid #E5E7EB; padding-top: 6px;">
-            <span>Total Payable:</span><span id="modalTotal" style="color: var(--primary);">₹0</span>
+            <span id="tTotalText">Total Payable:</span><span id="modalTotal" style="color: var(--primary);">₹0</span>
           </div>
         </div>
 
@@ -180,37 +230,55 @@
     </div>
   </div>
 
-  <!-- Customer Order History Modal (R5 Scoped by uid) -->
-  <div class="modal-overlay" id="ordersModal">
+  <!-- Orders Modal with Timeline & Refund Status -->
+  <div class="modal-overlay" id="ordersModal" role="dialog" aria-modal="true" aria-labelledby="ordersModalTitle">
     <div class="modal">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 700;">My Past Orders</h3>
-        <button onclick="closeModal('ordersModal')" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+        <h3 style="font-size: 16px; font-weight: 700;" id="ordersModalTitle">My Past Orders</h3>
+        <button class="modal-close-btn" data-modal="ordersModal" aria-label="Close modal" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
       </div>
       <div id="customerOrdersList">Loading your orders...</div>
     </div>
   </div>
 
-  <!-- Order Success In-App Modal (R11 No auto-open WhatsApp) -->
-  <div class="modal-overlay" id="successModal">
+  <!-- Success Modal -->
+  <div class="modal-overlay" id="successModal" role="dialog" aria-modal="true">
     <div class="modal" style="text-align: center;">
       <div style="font-size: 42px; margin-bottom: 8px;">🎉</div>
       <h3 style="font-size: 18px; font-weight: 700; color: var(--primary);">Order Placed Successfully!</h3>
       <p style="font-size: 14px; color: var(--muted); margin: 6px 0 16px;" id="successOrderIdText">Order #RA-XXXX</p>
-      <p style="font-size: 13px; margin-bottom: 16px;">We have received your order and are packing fresh items for delivery.</p>
-      
-      <!-- Optional WhatsApp button (R11) -->
+      <p style="font-size: 13px; margin-bottom: 16px;">We have received your order and are packing fresh items for delivery in Bommalatapalli.</p>
       <a id="successWhatsappLink" target="_blank" class="btn" style="background: #25D366; color: #fff; width: 100%; margin-bottom: 8px; text-decoration: none;">
         Send Order Details on WhatsApp
       </a>
-      <button class="btn btn-outline" style="width: 100%;" onclick="closeModal('successModal')">Done</button>
+      <button class="btn btn-outline modal-close-btn" data-modal="successModal" style="width: 100%;">Done</button>
     </div>
   </div>
 
   <div id="toast" class="toast"></div>
 
   <script>
-    // Firebase Setup
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ERA Store%3C/text%3E%3C/svg%3E";
+
+    function safeImage(url) {
+      if (!url || typeof url !== 'string') return SVG_PLACEHOLDER;
+      if (url.startsWith('https://') || url.startsWith('http://') || url.startsWith('data:image/')) {
+        return escapeHtml(url);
+      }
+      return SVG_PLACEHOLDER;
+    }
+
+    // In-App Browser Detection
+    const isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|Twitter|Snapchat/i.test(navigator.userAgent);
+    if (isInApp) {
+      document.getElementById('inAppBrowserBanner').style.display = 'block';
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyD94vWB3NBEjSGmbO6JQ5F1t6L9Js7er8Y",
       authDomain: "k-store-ae9dd.firebaseapp.com",
@@ -221,13 +289,19 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // Your Cloudflare Worker URL
     const WORKER_API = "https://ra-store-api.chowdarynikhil095.workers.dev";
 
-    // Cart and Customer State
+    // State
     let cart = JSON.parse(localStorage.getItem('ra_store_cart') || '{}');
     let productsCatalog = {};
+    let categoriesCatalog = {};
     let currentUser = null;
+    let currentCategory = 'all';
+    let searchQuery = '';
+    let searchTimeout = null;
+    let loggedMisses = new Set();
+    let ordersRef = null;
+
     let storeSettings = {
       deliveryFee: 25,
       freeDeliveryThreshold: 299,
@@ -236,7 +310,79 @@
     };
     let isStoreCurrentlyOpen = true;
 
-    // R14/R15 Store Hours Validation
+    // =========================================================
+    // LANGUAGE DICTIONARY & TOGGLE (EN <-> TE)
+    // =========================================================
+    let currentLang = localStorage.getItem('ra_store_lang') || 'en';
+
+    const I18N = {
+      en: {
+        toggleText: "తెలుగు",
+        searchPlaceholder: "Search fresh groceries (e.g. Milk, Tomato, పాలు)...",
+        allCategory: "All Items",
+        catalogHeading: "Fresh Groceries & Village Staples",
+        refundTitle: "100% Refund if you cancel before order is out for delivery",
+        refundDesc: "Automated full refund to your original payment method (UPI / Card / Bank) in 5-7 working days.",
+        addBtn: "+ Add",
+        outOfStock: "Out of Stock",
+        checkout: "Proceed to Checkout",
+        myOrders: "My Orders",
+        signIn: "Sign In",
+        authReq: "Sign in required to order",
+        freeDelNotice: "🎉 Free Delivery applied!",
+        moreForFree: "Add ₹{val} more for Free Delivery",
+        reorder: "🔁 Reorder Last"
+      },
+      te: {
+        toggleText: "English",
+        searchPlaceholder: "తాజా సరుకులు వెతకండి (ఉదా: పాలు, టమోటా, నూనె)...",
+        allCategory: "అన్ని వస్తువులు",
+        catalogHeading: "తాజా కూరగాయలు & కిరాణా సరుకులు",
+        refundTitle: "డెలివరీ బయలుదేరే ముందు రద్దు చేస్తే 100% వాపసు",
+        refundDesc: "మీ అసలు చెల్లింపు విధానానికే (UPI/బ్యాంక్) 5-7 రోజుల్లో పూర్తి రీఫండ్ అందుతుంది.",
+        addBtn: "+ చేర్చండి",
+        outOfStock: "స్టాక్ లేదు",
+        checkout: "ఆర్డర్ చేయండి",
+        myOrders: "నా ఆర్డర్లు",
+        signIn: "లాగిన్",
+        authReq: "ఆర్డర్ చేయడానికి లాగిన్ అవ్వండి",
+        freeDelNotice: "🎉 ఉచిత డెలివరీ వర్తిస్తుంది!",
+        moreForFree: "ఉచిత డెలివరీ కోసం ఇంకో ₹{val} జోడించండి",
+        reorder: "🔁 మళ్ళీ ఆర్డర్"
+      }
+    };
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('ra_store_lang', lang);
+      const t = I18N[lang];
+      document.getElementById('langToggleBtn').innerText = t.toggleText;
+      document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+      document.getElementById('tRefundTitle').innerText = t.refundTitle;
+      document.getElementById('tRefundDesc').innerText = t.refundDesc;
+      document.getElementById('tCatalogHeading').innerText = t.catalogHeading;
+      document.getElementById('ordersNavBtn').innerText = t.myOrders;
+      document.getElementById('checkoutBtn').innerText = t.checkout;
+      if (!currentUser) document.getElementById('loginBtn').innerText = t.signIn;
+      document.getElementById('tAuthReq').innerText = t.authReq;
+      document.getElementById('reorderLastBtn').innerText = t.reorder;
+      renderCategoryChips();
+      renderProducts();
+      updateCartUI();
+    }
+
+    document.getElementById('langToggleBtn').addEventListener('click', () => {
+      applyLanguage(currentLang === 'en' ? 'te' : 'en');
+    });
+
+    // Check store hours every 60 seconds
+    function parseHourToDecimal(val, defaultVal) {
+      if (!val) return defaultVal;
+      const parts = String(val).split(':');
+      if (parts.length === 2) return parseInt(parts[0], 10) + (parseInt(parts[1], 10) / 60);
+      return parseFloat(val) || defaultVal;
+    }
+
     function checkStoreHours() {
       const mode = storeSettings.storeHours?.mode || 'auto';
       if (mode === 'force_open') isStoreCurrentlyOpen = true;
@@ -245,33 +391,42 @@
         const now = new Date();
         const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
         const ist = new Date(utc + (3600000 * 5.5));
-        const hour = ist.getHours() + (ist.getMinutes() / 60);
-        isStoreCurrentlyOpen = (hour >= 7 && hour < 19);
+        const currentHour = ist.getHours() + (ist.getMinutes() / 60);
+        const openHour = parseHourToDecimal(storeSettings.storeHours?.open, 7);
+        const closeHour = parseHourToDecimal(storeSettings.storeHours?.close, 19);
+        isStoreCurrentlyOpen = (currentHour >= openHour && currentHour < closeHour);
       }
 
       document.getElementById('storeClosedBanner').style.display = isStoreCurrentlyOpen ? 'none' : 'block';
       const checkoutBtn = document.getElementById('checkoutBtn');
       if (!isStoreCurrentlyOpen) {
         checkoutBtn.disabled = true;
-        checkoutBtn.innerText = "Store Closed (Opens 7 AM)";
+        checkoutBtn.innerText = currentLang === 'te' ? "దుకాణం మూసివేయబడింది (7 AM కి తెరుస్తాం)" : "Store Closed (Opens 7 AM)";
         checkoutBtn.style.opacity = "0.6";
       } else {
         checkoutBtn.disabled = false;
-        checkoutBtn.innerText = "Proceed to Checkout";
+        checkoutBtn.innerText = I18N[currentLang].checkout;
         checkoutBtn.style.opacity = "1";
       }
     }
+    setInterval(checkStoreHours, 60000);
 
-    // Subscribe to Settings Live (R7)
+    // Subscribe to Settings
     db.ref('settings').on('value', snap => {
       if (snap.val()) {
         storeSettings = snap.val();
+        if (storeSettings.announcement) {
+          const ann = document.getElementById('announcementBanner');
+          ann.innerText = storeSettings.announcement;
+          ann.style.display = 'block';
+        }
         checkStoreHours();
         updateCartUI();
       }
     });
 
-    // Auth State Listener (R1)
+    // Restore Redirect Login or Auth State
+    auth.getRedirectResult().catch(() => {});
     auth.onAuthStateChanged(user => {
       currentUser = user;
       if (user) {
@@ -291,64 +446,255 @@
     async function loginGoogle(resumeCheckout = false) {
       const provider = new firebase.auth.GoogleAuthProvider();
       try {
-        await auth.signInWithPopup(provider);
-        if (resumeCheckout) {
-          document.getElementById('checkoutAuthPrompt').style.display = 'none';
-          document.getElementById('checkoutForm').style.display = 'block';
+        if (isInApp) {
+          await auth.signInWithRedirect(provider);
+        } else {
+          await auth.signInWithPopup(provider);
+          if (resumeCheckout) {
+            document.getElementById('checkoutAuthPrompt').style.display = 'none';
+            document.getElementById('checkoutForm').style.display = 'block';
+          }
         }
       } catch (err) {
         showToast('Login error: ' + err.message);
       }
     }
 
-    // Load Catalog (Public Read)
-    db.ref('products').on('value', snap => {
-      const grid = document.getElementById('productsGrid');
-      const products = snap.val();
-      if (!products) {
-        grid.innerHTML = '<p style="color: var(--muted);">No products available.</p>';
-        return;
-      }
-      productsCatalog = products;
+    document.getElementById('loginBtn').addEventListener('click', () => loginGoogle(false));
+    document.getElementById('checkoutLoginGoogleBtn').addEventListener('click', () => loginGoogle(true));
+
+    // Categories Listener
+    db.ref('categories').on('value', snap => {
+      categoriesCatalog = snap.val() || {};
+      renderCategoryChips();
       renderProducts();
     });
 
+    // Products Listener
+    db.ref('products').on('value', snap => {
+      productsCatalog = snap.val() || {};
+      // Self-heal cart: remove deleted items
+      let cartChanged = false;
+      Object.keys(cart).forEach(id => {
+        if (!productsCatalog[id]) { delete cart[id]; cartChanged = true; }
+      });
+      if (cartChanged) saveCart();
+
+      renderCategoryChips();
+      renderProducts();
+      updateCartUI();
+    });
+
+    // Check Reorder Button
+    const lastOrder = JSON.parse(localStorage.getItem('ra_last_order') || 'null');
+    if (lastOrder && Array.isArray(lastOrder.items) && lastOrder.items.length) {
+      document.getElementById('reorderLastBtn').style.display = 'inline-flex';
+    }
+
+    document.getElementById('reorderLastBtn').addEventListener('click', () => {
+      if (lastOrder && lastOrder.items) {
+        lastOrder.items.forEach(it => {
+          if (productsCatalog[it.id] && productsCatalog[it.id].inStock !== false) {
+            cart[it.id] = (cart[it.id] || 0) + it.quantity;
+          }
+        });
+        saveCart();
+        showToast('Previous items added to cart!');
+      }
+    });
+
+    // =========================================================
+    // CATEGORY CHIPS RENDERING
+    // =========================================================
+    function renderCategoryChips() {
+      const bar = document.getElementById('categoryChipsBar');
+      const catKeys = Object.keys(categoriesCatalog).sort((a,b) => (categoriesCatalog[a].order || 0) - (categoriesCatalog[b].order || 0));
+      
+      const totalCount = Object.keys(productsCatalog).length;
+      let html = `
+        <div class="chip ${currentCategory === 'all' ? 'active' : ''}" data-cat="all">
+          ${I18N[currentLang].allCategory} <span class="chip-count">(${totalCount})</span>
+        </div>
+      `;
+
+      catKeys.forEach(k => {
+        const cat = categoriesCatalog[k];
+        if (cat.active === false) return;
+        const count = Object.values(productsCatalog).filter(p => p.categoryId === k).length;
+        const name = (currentLang === 'te' && cat.nameTe) ? cat.nameTe : cat.name;
+        html += `
+          <div class="chip ${currentCategory === k ? 'active' : ''}" data-cat="${escapeHtml(k)}">
+            ${escapeHtml(cat.icon || '🏷️')} ${escapeHtml(name)} <span class="chip-count">(${count})</span>
+          </div>
+        `;
+      });
+
+      bar.innerHTML = html;
+    }
+
+    document.getElementById('categoryChipsBar').addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (chip) {
+        currentCategory = chip.getAttribute('data-cat');
+        syncUrlParams();
+        renderCategoryChips();
+        renderProducts();
+      }
+    });
+
+    // =========================================================
+    // SEARCH BAR WITH 250ms DEBOUNCE & MISS LOGGING
+    // =========================================================
+    const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
+
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      const val = searchInput.value.trim();
+      searchClearBtn.style.display = val ? 'block' : 'none';
+
+      searchTimeout = setTimeout(() => {
+        searchQuery = val.toLowerCase();
+        syncUrlParams();
+        renderProducts();
+      }, 250);
+    });
+
+    searchClearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      searchClearBtn.style.display = 'none';
+      syncUrlParams();
+      renderProducts();
+    });
+
+    function syncUrlParams() {
+      const url = new URL(window.location);
+      if (currentCategory && currentCategory !== 'all') url.searchParams.set('cat', currentCategory);
+      else url.searchParams.delete('cat');
+
+      if (searchQuery) url.searchParams.set('q', searchQuery);
+      else url.searchParams.delete('q');
+
+      history.replaceState(null, '', url);
+    }
+
+    // Restore URL params on initial load
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('cat')) currentCategory = urlParams.get('cat');
+    if (urlParams.get('q')) {
+      searchQuery = urlParams.get('q').toLowerCase();
+      searchInput.value = urlParams.get('q');
+      searchClearBtn.style.display = 'block';
+    }
+
+    // =========================================================
+    // PRODUCTS RENDERING & FILTERING
+    // =========================================================
     function renderProducts() {
       const grid = document.getElementById('productsGrid');
-      grid.innerHTML = Object.keys(productsCatalog).map(id => {
+      let pKeys = Object.keys(productsCatalog);
+
+      pKeys = pKeys.filter(id => {
+        const p = productsCatalog[id];
+        // Category Filter
+        if (currentCategory !== 'all' && p.categoryId !== currentCategory) return false;
+
+        // Search Filter (Fuzzy, Prefix, Telugu, English & Keywords)
+        if (searchQuery) {
+          const nameEn = (p.name || '').toLowerCase();
+          const nameTe = (p.nameTe || '').toLowerCase();
+          const keywords = (p.keywords || '').toLowerCase();
+          const cat = (categoriesCatalog[p.categoryId]?.name || '').toLowerCase();
+          const catTe = (categoriesCatalog[p.categoryId]?.nameTe || '').toLowerCase();
+
+          const matches = nameEn.includes(searchQuery) ||
+                          nameTe.includes(searchQuery) ||
+                          keywords.includes(searchQuery) ||
+                          cat.includes(searchQuery) ||
+                          catTe.includes(searchQuery);
+          if (!matches) return false;
+        }
+        return true;
+      });
+
+      // Handle Empty Search State & Missing Term Logging
+      if (!pKeys.length) {
+        if (searchQuery && !loggedMisses.has(searchQuery)) {
+          loggedMisses.add(searchQuery);
+          db.ref('searchMisses').push({
+            term: searchQuery,
+            category: currentCategory,
+            timestamp: new Date().toISOString()
+          }).catch(() => {});
+        }
+
+        const askMsg = encodeURIComponent(`Hello RA Store! Do you have "${searchQuery}" in stock in Bommalatapalli?`);
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-icon">🔍</div>
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">No items found for "${escapeHtml(searchQuery || currentCategory)}"</h3>
+            <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">We might have it in the store or can procure it for you!</p>
+            <a href="https://wa.me/${storeSettings.whatsappNumber}?text=${askMsg}" target="_blank" class="btn" style="background: #25D366; color: #fff; text-decoration: none;">
+              Ask Store on WhatsApp
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = pKeys.map(id => {
         const p = productsCatalog[id];
         const inCart = cart[id] || 0;
+        const isOutOfStock = p.inStock === false;
+        const displayName = (currentLang === 'te' && p.nameTe) ? p.nameTe : p.name;
+
         return `
-          <div class="card">
-            <img class="product-img" src="${p.image || 'https://via.placeholder.com/150'}" alt="${p.name}">
-            <div class="product-title">${p.name}</div>
-            <div class="product-unit">${p.unit || '1 pack'}</div>
+          <div class="card" style="${isOutOfStock ? 'opacity: 0.75;' : ''}">
+            ${isOutOfStock ? `<span class="out-of-stock-badge">${I18N[currentLang].outOfStock}</span>` : ''}
+            <img class="product-img" loading="lazy" width="140" height="110" src="${safeImage(p.image)}" alt="${escapeHtml(displayName)}">
+            <div class="product-title">${escapeHtml(displayName)}</div>
+            <div class="product-unit">${escapeHtml(p.unit || '1 pack')}</div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-              <span class="product-price">₹${p.price}</span>
-              ${inCart === 0 ? `
-                <button class="btn btn-primary" onclick="addToCart('${id}')">+ Add</button>
+              <span class="product-price">₹${escapeHtml(p.price)}</span>
+              
+              ${isOutOfStock ? `
+                <button class="btn btn-outline" disabled style="padding: 4px 8px; font-size: 11px; opacity: 0.6;">${I18N[currentLang].outOfStock}</button>
+              ` : (inCart === 0 ? `
+                <button class="btn btn-primary action-add-cart" data-id="${escapeHtml(id)}">${I18N[currentLang].addBtn}</button>
               ` : `
                 <div style="display: flex; align-items: center; gap: 6px;">
-                  <button class="btn btn-outline" style="padding: 4px 8px;" onclick="changeQty('${id}', -1)">-</button>
+                  <button class="btn btn-outline action-qty" data-id="${escapeHtml(id)}" data-delta="-1" style="padding: 4px 8px;" aria-label="Decrease quantity">-</button>
                   <span style="font-weight: 700; font-size: 13px;">${inCart}</span>
-                  <button class="btn btn-outline" style="padding: 4px 8px;" onclick="changeQty('${id}', 1)">+</button>
+                  <button class="btn btn-outline action-qty" data-id="${escapeHtml(id)}" data-delta="1" style="padding: 4px 8px;" aria-label="Increase quantity">+</button>
                 </div>
-              `}
+              `)}
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function addToCart(id) {
-      cart[id] = 1;
-      saveCart();
-    }
-    function changeQty(id, delta) {
-      cart[id] = (cart[id] || 0) + delta;
-      if (cart[id] <= 0) delete cart[id];
-      saveCart();
-    }
+    document.getElementById('productsGrid').addEventListener('click', (e) => {
+      if (e.target.classList.contains('action-add-cart')) {
+        const id = e.target.getAttribute('data-id');
+        cart[id] = 1;
+        saveCart();
+      }
+      if (e.target.classList.contains('action-qty')) {
+        const id = e.target.getAttribute('data-id');
+        const delta = parseInt(e.target.getAttribute('data-delta')) || 0;
+        const currentQty = cart[id] || 0;
+        if (delta > 0 && currentQty >= 20) {
+          showToast('Maximum 20 items per product allowed.');
+          return;
+        }
+        cart[id] = currentQty + delta;
+        if (cart[id] <= 0) delete cart[id];
+        saveCart();
+      }
+    });
+
     function saveCart() {
       localStorage.setItem('ra_store_cart', JSON.stringify(cart));
       updateCartUI();
@@ -371,35 +717,40 @@
         document.getElementById('cartSummaryText').innerText = `${count} Items • ₹${subtotal}`;
         const freeThresh = storeSettings.freeDeliveryThreshold || 299;
         if (subtotal >= freeThresh) {
-          document.getElementById('freeDeliveryNotice').innerText = "🎉 Free Delivery applied!";
+          document.getElementById('freeDeliveryNotice').innerText = I18N[currentLang].freeDelNotice;
         } else {
-          document.getElementById('freeDeliveryNotice').innerText = `Add ₹${freeThresh - subtotal} more for Free Delivery`;
+          document.getElementById('freeDeliveryNotice').innerText = I18N[currentLang].moreForFree.replace('{val}', freeThresh - subtotal);
         }
       } else {
         bar.style.display = 'none';
       }
 
-      // Update Checkout modal numbers
       const fee = subtotal >= (storeSettings.freeDeliveryThreshold || 299) ? 0 : (storeSettings.deliveryFee || 25);
       document.getElementById('modalSubtotal').innerText = `₹${subtotal}`;
       document.getElementById('modalDelivery').innerText = fee === 0 ? 'FREE' : `₹${fee}`;
       document.getElementById('modalTotal').innerText = `₹${subtotal + fee}`;
     }
 
-    function startCheckout() {
+    // Checkout Flow & Profile Pre-fill
+    document.getElementById('checkoutBtn').addEventListener('click', () => {
       if (!isStoreCurrentlyOpen) {
         alert("Store is closed right now. Operating hours are 7:00 AM – 7:00 PM IST.");
         return;
       }
+      // Pre-fill profile
+      const prof = JSON.parse(localStorage.getItem('ra_customer_profile') || '{}');
+      if (prof.name) document.getElementById('custName').value = prof.name;
+      if (prof.phone) document.getElementById('custPhone').value = prof.phone;
+      if (prof.address) document.getElementById('custAddress').value = prof.address;
+
       document.getElementById('checkoutModal').style.display = 'flex';
       if (!currentUser) {
         document.getElementById('checkoutAuthPrompt').style.display = 'block';
         document.getElementById('checkoutForm').style.display = 'none';
       }
-    }
+    });
 
-    // Submit Order via Secure Cloudflare Worker (R1, R8, R9)
-    async function submitOrder(e) {
+    document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentUser) {
         showToast('Please sign in with Google to place order');
@@ -414,18 +765,29 @@
       const customer = {
         name: document.getElementById('custName').value.trim(),
         phone: document.getElementById('custPhone').value.trim(),
-        address: document.getElementById('custAddress').value.trim()
+        address: document.getElementById('custAddress').value.trim(),
+        notes: document.getElementById('custNotes').value.trim()
       };
+
+      // Save customer profile back for next time
+      localStorage.setItem('ra_customer_profile', JSON.stringify({
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.address
+      }));
+
       const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
       const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
 
       try {
+        const token = await currentUser.getIdToken();
         const res = await fetch(`${WORKER_API}/api/create-order`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({
-            uid: currentUser.uid,
-            userEmail: currentUser.email,
             items,
             customer,
             paymentMethod: payMethod,
@@ -441,25 +803,48 @@
           return;
         }
 
-        // Online Payment via Razorpay Checkout
+        // Save last order for 1-click reorder
+        localStorage.setItem('ra_last_order', JSON.stringify({ items, total: data.total }));
+        document.getElementById('reorderLastBtn').style.display = 'inline-flex';
+
         if (payMethod === 'online_razorpay') {
           const options = {
             key: data.keyId,
-            amount: data.total * 100,
+            amount: data.amountPaise,
             currency: 'INR',
             name: 'RA Store',
             description: `Order #${data.orderId}`,
             order_id: data.razorpayOrderId,
+            modal: {
+              ondismiss: function () {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Confirm & Place Order";
+                showToast("Payment window closed. Your cart is preserved.");
+              }
+            },
             handler: async function (response) {
-              await fetch(`${WORKER_API}/api/verify-payment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...response, pushKey: data.pushKey })
-              });
-              cart = {};
-              saveCart();
-              closeModal('checkoutModal');
-              showOrderSuccess(data.orderId, customer, data.total);
+              try {
+                const token = await currentUser.getIdToken();
+                const verifyRes = await fetch(`${WORKER_API}/api/verify-payment`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({ ...response, pushKey: data.pushKey })
+                });
+                const verifyData = await verifyRes.json();
+                if (verifyRes.ok && verifyData.success) {
+                  cart = {};
+                  saveCart();
+                  closeModal('checkoutModal');
+                  showOrderSuccess(data.orderId, customer, data.total);
+                } else {
+                  alert('Verification issue: ' + (verifyData.error || 'Contact store.'));
+                }
+              } catch (err) {
+                alert('Connection error during verification. Will verify via webhook.');
+              }
             },
             prefill: {
               name: customer.name,
@@ -468,10 +853,15 @@
             },
             theme: { color: '#0C831F' }
           };
+
           const rzp = new Razorpay(options);
+          rzp.on('payment.failed', function (resp) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Confirm & Place Order";
+            alert("Payment failed: " + (resp.error?.description || "Transaction declined. Cart preserved."));
+          });
           rzp.open();
         } else {
-          // COD Success
           cart = {};
           saveCart();
           closeModal('checkoutModal');
@@ -483,69 +873,132 @@
         submitBtn.disabled = false;
         submitBtn.innerText = "Confirm & Place Order";
       }
-    }
+    });
 
     function showOrderSuccess(orderId, customer, total) {
-      document.getElementById('successOrderIdText').innerText = `Order #${orderId}`;
+      document.getElementById('successOrderIdText').innerText = `Order #${escapeHtml(orderId)}`;
       const msg = encodeURIComponent(`Hello RA Store! I placed order #${orderId} for ₹${total}.\nName: ${customer.name}\nAddress: ${customer.address}`);
       document.getElementById('successWhatsappLink').href = `https://wa.me/${storeSettings.whatsappNumber}?text=${msg}`;
       document.getElementById('successModal').style.display = 'flex';
     }
 
-    // Customer Scoped Orders Query (R5)
-    async function openOrdersModal() {
+    // =========================================================
+    // CUSTOMER ORDERS MODAL WITH TIMELINE & DEDUPED LISTENER
+    // =========================================================
+    document.getElementById('ordersNavBtn').addEventListener('click', () => {
       if (!currentUser) {
         alert("Please sign in to view your past orders.");
         return;
       }
       document.getElementById('ordersModal').style.display = 'flex';
       
-      db.ref('orders').orderByChild('uid').equalTo(currentUser.uid).on('value', snap => {
+      if (ordersRef) ordersRef.off();
+      ordersRef = db.ref('orders').orderByChild('uid').equalTo(currentUser.uid);
+      
+      ordersRef.on('value', snap => {
         const list = document.getElementById('customerOrdersList');
         const orders = snap.val();
         if (!orders) {
-          list.innerHTML = "<p style='color: var(--muted);'>No past orders found.</p>";
+          list.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No past orders found.</p>";
           return;
         }
 
+        const friendlyStatus = {
+          placed: "Placed",
+          accepted: "Accepted",
+          packed: "Packed & Ready",
+          out_for_delivery: "Out for Delivery 🛵",
+          delivered: "Delivered ✅",
+          cancelled: "Cancelled ❌"
+        };
+
         list.innerHTML = Object.keys(orders).reverse().map(k => {
           const o = orders[k];
+          const st = o.status || 'placed';
+          const refundNote = o.paymentStatus === 'refund_initiated' ? ' (Refund Initiated)' : (o.paymentStatus === 'refunded' ? ' (Refunded ✅)' : '');
+
           return `
-            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fff;">
               <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 14px;">
-                <span>#${o.id}</span>
-                <span style="color: var(--primary);">₹${o.total}</span>
+                <span>#${escapeHtml(o.id)}</span>
+                <span style="color: var(--primary);">₹${escapeHtml(o.total)}</span>
               </div>
-              <div style="font-size: 12px; color: var(--muted); margin: 4px 0;">Status: <strong>${o.status}</strong> (${o.paymentStatus})</div>
-              ${o.status !== 'out_for_delivery' && o.status !== 'delivered' && o.status !== 'cancelled' ? `
-                <button class="btn btn-outline" style="color: var(--danger); font-size: 11px; padding: 4px 8px; margin-top: 6px;" onclick="cancelMyOrder('${k}')">Cancel & 100% Refund</button>
+              <div style="font-size: 11px; color: var(--muted); margin: 2px 0 6px;">${new Date(o.createdAt).toLocaleString()}</div>
+              
+              <div style="font-size: 12px; margin-bottom: 6px;">
+                Status: <strong style="color: ${st === 'cancelled' ? 'var(--danger)' : 'var(--primary)'};">${friendlyStatus[st] || st}</strong>
+                <span style="color: #6B7280; font-size: 11px;">${refundNote}</span>
+              </div>
+
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">
+                ${(o.items || []).map(i => `${escapeHtml(i.name)} (${i.quantity})`).join(', ')}
+              </div>
+
+              ${st !== 'out_for_delivery' && st !== 'delivered' && st !== 'cancelled' ? `
+                <button class="btn btn-outline action-cancel-my-order" data-key="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); font-size: 11px; padding: 4px 8px;">Cancel & 100% Refund</button>
               ` : ''}
             </div>
           `;
         }).join('');
       });
-    }
+    });
 
-    // Automated 100% Refund Cancellation (R2)
-    async function cancelMyOrder(pushKey) {
-      if (!confirm("Are you sure you want to cancel this order? Paid online orders will be refunded 100% to your original payment method.")) return;
-      const res = await fetch(`${WORKER_API}/api/cancel-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pushKey, uid: currentUser.uid })
+    document.getElementById('customerOrdersList').addEventListener('click', async (e) => {
+      if (e.target.classList.contains('action-cancel-my-order')) {
+        const pushKey = e.target.getAttribute('data-key');
+        if (!confirm("Are you sure you want to cancel this order? Paid online orders will be refunded 100%.")) return;
+        
+        try {
+          const token = await currentUser.getIdToken();
+          const res = await fetch(`${WORKER_API}/api/cancel-order`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ pushKey })
+          });
+          const data = await res.json();
+          if (res.ok) showToast("Order cancelled and refund initiated.");
+          else alert(data.error || "Cannot cancel order.");
+        } catch (err) {
+          alert('Network error connecting to server.');
+        }
+      }
+    });
+
+    // Close Modals & Escape key accessibility
+    document.querySelectorAll('.modal-close-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modalId = btn.getAttribute('data-modal');
+        closeModal(modalId);
       });
-      const data = await res.json();
-      if (res.ok) showToast("Order cancelled and refund initiated.");
-      else alert(data.error || "Cannot cancel order.");
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+        if (ordersRef) { ordersRef.off(); ordersRef = null; }
+      }
+    });
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+      if (id === 'ordersModal' && ordersRef) {
+        ordersRef.off();
+        ordersRef = null;
+      }
     }
 
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function showToast(msg) {
       const t = document.getElementById('toast');
       t.innerText = msg;
       t.style.display = 'block';
       setTimeout(() => t.style.display = 'none', 3000);
     }
+
+    // Initialize with default language
+    applyLanguage(currentLang);
   </script>
 </body>
 </html>
