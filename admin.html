@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
   <title>RA Store — Owner Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --primary: #0C831F;
@@ -16,6 +19,7 @@
       --accent: #F8CB46;
       --dark: #1C1C1C;
       --danger: #D9383A;
+      --warning: #D97706;
       --bg: #F4F6F8;
       --surface: #FFFFFF;
       --border: #E5E7EB;
@@ -23,28 +27,56 @@
       --muted: #6B7280;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 50px; }
+
     .header { background: var(--dark); color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
     .header h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .header h1 span { background: var(--accent); color: var(--dark); padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-    .btn { padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; }
+    
+    .btn { padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-outline { background: transparent; border: 1px solid #4B5563; color: #E5E7EB; }
+    .btn-light { background: #E5E7EB; color: #374151; }
+
     .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
     .auth-box { max-width: 420px; margin: 80px auto; background: var(--surface); padding: 32px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-    .tab-btn { background: none; border: none; font-size: 15px; font-weight: 600; color: var(--muted); padding: 8px 16px; cursor: pointer; border-radius: 6px; }
+    
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x: auto; }
+    .tab-btn { background: none; border: none; font-size: 14px; font-weight: 600; color: var(--muted); padding: 8px 16px; cursor: pointer; border-radius: 6px; white-space: nowrap; }
     .tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 18px; margin-bottom: 16px; }
+
+    .card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 16px; margin-bottom: 16px; }
     .order-card { border-left: 5px solid var(--primary); }
+
     .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
     .badge-paid { background: #DCFCE7; color: #166534; }
     .badge-pending { background: #FEF3C7; color: #92400E; }
+    .badge-failed { background: #FEE2E2; color: #991B1B; }
     .badge-cancelled { background: #FEE2E2; color: #991B1B; }
-    .badge-refunded { background: #E0E7FF; color: #3730A3; }
+    .badge-delivered { background: #E0E7FF; color: #3730A3; }
+    
+    .unpaid-warning { background: #FFFBEB; border: 1px solid #FDE68A; color: #B45309; padding: 6px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; font-weight: 600; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
+    .modal { background: var(--surface); border-radius: 12px; max-width: 500px; width: 100%; padding: 20px; max-height: 90vh; overflow-y: auto; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+
+    /* Filter Bar */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+    .filter-bar input, .filter-bar select { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
+
     .toast { position: fixed; bottom: 20px; right: 20px; background: var(--dark); color: #fff; padding: 12px 20px; border-radius: 8px; display: none; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .toast-undo { background: var(--accent); color: var(--dark); font-weight: 700; margin-left: 10px; cursor: pointer; border: none; padding: 3px 8px; border-radius: 4px; }
+
+    /* Printable Slip Styling */
+    @media print {
+      body * { visibility: hidden; }
+      #printableSlip, #printableSlip * { visibility: visible; }
+      #printableSlip { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; font-family: monospace; }
+    }
   </style>
 </head>
 <body>
@@ -53,7 +85,7 @@
     <h1>RA Store <span>OWNER PORTAL</span></h1>
     <div id="authActions" style="display: none; align-items: center; gap: 12px;">
       <span id="userBadge" style="font-size: 13px; color: #9CA3AF;"></span>
-      <button class="btn btn-outline" onclick="logoutAdmin()">Logout</button>
+      <button class="btn btn-outline" id="logoutBtn">Logout</button>
     </div>
   </div>
 
@@ -61,9 +93,8 @@
     <!-- Login Screen -->
     <div id="loginView" class="auth-box">
       <h2 style="font-size: 20px; margin-bottom: 8px;">Authorized Owner Access</h2>
-      <p style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Sign in with your verified owner Google account to manage store operations.</p>
-      <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="loginWithGoogle()">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z"/></svg>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Sign in with your verified owner Google account.</p>
+      <button class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;" id="loginGoogleBtn">
         Sign In with Google
       </button>
       <p id="authError" style="color: var(--danger); font-size: 12px; margin-top: 14px; display: none;"></p>
@@ -72,55 +103,259 @@
     <!-- Main Dashboard -->
     <div id="dashboardView" style="display: none;">
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('orders')">Live Orders</button>
-        <button class="tab-btn" onclick="switchTab('settings')">Store Settings</button>
+        <button class="tab-btn active" data-tab="orders">📦 Live Orders</button>
+        <button class="tab-btn" data-tab="products">🛒 Products Catalog</button>
+        <button class="tab-btn" data-tab="categories">🏷️ Categories</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
       </div>
 
-      <!-- Orders Section -->
+      <!-- ============================================== -->
+      <!-- TAB 1: ORDERS SECTION -->
+      <!-- ============================================== -->
       <div id="ordersTab">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <h2 style="font-size: 18px; font-weight: 700;">Recent Orders</h2>
-          <span style="font-size: 13px; color: var(--muted);">Auto-refreshes in real-time</span>
+        <div class="filter-bar">
+          <input type="text" id="orderSearchInput" placeholder="Search by ID, name, or phone..." style="flex: 1; min-width: 180px;">
+          <select id="orderDateFilter">
+            <option value="today">Today</option>
+            <option value="7days">Last 7 Days</option>
+            <option value="all">All Time</option>
+          </select>
+          <select id="orderStatusFilter">
+            <option value="all">All Statuses</option>
+            <option value="placed">Placed</option>
+            <option value="accepted">Accepted</option>
+            <option value="packed">Packed</option>
+            <option value="out_for_delivery">Out for Delivery</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select id="orderPaymentFilter">
+            <option value="all">All Payments</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Unpaid</option>
+          </select>
         </div>
+
         <div id="ordersList">Loading orders...</div>
       </div>
 
-      <!-- Settings Section -->
+      <!-- ============================================== -->
+      <!-- TAB 2: PRODUCTS CATALOG -->
+      <!-- ============================================== -->
+      <div id="productsTab" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex: 1; max-width: 500px;">
+            <input type="text" id="catalogSearchInput" placeholder="Search products..." style="flex: 1; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px;">
+            <select id="catalogCategoryFilter" style="padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px;">
+              <option value="all">All Categories</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline" id="quickAddModeBtn" style="color: var(--primary); border-color: var(--primary);">⚡ Quick Add (Shop Stocking)</button>
+            <button class="btn btn-primary" id="openAddProductModalBtn">+ Add Product</button>
+          </div>
+        </div>
+
+        <div id="productsTableContainer">Loading catalog...</div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- TAB 3: CATEGORIES MANAGEMENT -->
+      <!-- ============================================== -->
+      <div id="categoriesTab" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h2 style="font-size: 16px; font-weight: 700;">Categories</h2>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline" id="migrateCategoriesBtn" style="font-size: 12px;">Run 1-Click Migration</button>
+            <button class="btn btn-primary" id="openAddCategoryModalBtn">+ New Category</button>
+          </div>
+        </div>
+        <div id="categoriesListContainer">Loading categories...</div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- TAB 4: STORE SETTINGS -->
+      <!-- ============================================== -->
       <div id="settingsTab" style="display: none;">
         <div class="card" style="max-width: 600px;">
           <h3 style="font-size: 16px; margin-bottom: 16px;">Store Configuration</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <div>
+              <label style="font-size: 12px; font-weight: 600;">Opening Time (IST)</label>
+              <input type="time" id="settingOpenTime" value="07:00">
+            </div>
+            <div>
+              <label style="font-size: 12px; font-weight: 600;">Closing Time (IST)</label>
+              <input type="time" id="settingCloseTime" value="19:00">
+            </div>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 12px; font-weight: 600;">Minimum Order Value (₹)</label>
+            <input type="number" id="settingMinOrder" value="0">
+          </div>
           <div style="margin-bottom: 12px;">
             <label style="font-size: 12px; font-weight: 600;">Delivery Fee (₹)</label>
-            <input type="number" id="settingDeliveryFee" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-top: 4px;">
+            <input type="number" id="settingDeliveryFee">
           </div>
           <div style="margin-bottom: 12px;">
             <label style="font-size: 12px; font-weight: 600;">Free Delivery Order Threshold (₹)</label>
-            <input type="number" id="settingFreeThreshold" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-top: 4px;">
+            <input type="number" id="settingFreeThreshold">
           </div>
           <div style="margin-bottom: 12px;">
-            <label style="font-size: 12px; font-weight: 600;">Store WhatsApp Number (with country code)</label>
-            <input type="text" id="settingWhatsapp" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-top: 4px;">
+            <label style="font-size: 12px; font-weight: 600;">Store WhatsApp Number</label>
+            <input type="text" id="settingWhatsapp">
           </div>
-          <div style="margin-bottom: 16px;">
+          <div style="margin-bottom: 12px;">
             <label style="font-size: 12px; font-weight: 600;">Store Mode</label>
-            <select id="settingStoreMode" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-top: 4px;">
-              <option value="auto">Auto (7:00 AM - 7:00 PM IST)</option>
+            <select id="settingStoreMode">
+              <option value="auto">Auto (According to Store Hours)</option>
               <option value="force_open">Force Open (Always Open)</option>
-              <option value="force_closed">Force Closed (Closed Now)</option>
+              <option value="force_closed">Force Closed (Closed Immediately)</option>
             </select>
           </div>
-          <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+          <div style="margin-bottom: 16px;">
+            <label style="font-size: 12px; font-weight: 600;">Announcement Banner Text (Optional)</label>
+            <input type="text" id="settingAnnouncement" placeholder="e.g. Fresh Mangoes & Village Milk arrived today!">
+          </div>
+          <button class="btn btn-primary" id="saveSettingsBtn">Save All Settings</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ============================================== -->
+  <!-- MODAL: ADD / EDIT PRODUCT -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700;" id="productModalTitle">Add New Product</h3>
+        <button class="modal-close-btn" data-modal="productModal" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="productForm">
+        <input type="hidden" id="editProductId">
+
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" id="prodName" required placeholder="e.g. Fresh Tomatoes / టమోటా">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>Price (₹)</label>
+            <input type="number" id="prodPrice" required step="0.5" placeholder="40">
+          </div>
+          <div class="form-group">
+            <label>Unit / Quantity</label>
+            <input type="text" id="prodUnit" required placeholder="e.g. 1 kg / 500 ml">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Category</label>
+          <select id="prodCategory" required></select>
+        </div>
+
+        <div class="form-group">
+          <label>Keywords (Optional - for search)</label>
+          <input type="text" id="prodKeywords" placeholder="e.g. tamata, tomato, kura">
+        </div>
+
+        <!-- CAMERA-TO-WEBSITE SECTION -->
+        <div class="form-group" style="background: #F9FAFB; padding: 12px; border-radius: 8px; border: 1px dashed var(--border);">
+          <label style="margin-bottom: 6px;">Product Photo (Compressed to &lt;100 KB)</label>
+          
+          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <!-- Native Phone Camera Trigger -->
+            <label class="btn btn-primary" style="flex: 1; font-size: 12px; cursor: pointer;">
+              📸 Take Photo
+              <input type="file" id="phoneCameraInput" accept="image/*" capture="environment" style="display: none;">
+            </label>
+            <!-- Gallery Picker -->
+            <label class="btn btn-outline" style="flex: 1; font-size: 12px; color: var(--text); border-color: var(--border); cursor: pointer;">
+              🖼️ From Gallery
+              <input type="file" id="galleryFileInput" accept="image/*" style="display: none;">
+            </label>
+          </div>
+
+          <!-- In-Page Live Web Camera View -->
+          <div id="liveCameraContainer" style="display: none; margin-bottom: 10px; text-align: center;">
+            <video id="cameraVideo" autoplay playsinline style="width: 100%; max-height: 200px; background: #000; border-radius: 6px;"></video>
+            <div style="display: flex; gap: 6px; margin-top: 6px;">
+              <button type="button" class="btn btn-primary" id="snapPhotoBtn" style="flex: 1;">Snap Picture</button>
+              <button type="button" class="btn btn-outline" id="flipCameraBtn" style="color: var(--text);">Flip Cam</button>
+              <button type="button" class="btn btn-light" id="closeCameraBtn">Cancel</button>
+            </div>
+          </div>
+
+          <div id="imageUploadProgress" style="display: none; font-size: 11px; color: var(--primary); font-weight: 600; margin-bottom: 6px;">
+            Optimizing & Uploading image...
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img id="imagePreview" src="https://via.placeholder.com/80" style="width: 60px; height: 60px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); background: #fff;">
+            <input type="hidden" id="prodImageUrl">
+            <span id="imageStatusText" style="font-size: 12px; color: var(--muted);">No photo taken yet</span>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+            <input type="checkbox" id="prodInStock" checked> In Stock
+          </label>
+        </div>
+
+        <button type="submit" id="saveProductBtn" class="btn btn-primary" style="width: 100%; padding: 12px;">Save Product</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD / EDIT CATEGORY -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700;">New Category</h3>
+        <button class="modal-close-btn" data-modal="categoryModal" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="categoryForm">
+        <input type="hidden" id="editCategoryId">
+        <div class="form-group">
+          <label>English Name</label>
+          <input type="text" id="catName" required placeholder="e.g. Vegetables">
+        </div>
+        <div class="form-group">
+          <label>Telugu Name (తెలుగు)</label>
+          <input type="text" id="catNameTe" placeholder="e.g. కూరగాయలు">
+        </div>
+        <div class="form-group">
+          <label>Emoji / Icon</label>
+          <input type="text" id="catIcon" placeholder="e.g. 🥦">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px;">Save Category</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- PRINTABLE PACKING SLIP -->
+  <!-- ============================================== -->
+  <div id="printableSlip" style="display: none;"></div>
+
   <div id="toast" class="toast">
     <span id="toastMsg"></span>
-    <button id="toastUndoBtn" class="toast-undo" style="display: none;" onclick="undoDelete()">UNDO</button>
+    <button id="toastUndoBtn" class="toast-undo" style="display: none;">UNDO</button>
   </div>
 
   <script>
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyD94vWB3NBEjSGmbO6JQ5F1t6L9Js7er8Y",
       authDomain: "k-store-ae9dd.firebaseapp.com",
@@ -131,27 +366,45 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // Your Cloudflare Worker URL
     const WORKER_API = "https://ra-store-api.chowdarynikhil095.workers.dev";
 
     let currentUser = null;
-    let inactivityTimer = null;
+    let allOrders = {};
+    let allProducts = {};
+    let allCategories = {};
+    let isQuickAddActive = false;
+    let deletedProductBackup = null;
+    let deleteTimeout = null;
+    let previousOrdersCount = null;
 
-    // 15-Minute Inactivity Auto-Logout
-    function resetInactivityTimer() {
-      clearTimeout(inactivityTimer);
-      if (currentUser) {
-        inactivityTimer = setTimeout(() => {
-          showToast("Session expired due to 15 minutes of inactivity.");
-          logoutAdmin();
-        }, 15 * 60 * 1000);
+    // Web Audio Chime Generator
+    function playNewOrderChime() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.6);
+      } catch (e) {}
+
+      // Browser notification
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("RA Store: New Order Received!", { body: "A new grocery delivery order just arrived in Bommalatapalli." });
       }
     }
-    ['mousemove', 'keydown', 'click', 'scroll'].forEach(evt => window.addEventListener(evt, resetInactivityTimer));
+
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
-        // Authorize strictly via /admins/{uid} allowlist
         const snap = await db.ref(`admins/${user.uid}`).once('value');
         if (snap.val() === true) {
           currentUser = user;
@@ -159,12 +412,10 @@
           document.getElementById('dashboardView').style.display = 'block';
           document.getElementById('authActions').style.display = 'flex';
           document.getElementById('userBadge').innerText = user.email;
-          resetInactivityTimer();
-          loadOrders();
-          loadSettings();
+          initRealtimeListeners();
         } else {
           auth.signOut();
-          document.getElementById('authError').innerText = "Access Denied: Google Account is not on the /admins allowlist.";
+          document.getElementById('authError').innerText = "Access Denied: Google Account is not in /admins.";
           document.getElementById('authError').style.display = 'block';
         }
       } else {
@@ -175,125 +426,600 @@
       }
     });
 
-    async function loginWithGoogle() {
+    document.getElementById('loginGoogleBtn').addEventListener('click', async () => {
       const provider = new firebase.auth.GoogleAuthProvider();
-      try {
-        await auth.signInWithPopup(provider);
-      } catch (err) {
-        document.getElementById('authError').innerText = err.message;
-        document.getElementById('authError').style.display = 'block';
-      }
-    }
+      try { await auth.signInWithPopup(provider); } catch (err) { alert(err.message); }
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
-    function logoutAdmin() {
-      auth.signOut();
-    }
-
-    // Live Orders Listener
-    function loadOrders() {
-      db.ref('orders').limitToLast(50).on('value', snap => {
-        const list = document.getElementById('ordersList');
-        const orders = snap.val();
-        if (!orders) {
-          list.innerHTML = "<p style='color: var(--muted);'>No orders found.</p>";
-          return;
+    function initRealtimeListeners() {
+      // 1. Orders Listener with Audio Chime
+      db.ref('orders').on('value', snap => {
+        const val = snap.val() || {};
+        const count = Object.keys(val).length;
+        if (previousOrdersCount !== null && count > previousOrdersCount) {
+          playNewOrderChime();
         }
+        previousOrdersCount = count;
+        allOrders = val;
+        renderOrdersList();
+      });
 
-        const sortedKeys = Object.keys(orders).reverse();
-        list.innerHTML = sortedKeys.map(key => {
-          const ord = orders[key];
-          const checks = ord.packingChecks || {};
-          const isCancelled = ord.status === 'cancelled';
+      // 2. Categories Listener
+      db.ref('categories').on('value', snap => {
+        allCategories = snap.val() || {};
+        renderCategoriesList();
+        populateCategoryDropdowns();
+      });
 
-          return `
-            <div class="card order-card" style="border-left-color: ${isCancelled ? 'var(--danger)' : 'var(--primary)'}">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div>
-                  <strong style="font-size: 15px;">#${ord.id}</strong>
-                  <span style="font-size: 12px; color: var(--muted); margin-left: 8px;">${new Date(ord.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                </div>
-                <div>
-                  <span class="badge badge-${ord.paymentStatus}">${ord.paymentStatus}</span>
-                  <span class="badge" style="background: #E5E7EB; color: #3730A3;">${ord.status}</span>
-                </div>
-              </div>
-              <div style="font-size: 13px; margin-bottom: 10px;">
-                <strong>${ord.customer?.name}</strong> (${ord.customer?.phone}) • ${ord.customer?.address}
-              </div>
-              
-              <!-- Persistent Packing Checklist -->
-              <div style="background: #F9FAFB; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-                <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">PACKING CHECKLIST:</div>
-                ${(ord.items || []).map((it, idx) => `
-                  <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 4px; cursor: pointer;">
-                    <input type="checkbox" ${checks[it.id] ? 'checked' : ''} onchange="togglePackCheck('${key}', '${it.id}', this.checked)">
-                    <span style="${checks[it.id] ? 'text-decoration: line-through; color: var(--muted);' : ''}">${it.name} (${it.quantity} × ₹${it.price})</span>
-                  </label>
-                `).join('')}
-              </div>
+      // 3. Products Catalog Listener
+      db.ref('products').on('value', snap => {
+        allProducts = snap.val() || {};
+        renderProductsCatalog();
+      });
 
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: 700; font-size: 15px;">Total: ₹${ord.total}</span>
-                <div style="display: flex; gap: 8px;">
-                  ${!isCancelled && ord.status !== 'delivered' ? `
-                    <button class="btn btn-danger" onclick="cancelOrderWithRefund('${key}', '${ord.id}', '${ord.paymentMethod}', '${ord.paymentStatus}')">Cancel & Refund</button>
-                    <button class="btn btn-primary" onclick="updateOrderStatus('${key}', 'out_for_delivery')">Out for Delivery</button>
-                  ` : ''}
-                </div>
-              </div>
-            </div>
-          `;
-        }).join('');
+      // 4. Settings
+      db.ref('settings').once('value', snap => {
+        const s = snap.val() || {};
+        document.getElementById('settingOpenTime').value = s.storeHours?.open || '07:00';
+        document.getElementById('settingCloseTime').value = s.storeHours?.close || '19:00';
+        document.getElementById('settingMinOrder').value = s.minOrderValue || 0;
+        document.getElementById('settingDeliveryFee').value = s.deliveryFee || 25;
+        document.getElementById('settingFreeThreshold').value = s.freeDeliveryThreshold || 299;
+        document.getElementById('settingWhatsapp').value = s.whatsappNumber || '916281730144';
+        document.getElementById('settingStoreMode').value = s.storeHours?.mode || 'auto';
+        document.getElementById('settingAnnouncement').value = s.announcement || '';
       });
     }
 
-    async function togglePackCheck(orderKey, itemId, isChecked) {
-      await db.ref(`orders/${orderKey}/packingChecks/${itemId}`).set(isChecked);
+    // =========================================================
+    // ORDERS RENDERING & FULL STATUS PROGRESSION
+    // =========================================================
+    function renderOrdersList() {
+      const list = document.getElementById('ordersList');
+      const search = document.getElementById('orderSearchInput').value.toLowerCase().trim();
+      const dateFilter = document.getElementById('orderDateFilter').value;
+      const statusFilter = document.getElementById('orderStatusFilter').value;
+      const payFilter = document.getElementById('orderPaymentFilter').value;
+
+      let keys = Object.keys(allOrders).reverse();
+      const now = new Date();
+
+      keys = keys.filter(k => {
+        const o = allOrders[k];
+        if (search) {
+          const matchId = (o.id || '').toLowerCase().includes(search);
+          const matchName = (o.customer?.name || '').toLowerCase().includes(search);
+          const matchPhone = (o.customer?.phone || '').includes(search);
+          if (!matchId && !matchName && !matchPhone) return false;
+        }
+
+        if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+        if (payFilter === 'paid' && o.paymentStatus !== 'paid') return false;
+        if (payFilter === 'pending' && o.paymentStatus === 'paid') return false;
+
+        const orderDate = new Date(o.createdAt);
+        if (dateFilter === 'today') {
+          if (orderDate.toDateString() !== now.toDateString()) return false;
+        } else if (dateFilter === '7days') {
+          if ((now - orderDate) > 7 * 24 * 3600 * 1000) return false;
+        }
+        return true;
+      });
+
+      if (!keys.length) {
+        list.innerHTML = "<p style='color: var(--muted); padding: 20px; text-align: center;'>No orders match your filter.</p>";
+        return;
+      }
+
+      list.innerHTML = keys.map(key => {
+        const ord = allOrders[key];
+        const checks = ord.packingChecks || {};
+        const isCancelled = ord.status === 'cancelled';
+        const isDelivered = ord.status === 'delivered';
+        const isUnpaidOnline = ord.paymentMethod === 'online_razorpay' && ord.paymentStatus !== 'paid';
+
+        return `
+          <div class="card order-card" style="border-left-color: ${isCancelled ? 'var(--danger)' : (isDelivered ? '#3730A3' : 'var(--primary)')}">
+            ${isUnpaidOnline ? `<div class="unpaid-warning">⚠️ Customer has NOT paid online yet. Await payment before packing.</div>` : ''}
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div>
+                <strong style="font-size: 15px;">#${escapeHtml(ord.id)}</strong>
+                <span style="font-size: 12px; color: var(--muted); margin-left: 8px;">${new Date(ord.createdAt).toLocaleString([], {hour:'2-digit', minute:'2-digit', day:'numeric', month:'short'})}</span>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <span class="badge badge-${escapeHtml(ord.paymentStatus)}">${escapeHtml(ord.paymentStatus)}</span>
+                <span class="badge" style="background: #E5E7EB; color: #3730A3;">${escapeHtml(ord.status)}</span>
+              </div>
+            </div>
+
+            <div style="font-size: 13px; margin-bottom: 10px;">
+              <strong>${escapeHtml(ord.customer?.name)}</strong> (${escapeHtml(ord.customer?.phone)}) • ${escapeHtml(ord.customer?.address)}
+            </div>
+
+            <!-- Packing Checklist -->
+            <div style="background: #F9FAFB; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+              <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">PACKING CHECKLIST:</div>
+              ${(ord.items || []).map(it => `
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 4px; cursor: pointer;">
+                  <input type="checkbox" class="pack-checkbox" data-order-key="${escapeHtml(key)}" data-item-id="${escapeHtml(it.id)}" ${checks[it.id] ? 'checked' : ''}>
+                  <span style="${checks[it.id] ? 'text-decoration: line-through; color: var(--muted);' : ''}">${escapeHtml(it.name)} (${escapeHtml(it.quantity)} × ₹${escapeHtml(it.price)})</span>
+                </label>
+              `).join('')}
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <span style="font-weight: 700; font-size: 15px;">Total: ₹${escapeHtml(ord.total)} (${ord.paymentMethod === 'cod' ? 'COD' : 'ONLINE'})</span>
+                ${ord.paymentMethod === 'cod' && isDelivered ? `
+                  <label style="margin-left: 10px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                    <input type="checkbox" class="cod-collected-checkbox" data-key="${escapeHtml(key)}" ${ord.codCollected ? 'checked' : ''}> Cash Collected
+                  </label>
+                ` : ''}
+              </div>
+
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button class="btn btn-outline action-print" data-key="${escapeHtml(key)}" style="color: var(--text); border-color: var(--border);">🖨️ Bill</button>
+                
+                ${!isCancelled && !isDelivered ? `
+                  ${ord.status === 'placed' ? `<button class="btn btn-light action-status" data-key="${escapeHtml(key)}" data-status="accepted">Accept</button>` : ''}
+                  ${ord.status === 'accepted' ? `<button class="btn btn-light action-status" data-key="${escapeHtml(key)}" data-status="packed">Mark Packed</button>` : ''}
+                  ${ord.status === 'packed' ? `<button class="btn btn-primary action-status" data-key="${escapeHtml(key)}" data-status="out_for_delivery">Out for Delivery</button>` : ''}
+                  ${ord.status === 'out_for_delivery' ? `<button class="btn btn-primary action-status" data-key="${escapeHtml(key)}" data-status="delivered">Delivered ✅</button>` : ''}
+                  <button class="btn btn-danger action-cancel-refund" data-key="${escapeHtml(key)}" data-id="${escapeHtml(ord.id)}">Cancel</button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
-    async function cancelOrderWithRefund(pushKey, humanId, method, paymentStatus) {
-      if (!confirm(`Are you sure you want to cancel order #${humanId}? If paid online, a full refund will be processed immediately via Razorpay.`)) return;
+    // Orders Filter Events
+    ['orderSearchInput', 'orderDateFilter', 'orderStatusFilter', 'orderPaymentFilter'].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderOrdersList);
+    });
 
-      try {
+    // Orders Actions Delegation
+    document.getElementById('ordersList').addEventListener('click', async (e) => {
+      if (e.target.classList.contains('action-status')) {
+        const key = e.target.getAttribute('data-key');
+        const st = e.target.getAttribute('data-status');
+        await db.ref(`orders/${key}/status`).set(st);
+      }
+
+      if (e.target.classList.contains('action-print')) {
+        const key = e.target.getAttribute('data-key');
+        printOrderSlip(allOrders[key]);
+      }
+
+      if (e.target.classList.contains('action-cancel-refund')) {
+        const key = e.target.getAttribute('data-key');
+        const humanId = e.target.getAttribute('data-id');
+        if (!confirm(`Cancel order #${humanId}? Paid online orders will be refunded immediately.`)) return;
+        const token = await currentUser.getIdToken();
         const res = await fetch(`${WORKER_API}/api/cancel-order`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pushKey, uid: currentUser.uid, reason: 'Admin cancelled' })
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ pushKey: key, reason: 'Owner cancelled' })
         });
+        const d = await res.json();
+        if (res.ok) showToast(`Order #${humanId} cancelled.`);
+        else alert(d.error || 'Cancellation error');
+      }
+    });
+
+    document.getElementById('ordersList').addEventListener('change', async (e) => {
+      if (e.target.classList.contains('pack-checkbox')) {
+        const key = e.target.getAttribute('data-order-key');
+        const item = e.target.getAttribute('data-item-id');
+        await db.ref(`orders/${key}/packingChecks/${item}`).set(e.target.checked);
+      }
+      if (e.target.classList.contains('cod-collected-checkbox')) {
+        const key = e.target.getAttribute('data-key');
+        await db.ref(`orders/${key}/codCollected`).set(e.target.checked);
+      }
+    });
+
+    // Packing Bill Print
+    function printOrderSlip(ord) {
+      if (!ord) return;
+      const slip = document.getElementById('printableSlip');
+      slip.innerHTML = `
+        <div style="max-width: 380px; margin: 0 auto; border: 1px dashed #000; padding: 15px; font-size: 13px;">
+          <h2 style="text-align: center; margin: 0;">RA STORE</h2>
+          <div style="text-align: center; font-size: 11px;">Main Road, Bommalatapalli</div>
+          <hr style="margin: 8px 0; border: none; border-top: 1px dashed #000;">
+          <div><strong>Order:</strong> #${escapeHtml(ord.id)}</div>
+          <div><strong>Date:</strong> ${new Date(ord.createdAt).toLocaleString()}</div>
+          <div><strong>Customer:</strong> ${escapeHtml(ord.customer?.name)}</div>
+          <div><strong>Phone:</strong> ${escapeHtml(ord.customer?.phone)}</div>
+          <div><strong>Address:</strong> ${escapeHtml(ord.customer?.address)}</div>
+          <hr style="margin: 8px 0; border: none; border-top: 1px dashed #000;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            ${(ord.items || []).map(i => `
+              <tr>
+                <td>${escapeHtml(i.name)} × ${i.quantity}</td>
+                <td style="text-align: right;">₹${i.price * i.quantity}</td>
+              </tr>
+            `).join('')}
+          </table>
+          <hr style="margin: 8px 0; border: none; border-top: 1px dashed #000;">
+          <div style="display: flex; justify-content: space-between;"><span>Subtotal:</span><span>₹${ord.subtotal}</span></div>
+          <div style="display: flex; justify-content: space-between;"><span>Delivery:</span><span>₹${ord.deliveryFee}</span></div>
+          <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-top: 4px;">
+            <span>TOTAL:</span><span>₹${ord.total}</span>
+          </div>
+          <div style="margin-top: 6px; font-weight: bold;">PAYMENT: ${ord.paymentMethod === 'cod' ? 'CASH ON DELIVERY' : 'ONLINE (PAID)'}</div>
+          <div style="text-align: center; margin-top: 12px; font-size: 11px;">Thank you for shopping local!</div>
+        </div>
+      `;
+      window.print();
+    }
+
+    // =========================================================
+    // CAMERA-TO-WEBSITE IMAGE COMPRESSION & UPLOAD
+    // =========================================================
+    async function compressImageToBlob(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 800; // Resize longest side <= 800px
+
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to WebP (fallback to JPEG)
+          canvas.toBlob(blob => {
+            resolve(blob);
+          }, 'image/webp', 0.8);
+        };
+        img.onerror = reject;
+      });
+    }
+
+    async function handleFileSelected(file) {
+      if (!file) return;
+      const progress = document.getElementById('imageUploadProgress');
+      const statusText = document.getElementById('imageStatusText');
+      progress.style.display = 'block';
+      statusText.innerText = "Compressing & Uploading...";
+
+      try {
+        const compressedBlob = await compressImageToBlob(file);
+        const token = await currentUser.getIdToken();
+        const fd = new FormData();
+        fd.append('photo', compressedBlob, 'photo.webp');
+
+        const res = await fetch(`${WORKER_API}/api/admin/upload-image`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: fd
+        });
+
         const data = await res.json();
-        if (res.ok) {
-          showToast(`Order #${humanId} cancelled successfully.`);
+        if (res.ok && data.url) {
+          document.getElementById('prodImageUrl').value = data.url;
+          document.getElementById('imagePreview').src = data.url;
+          statusText.innerText = "Uploaded! (<100 KB)";
         } else {
-          alert('Cancellation error: ' + (data.error || 'Server error'));
+          alert('Upload failed: ' + (data.error || 'Server error'));
+          statusText.innerText = "Upload failed. Try again.";
         }
       } catch (e) {
-        alert('Network error connecting to worker backend.');
+        alert('Image processing error: ' + e.message);
+        statusText.innerText = "Error. Try again.";
+      } finally {
+        progress.style.display = 'none';
       }
     }
 
-    async function updateOrderStatus(pushKey, newStatus) {
-      await db.ref(`orders/${pushKey}/status`).set(newStatus);
+    document.getElementById('phoneCameraInput').addEventListener('change', (e) => handleFileSelected(e.target.files[0]));
+    document.getElementById('galleryFileInput').addEventListener('change', (e) => handleFileSelected(e.target.files[0]));
+
+    // =========================================================
+    // IN-PAGE LIVE CAMERA STREAM
+    // =========================================================
+    let cameraStream = null;
+    let cameraFacingMode = 'environment';
+
+    async function startLiveCamera() {
+      try {
+        if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: cameraFacingMode }
+        });
+        const video = document.getElementById('cameraVideo');
+        video.srcObject = cameraStream;
+        document.getElementById('liveCameraContainer').style.display = 'block';
+      } catch (e) {
+        alert('Could not open camera stream. Please use "Take Photo" button instead.');
+      }
     }
 
-    async function loadSettings() {
-      const snap = await db.ref('settings').once('value');
-      const s = snap.val() || {};
-      document.getElementById('settingDeliveryFee').value = s.deliveryFee || 25;
-      document.getElementById('settingFreeThreshold').value = s.freeDeliveryThreshold || 299;
-      document.getElementById('settingWhatsapp').value = s.whatsappNumber || '916281730144';
-      document.getElementById('settingStoreMode').value = s.storeHours?.mode || 'auto';
+    document.getElementById('flipCameraBtn').addEventListener('click', () => {
+      cameraFacingMode = cameraFacingMode === 'environment' ? 'user' : 'environment';
+      startLiveCamera();
+    });
+
+    document.getElementById('closeCameraBtn').addEventListener('click', () => {
+      if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+      document.getElementById('liveCameraContainer').style.display = 'none';
+    });
+
+    document.getElementById('snapPhotoBtn').addEventListener('click', () => {
+      const video = document.getElementById('cameraVideo');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob(blob => {
+        handleFileSelected(blob);
+        if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+        document.getElementById('liveCameraContainer').style.display = 'none';
+      }, 'image/webp', 0.8);
+    });
+
+    // =========================================================
+    // PRODUCTS MANAGEMENT (ADD, EDIT, DELETE WITH UNDO)
+    // =========================================================
+    function populateCategoryDropdowns() {
+      const select = document.getElementById('prodCategory');
+      const filterSelect = document.getElementById('catalogCategoryFilter');
+      const catKeys = Object.keys(allCategories);
+
+      select.innerHTML = catKeys.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(allCategories[k].name)}</option>`).join('');
+      filterSelect.innerHTML = `<option value="all">All Categories</option>` + catKeys.map(k => `<option value="${escapeHtml(k)}">${escapeHtml(allCategories[k].name)}</option>`).join('');
     }
 
-    async function saveSettings() {
+    function renderProductsCatalog() {
+      const container = document.getElementById('productsTableContainer');
+      const search = document.getElementById('catalogSearchInput').value.toLowerCase().trim();
+      const catFilter = document.getElementById('catalogCategoryFilter').value;
+
+      let pKeys = Object.keys(allProducts);
+      pKeys = pKeys.filter(k => {
+        const p = allProducts[k];
+        if (search && !p.name.toLowerCase().includes(search) && !(p.keywords || '').toLowerCase().includes(search)) return false;
+        if (catFilter !== 'all' && p.categoryId !== catFilter) return false;
+        return true;
+      });
+
+      if (!pKeys.length) {
+        container.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No products found.</p>";
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+          ${pKeys.map(k => {
+            const p = allProducts[k];
+            const cat = allCategories[p.categoryId]?.name || 'General';
+            return `
+              <div class="card" style="padding: 10px;">
+                <img src="${p.image || 'https://via.placeholder.com/150'}" style="width: 100%; height: 110px; object-fit: contain; background: #fafafa; border-radius: 6px;">
+                <div style="font-weight: 700; font-size: 14px; margin-top: 6px;">${escapeHtml(p.name)}</div>
+                <div style="font-size: 12px; color: var(--muted);">${escapeHtml(cat)} • ${escapeHtml(p.unit)}</div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--primary); margin: 4px 0;">₹${escapeHtml(p.price)}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                  <button class="btn btn-light action-edit-prod" data-id="${escapeHtml(k)}" style="padding: 4px 8px; font-size: 11px;">Edit</button>
+                  <button class="btn btn-outline action-delete-prod" data-id="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); padding: 4px 8px; font-size: 11px;">Delete</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    ['catalogSearchInput', 'catalogCategoryFilter'].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderProductsCatalog);
+    });
+
+    document.getElementById('openAddProductModalBtn').addEventListener('click', () => {
+      document.getElementById('productForm').reset();
+      document.getElementById('editProductId').value = '';
+      document.getElementById('productModalTitle').innerText = 'Add New Product';
+      document.getElementById('imagePreview').src = 'https://via.placeholder.com/80';
+      document.getElementById('prodImageUrl').value = '';
+      document.getElementById('productModal').style.display = 'flex';
+    });
+
+    document.getElementById('quickAddModeBtn').addEventListener('click', () => {
+      isQuickAddActive = true;
+      document.getElementById('productForm').reset();
+      document.getElementById('editProductId').value = '';
+      document.getElementById('productModalTitle').innerText = '⚡ Quick Add - Continuous Stocking';
+      document.getElementById('imagePreview').src = 'https://via.placeholder.com/80';
+      document.getElementById('prodImageUrl').value = '';
+      document.getElementById('productModal').style.display = 'flex';
+      startLiveCamera();
+    });
+
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editProductId').value || `p_${Date.now()}`;
+      const prodData = {
+        name: document.getElementById('prodName').value.trim(),
+        price: Number(document.getElementById('prodPrice').value),
+        unit: document.getElementById('prodUnit').value.trim(),
+        categoryId: document.getElementById('prodCategory').value,
+        keywords: document.getElementById('prodKeywords').value.trim(),
+        image: document.getElementById('prodImageUrl').value || 'https://via.placeholder.com/150',
+        inStock: document.getElementById('prodInStock').checked,
+        updatedAt: new Date().toISOString()
+      };
+
+      await db.ref(`products/${id}`).update(prodData);
+      await db.ref('audit').push({
+        adminUid: currentUser.uid,
+        adminEmail: currentUser.email,
+        action: 'SAVE_PRODUCT',
+        productId: id,
+        timestamp: new Date().toISOString()
+      });
+
+      showToast(`Product "${prodData.name}" saved!`);
+
+      if (isQuickAddActive) {
+        document.getElementById('productForm').reset();
+        document.getElementById('imagePreview').src = 'https://via.placeholder.com/80';
+        document.getElementById('prodImageUrl').value = '';
+        startLiveCamera(); // Immediately reopen camera for next product!
+      } else {
+        document.getElementById('productModal').style.display = 'none';
+      }
+    });
+
+    document.getElementById('productsTableContainer').addEventListener('click', async (e) => {
+      if (e.target.classList.contains('action-edit-prod')) {
+        const id = e.target.getAttribute('data-id');
+        const p = allProducts[id];
+        document.getElementById('editProductId').value = id;
+        document.getElementById('prodName').value = p.name;
+        document.getElementById('prodPrice').value = p.price;
+        document.getElementById('prodUnit').value = p.unit;
+        document.getElementById('prodCategory').value = p.categoryId || '';
+        document.getElementById('prodKeywords').value = p.keywords || '';
+        document.getElementById('prodImageUrl').value = p.image || '';
+        document.getElementById('imagePreview').src = p.image || 'https://via.placeholder.com/80';
+        document.getElementById('prodInStock').checked = p.inStock !== false;
+        document.getElementById('productModalTitle').innerText = 'Edit Product';
+        document.getElementById('productModal').style.display = 'flex';
+      }
+
+      if (e.target.classList.contains('action-delete-prod')) {
+        const id = e.target.getAttribute('data-id');
+        const p = allProducts[id];
+        if (!confirm(`Delete "${p.name}"? You will have 10 seconds to undo.`)) return;
+        
+        deletedProductBackup = { id, data: p };
+        await db.ref(`products/${id}`).remove();
+        showToast(`Deleted "${p.name}".`, true);
+
+        deleteTimeout = setTimeout(() => { deletedProductBackup = null; }, 10000);
+      }
+    });
+
+    document.getElementById('toastUndoBtn').addEventListener('click', async () => {
+      if (deletedProductBackup) {
+        clearTimeout(deleteTimeout);
+        await db.ref(`products/${deletedProductBackup.id}`).set(deletedProductBackup.data);
+        showToast(`Restored "${deletedProductBackup.data.name}"`);
+        deletedProductBackup = null;
+        document.getElementById('toastUndoBtn').style.display = 'none';
+      }
+    });
+
+    // =========================================================
+    // CATEGORIES MANAGEMENT
+    // =========================================================
+    function renderCategoriesList() {
+      const container = document.getElementById('categoriesListContainer');
+      const cKeys = Object.keys(allCategories);
+      if (!cKeys.length) {
+        container.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No categories yet. Click New Category.</p>";
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px;">
+          ${cKeys.map(k => {
+            const cat = allCategories[k];
+            return `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border);">
+                <div>
+                  <span style="font-size: 16px; margin-right: 8px;">${escapeHtml(cat.icon || '🏷️')}</span>
+                  <strong>${escapeHtml(cat.name)}</strong>
+                  ${cat.nameTe ? `<span style="font-size: 12px; color: var(--muted); margin-left: 6px;">(${escapeHtml(cat.nameTe)})</span>` : ''}
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-outline action-delete-cat" data-id="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); font-size: 11px; padding: 4px 8px;">Delete</button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    document.getElementById('openAddCategoryModalBtn').addEventListener('click', () => {
+      document.getElementById('categoryForm').reset();
+      document.getElementById('categoryModal').style.display = 'flex';
+    });
+
+    document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = `cat_${Date.now()}`;
+      await db.ref(`categories/${id}`).set({
+        name: document.getElementById('catName').value.trim(),
+        nameTe: document.getElementById('catNameTe').value.trim(),
+        icon: document.getElementById('catIcon').value.trim(),
+        order: Object.keys(allCategories).length + 1,
+        active: true
+      });
+      document.getElementById('categoryModal').style.display = 'none';
+      showToast('Category created!');
+    });
+
+    // Prevent deletion if items exist
+    document.getElementById('categoriesListContainer').addEventListener('click', async (e) => {
+      if (e.target.classList.contains('action-delete-cat')) {
+        const catId = e.target.getAttribute('data-id');
+        const itemsInCat = Object.values(allProducts).filter(p => p.categoryId === catId);
+        if (itemsInCat.length > 0) {
+          alert(`Cannot delete this category: ${itemsInCat.length} products belong to it! Please reassign them first.`);
+          return;
+        }
+        await db.ref(`categories/${catId}`).remove();
+        showToast('Category deleted.');
+      }
+    });
+
+    // One-time Migration for existing products
+    document.getElementById('migrateCategoriesBtn').addEventListener('click', async () => {
+      const defaultCatId = 'cat_general';
+      await db.ref(`categories/${defaultCatId}`).set({ name: 'General', nameTe: 'ఇతరాలు', icon: '🛒', order: 1, active: true });
+      for (const pId of Object.keys(allProducts)) {
+        if (!allProducts[pId].categoryId) {
+          await db.ref(`products/${pId}/categoryId`).set(defaultCatId);
+        }
+      }
+      showToast('1-Click migration complete: All items assigned to General.');
+    });
+
+    // =========================================================
+    // SETTINGS SAVING
+    // =========================================================
+    document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
       const updates = {
+        storeHours: {
+          open: document.getElementById('settingOpenTime').value,
+          close: document.getElementById('settingCloseTime').value,
+          mode: document.getElementById('settingStoreMode').value
+        },
+        minOrderValue: Number(document.getElementById('settingMinOrder').value),
         deliveryFee: Number(document.getElementById('settingDeliveryFee').value),
         freeDeliveryThreshold: Number(document.getElementById('settingFreeThreshold').value),
-        whatsappNumber: document.getElementById('settingWhatsapp').value,
-        storeHours: {
-          open: "07:00",
-          close: "19:00",
-          mode: document.getElementById('settingStoreMode').value
-        }
+        whatsappNumber: document.getElementById('settingWhatsapp').value.trim(),
+        announcement: document.getElementById('settingAnnouncement').value.trim()
       };
       await db.ref('settings').update(updates);
       await db.ref('audit').push({
@@ -303,23 +1029,32 @@
         details: updates,
         timestamp: new Date().toISOString()
       });
-      showToast('Settings saved successfully.');
-    }
+      showToast('Store settings saved successfully!');
+    });
 
-    function showToast(msg) {
+    // Tab Navigation
+    document.querySelector('.tabs').addEventListener('click', (e) => {
+      if (e.target.classList.contains('tab-btn')) {
+        const t = e.target.getAttribute('data-tab');
+        ['orders', 'products', 'categories', 'settings'].forEach(tab => {
+          document.getElementById(tab + 'Tab').style.display = tab === t ? 'block' : 'none';
+        });
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tab') === t));
+      }
+    });
+
+    document.querySelectorAll('.modal-close-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById(btn.getAttribute('data-modal')).style.display = 'none';
+      });
+    });
+
+    function showToast(msg, allowUndo = false) {
       const toast = document.getElementById('toast');
       document.getElementById('toastMsg').innerText = msg;
+      document.getElementById('toastUndoBtn').style.display = allowUndo ? 'inline-block' : 'none';
       toast.style.display = 'flex';
-      setTimeout(() => { toast.style.display = 'none'; }, 3000);
-    }
-
-    function switchTab(t) {
-      ['orders', 'settings'].forEach(tab => {
-        document.getElementById(tab + 'Tab').style.display = tab === t ? 'block' : 'none';
-      });
-      document.querySelectorAll('.tab-btn').forEach((b, idx) => {
-        b.classList.toggle('active', ['orders', 'settings'][idx] === t);
-      });
+      setTimeout(() => { if (!deletedProductBackup) toast.style.display = 'none'; }, 4000);
     }
   </script>
 </body>
