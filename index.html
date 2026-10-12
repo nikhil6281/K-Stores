@@ -392,6 +392,56 @@
       return SVG_PLACEHOLDER;
     }
 
+    function getCachedProductImage(id, version) {
+      try {
+        const item = localStorage.getItem('ra_img_' + id);
+        if (item) {
+          const parsed = JSON.parse(item);
+          if (parsed && parsed.v === version && parsed.data) {
+            return parsed.data;
+          }
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function setCachedProductImage(id, version, data) {
+      try {
+        localStorage.setItem('ra_img_' + id, JSON.stringify({ v: version, data: data }));
+      } catch (e) {
+        try {
+          const keys = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('ra_img_')) keys.push(k);
+          }
+          for (let i = 0; i < Math.min(keys.length, 10); i++) {
+            localStorage.removeItem(keys[i]);
+          }
+          localStorage.setItem('ra_img_' + id, JSON.stringify({ v: version, data: data }));
+        } catch (e2) {}
+      }
+    }
+
+    const pendingImageFetches = new Set();
+    function loadProductImageLazily(id, version) {
+      if (pendingImageFetches.has(id)) return;
+      pendingImageFetches.add(id);
+
+      db.ref('productImages/' + id).once('value').then(snap => {
+        pendingImageFetches.delete(id);
+        const dataUrl = snap.val();
+        if (dataUrl && typeof dataUrl === 'string') {
+          setCachedProductImage(id, version, dataUrl);
+          document.querySelectorAll('.product-img-' + id).forEach(img => {
+            img.src = dataUrl;
+          });
+        }
+      }).catch(() => {
+        pendingImageFetches.delete(id);
+      });
+    }
+
     // Lazy load Razorpay Checkout only on-demand
     function loadRazorpaySdk() {
       return new Promise((resolve, reject) => {
@@ -754,13 +804,26 @@
         const inCart = cart[id] || 0;
         const isOutOfStock = p.inStock === false;
         const displayName = (currentLang === 'te' && p.nameTe) ? p.nameTe : p.name;
-        const imgUrl = p.image || p.imageUrl || p.imageURL || '';
+        
+        let displayImg = SVG_PLACEHOLDER;
+        let needsLazyLoad = false;
+        if (p.hasImage) {
+          const cached = getCachedProductImage(id, p.imageVersion);
+          if (cached) {
+            displayImg = cached;
+          } else {
+            displayImg = SVG_PLACEHOLDER;
+            needsLazyLoad = true;
+          }
+        } else {
+          displayImg = safeImage(p.image || p.imageUrl || p.imageURL || '');
+        }
 
         return `
           <div class="card" style="${isOutOfStock ? 'opacity: 0.75;' : ''}">
             ${isOutOfStock ? `<span class="out-of-stock-badge">${I18N[currentLang].outOfStock}</span>` : ''}
             <div class="product-img-wrap">
-              <img class="product-img" loading="lazy" width="140" height="140" src="${safeImage(imgUrl)}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null; this.src='${SVG_PLACEHOLDER}';">
+              <img class="product-img product-img-${escapeHtml(id)}" ${needsLazyLoad ? `data-img-lazy="true" data-img-id="${escapeHtml(id)}" data-img-v="${escapeHtml(p.imageVersion || '')}"` : ''} loading="lazy" width="140" height="140" src="${displayImg}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null; this.src='${SVG_PLACEHOLDER}';">
             </div>
             <div class="product-info">
               <div class="product-title">${escapeHtml(displayName)}</div>
@@ -784,6 +847,33 @@
           </div>
         `;
       }).join('');
+
+      if (window.IntersectionObserver) {
+        const observer = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              const imgId = img.getAttribute('data-img-id');
+              const imgV = img.getAttribute('data-img-v');
+              if (imgId) {
+                loadProductImageLazily(imgId, imgV);
+                obs.unobserve(img);
+              }
+            }
+          });
+        }, { rootMargin: '200px' });
+
+        document.querySelectorAll('img[data-img-lazy="true"]').forEach(img => {
+          observer.observe(img);
+        });
+      } else {
+        pKeys.forEach(id => {
+          const p = productsCatalog[id];
+          if (p.hasImage && !getCachedProductImage(id, p.imageVersion)) {
+            loadProductImageLazily(id, p.imageVersion);
+          }
+        });
+      }
     }
 
     document.getElementById('productsGrid').addEventListener('click', (e) => {
