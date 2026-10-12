@@ -336,7 +336,7 @@
         </div>
 
         <div class="form-group" style="background: #F9FAFB; padding: 12px; border-radius: 8px; border: 1px dashed var(--border);">
-          <label style="margin-bottom: 6px;">Product Photo (Compressed to &lt;100 KB)</label>
+          <label style="margin-bottom: 6px;">Product Photo</label>
           
           <div style="display: flex; gap: 8px; margin-bottom: 10px;">
             <label class="btn btn-primary" style="flex: 1; font-size: 12px; cursor: pointer;">
@@ -356,10 +356,6 @@
               <button type="button" class="btn btn-outline" id="flipCameraBtn" style="color: var(--text);">Flip Cam</button>
               <button type="button" class="btn btn-light" id="closeCameraBtn">Cancel</button>
             </div>
-          </div>
-
-          <div id="imageUploadProgress" style="display: none; font-size: 11px; color: var(--primary); font-weight: 600; margin-bottom: 6px;">
-            Optimizing & Uploading image...
           </div>
 
           <div style="margin: 8px 0 10px;">
@@ -1027,58 +1023,89 @@
     // =========================================================
     // CAMERA-TO-WEBSITE COMPRESSION & UPLOAD (From Phase 2)
     // =========================================================
-    async function compressImageToBlob(file) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = URL.createObjectURL(file);
-        img.onload = () => {
-          let width = img.width, height = img.height;
-          const maxDim = 800;
-          if (width > height && width > maxDim) { height = Math.round((height * maxDim) / width); width = maxDim; }
-          else if (height > maxDim) { width = Math.round((width * maxDim) / height); height = maxDim; }
-          const canvas = document.createElement('canvas');
-          canvas.width = width; canvas.height = height;
-          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          canvas.toBlob(blob => resolve(blob), 'image/webp', 0.8);
-        };
-        img.onerror = reject;
-      });
+    // CAMERA-TO-WEBSITE COMPRESSION & REALTIME DATABASE UPLOAD
+    // =========================================================
+    let currentPendingImageDataUrl = null;
+    const adminImageCache = {};
+
+    async function compressImageToDataUrl(file) {
+      let imgBitmap;
+      let width, height;
+      try {
+        imgBitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+        width = imgBitmap.width;
+        height = imgBitmap.height;
+      } catch (e) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+              let w = img.width, h = img.height;
+              const maxDim = 600;
+              if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+              else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+              const canvas = document.createElement('canvas');
+              canvas.width = w; canvas.height = h;
+              canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+              resolve(getOptimizedDataUrl(canvas));
+            };
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.src = ev.target.result;
+          };
+          reader.onerror = () => reject(new Error('Failed to read file'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const maxDim = 600;
+      if (width > height && width > maxDim) {
+        height = Math.round((height * maxDim) / width);
+        width = maxDim;
+      } else if (height > maxDim) {
+        width = Math.round((width * maxDim) / height);
+        height = maxDim;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(imgBitmap, 0, 0, width, height);
+      return getOptimizedDataUrl(canvas);
+    }
+
+    function getOptimizedDataUrl(canvas) {
+      let quality = 0.8;
+      let dataUrl = '';
+      try {
+        dataUrl = canvas.toDataURL('image/webp', quality);
+      } catch (err) {}
+      if (!dataUrl || !dataUrl.startsWith('data:image/webp')) {
+        dataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
+      while (dataUrl.length > 100000 && quality > 0.3) {
+        quality -= 0.15;
+        const fmt = dataUrl.startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+        dataUrl = canvas.toDataURL(fmt, quality);
+      }
+      return dataUrl;
     }
 
     async function handleFileSelected(file) {
       if (!file) return;
-      const progress = document.getElementById('imageUploadProgress');
       const statusText = document.getElementById('imageStatusText');
-      progress.style.display = 'block';
-      statusText.innerText = "Compressing & Uploading...";
+      statusText.innerText = "Optimizing photo...";
 
       try {
-        const compressedBlob = await compressImageToBlob(file);
-        const token = await currentUser.getIdToken();
-        const fd = new FormData();
-        fd.append('photo', compressedBlob, 'photo.webp');
-
-        const res = await fetch(`${WORKER_API}/api/admin/upload-image`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: fd
-        });
-
-        const data = await res.json();
-        if (res.ok && data.url) {
-          document.getElementById('prodImageUrl').value = data.url;
-          document.getElementById('prodImageUrlInput').value = data.url;
-          document.getElementById('imagePreview').src = data.url;
-          statusText.innerText = "Uploaded! (<100 KB)";
-        } else {
-          alert('Upload failed: ' + (data.error || 'Server error'));
-          statusText.innerText = "Upload failed. You can paste an image URL below.";
-        }
+        const dataUrl = await compressImageToDataUrl(file);
+        currentPendingImageDataUrl = dataUrl;
+        document.getElementById('imagePreview').src = dataUrl;
+        document.getElementById('prodImageUrlInput').value = '';
+        document.getElementById('prodImageUrl').value = '';
+        statusText.innerText = "Photo ready";
       } catch (e) {
-        alert('Image error: ' + e.message);
-        statusText.innerText = "Error. You can paste an image URL below.";
-      } finally {
-        progress.style.display = 'none';
+        statusText.innerHTML = `Error: ${escapeHtml(e.message)} <button type="button" class="btn btn-outline" style="padding:2px 6px;font-size:11px;margin-left:4px;" onclick="document.getElementById('phoneCameraInput').click()">Retry</button>`;
       }
     }
 
@@ -1169,9 +1196,27 @@
           ${pKeys.map(k => {
             const p = allProducts[k];
             const cat = allCategories[p.categoryId]?.name || 'General';
+            let imgSrc = SVG_PLACEHOLDER;
+            if (p.hasImage) {
+              if (adminImageCache[k]) {
+                imgSrc = adminImageCache[k];
+              } else {
+                imgSrc = SVG_PLACEHOLDER;
+                db.ref('productImages/' + k).once('value').then(snap => {
+                  const val = snap.val();
+                  if (val) {
+                    adminImageCache[k] = val;
+                    const imgEl = document.getElementById('admin-img-' + k);
+                    if (imgEl) imgEl.src = val;
+                  }
+                });
+              }
+            } else {
+              imgSrc = p.image || p.imageUrl || p.imageURL || SVG_PLACEHOLDER;
+            }
             return `
               <div class="card" style="padding: 10px;">
-                <img src="${p.image || p.imageUrl || p.imageURL || SVG_PLACEHOLDER}" onerror="this.onerror=null; this.src=SVG_PLACEHOLDER;" style="width: 100%; height: 110px; object-fit: contain; background: #fafafa; border-radius: 6px;">
+                <img id="admin-img-${escapeHtml(k)}" src="${imgSrc}" onerror="this.onerror=null; this.src=SVG_PLACEHOLDER;" style="width: 100%; height: 110px; object-fit: contain; background: #fafafa; border-radius: 6px;">
                 <div style="font-weight: 700; font-size: 14px; margin-top: 6px;">${escapeHtml(p.name)}</div>
                 <div style="font-size: 12px; color: var(--muted);">${escapeHtml(cat)} • ${escapeHtml(p.unit)}</div>
                 <div style="font-size: 14px; font-weight: 700; color: var(--primary); margin: 4px 0;">₹${escapeHtml(p.price)}</div>
@@ -1191,6 +1236,8 @@
     });
 
     document.getElementById('openAddProductModalBtn').addEventListener('click', () => {
+      isQuickAddActive = false;
+      currentPendingImageDataUrl = null;
       document.getElementById('productForm').reset();
       document.getElementById('editProductId').value = '';
       document.getElementById('productModalTitle').innerText = 'Add New Product';
@@ -1203,6 +1250,7 @@
 
     document.getElementById('quickAddModeBtn').addEventListener('click', () => {
       isQuickAddActive = true;
+      currentPendingImageDataUrl = null;
       document.getElementById('productForm').reset();
       document.getElementById('editProductId').value = '';
       document.getElementById('productModalTitle').innerText = '⚡ Quick Add - Continuous Stocking';
@@ -1217,20 +1265,43 @@
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('editProductId').value || `p_${Date.now()}`;
-      const chosenImage = document.getElementById('prodImageUrlInput').value.trim() || document.getElementById('prodImageUrl').value.trim() || SVG_PLACEHOLDER;
+      const pastedUrl = document.getElementById('prodImageUrlInput').value.trim();
+      const existingProduct = allProducts[id] || {};
+
       const prodData = {
         name: document.getElementById('prodName').value.trim(),
         price: Number(document.getElementById('prodPrice').value),
         unit: document.getElementById('prodUnit').value.trim(),
         categoryId: document.getElementById('prodCategory').value,
         keywords: document.getElementById('prodKeywords').value.trim(),
-        image: chosenImage,
         inStock: document.getElementById('prodInStock').checked,
         updatedAt: new Date().toISOString()
       };
 
+      if (currentPendingImageDataUrl) {
+        await db.ref(`productImages/${id}`).set(currentPendingImageDataUrl);
+        prodData.hasImage = true;
+        prodData.imageVersion = Date.now();
+        prodData.image = '';
+        adminImageCache[id] = currentPendingImageDataUrl;
+      } else if (pastedUrl) {
+        prodData.image = pastedUrl;
+        prodData.hasImage = false;
+        await db.ref(`productImages/${id}`).remove();
+        delete adminImageCache[id];
+      } else if (existingProduct.hasImage) {
+        prodData.hasImage = true;
+        prodData.imageVersion = existingProduct.imageVersion || Date.now();
+        prodData.image = '';
+      } else {
+        prodData.image = existingProduct.image || '';
+        prodData.hasImage = false;
+      }
+
       await db.ref(`products/${id}`).update(prodData);
       showToast(`Product "${prodData.name}" saved!`);
+
+      currentPendingImageDataUrl = null;
 
       if (isQuickAddActive) {
         document.getElementById('productForm').reset();
@@ -1248,26 +1319,57 @@
       if (e.target.classList.contains('action-edit-prod')) {
         const id = e.target.getAttribute('data-id');
         const p = allProducts[id];
-        const imgVal = p.image || p.imageUrl || p.imageURL || '';
+        currentPendingImageDataUrl = null;
         document.getElementById('editProductId').value = id;
         document.getElementById('prodName').value = p.name;
         document.getElementById('prodPrice').value = p.price;
         document.getElementById('prodUnit').value = p.unit;
         document.getElementById('prodCategory').value = p.categoryId || '';
         document.getElementById('prodKeywords').value = p.keywords || '';
-        document.getElementById('prodImageUrl').value = imgVal;
-        document.getElementById('prodImageUrlInput').value = imgVal;
-        document.getElementById('imagePreview').src = imgVal || SVG_PLACEHOLDER;
-        document.getElementById('imageStatusText').innerText = imgVal ? "Photo set" : "No photo taken yet";
         document.getElementById('prodInStock').checked = p.inStock !== false;
         document.getElementById('productModalTitle').innerText = 'Edit Product';
+
+        if (p.hasImage) {
+          document.getElementById('prodImageUrl').value = '';
+          document.getElementById('prodImageUrlInput').value = '';
+          if (adminImageCache[id]) {
+            document.getElementById('imagePreview').src = adminImageCache[id];
+            document.getElementById('imageStatusText').innerText = "Photo set";
+          } else {
+            document.getElementById('imagePreview').src = SVG_PLACEHOLDER;
+            document.getElementById('imageStatusText').innerText = "Loading photo...";
+            db.ref(`productImages/${id}`).once('value').then(snap => {
+              const val = snap.val();
+              if (val) {
+                adminImageCache[id] = val;
+                document.getElementById('imagePreview').src = val;
+                document.getElementById('imageStatusText').innerText = "Photo set";
+              } else {
+                document.getElementById('imageStatusText').innerText = "No photo found";
+              }
+            });
+          }
+        } else {
+          const imgVal = p.image || p.imageUrl || p.imageURL || '';
+          document.getElementById('prodImageUrl').value = imgVal;
+          document.getElementById('prodImageUrlInput').value = imgVal;
+          document.getElementById('imagePreview').src = imgVal || SVG_PLACEHOLDER;
+          document.getElementById('imageStatusText').innerText = imgVal ? "Photo set" : "No photo taken yet";
+        }
+
         document.getElementById('productModal').style.display = 'flex';
       }
       if (e.target.classList.contains('action-delete-prod')) {
         const id = e.target.getAttribute('data-id');
         const p = allProducts[id];
         if (!confirm(`Delete "${p.name}"? You will have 10 seconds to undo.`)) return;
-        deletedProductBackup = { id, data: p };
+        let imgBackup = null;
+        if (p.hasImage) {
+          const snap = await db.ref(`productImages/${id}`).once('value');
+          imgBackup = snap.val();
+          await db.ref(`productImages/${id}`).remove();
+        }
+        deletedProductBackup = { id, data: p, imageData: imgBackup };
         await db.ref(`products/${id}`).remove();
         showToast(`Deleted "${p.name}".`, true);
         deleteTimeout = setTimeout(() => { deletedProductBackup = null; }, 10000);
@@ -1278,6 +1380,10 @@
       if (deletedProductBackup) {
         clearTimeout(deleteTimeout);
         await db.ref(`products/${deletedProductBackup.id}`).set(deletedProductBackup.data);
+        if (deletedProductBackup.imageData) {
+          await db.ref(`productImages/${deletedProductBackup.id}`).set(deletedProductBackup.imageData);
+          adminImageCache[deletedProductBackup.id] = deletedProductBackup.imageData;
+        }
         showToast(`Restored "${deletedProductBackup.data.name}"`);
         deletedProductBackup = null;
         document.getElementById('toastUndoBtn').style.display = 'none';
