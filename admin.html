@@ -362,8 +362,13 @@
             Optimizing & Uploading image...
           </div>
 
+          <div style="margin: 8px 0 10px;">
+            <label style="font-size: 11px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px;">Or Paste Image URL (HTTPS link):</label>
+            <input type="url" id="prodImageUrlInput" placeholder="https://example.com/product.jpg" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px;">
+          </div>
+
           <div style="display: flex; align-items: center; gap: 10px;">
-            <img id="imagePreview" src="https://via.placeholder.com/80" style="width: 60px; height: 60px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); background: #fff;">
+            <img id="imagePreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ERA Store%3C/text%3E%3C/svg%3E" style="width: 60px; height: 60px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); background: #fff;">
             <input type="hidden" id="prodImageUrl">
             <span id="imageStatusText" style="font-size: 12px; color: var(--muted);">No photo taken yet</span>
           </div>
@@ -430,6 +435,8 @@
       if (str === null || str === undefined) return '';
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
+
+    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ERA Store%3C/text%3E%3C/svg%3E";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD94vWB3NBEjSGmbO6JQ5F1t6L9Js7er8Y",
@@ -1060,15 +1067,16 @@
         const data = await res.json();
         if (res.ok && data.url) {
           document.getElementById('prodImageUrl').value = data.url;
+          document.getElementById('prodImageUrlInput').value = data.url;
           document.getElementById('imagePreview').src = data.url;
           statusText.innerText = "Uploaded! (<100 KB)";
         } else {
           alert('Upload failed: ' + (data.error || 'Server error'));
-          statusText.innerText = "Upload failed. Try again.";
+          statusText.innerText = "Upload failed. You can paste an image URL below.";
         }
       } catch (e) {
         alert('Image error: ' + e.message);
-        statusText.innerText = "Error. Try again.";
+        statusText.innerText = "Error. You can paste an image URL below.";
       } finally {
         progress.style.display = 'none';
       }
@@ -1076,6 +1084,19 @@
 
     document.getElementById('phoneCameraInput').addEventListener('change', (e) => handleFileSelected(e.target.files[0]));
     document.getElementById('galleryFileInput').addEventListener('change', (e) => handleFileSelected(e.target.files[0]));
+
+    document.getElementById('prodImageUrlInput').addEventListener('input', (e) => {
+      const url = e.target.value.trim();
+      if (url) {
+        document.getElementById('imagePreview').src = url;
+        document.getElementById('prodImageUrl').value = url;
+        document.getElementById('imageStatusText').innerText = "URL set";
+      } else {
+        document.getElementById('imagePreview').src = SVG_PLACEHOLDER;
+        document.getElementById('prodImageUrl').value = '';
+        document.getElementById('imageStatusText').innerText = "No photo taken yet";
+      }
+    });
 
     let cameraStream = null;
     let cameraFacingMode = 'environment';
@@ -1150,7 +1171,7 @@
             const cat = allCategories[p.categoryId]?.name || 'General';
             return `
               <div class="card" style="padding: 10px;">
-                <img src="${p.image || 'https://via.placeholder.com/150'}" style="width: 100%; height: 110px; object-fit: contain; background: #fafafa; border-radius: 6px;">
+                <img src="${p.image || p.imageUrl || p.imageURL || SVG_PLACEHOLDER}" onerror="this.onerror=null; this.src=SVG_PLACEHOLDER;" style="width: 100%; height: 110px; object-fit: contain; background: #fafafa; border-radius: 6px;">
                 <div style="font-weight: 700; font-size: 14px; margin-top: 6px;">${escapeHtml(p.name)}</div>
                 <div style="font-size: 12px; color: var(--muted);">${escapeHtml(cat)} • ${escapeHtml(p.unit)}</div>
                 <div style="font-size: 14px; font-weight: 700; color: var(--primary); margin: 4px 0;">₹${escapeHtml(p.price)}</div>
@@ -1173,8 +1194,10 @@
       document.getElementById('productForm').reset();
       document.getElementById('editProductId').value = '';
       document.getElementById('productModalTitle').innerText = 'Add New Product';
-      document.getElementById('imagePreview').src = 'https://via.placeholder.com/80';
+      document.getElementById('imagePreview').src = SVG_PLACEHOLDER;
       document.getElementById('prodImageUrl').value = '';
+      document.getElementById('prodImageUrlInput').value = '';
+      document.getElementById('imageStatusText').innerText = "No photo taken yet";
       document.getElementById('productModal').style.display = 'flex';
     });
 
@@ -1183,8 +1206,10 @@
       document.getElementById('productForm').reset();
       document.getElementById('editProductId').value = '';
       document.getElementById('productModalTitle').innerText = '⚡ Quick Add - Continuous Stocking';
-      document.getElementById('imagePreview').src = 'https://via.placeholder.com/80';
+      document.getElementById('imagePreview').src = SVG_PLACEHOLDER;
       document.getElementById('prodImageUrl').value = '';
+      document.getElementById('prodImageUrlInput').value = '';
+      document.getElementById('imageStatusText').innerText = "No photo taken yet";
       document.getElementById('productModal').style.display = 'flex';
       startLiveCamera();
     });
@@ -1192,13 +1217,14 @@
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('editProductId').value || `p_${Date.now()}`;
+      const chosenImage = document.getElementById('prodImageUrlInput').value.trim() || document.getElementById('prodImageUrl').value.trim() || SVG_PLACEHOLDER;
       const prodData = {
         name: document.getElementById('prodName').value.trim(),
         price: Number(document.getElementById('prodPrice').value),
         unit: document.getElementById('prodUnit').value.trim(),
         categoryId: document.getElementById('prodCategory').value,
         keywords: document.getElementById('prodKeywords').value.trim(),
-        image: document.getElementById('prodImageUrl').value || 'https://via.placeholder.com/150',
+        image: chosenImage,
         inStock: document.getElementById('prodInStock').checked,
         updatedAt: new Date().toISOString()
       };
@@ -1208,8 +1234,10 @@
 
       if (isQuickAddActive) {
         document.getElementById('productForm').reset();
-        document.getElementById('imagePreview').src = 'https://via.placeholder.com/80';
+        document.getElementById('imagePreview').src = SVG_PLACEHOLDER;
         document.getElementById('prodImageUrl').value = '';
+        document.getElementById('prodImageUrlInput').value = '';
+        document.getElementById('imageStatusText').innerText = "No photo taken yet";
         startLiveCamera();
       } else {
         document.getElementById('productModal').style.display = 'none';
@@ -1220,14 +1248,17 @@
       if (e.target.classList.contains('action-edit-prod')) {
         const id = e.target.getAttribute('data-id');
         const p = allProducts[id];
+        const imgVal = p.image || p.imageUrl || p.imageURL || '';
         document.getElementById('editProductId').value = id;
         document.getElementById('prodName').value = p.name;
         document.getElementById('prodPrice').value = p.price;
         document.getElementById('prodUnit').value = p.unit;
         document.getElementById('prodCategory').value = p.categoryId || '';
         document.getElementById('prodKeywords').value = p.keywords || '';
-        document.getElementById('prodImageUrl').value = p.image || '';
-        document.getElementById('imagePreview').src = p.image || 'https://via.placeholder.com/80';
+        document.getElementById('prodImageUrl').value = imgVal;
+        document.getElementById('prodImageUrlInput').value = imgVal;
+        document.getElementById('imagePreview').src = imgVal || SVG_PLACEHOLDER;
+        document.getElementById('imageStatusText').innerText = imgVal ? "Photo set" : "No photo taken yet";
         document.getElementById('prodInStock').checked = p.inStock !== false;
         document.getElementById('productModalTitle').innerText = 'Edit Product';
         document.getElementById('productModal').style.display = 'flex';

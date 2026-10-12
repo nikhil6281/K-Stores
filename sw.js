@@ -1,9 +1,10 @@
 /**
  * RA Store - Service Worker (PWA Shell Caching)
- * CRITICAL RULE: Never cache API, Firebase, or Razorpay calls.
+ * Network-first for navigation/HTML, stale-while-revalidate for local assets.
+ * CRITICAL RULE: Never cache API, Firebase, Google Auth, Cloudinary, or Razorpay calls.
  */
 
-const CACHE_NAME = 'ra-store-shell-v1';
+const CACHE_NAME = 'ra-store-shell-v2';
 const SHELL_ASSETS = [
   './index.html',
   './manifest.json',
@@ -31,32 +32,48 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = e.request.url;
 
-  // NEVER cache API requests, Firebase RTDB, Firebase Auth, or Razorpay
+  // NEVER cache API requests, Firebase, Razorpay, or Cloudinary
   if (
     url.includes('/api/') ||
     url.includes('firebaseio.com') ||
     url.includes('googleapis.com/identitytoolkit') ||
-    url.includes('razorpay.com')
+    url.includes('razorpay.com') ||
+    url.includes('cloudinary.com')
   ) {
     return; // Pass through to network
   }
 
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-      return fetch(e.request).then((networkResponse) => {
-        // Cache external fonts or shell resources
-        if (networkResponse && networkResponse.status === 200 && e.request.method === 'GET') {
-          const resClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
-        }
-        return networkResponse;
-      }).catch(() => {
-        // Fallback for navigation requests
-        if (e.request.mode === 'navigate') {
+  // 1. Navigation / HTML requests: Network-First (with cache fallback for offline)
+  if (e.request.mode === 'navigate' || e.request.destination === 'document') {
+    e.respondWith(
+      fetch(e.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const resClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
+          }
+          return networkResponse;
+        })
+        .catch(() => {
           return caches.match('./index.html');
-        }
-      });
-    })
-  );
+        })
+    );
+    return;
+  }
+
+  // 2. Same-origin static assets: Cache-first with network fallback
+  if (url.startsWith(self.location.origin) || url.startsWith('https://fonts.googleapis.com')) {
+    e.respondWith(
+      caches.match(e.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
+        return fetch(e.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200 && e.request.method === 'GET') {
+            const resClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
+          }
+          return networkResponse;
+        });
+      })
+    );
+  }
 });
