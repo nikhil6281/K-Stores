@@ -2083,9 +2083,16 @@
             order_id: data.razorpayOrderId,
             handler: async function (response) {
               try {
+                let verifyHeaders = { 'Content-Type': 'application/json' };
+                if (currentUser) {
+                  try {
+                    const verifyToken = await currentUser.getIdToken();
+                    verifyHeaders['Authorization'] = `Bearer ${verifyToken}`;
+                  } catch (e) {}
+                }
                 const verifyRes = await fetch(`${WORKER_API}/api/verify-payment`, {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: verifyHeaders,
                   body: JSON.stringify({
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_payment_id: response.razorpay_payment_id,
