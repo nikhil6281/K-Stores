@@ -101,21 +101,24 @@
     .refund-hero-title { font-weight: 700; font-size: 13px; color: #92400E; }
     .refund-hero-desc { font-size: 11px; color: #B45309; }
 
-    .store-banner { background: #FEE2E2; color: #991B1B; padding: 10px 16px; font-size: 13px; font-weight: 600; text-align: center; display: none; }
+    .store-banner { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; padding: 10px 16px; font-size: 13px; font-weight: 600; text-align: center; display: none; }
     .inapp-banner { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; padding: 8px 16px; font-size: 12px; text-align: center; display: none; }
     .announcement-banner { background: #DCFCE7; color: #166534; padding: 8px 16px; font-size: 13px; font-weight: 600; text-align: center; display: none; }
 
     .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
-    .product-img-wrap { width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; background: #fafafa; border-radius: 6px; overflow: hidden; }
+    .product-img-wrap { width: 100%; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; background: #fafafa; border-radius: 6px; overflow: hidden; cursor: zoom-in; position: relative; }
     .product-img { width: 100%; height: 100%; object-fit: contain; }
     .product-info { flex: 1; display: flex; flex-direction: column; }
     .product-title { font-size: 13px; font-weight: 600; margin-top: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.8em; }
-    .product-unit { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-    .product-bottom-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 6px; }
+    .product-unit { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .product-bottom-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 6px; }
+    .product-price-wrap { display: flex; flex-direction: column; }
     .product-price { font-size: 14px; font-weight: 700; color: var(--dark); }
-    
+    .product-mrp { font-size: 11px; color: var(--muted); text-decoration: line-through; font-weight: 500; margin-left: 4px; }
+    .discount-pill { position: absolute; top: 8px; left: 8px; background: #166534; color: #fff; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; z-index: 2; }
+
     .action-add-cart { min-height: 44px; min-width: 60px; padding: 8px 12px; font-size: 13px; }
     .qty-stepper-wrap { display: flex; align-items: center; gap: 4px; }
     .action-qty { min-height: 44px; min-width: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; }
@@ -157,7 +160,7 @@
     .bill-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
     .bill-row-total { font-size: 14px; font-weight: 700; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 6px; }
 
-    /* Phase 2: Phone OTP & Checkout Bottom Sheet Enhancements */
+    /* Phone OTP & Checkout Bottom Sheet Enhancements */
     .phone-input-group { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; transition: border-color 0.15s ease; }
     .phone-input-group:focus-within { border-color: var(--primary); }
     .phone-prefix { background: #F3F4F6; padding: 10px 12px; font-size: 14px; font-weight: 700; color: var(--text); border-right: 1px solid var(--border); flex-shrink: 0; }
@@ -186,6 +189,26 @@
     .pay-card-radio-indicator { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #D1D5DB; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: transparent; flex-shrink: 0; }
     .pay-card.active .pay-card-radio-indicator { border-color: var(--primary); background: var(--primary); color: #fff; }
 
+    /* Phase 3: Order Tracking Timeline Styles */
+    .order-timeline { display: flex; align-items: center; justify-content: space-between; margin: 12px 0 10px; padding: 0 4px; }
+    .timeline-step { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; z-index: 1; flex: 1; }
+    .step-circle { width: 22px; height: 22px; border-radius: 50%; background: #E5E7EB; color: #6B7280; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .timeline-step.active .step-circle { background: var(--primary); color: #fff; }
+    .timeline-step.current .step-circle { background: var(--primary); color: #fff; box-shadow: 0 0 0 3px #BBF7D0; }
+    .step-label { font-size: 10px; color: #6B7280; font-weight: 600; text-align: center; line-height: 1.2; }
+    .timeline-step.active .step-label, .timeline-step.current .step-label { color: var(--primary-dark); font-weight: 700; }
+    .timeline-line { flex: 1; height: 3px; background: #E5E7EB; margin: -16px -8px 0; z-index: 0; }
+    .timeline-line.active { background: var(--primary); }
+    .order-card-box { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; background: #fff; }
+
+    /* Phase 3: Floating Call & WhatsApp Buttons */
+    .floating-contact-wrap { position: fixed; right: 14px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 10px; z-index: 95; transition: bottom 0.25s ease; }
+    .floating-contact-wrap.with-cart-bar { bottom: calc(75px + env(safe-area-inset-bottom, 0px)); }
+    .floating-btn { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.18); transition: transform 0.15s ease; }
+    .floating-btn:active { transform: scale(0.92); }
+    .floating-call-btn { background: #1F2937; color: #fff; }
+    .floating-wa-btn { background: #25D366; color: #fff; }
+
     .empty-state { text-align: center; padding: 40px 20px; }
     .empty-icon { font-size: 40px; margin-bottom: 8px; }
 
@@ -197,7 +220,7 @@
     .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; z-index: 300; display: none; }
 
     /* =========================================================
-       RESPONSIVE MOBILE STYLES (Phase 1 & 2 Mobile Foundations)
+       RESPONSIVE MOBILE STYLES (Phase 1, 2, 3 Foundations)
        Desktop styles stay completely intact.
        ========================================================= */
     @media (max-width: 768px) {
@@ -240,8 +263,9 @@
       .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
       .card { padding: 8px; border-radius: 10px; }
       .product-title { font-size: 12px; min-height: 2.6em; }
-      .product-unit { font-size: 10px; margin-bottom: 4px; }
+      .product-unit { font-size: 10px; margin-bottom: 2px; }
       .product-price { font-size: 13px; }
+      .product-mrp { font-size: 10px; }
       .action-add-cart { min-height: 40px; min-width: 52px; padding: 6px 8px; font-size: 12px; }
       .action-qty { min-height: 40px; min-width: 36px; font-size: 15px; }
       .qty-display { font-size: 12px; min-width: 16px; }
@@ -284,8 +308,9 @@
 
   <div id="announcementBanner" class="announcement-banner"></div>
 
+  <!-- Phase 3: Store Closed Scheduling Banner -->
   <div id="storeClosedBanner" class="store-banner">
-    Store is currently closed (Hours: 7:00 AM – 7:00 PM IST). You can browse and add items to cart!
+    🌙 Store is currently closed for the night. You can order now for scheduled delivery at 7:00 AM IST!
   </div>
 
   <header class="navbar">
@@ -407,6 +432,16 @@
     <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">© 2026 RA Store. All rights reserved. Fast local grocery delivery.</div>
   </footer>
 
+  <!-- Phase 3: Floating Call & WhatsApp Buttons (Does not cover cart bar) -->
+  <div class="floating-contact-wrap" id="floatingContactWrap">
+    <a href="tel:+916281730144" class="floating-btn floating-call-btn" aria-label="Call Store Helpline" title="Call Store">
+      📞
+    </a>
+    <a href="https://wa.me/916281730144?text=Hello%20RA%20Store%2C%20I%20have%20a%20question%20about%20groceries%20in%20Bommalatapalli" target="_blank" class="floating-btn floating-wa-btn" aria-label="Chat on WhatsApp" title="WhatsApp Store">
+      💬
+    </a>
+  </div>
+
   <!-- Floating Cart Bar -->
   <div class="bottom-bar" id="cartBottomBar" style="display: none;" role="region" aria-label="Cart Summary">
     <div class="bottom-bar-info" id="cartBottomBarSummary">
@@ -473,7 +508,7 @@
     </div>
   </div>
 
-  <!-- Phase 2: Phone OTP & Google Login Modal -->
+  <!-- Phone OTP & Google Login Modal -->
   <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
     <div class="modal">
       <div class="drawer-drag-handle"></div>
@@ -545,6 +580,19 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <h3 style="font-size: 16px; font-weight: 700;" id="checkoutModalTitle">Delivery Details</h3>
         <button class="modal-close-btn" data-modal="checkoutModal" aria-label="Close checkout modal" style="background: none; border: none; font-size: 18px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">✕</button>
+      </div>
+
+      <!-- Phase 3: Store Closed Delivery Scheduling Notice -->
+      <div id="deliverySlotSection" style="display: none; background: #FEF3C7; border: 1px solid #FDE68A; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px;">
+        <div style="font-size: 12px; font-weight: 700; color: #92400E; display: flex; align-items: center; gap: 6px;">
+          <span>⏰</span> <span id="tScheduledDeliveryTitle">Scheduled Morning Delivery</span>
+        </div>
+        <div style="font-size: 11px; color: #B45309; margin-top: 2px;" id="tScheduledDeliveryDesc">
+          Store is currently closed. Your groceries will be packed fresh first thing in the morning!
+        </div>
+        <div style="margin-top: 6px; font-size: 12px; font-weight: 700; color: #166534; background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid #BBF7D0;" id="scheduledSlotText">
+          Morning Slot: 7:00 AM – 9:00 AM IST
+        </div>
       </div>
 
       <!-- Delivery Area Check Notice -->
@@ -643,16 +691,31 @@
     </div>
   </div>
 
-  <!-- Orders Modal -->
+  <!-- Orders Modal with Live Status Timeline -->
   <div class="modal-overlay" id="ordersModal" role="dialog" aria-modal="true" aria-labelledby="ordersModalTitle">
     <div class="modal">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 700;" id="ordersModalTitle">My Past Orders</h3>
+        <h3 style="font-size: 16px; font-weight: 700;" id="ordersModalTitle">My Orders & Live Tracking</h3>
         <button class="modal-close-btn" data-modal="ordersModal" aria-label="Close past orders modal" style="background: none; border: none; font-size: 18px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">✕</button>
       </div>
-      <div id="customerOrdersList" style="max-height: 400px; overflow-y: auto;">
-        <p style="color: var(--muted); padding: 15px;">Loading past orders...</p>
+      <div id="customerOrdersList" style="max-height: 55vh; overflow-y: auto;">
+        <p style="color: var(--muted); padding: 15px;">Loading orders...</p>
       </div>
+    </div>
+  </div>
+
+  <!-- Phase 3: Tap-to-Zoom Product Image Modal -->
+  <div class="modal-overlay" id="imageZoomModal" role="dialog" aria-modal="true" aria-labelledby="imageZoomTitle">
+    <div class="modal" style="max-width: 360px; text-align: center; padding: 16px;">
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="modal-close-btn" data-modal="imageZoomModal" aria-label="Close zoom modal" style="background: none; border: none; font-size: 20px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">✕</button>
+      </div>
+      <div style="width: 100%; aspect-ratio: 1/1; background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border);">
+        <img id="zoomModalImg" src="" alt="" style="width: 100%; height: 100%; object-fit: contain;">
+      </div>
+      <h3 id="imageZoomTitle" style="font-size: 16px; font-weight: 700; margin-bottom: 2px;"></h3>
+      <p id="imageZoomUnit" style="font-size: 12px; color: var(--muted); margin-bottom: 8px;"></p>
+      <div id="imageZoomPrice" style="font-size: 18px; font-weight: 800; color: var(--primary);"></div>
     </div>
   </div>
 
@@ -842,7 +905,19 @@
         payOnlineSub: "PhonePe, GPay, Paytm, Cards • 100% Refundable",
         payCodTitle: "Cash on Delivery (COD)",
         payCodSub: "Pay cash when groceries reach your doorstep",
-        confirmOrderBtn: "Confirm & Place Order"
+        confirmOrderBtn: "Confirm & Place Order",
+        scheduleForMorning: "📅 Schedule for 7:00 AM Delivery",
+        storeClosedScheduleBanner: "🌙 Store is closed for the night. You can order now for scheduled delivery at 7:00 AM IST!",
+        scheduledSlotHeading: "Scheduled Morning Delivery",
+        scheduledSlotSub: "Store is currently closed. Your groceries will be packed fresh first thing in the morning!",
+        stepPlaced: "Placed",
+        stepPacked: "Packed",
+        stepOut: "Out for Delivery",
+        stepDelivered: "Delivered",
+        stepCancelled: "Cancelled",
+        reorderOrderBtn: "🔁 Reorder Items",
+        cancelOrderBtn: "Cancel (100% Refund)",
+        itemsAddedToast: "Items added to cart!"
       },
       te: {
         toggleText: "English",
@@ -894,7 +969,19 @@
         payOnlineSub: "PhonePe, GPay, Paytm, కార్డ్స్ • 100% రీఫండ్ హామీ",
         payCodTitle: "క్యాష్ ఆన్ డెలివరీ (సరుకులు వచ్చాక నగదు)",
         payCodSub: "సరుకులు ఇంటికి చేరిన తర్వాత నగదు చెల్లించండి",
-        confirmOrderBtn: "ఆర్డర్ ధృవీకరించండి"
+        confirmOrderBtn: "ఆర్డర్ ధృవీకరించండి",
+        scheduleForMorning: "📅 ఉదయం 7:00 AM కి డెలివరీ షెడ్యూల్",
+        storeClosedScheduleBanner: "🌙 స్టోర్ ఇప్పుడు మూసివేయబడింది. మీరు ఉదయం 7:00 AM డెలివరీ కోసం ఇప్పుడే ఆర్డర్ బుక్ చేసుకోవచ్చు!",
+        scheduledSlotHeading: "షెడ్యూల్డ్ ఉదయపు డెలివరీ",
+        scheduledSlotSub: "స్టోర్ ఇప్పుడు మూసివేయబడింది. ఉదయం మొదటి డెలివరీలో మీ సరుకులు ప్యాక్ చేయబడతాయి!",
+        stepPlaced: "ఆర్డర్ అందింది",
+        stepPacked: "ప్యాకింగ్",
+        stepOut: "బయలుదేరింది 🛵",
+        stepDelivered: "చేరింది ✅",
+        stepCancelled: "రద్దయింది ❌",
+        reorderOrderBtn: "🔁 మళ్ళీ ఆర్డర్",
+        cancelOrderBtn: "రద్దు చేయండి (100% వాపసు)",
+        itemsAddedToast: "వస్తువులు కార్ట్‌కు జోడించబడ్డాయి!"
       }
     };
 
@@ -920,16 +1007,14 @@
       document.getElementById('tDrawerSubtotal').innerText = t.drawerSubtotal;
       document.getElementById('tDrawerDeliveryFee').innerText = t.drawerDeliveryFee;
       document.getElementById('tDrawerTotal').innerText = t.drawerTotal;
-      document.getElementById('cartDrawerCheckoutBtn').innerText = t.checkout;
       
       const clearBtnText = document.querySelector('.clear-cart-text');
       if (clearBtnText) clearBtnText.innerText = t.clearCart;
 
-      document.getElementById('checkoutBtn').innerText = t.checkout;
       if (!currentUser) document.getElementById('loginBtn').innerText = t.signIn;
       document.getElementById('reorderLastBtn').innerText = t.reorder;
 
-      // Phase 2 translations
+      // Translations for Phone Login & Checkout
       document.getElementById('loginModalTitle').innerText = t.phoneLoginTitle;
       document.getElementById('tPhoneLoginSub').innerText = t.phoneLoginSub;
       document.getElementById('sendOtpBtn').innerText = t.sendOtpBtn;
@@ -947,8 +1032,14 @@
       document.getElementById('tPayOnlineSub').innerText = t.payOnlineSub;
       document.getElementById('tPayCodTitle').innerText = t.payCodTitle;
       document.getElementById('tPayCodSub').innerText = t.payCodSub;
-      document.getElementById('placeOrderSubmitBtn').innerText = t.confirmOrderBtn;
 
+      // Phase 3 Scheduled delivery translations
+      document.getElementById('storeClosedBanner').innerText = t.storeClosedScheduleBanner;
+      document.getElementById('tScheduledDeliveryTitle').innerText = t.scheduledSlotHeading;
+      document.getElementById('tScheduledDeliveryDesc').innerText = t.scheduledSlotSub;
+      document.getElementById('ordersModalTitle').innerText = (lang === 'te' ? 'నా ఆర్డర్లు & లైవ్ ట్రాకింగ్' : 'My Orders & Live Tracking');
+
+      checkStoreHours();
       renderCategoryChips();
       renderProducts();
       updateCartUI();
@@ -965,6 +1056,17 @@
       return parseFloat(val) || defaultVal;
     }
 
+    function getNextDeliverySlotString() {
+      const now = new Date();
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const ist = new Date(utc + (3600000 * 5.5));
+      const hours = ist.getHours() + (ist.getMinutes() / 60);
+
+      const dayStr = hours < 7 ? (currentLang === 'te' ? 'ఈరోజు' : 'Today') : (currentLang === 'te' ? 'రేపు' : 'Tomorrow');
+      return `${dayStr}, 7:00 AM – 9:00 AM IST`;
+    }
+
+    // Phase 3: Store Closed Scheduling logic (lets users order anytime without blocking!)
     function checkStoreHours() {
       const mode = storeSettings.storeHours?.mode || 'auto';
       if (mode === 'force_open') isStoreCurrentlyOpen = true;
@@ -979,27 +1081,36 @@
         isStoreCurrentlyOpen = (currentHour >= openHour && currentHour < closeHour);
       }
 
-      document.getElementById('storeClosedBanner').style.display = isStoreCurrentlyOpen ? 'none' : 'block';
+      const closedBanner = document.getElementById('storeClosedBanner');
       const checkoutBtn = document.getElementById('checkoutBtn');
       const drawerCheckoutBtn = document.getElementById('cartDrawerCheckoutBtn');
+      const submitBtn = document.getElementById('placeOrderSubmitBtn');
+      const slotSection = document.getElementById('deliverySlotSection');
+      const slotText = document.getElementById('scheduledSlotText');
+
       if (!isStoreCurrentlyOpen) {
-        const closedText = currentLang === 'te' ? "దుకాణం మూసివేయబడింది (7 AM కి తెరుస్తాం)" : "Store Closed (Opens 7 AM)";
-        checkoutBtn.disabled = true;
-        checkoutBtn.innerText = closedText;
-        checkoutBtn.style.opacity = "0.6";
+        closedBanner.style.display = 'block';
+        slotSection.style.display = 'block';
+        slotText.innerText = getNextDeliverySlotString();
 
-        drawerCheckoutBtn.disabled = true;
-        drawerCheckoutBtn.innerText = closedText;
-        drawerCheckoutBtn.style.opacity = "0.6";
+        const scheduleText = I18N[currentLang].scheduleForMorning;
+        checkoutBtn.innerText = scheduleText;
+        drawerCheckoutBtn.innerText = scheduleText;
+        submitBtn.innerText = scheduleText;
       } else {
-        checkoutBtn.disabled = false;
-        checkoutBtn.innerText = I18N[currentLang].checkout;
-        checkoutBtn.style.opacity = "1";
+        closedBanner.style.display = 'none';
+        slotSection.style.display = 'none';
 
-        drawerCheckoutBtn.disabled = false;
-        drawerCheckoutBtn.innerText = I18N[currentLang].checkout;
-        drawerCheckoutBtn.style.opacity = "1";
+        const normalCheckoutText = I18N[currentLang].checkout;
+        checkoutBtn.innerText = normalCheckoutText;
+        drawerCheckoutBtn.innerText = normalCheckoutText;
+        submitBtn.innerText = I18N[currentLang].confirmOrderBtn;
       }
+
+      checkoutBtn.disabled = false;
+      drawerCheckoutBtn.disabled = false;
+      checkoutBtn.style.opacity = "1";
+      drawerCheckoutBtn.style.opacity = "1";
     }
     setInterval(checkStoreHours, 60000);
 
@@ -1017,7 +1128,7 @@
     });
 
     // ==========================================
-    // Phase 2: Firebase Phone Auth & User State
+    // Firebase Phone Auth & User State
     // ==========================================
     let phoneConfirmationResult = null;
     let resendTimerInterval = null;
@@ -1294,7 +1405,7 @@
           }
         });
         saveCart();
-        showToast('Previous items added to cart!');
+        showToast(I18N[currentLang].itemsAddedToast);
       }
     });
 
@@ -1376,6 +1487,7 @@
       searchClearBtn.style.display = 'block';
     }
 
+    // Phase 3: Product rendering with MRP, discount %, and Tap-to-Zoom
     function renderProducts() {
       const grid = document.getElementById('productsGrid');
       let pKeys = Object.keys(productsCatalog);
@@ -1445,10 +1557,19 @@
           displayImg = safeImage(p.image || p.imageUrl || p.imageURL || '');
         }
 
+        // MRP & Discount calculation
+        let mrpHtml = '';
+        let discountHtml = '';
+        if (p.mrp && Number(p.mrp) > Number(p.price)) {
+          const disc = Math.round(((Number(p.mrp) - Number(p.price)) / Number(p.mrp)) * 100);
+          mrpHtml = `<span class="product-mrp">₹${escapeHtml(p.mrp)}</span>`;
+          discountHtml = `<span class="discount-pill">${disc}% OFF</span>`;
+        }
+
         return `
           <div class="card" style="${isOutOfStock ? 'opacity: 0.75;' : ''}">
-            ${isOutOfStock ? `<span class="out-of-stock-badge">${I18N[currentLang].outOfStock}</span>` : ''}
-            <div class="product-img-wrap">
+            ${isOutOfStock ? `<span class="out-of-stock-badge">${I18N[currentLang].outOfStock}</span>` : discountHtml}
+            <div class="product-img-wrap" data-action="zoom-image" data-id="${escapeHtml(id)}" title="Tap to zoom">
               <img class="product-img product-img-${escapeHtml(id)}" ${needsLazyLoad ? `data-img-lazy="true" data-img-id="${escapeHtml(id)}" data-img-v="${escapeHtml(p.imageVersion || '')}"` : ''} loading="lazy" width="140" height="140" src="${displayImg}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null; this.src='${SVG_PLACEHOLDER}';">
             </div>
             <div class="product-info">
@@ -1456,7 +1577,12 @@
               <div class="product-unit">${escapeHtml(p.unit || '1 pack')}</div>
             </div>
             <div class="product-bottom-row">
-              <span class="product-price">₹${escapeHtml(p.price)}</span>
+              <div class="product-price-wrap">
+                <div>
+                  <span class="product-price">₹${escapeHtml(p.price)}</span>
+                  ${mrpHtml}
+                </div>
+              </div>
               
               ${isOutOfStock ? `
                 <button class="btn btn-outline" disabled style="padding: 6px 10px; font-size: 11px; opacity: 0.6; min-height: 40px;">${I18N[currentLang].outOfStock}</button>
@@ -1502,7 +1628,36 @@
       }
     }
 
+    // Tap to Zoom Image Handler
+    function showImageZoom(productId) {
+      const p = productsCatalog[productId];
+      if (!p) return;
+      const displayName = (currentLang === 'te' && p.nameTe) ? p.nameTe : p.name;
+      
+      let imgUrl = SVG_PLACEHOLDER;
+      if (p.hasImage) {
+        const cached = getCachedProductImage(productId, p.imageVersion);
+        if (cached) imgUrl = cached;
+      } else {
+        imgUrl = safeImage(p.image || p.imageUrl || p.imageURL || '');
+      }
+
+      document.getElementById('zoomModalImg').src = imgUrl;
+      document.getElementById('zoomModalImg').alt = displayName;
+      document.getElementById('imageZoomTitle').innerText = displayName;
+      document.getElementById('imageZoomUnit').innerText = p.unit || '1 pack';
+      document.getElementById('imageZoomPrice').innerText = `₹${p.price}`;
+      openModal('imageZoomModal');
+    }
+
     document.getElementById('productsGrid').addEventListener('click', (e) => {
+      const zoomTarget = e.target.closest('[data-action="zoom-image"]');
+      if (zoomTarget && !e.target.closest('.btn') && !e.target.closest('.qty-stepper-wrap')) {
+        const id = zoomTarget.getAttribute('data-id');
+        if (id) showImageZoom(id);
+        return;
+      }
+
       if (e.target.classList.contains('action-add-cart')) {
         const id = e.target.getAttribute('data-id');
         cart[id] = 1;
@@ -1512,8 +1667,9 @@
         const id = e.target.getAttribute('data-id');
         const delta = parseInt(e.target.getAttribute('data-delta')) || 0;
         const currentQty = cart[id] || 0;
-        if (delta > 0 && currentQty >= 20) {
-          showToast('Maximum 20 items per product allowed.');
+        const maxLimit = (productsCatalog[id] && productsCatalog[id].maxQuantity) || 20;
+        if (delta > 0 && currentQty >= maxLimit) {
+          showToast(`Maximum ${maxLimit} items per product allowed.`);
           return;
         }
         cart[id] = currentQty + delta;
@@ -1551,8 +1707,10 @@
 
       // Bottom floating bar update
       const bar = document.getElementById('cartBottomBar');
+      const contactWrap = document.getElementById('floatingContactWrap');
       if (count > 0) {
         bar.style.display = 'flex';
+        if (contactWrap) contactWrap.classList.add('with-cart-bar');
         const viewCartHint = `<span style="font-size: 11px; font-weight: 600; color: var(--primary); text-decoration: underline; margin-left: 4px;">${I18N[currentLang].viewCartText}</span>`;
         document.getElementById('cartSummaryText').innerHTML = `${count} Items • ₹${subtotal} ${viewCartHint}`;
         const freeThresh = storeSettings.freeDeliveryThreshold || 299;
@@ -1563,6 +1721,7 @@
         }
       } else {
         bar.style.display = 'none';
+        if (contactWrap) contactWrap.classList.remove('with-cart-bar');
       }
 
       const fee = subtotal >= (storeSettings.freeDeliveryThreshold || 299) ? 0 : (storeSettings.deliveryFee || 25);
@@ -1683,8 +1842,9 @@
         const id = qtyBtn.getAttribute('data-id');
         const delta = parseInt(qtyBtn.getAttribute('data-delta')) || 0;
         const currentQty = cart[id] || 0;
-        if (delta > 0 && currentQty >= 20) {
-          showToast('Maximum 20 items per product allowed.');
+        const maxLimit = (productsCatalog[id] && productsCatalog[id].maxQuantity) || 20;
+        if (delta > 0 && currentQty >= maxLimit) {
+          showToast(`Maximum ${maxLimit} items per product allowed.`);
           return;
         }
         cart[id] = currentQty + delta;
@@ -1719,7 +1879,7 @@
     });
 
     // ==========================================
-    // Phase 2: Checkout Bottom Sheet & Profile
+    // Checkout Bottom Sheet & Profile Loading
     // ==========================================
     function loadUserProfileIntoCheckout() {
       if (!currentUser) return;
@@ -1818,10 +1978,6 @@
     });
 
     function openCheckout() {
-      if (!isStoreCurrentlyOpen) {
-        alert("Store is closed right now. Operating hours are 7:00 AM – 7:00 PM IST.");
-        return;
-      }
       if (Object.keys(cart).length === 0) {
         showToast("Your cart is empty!");
         return;
@@ -1853,11 +2009,20 @@
       submitBtn.innerText = "Securing order...";
 
       const items = Object.keys(cart).map(id => ({ id, quantity: cart[id] }));
+      
+      let deliveryNotes = document.getElementById('custNotes').value.trim();
+      let scheduledSlotInfo = null;
+      if (!isStoreCurrentlyOpen) {
+        scheduledSlotInfo = getNextDeliverySlotString();
+        deliveryNotes = (deliveryNotes ? deliveryNotes + ' • ' : '') + `[Scheduled Delivery: ${scheduledSlotInfo}]`;
+      }
+
       const customer = {
         name: document.getElementById('custName').value.trim(),
         phone: document.getElementById('custPhone').value.trim(),
         address: document.getElementById('custAddress').value.trim(),
-        notes: document.getElementById('custNotes').value.trim()
+        notes: deliveryNotes,
+        scheduledSlot: scheduledSlotInfo
       };
 
       // Save user profile locally & to Firebase under users node
@@ -1966,17 +2131,19 @@
         alert('Network error connecting to store server. Please try again.');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerText = I18N[currentLang].confirmOrderBtn;
+        submitBtn.innerText = isStoreCurrentlyOpen ? I18N[currentLang].confirmOrderBtn : I18N[currentLang].scheduleForMorning;
       }
     });
 
     function showOrderSuccess(orderId, customer, total) {
       document.getElementById('successOrderIdText').innerText = `Order #${escapeHtml(orderId)}`;
-      const msg = encodeURIComponent(`Hello RA Store! I placed order #${orderId} for ₹${total}.\nName: ${customer.name}\nAddress: ${customer.address}`);
+      const slotNote = customer.scheduledSlot ? `\nScheduled Delivery: ${customer.scheduledSlot}` : '';
+      const msg = encodeURIComponent(`Hello RA Store! I placed order #${orderId} for ₹${total}.${slotNote}\nName: ${customer.name}\nAddress: ${customer.address}`);
       document.getElementById('successWhatsappLink').href = `https://wa.me/${storeSettings.whatsappNumber}?text=${msg}`;
       openModal('successModal');
     }
 
+    // Phase 3: Order History & Status Timeline Stepper
     document.getElementById('ordersNavBtn').addEventListener('click', () => {
       if (!currentUser) {
         pendingCheckoutAfterLogin = false;
@@ -1992,44 +2159,96 @@
         const list = document.getElementById('customerOrdersList');
         const orders = snap.val();
         if (!orders) {
-          list.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No past orders found.</p>";
+          list.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No orders found.</p>";
           return;
         }
 
-        const friendlyStatus = {
-          placed: "Placed",
-          accepted: "Accepted",
-          packed: "Packed & Ready",
-          out_for_delivery: "Out for Delivery 🛵",
-          delivered: "Delivered ✅",
-          cancelled: "Cancelled ❌"
+        const stepRanks = {
+          placed: 0,
+          accepted: 0,
+          packed: 1,
+          out_for_delivery: 2,
+          delivered: 3,
+          cancelled: -1
         };
+
+        const t = I18N[currentLang];
 
         list.innerHTML = Object.keys(orders).reverse().map(k => {
           const o = orders[k];
           const st = o.status || 'placed';
           const refundNote = o.paymentStatus === 'refund_initiated' ? ' (Refund Initiated)' : (o.paymentStatus === 'refunded' ? ' (Refunded ✅)' : '');
+          const currentRank = stepRanks[st] !== undefined ? stepRanks[st] : 0;
+          const isCancelled = st === 'cancelled';
+
+          const canCancel = st !== 'out_for_delivery' && st !== 'delivered' && st !== 'cancelled';
+
+          // Visual stepper timeline
+          let timelineHtml = '';
+          if (isCancelled) {
+            timelineHtml = `
+              <div style="background: #FEE2E2; border: 1px solid #FECACA; color: var(--danger); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin: 10px 0;">
+                ❌ ${t.stepCancelled}${refundNote}
+              </div>
+            `;
+          } else {
+            timelineHtml = `
+              <div class="order-timeline">
+                <div class="timeline-step ${currentRank >= 0 ? 'active' : ''} ${currentRank === 0 ? 'current' : ''}">
+                  <div class="step-circle">${currentRank > 0 ? '✓' : '1'}</div>
+                  <div class="step-label">${t.stepPlaced}</div>
+                </div>
+                <div class="timeline-line ${currentRank >= 1 ? 'active' : ''}"></div>
+                <div class="timeline-step ${currentRank >= 1 ? 'active' : ''} ${currentRank === 1 ? 'current' : ''}">
+                  <div class="step-circle">${currentRank > 1 ? '✓' : '2'}</div>
+                  <div class="step-label">${t.stepPacked}</div>
+                </div>
+                <div class="timeline-line ${currentRank >= 2 ? 'active' : ''}"></div>
+                <div class="timeline-step ${currentRank >= 2 ? 'active' : ''} ${currentRank === 2 ? 'current' : ''}">
+                  <div class="step-circle">${currentRank > 2 ? '✓' : '3'}</div>
+                  <div class="step-label">${t.stepOut}</div>
+                </div>
+                <div class="timeline-line ${currentRank >= 3 ? 'active' : ''}"></div>
+                <div class="timeline-step ${currentRank >= 3 ? 'active' : ''} ${currentRank === 3 ? 'current' : ''}">
+                  <div class="step-circle">${currentRank >= 3 ? '✓' : '4'}</div>
+                  <div class="step-label">${t.stepDelivered}</div>
+                </div>
+              </div>
+            `;
+          }
+
+          const itemsJson = escapeHtml(JSON.stringify(o.items || []));
 
           return `
-            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fff;">
+            <div class="order-card-box">
               <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 14px;">
                 <span>#${escapeHtml(o.id)}</span>
                 <span style="color: var(--primary);">₹${escapeHtml(o.total)}</span>
               </div>
               <div style="font-size: 11px; color: var(--muted); margin: 2px 0 6px;">${new Date(o.createdAt).toLocaleString()}</div>
               
-              <div style="font-size: 12px; margin-bottom: 6px;">
-                Status: <strong style="color: ${st === 'cancelled' ? 'var(--danger)' : 'var(--primary)'};">${friendlyStatus[st] || st}</strong>
-                <span style="color: #6B7280; font-size: 11px;">${refundNote}</span>
-              </div>
+              ${timelineHtml}
 
-              <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">
+              <div style="font-size: 12px; color: var(--muted); margin: 8px 0;">
                 ${(o.items || []).map(i => `${escapeHtml(i.name)} (${i.quantity})`).join(', ')}
               </div>
 
-              ${st !== 'out_for_delivery' && st !== 'delivered' && st !== 'cancelled' ? `
-                <button class="btn btn-outline action-cancel-my-order" data-key="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); font-size: 11px; padding: 4px 8px; min-height: 36px;">Cancel & 100% Refund</button>
+              ${o.customer?.scheduledSlot ? `
+                <div style="font-size: 11px; color: #B45309; background: #FEF3C7; padding: 4px 8px; border-radius: 6px; margin-bottom: 8px;">
+                  ⏰ ${escapeHtml(o.customer.scheduledSlot)}
+                </div>
               ` : ''}
+
+              <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <button class="btn btn-outline action-reorder-past-order" data-order-id="${escapeHtml(o.id)}" data-items="${itemsJson}" style="flex: 1; font-size: 12px; min-height: 38px;">
+                  ${t.reorderOrderBtn}
+                </button>
+                ${canCancel ? `
+                  <button class="btn btn-outline action-cancel-my-order" data-key="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); font-size: 12px; padding: 4px 10px; min-height: 38px;">
+                    ${t.cancelOrderBtn}
+                  </button>
+                ` : ''}
+              </div>
             </div>
           `;
         }).join('');
@@ -2037,6 +2256,33 @@
     });
 
     document.getElementById('customerOrdersList').addEventListener('click', async (e) => {
+      // Reorder button on past orders
+      const reorderBtn = e.target.closest('.action-reorder-past-order');
+      if (reorderBtn) {
+        try {
+          const rawItems = reorderBtn.getAttribute('data-items');
+          const items = JSON.parse(rawItems || '[]');
+          let addedCount = 0;
+          items.forEach(it => {
+            if (it.id && productsCatalog[it.id] && productsCatalog[it.id].inStock !== false) {
+              cart[it.id] = (cart[it.id] || 0) + (it.quantity || 1);
+              addedCount++;
+            }
+          });
+          if (addedCount > 0) {
+            saveCart();
+            showToast(I18N[currentLang].itemsAddedToast);
+            closeModal('ordersModal');
+            openCartDrawer();
+          } else {
+            showToast("Sorry, those items are currently out of stock.");
+          }
+        } catch (err) {
+          showToast("Error reordering items.");
+        }
+        return;
+      }
+
       if (e.target.classList.contains('action-cancel-my-order')) {
         const orderKey = e.target.getAttribute('data-key');
         if (!confirm('Cancel this order for an automatic 100% full refund?')) return;
@@ -2061,12 +2307,12 @@
           } else {
             alert('Cancellation error: ' + (data.error || 'Please contact store.'));
             e.target.disabled = false;
-            e.target.innerText = "Cancel & 100% Refund";
+            e.target.innerText = I18N[currentLang].cancelOrderBtn;
           }
         } catch (err) {
           alert('Network issue connecting to server. Please try again.');
           e.target.disabled = false;
-          e.target.innerText = "Cancel & 100% Refund";
+          e.target.innerText = I18N[currentLang].cancelOrderBtn;
         }
       }
     });
