@@ -483,9 +483,12 @@
   <!-- Site Footer -->
   <footer class="site-footer">
     <div class="footer-links">
-      <a href="./privacy-policy.html">Privacy Policy (DPDP)</a>
-      <a href="./refund-policy.html">Refund & Cancellation</a>
+      <a href="./about-us.html">About Us</a>
+      <a href="./contact-us.html">Contact Us</a>
       <a href="./terms.html">Terms of Service</a>
+      <a href="./privacy-policy.html">Privacy Policy</a>
+      <a href="./refund-policy.html">Cancellation & Refund</a>
+      <a href="./shipping-policy.html">Shipping & Delivery</a>
     </div>
     <div><strong>RA Store</strong> • <span id="footerAddressText">Shop Address, Anantapur, Andhra Pradesh</span></div>
     <div style="margin-top: 6px;">
@@ -2774,7 +2777,7 @@
 
         await loadRazorpaySdk();
         const options = {
-          key: storeSettings.razorpayKeyId || 'rzp_live_SKfV6022e039Q3',
+          key: storeSettings.razorpayKeyId || 'rzp_live_TtGrq3sfJkM0pA',
           amount: Math.round(Number(total) * 100),
           currency: 'INR',
           name: 'RA Store Anantapur',
