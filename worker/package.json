@@ -1,7 +1,7 @@
 {
   "name": "ra-store-api",
   "version": "1.0.0",
-  "description": "Cloudflare Worker API for Sri Sai General Online Store",
+  "description": "Cloudflare Worker API for RA Store",
   "main": "src/index.js",
   "scripts": {
     "dev": "wrangler dev",

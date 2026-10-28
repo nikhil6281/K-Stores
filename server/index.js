@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
@@ -10,8 +10,12 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_test_TWgfmbYBnc7AU9';
-const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '9bNyxZV8SWTuh4wtSPeAUOhJ';
+const KEY_ID = process.env.RAZORPAY_KEY_ID || '';
+const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
+
+if (!KEY_SECRET) {
+  console.warn('[Razorpay Backend] Warning: RAZORPAY_KEY_SECRET is not configured in environment variables.');
+}
 
 const razorpay = new Razorpay({
   key_id: KEY_ID,

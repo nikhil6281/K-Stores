@@ -1,43 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="config.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';">
   
   <!-- SEO & Social Meta -->
-  <title>Sri Sai General Online Store — Fresh Groceries Delivered in Bommalatapalli</title>
-  <meta name="description" content="Order fresh vegetables, milk, and groceries online in Bommalatapalli. 100% refund guarantee before dispatch. Fast village delivery.">
+  <title>RA Store — Fresh Groceries Delivered in Anantapur</title>
+  <meta name="description" content="Order fresh vegetables, milk, and daily groceries online in Anantapur. 100% refund guarantee before dispatch. Fast doorstep delivery.">
   <link rel="canonical" href="https://nikhil6281.github.io/K-Stores/">
-  <meta property="og:title" content="Sri Sai General Online Store — Fresh Groceries Delivered in Bommalatapalli">
-  <meta property="og:description" content="Local grocery delivery for Bommalatapalli. Browse fresh items, order online, or choose Cash on Delivery.">
+  <meta property="og:title" content="RA Store — Fresh Groceries Delivered in Anantapur">
+  <meta property="og:description" content="Local grocery delivery for Anantapur, Andhra Pradesh. Browse fresh items, order online, or choose Cash on Delivery.">
   <meta property="og:url" content="https://nikhil6281.github.io/K-Stores/">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#0C831F">
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230C831F'/%3E%3Ctext x='50' y='65' font-size='45' font-weight='bold' fill='%23F8CB46' text-anchor='middle'%3ESS%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230C831F'/%3E%3Ctext x='50' y='65' font-size='45' font-weight='bold' fill='%23F8CB46' text-anchor='middle'%3ERA%3C/text%3E%3C/svg%3E">
 
-  <!-- Schema.org JSON-LD for Bommalatapalli -->
+  <!-- Schema.org JSON-LD for Anantapur -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "GroceryStore",
-    "name": "Sri Sai General Online Store",
+    "name": "RA Store",
+    "alternateName": ["Ananthapur RA Store", "Anantapuramu RA Store", "RA General Store"],
     "telephone": "+916281730144",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Main Road beside Chennampalli Road",
-      "addressLocality": "Bommalatapalli",
+      "streetAddress": "Shop Address",
+      "addressLocality": "Anantapur",
       "addressRegion": "Andhra Pradesh",
-      "postalCode": "515134",
+      "postalCode": "515001",
       "addressCountry": "IN"
     },
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",
       "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       "opens": "07:00",
-      "closes": "19:00"
+      "closes": "21:00"
     },
     "priceRange": "₹"
   }
@@ -375,7 +378,7 @@
 
   <header class="navbar">
     <div class="brand">
-      <span class="brand-title" id="navbarBrandTitle">Sri Sai General Online Store</span> <span class="brand-badge">BOMMALATAPALLI</span>
+      <span class="brand-title" id="navbarBrandTitle">RA Store</span> <span class="brand-badge">ANANTAPUR</span>
     </div>
     <div class="nav-actions">
       <button class="btn-lang" id="langToggleBtn" aria-label="Change Language">తెలుగు</button>
@@ -414,7 +417,7 @@
 
   <main class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h2 style="font-size: 16px; font-weight: 700;" id="tCatalogHeading">Fresh Groceries & Village Staples</h2>
+      <h2 style="font-size: 16px; font-weight: 700;" id="tCatalogHeading">Fresh Groceries & daily staples</h2>
       <button id="reorderLastBtn" class="btn btn-outline" style="font-size: 11px; padding: 4px 8px; display: none;" aria-label="Reorder last items">🔁 Reorder Last</button>
     </div>
     
@@ -484,12 +487,12 @@
       <a href="./refund-policy.html">Refund & Cancellation</a>
       <a href="./terms.html">Terms of Service</a>
     </div>
-    <div><strong>Sri Sai General Online Store</strong> • Main Road beside Chennampalli Road, Bommalatapalli, AP</div>
+    <div><strong>RA Store</strong> • <span id="footerAddressText">Shop Address, Anantapur, Andhra Pradesh</span></div>
     <div style="margin-top: 6px;">
       Helpline / WhatsApp: <a href="tel:+916281730144" style="color: #E5E7EB; text-decoration: underline;">+91 62817 30144</a> • 
       <a href="https://wa.me/916281730144" target="_blank" style="color: #25D366; text-decoration: underline;">Chat on WhatsApp</a>
     </div>
-    <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">© 2026 Sri Sai General Online Store. All rights reserved. Fast local grocery delivery.</div>
+    <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">© 2026 RA Store. All rights reserved. Fast doorstep grocery delivery in Anantapur.</div>
   </footer>
 
   <!-- Phase 3: Floating Call & WhatsApp Buttons (Does not cover cart bar) -->
@@ -497,7 +500,7 @@
     <a href="tel:+916281730144" class="floating-btn floating-call-btn" aria-label="Call Store Helpline" title="Call Store">
       📞
     </a>
-    <a href="https://wa.me/916281730144?text=Hello%20Sri%20Sai%20General%20Online%20Store%2C%20I%20have%20a%20question%20about%20groceries%20in%20Bommalatapalli" target="_blank" class="floating-btn floating-wa-btn" aria-label="Chat on WhatsApp" title="WhatsApp Store">
+    <a href="https://wa.me/916281730144?text=Hello%20RA%20Store%2C%20I%20have%20a%20question%20about%20groceries%20in%20Anantapur" target="_blank" class="floating-btn floating-wa-btn" aria-label="Chat on WhatsApp" title="WhatsApp Store">
       💬
     </a>
   </div>
@@ -573,7 +576,7 @@
     <div class="modal">
       <div class="drawer-drag-handle"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 700;" id="loginModalTitle">Sign In to Sri Sai General Online Store</h3>
+        <h3 style="font-size: 16px; font-weight: 700;" id="loginModalTitle">Sign In to RA Store</h3>
         <button class="modal-close-btn" data-modal="loginModal" aria-label="Close login modal" style="background: none; border: none; font-size: 18px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">✕</button>
       </div>
 
@@ -659,8 +662,8 @@
       <div class="delivery-area-badge">
         <span style="font-size: 16px;">📍</span>
         <div>
-          <div style="font-weight: 700; color: #166534;" id="tDeliveryAreaTitle">Village Delivery Zone</div>
-          <div style="color: #15803D; font-size: 11px;" id="tDeliveryAreaDesc">Delivering across all wards of Bommalatapalli (515134)</div>
+          <div style="font-weight: 700; color: #166534;" id="tDeliveryAreaTitle">Anantapur Delivery Zone</div>
+          <div style="color: #15803D; font-size: 11px;" id="tDeliveryAreaDesc">Delivering across Anantapur (515001 - 515005)</div>
         </div>
       </div>
 
@@ -678,18 +681,18 @@
         </div>
 
         <div class="form-group">
-          <label for="custAddress" id="tLabelAddress">Delivery Address / Landmark in Bommalatapalli</label>
+          <label for="custAddress" id="tLabelAddress">Delivery Address / Landmark in Anantapur</label>
           <textarea id="custAddress" required minlength="10" rows="2" placeholder="e.g. Near Ramalayam Temple / Water Tank" autocomplete="street-address"></textarea>
           
           <!-- Quick Landmark Chips -->
           <div class="landmark-chips-wrap">
             <span style="font-size: 11px; color: var(--muted);" id="tQuickLandmarks">Quick Landmarks:</span>
-            <div class="landmark-chips">
-              <button type="button" class="landmark-chip" data-val="Near Ramalayam Temple, Bommalatapalli">Ramalayam Temple</button>
-              <button type="button" class="landmark-chip" data-val="Main Road beside Chennampalli Road, Bommalatapalli">Main Road</button>
-              <button type="button" class="landmark-chip" data-val="Near Water Tank, Bommalatapalli">Water Tank</button>
-              <button type="button" class="landmark-chip" data-val="Near Govt School, Bommalatapalli">Govt School</button>
-              <button type="button" class="landmark-chip" data-val="SC Colony, Bommalatapalli">SC Colony</button>
+            <div class="landmark-chips" id="landmarkChipsContainer">
+              <button type="button" class="landmark-chip" data-val="Near Tower Clock, Anantapur">Tower Clock</button>
+              <button type="button" class="landmark-chip" data-val="Subhash Road, Anantapur">Subhash Road</button>
+              <button type="button" class="landmark-chip" data-val="Near Saptagiri Circle, Anantapur">Saptagiri Circle</button>
+              <button type="button" class="landmark-chip" data-val="Rudrampeta, Anantapur">Rudrampeta</button>
+              <button type="button" class="landmark-chip" data-val="Kamalanagar, Anantapur">Kamalanagar</button>
             </div>
           </div>
         </div>
@@ -807,7 +810,7 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ESri Sai Store%3C/text%3E%3C/svg%3E";
+    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ERA Store%3C/text%3E%3C/svg%3E";
 
     function safeImage(url) {
       if (!url || typeof url !== 'string') return SVG_PLACEHOLDER;
@@ -921,7 +924,7 @@
         toggleText: "తెలుగు",
         searchPlaceholder: "Search fresh groceries (e.g. Milk, Tomato, పాలు)...",
         allCategory: "All Items",
-        catalogHeading: "Fresh Groceries & Village Staples",
+        catalogHeading: "Fresh Groceries & daily staples",
         refundTitle: "100% Refund if you cancel before order is out for delivery",
         refundDesc: "Automated full refund to your original payment method (UPI / Card / Bank) in 5-7 working days.",
         addBtn: "+ Add",
@@ -932,7 +935,7 @@
         yourCart: "Your Cart",
         itemsCount: "{n} items",
         emptyCartMsg: "Your cart is empty",
-        emptyCartSub: "Add fresh items to your cart to order village delivery.",
+        emptyCartSub: "Add fresh items to your cart to order Anantapur delivery.",
         startShopping: "Start Shopping",
         drawerSubtotal: "Item Subtotal",
         drawerDeliveryFee: "Delivery Fee",
@@ -947,8 +950,8 @@
         moreForFree: "Add ₹{val} more for Free Delivery",
         reorder: "🔁 Reorder Last",
         viewCartText: "View Cart ⌃",
-        phoneLoginTitle: "Sign In to Sri Sai General Online Store",
-        phoneLoginSub: "Enter your 10-digit mobile number for instant village grocery delivery and tracking.",
+        phoneLoginTitle: "Sign In to RA Store",
+        phoneLoginSub: "Enter your 10-digit mobile number for instant Anantapur grocery delivery and tracking.",
         sendOtpBtn: "Send OTP via SMS",
         sendingOtp: "Sending OTP...",
         otpSentTo: "OTP sent to: ",
@@ -959,8 +962,8 @@
         resendOtp: "Resend OTP",
         orDivider: "OR",
         signInWithGoogle: "Sign in with Google",
-        villageDeliveryTitle: "Village Delivery Zone",
-        villageDeliveryDesc: "Delivering across all wards of Bommalatapalli (515134)",
+        villageDeliveryTitle: "Anantapur Delivery Zone",
+        villageDeliveryDesc: "Delivering across Anantapur (515001 - 515005)",
         quickLandmarks: "Quick Landmarks:",
         orderSummaryHeading: "Order Summary",
         payOnlineTitle: "Online Payment (UPI / Card)",
@@ -982,7 +985,7 @@
         itemsAddedToast: "Items added to cart!",
         validNameErr: "Please enter your full name (at least 2 characters).",
         validPhoneErr: "Please enter a valid 10-digit mobile number starting with 6-9.",
-        validAddressErr: "Please enter your detailed address in Bommalatapalli (at least 10 characters).",
+        validAddressErr: "Please enter your detailed delivery address in Anantapur (at least 10 characters).",
         priceUpdatedMsg: "Prices were updated. Server total is ₹{serverTotal} (was ₹{clientTotal}). Please review and tap Confirm again.",
         orderHeldNotice: "Payment not completed — your order is held for 15 minutes.",
         payNowBtn: "Pay Now ⚡",
@@ -1028,7 +1031,7 @@
         moreForFree: "ఉచిత డెలివరీ కోసం ఇంకో ₹{val} జోడించండి",
         reorder: "🔁 మళ్ళీ ఆర్డర్",
         viewCartText: "కార్ట్ చూడండి ⌃",
-        phoneLoginTitle: "శ్రీ సాయి జనరల్ ఆన్‌లైన్ స్టోర్‌కు లాగిన్ అవ్వండి",
+        phoneLoginTitle: "RA స్టోర్‌కు లాగిన్ అవ్వండి",
         phoneLoginSub: "కిరాణా డెలివరీ మరియు ఆర్డర్ ట్రాకింగ్ కోసం మీ 10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి.",
         sendOtpBtn: "SMS ద్వారా OTP పంపండి",
         sendingOtp: "OTP పంపుతున్నాం...",
@@ -1040,8 +1043,8 @@
         resendOtp: "మళ్ళీ OTP పంపండి",
         orDivider: "లేదా",
         signInWithGoogle: "Google తో లాగిన్ అవ్వండి",
-        villageDeliveryTitle: "గ్రామ డెలివరీ జోన్",
-        villageDeliveryDesc: "బొమ్మలాటపల్లి గ్రామ పరిధిలోని అన్ని ప్రాంతాలకు డెలివరీ (515134)",
+        villageDeliveryTitle: "అనంతపురం డెలివరీ జోన్",
+        villageDeliveryDesc: "అనంతపురం నగర పరిధిలోని అన్ని ప్రాంతాలకు డెలివరీ (515001 - 515005)",
         quickLandmarks: "ముఖ్యమైన గుర్తులు:",
         orderSummaryHeading: "ఆర్డర్ వివరాలు",
         payOnlineTitle: "ఆన్‌లైన్ చెల్లింపు (UPI / కార్డ్)",
@@ -1063,7 +1066,7 @@
         itemsAddedToast: "వస్తువులు కార్ట్‌కు జోడించబడ్డాయి!",
         validNameErr: "దయచేసి మీ పూర్తి పేరు నమోదు చేయండి (కనీసం 2 అక్షరాలు).",
         validPhoneErr: "దయచేసి 6, 7, 8 లేదా 9 తో మొదలయ్యే 10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి.",
-        validAddressErr: "దయచేసి బొమ్మలాటపల్లిలోని మీ ఇంటి చిరునామా నమోదు చేయండి (కనీసం 10 అక్షరాలు).",
+        validAddressErr: "దయచేసి అనంతపురంలోని మీ ఇంటి చిరునామా నమోదు చేయండి (కనీసం 10 అక్షరాలు).",
         priceUpdatedMsg: "ధరలు మారాయి. మొత్తం బిల్లు ₹{serverTotal} (గతంలో ₹{clientTotal}). దయచేసి మళ్ళీ ధృవీకరించండి.",
         orderHeldNotice: "చెల్లింపు పూర్తి కాలేదు — మీ ఆర్డర్ 15 నిమిషాల పాటు భద్రపరచబడింది.",
         payNowBtn: "ఇప్పుడే చెల్లించండి ⚡",
@@ -1092,7 +1095,7 @@
       document.getElementById('tCatalogHeading').innerText = t.catalogHeading;
       
       const brandTitleEl = document.getElementById('navbarBrandTitle');
-      if (brandTitleEl) brandTitleEl.innerText = (lang === 'te' ? 'శ్రీ సాయి జనరల్ ఆన్‌లైన్ స్టోర్' : 'Sri Sai General Online Store');
+      if (brandTitleEl) brandTitleEl.innerText = (lang === 'te' ? 'RA స్టోర్' : 'RA Store');
       
       const ordersFull = document.querySelector('.nav-orders-text-full');
       const ordersShort = document.querySelector('.nav-orders-text-short');
@@ -1140,6 +1143,7 @@
 
       checkStoreHours();
       renderCategoryChips();
+      renderLandmarkChips();
       renderProducts();
       updateCartUI();
     }
@@ -1823,7 +1827,7 @@
             }).catch(() => {});
           }
 
-          const askMsg = encodeURIComponent(`Hello Sri Sai General Online Store! Do you have "${searchQuery}" in stock in Bommalatapalli?`);
+          const askMsg = encodeURIComponent(`Hello RA Store! Do you have "${searchQuery}" in stock in Anantapur?`);
           gridContainer.className = 'grid';
           gridContainer.innerHTML = `
             <div class="empty-state" style="grid-column: 1 / -1;">
@@ -2428,7 +2432,7 @@
             key: data.razorpayKeyId,
             amount: data.amount,
             currency: 'INR',
-            name: 'Sri Sai General Online Store Bommalatapalli',
+            name: 'RA Store Anantapur',
             description: `Order #${data.orderId}`,
             order_id: data.razorpayOrderId,
             modal: {
@@ -2551,7 +2555,7 @@
       checkoutSessionRequestId = null;
       document.getElementById('successOrderIdText').innerText = `Order #${escapeHtml(orderId)}`;
       const slotNote = customer.scheduledSlot ? `\nScheduled Delivery: ${customer.scheduledSlot}` : '';
-      const msg = encodeURIComponent(`Hello Sri Sai General Online Store! I placed order #${orderId} for ₹${total}.${slotNote}\nName: ${customer.name}\nAddress: ${customer.address}`);
+      const msg = encodeURIComponent(`Hello RA Store! I placed order #${orderId} for ₹${total}.${slotNote}\nName: ${customer.name}\nAddress: ${customer.address}`);
       document.getElementById('successWhatsappLink').href = `https://wa.me/${storeSettings.whatsappNumber}?text=${msg}`;
       openModal('successModal');
     }
@@ -2693,7 +2697,7 @@
 
               <div style="font-size: 12px; color: var(--text); background: #F8FAFC; border: 1px solid var(--border); padding: 8px 10px; border-radius: 6px; margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere;">
                 <span style="font-weight: 700; color: var(--muted); font-size: 11px;">📍 Delivery Address:</span>
-                <div>${escapeHtml(o.customer?.address || 'Bommalatapalli')}</div>
+                <div>${escapeHtml(o.customer?.address || 'Anantapur')}</div>
                 ${o.customer?.notes ? `<div style="font-size: 11px; color: var(--muted); margin-top: 4px;">📝 <strong>Notes:</strong> ${escapeHtml(o.customer.notes)}</div>` : ''}
               </div>
 
@@ -2773,7 +2777,7 @@
           key: storeSettings.razorpayKeyId || 'rzp_live_SKfV6022e039Q3',
           amount: Math.round(Number(total) * 100),
           currency: 'INR',
-          name: 'Sri Sai General Online Store Bommalatapalli',
+          name: 'RA Store Anantapur',
           description: `Order #${orderId}`,
           order_id: rzpOrderId,
           handler: async function (response) {

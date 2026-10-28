@@ -101,7 +101,7 @@ export const HeroBanner: React.FC = () => {
           {/* Village Tag */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 border border-white/20 text-emerald-100 text-xs sm:text-sm font-semibold mb-4 backdrop-blur-sm">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-            <span>Bommalatapalli Village Express Delivery</span>
+            <span>Anantapur Village Express Delivery</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
@@ -113,7 +113,7 @@ export const HeroBanner: React.FC = () => {
           </p>
 
           <p className="mt-1 text-xs sm:text-sm text-emerald-200/90">
-            📍 on main road , Bommalatapalli beside chennampalli road • Everyday: 5:00 AM to 8:30 PM
+            📍 on main road , Anantapur beside Anantapur road • Everyday: 5:00 AM to 8:30 PM
           </p>
 
           {/* Feature Badges */}
@@ -157,7 +157,7 @@ export const HeroBanner: React.FC = () => {
 
       {/* Offer Strip */}
       <div className="mt-3 bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm py-2 px-4 rounded-xl text-center shadow-sm">
-        ✨ Special Offer: Free Village Delivery on orders above ₹199! Fresh farm vegetables just arrived.
+        ✨ Special Offer: Free Anantapur delivery on orders above ₹199! Fresh farm vegetables just arrived.
       </div>
     </div>
   );

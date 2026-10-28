@@ -78,7 +78,7 @@ export const CheckoutModal: React.FC = () => {
           <div>
             <h3 className="font-extrabold text-lg text-white">Sign in Required</h3>
             <p className="text-xs text-slate-400 mt-1">
-              Please sign in or create an account to place your order with 20-minute village delivery.
+              Please sign in or create an account to place your order with 20-minute Anantapur delivery.
             </p>
           </div>
           <button

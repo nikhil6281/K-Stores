@@ -5,7 +5,7 @@ const path = require('path');
 const transPath = './src/i18n/translations.ts';
 if (fs.existsSync(transPath)) {
   let trans = fs.readFileSync(transPath, 'utf8');
-  trans = trans.replace(/Main Road, Center Junction, Near Panchayat Office/g, 'Bommalatapalli beside chennampalli road');
+  trans = trans.replace(/Main Road, Center Junction, Near Panchayat Office/g, 'Anantapur beside Anantapur road');
   trans = trans.replace(/Everyday:\s*6:00\s*AM\s*[-–to ]*\s*10:00\s*PM/g, 'Everyday: 5:00 AM to 8:30 PM');
   trans = trans.replace(/Sri Venkateswara[^'"]*/g, 'RA General Store');
   trans = trans.replace(/శ్రీ వేంకటేశ్వర[^'"]*/g, 'RA General Store');
@@ -17,7 +17,7 @@ if (fs.existsSync(transPath)) {
 const footerPath = './src/components/Footer.tsx';
 if (fs.existsSync(footerPath)) {
   let footer = fs.readFileSync(footerPath, 'utf8');
-  footer = footer.replace(/Main Road, Center Junction, Near Panchayat Office/g, 'Bommalatapalli beside chennampalli road');
+  footer = footer.replace(/Main Road, Center Junction, Near Panchayat Office/g, 'Anantapur beside Anantapur road');
   footer = footer.replace(/Everyday:\s*6:00\s*AM\s*[-–to ]*\s*10:00\s*PM/g, 'Everyday: 5:00 AM to 8:30 PM');
   footer = footer.replace(/Sri Venkateswara[^<]*/g, 'RA General Store');
   fs.writeFileSync(footerPath, footer, 'utf8');
@@ -101,15 +101,15 @@ allFiles.forEach(f => {
     changed = true;
   }
   if (c.includes('Main Road, Center Junction, Near Panchayat Office')) {
-    c = c.replace(/Main Road, Center Junction, Near Panchayat Office/g, 'Bommalatapalli beside chennampalli road');
+    c = c.replace(/Main Road, Center Junction, Near Panchayat Office/g, 'Anantapur beside Anantapur road');
     changed = true;
   }
   if (/Everyday:\s*6:00\s*AM\s*[-–to ]*\s*10:00\s*PM/g.test(c)) {
     c = c.replace(/Everyday:\s*6:00\s*AM\s*[-–to ]*\s*10:00\s*PM/g, 'Everyday: 5:00 AM to 8:30 PM');
     changed = true;
   }
-  if (c.includes('20 Min Superfast Village Delivery')) {
-    c = c.replace(/.*20 Min Superfast Village Delivery[\s\S]*?WhatsApp bill generation\..*/g, '');
+  if (c.includes('20 Min Superfast Anantapur delivery')) {
+    c = c.replace(/.*20 Min Superfast Anantapur delivery[\s\S]*?WhatsApp bill generation\..*/g, '');
     changed = true;
   }
 

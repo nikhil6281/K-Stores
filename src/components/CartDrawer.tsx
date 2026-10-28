@@ -243,7 +243,7 @@ export const CartDrawer: React.FC = () => {
 
             {/* Subtext matching Image 5 */}
             <p className="text-[11px] text-slate-500 leading-tight">
-              Taxes and 20-min village delivery calculated at checkout.
+              Taxes and 20-min Anantapur delivery calculated at checkout.
             </p>
 
             {/* Big bold crimson CHECK OUT button */}

@@ -137,7 +137,7 @@ export const HeroBanner: React.FC = () => {
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-8"
           style={{background:'rgba(245,158,11,0.08)',backdropFilter:'blur(8px)'}}>
           <Sparkles className="w-4 h-4 text-amber-400" style={{animation:'pulse 2s infinite'}} />
-          RA General Store — Bommalatapalli Village
+          RA General Store — Anantapur Village
         </div>
 
         {/* Headline */}
@@ -146,7 +146,7 @@ export const HeroBanner: React.FC = () => {
           <span className="gold-text">Delivered in 20 Minutes</span>
         </h1>
         <p className="text-slate-300 text-base sm:text-xl max-w-2xl leading-relaxed mb-10" style={{fontFamily:'Lora,serif'}}>
-          Premium pantry staples, dairy, farm-fresh vegetables and household essentials — right beside Chennampalli road, Bommalatapalli.
+          Premium pantry staples, dairy, farm-fresh vegetables and household essentials — right beside Anantapur road, Anantapur.
         </p>
 
         {/* Feature pills */}
@@ -293,7 +293,7 @@ export const PromotionsTicker: React.FC = () => (
   <div className="w-full py-2.5 px-4 text-center text-xs sm:text-sm font-semibold tracking-wide flex items-center justify-center gap-2 text-navy-900"
     style={{background:'linear-gradient(90deg,#F59E0B,#FBBF24,#F59E0B)'}}>
     <Sparkles className="w-4 h-4 shrink-0" />
-    <span><strong>Special Offer:</strong> Free Village Delivery on orders above &#8377;199! Fresh farm vegetables just arrived.</span>
+    <span><strong>Special Offer:</strong> Free Anantapur delivery on orders above &#8377;199! Fresh farm vegetables just arrived.</span>
   </div>
 );
 `, 'utf8');

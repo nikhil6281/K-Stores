@@ -55,10 +55,10 @@ export const HeroBanner: React.FC = () => {
             RA General Store
           </h1>
           <p style={{ fontSize: '1.1rem', opacity: 0.9, marginBottom: '8px' }}>
-            Fresh Groceries • 20-Min Village Delivery
+            Fresh Groceries • 20-Min Anantapur delivery
           </p>
           <p style={{ fontSize: '0.9rem', opacity: 0.75 }}>
-            on main road, Bommalatapalli beside Chennampalli road
+            on main road, Anantapur beside Anantapur road
           </p>
           <p style={{ fontSize: '0.85rem', opacity: 0.75, marginTop: '4px' }}>
             Open Everyday: 5:00 AM to 8:30 PM
@@ -72,7 +72,7 @@ export const HeroBanner: React.FC = () => {
               <ShieldCheck size={15} /> Quality Assured
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.15)', padding: '8px 16px', borderRadius: '999px', fontSize: '0.85rem' }}>
-              <Truck size={15} /> Free Village Delivery
+              <Truck size={15} /> Free Anantapur delivery
             </div>
           </div>
         </div>
@@ -204,7 +204,7 @@ console.log('5. SearchOverlay.tsx - clean working search');
 fs.writeFileSync('./src/components/PromotionsTicker.tsx', `import React from 'react';
 export const PromotionsTicker: React.FC = () => (
   <div style={{ background: '#fef08a', color: '#713f12', textAlign: 'center', padding: '8px 16px', fontSize: '13px', fontWeight: 600 }}>
-    Special Offer: Free Village Delivery on orders above &#8377;199! Fresh farm vegetables just arrived.
+    Special Offer: Free Anantapur delivery on orders above &#8377;199! Fresh farm vegetables just arrived.
   </div>
 );
 `, 'utf8');

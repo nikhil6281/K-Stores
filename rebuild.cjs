@@ -30,7 +30,7 @@ export const HeroBanner: React.FC = () => (
     <div style={{background:'linear-gradient(135deg,#14532d 0%,#15803d 100%)',color:'#fff',padding:'40px 20px',textAlign:'center'}}>
       <div style={{maxWidth:'640px',margin:'0 auto'}}>
         <div style={{display:'inline-block',padding:'4px 16px',borderRadius:'999px',background:'rgba(255,255,255,0.15)',fontSize:'12px',fontWeight:600,marginBottom:'16px',letterSpacing:'0.05em'}}>
-          Bommalatapalli Village • Express Delivery
+          Anantapur Village • Express Delivery
         </div>
         <h1 style={{fontSize:'clamp(1.6rem,5vw,2.6rem)',fontWeight:800,margin:'0 0 10px',lineHeight:1.2}}>
           RA General Store
@@ -39,10 +39,10 @@ export const HeroBanner: React.FC = () => (
           Fresh Groceries & Vegetables — Delivered in 20 Minutes
         </p>
         <p style={{fontSize:'13px',opacity:0.75,margin:0}}>
-          on main road, Bommalatapalli beside Chennampalli road &nbsp;•&nbsp; Everyday 5:00 AM – 8:30 PM
+          on main road, Anantapur beside Anantapur road &nbsp;•&nbsp; Everyday 5:00 AM – 8:30 PM
         </p>
         <div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:'10px',marginTop:'24px'}}>
-          {[{icon:'🕐',text:'20-Min Delivery'},{icon:'✅',text:'Quality Assured'},{icon:'🚚',text:'Free Village Delivery'},{icon:'₹',text:'COD & UPI'}].map((b,i)=>(
+          {[{icon:'🕐',text:'20-Min Delivery'},{icon:'✅',text:'Quality Assured'},{icon:'🚚',text:'Free Anantapur delivery'},{icon:'₹',text:'COD & UPI'}].map((b,i)=>(
             <span key={i} style={{display:'flex',alignItems:'center',gap:'6px',background:'rgba(0,0,0,0.2)',borderRadius:'10px',padding:'7px 14px',fontSize:'12px',fontWeight:600}}>
               <span>{b.icon}</span>{b.text}
             </span>

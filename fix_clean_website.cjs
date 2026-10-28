@@ -39,7 +39,7 @@ let html = fs.readFileSync('./index.html', 'utf8');
 html = html.replace(/<link[^>]*fonts\.googleapis[^>]*>/gi, '');
 html = html.replace(/<link[^>]*fonts\.gstatic[^>]*>/gi, '');
 html = html.replace(/<link[^>]*preconnect[^>]*>/gi, '');
-html = html.replace(/<title>.*?<\/title>/, '<title>RA General Store - Fresh Groceries & Village Delivery</title>');
+html = html.replace(/<title>.*?<\/title>/, '<title>RA General Store - Fresh Groceries & Anantapur delivery</title>');
 fs.writeFileSync('./index.html', html, 'utf8');
 console.log("✓ Reset index.css, tailwind.config.js & index.html to clean fast styling");
 
@@ -60,7 +60,7 @@ export const HeroBanner: React.FC = () => {
       <div className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-green-700 text-white py-10 sm:py-14 px-4 text-center">
         <div className="max-w-3xl mx-auto">
           <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-emerald-100 text-xs sm:text-sm font-semibold mb-3">
-            ✨ Bommalatapalli Village Express
+            ✨ Anantapur Village Express
           </span>
           <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
             RA General Store
@@ -69,7 +69,7 @@ export const HeroBanner: React.FC = () => {
             Fresh Farm Groceries Delivered in 20 Minutes
           </p>
           <p className="text-xs sm:text-sm text-emerald-200">
-            on main road , Bommalatapalli beside chennampalli road
+            on main road , Anantapur beside Anantapur road
           </p>
           <p className="text-xs text-emerald-200/90 mt-1">
             Open Everyday: 5:00 AM to 8:30 PM
@@ -114,7 +114,7 @@ export const HeroBanner: React.FC = () => {
 
       {/* Offer Strip */}
       <div className="bg-amber-300 text-slate-900 py-2 px-4 text-center text-xs sm:text-sm font-bold shadow-sm">
-        Special Offer: Free Village Delivery on orders above ₹199! Fresh farm vegetables just arrived.
+        Special Offer: Free Anantapur delivery on orders above ₹199! Fresh farm vegetables just arrived.
       </div>
     </div>
   );
@@ -275,7 +275,7 @@ console.log("✓ Created clean, working SearchOverlay.tsx");
 fs.writeFileSync('./src/components/PromotionsTicker.tsx', `import React from 'react';
 export const PromotionsTicker: React.FC = () => (
   <div className="bg-amber-300 text-slate-900 py-1.5 px-4 text-center text-xs font-semibold tracking-wide">
-    Special Offer: Free Village Delivery on orders above ₹199! Fresh farm vegetables just arrived.
+    Special Offer: Free Anantapur delivery on orders above ₹199! Fresh farm vegetables just arrived.
   </div>
 );
 `, 'utf8');

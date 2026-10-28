@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '1px' }}>
             <MapPin size={11} color="rgba(255,255,255,0.7)" />
             <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
-              Bommalatapalli · 20 min delivery
+              Anantapur · 20 min delivery
             </span>
           </div>
           <h1 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#fff', letterSpacing: '-0.3px' }}>

@@ -6,7 +6,7 @@ fs.writeFileSync('./src/components/Footer.tsx',
 `import React from 'react';
 export const Footer: React.FC = () => (
   <div style={{textAlign:'center',padding:'14px 16px 80px',fontSize:'11px',color:'#9ca3af',borderTop:'1px solid #e5e7eb',background:'#fff'}}>
-    © 2026 RA General Store, Bommalatapalli · All rights reserved
+    © 2026 RA General Store, Anantapur · All rights reserved
   </div>
 );
 `, 'utf8');
@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '1px' }}>
             <MapPin size={11} color="rgba(255,255,255,0.7)" />
             <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
-              Bommalatapalli · 20 min delivery
+              Anantapur · 20 min delivery
             </span>
           </div>
           <h1 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#fff', letterSpacing: '-0.3px' }}>

@@ -128,7 +128,7 @@ export async function openRazorpayCheckout(options: RazorpayCheckoutOptions): Pr
     amount: Math.round(Number(options.amountPaise)),
     currency: options.currency || 'INR',
     name: 'K-STORES',
-    description: 'Fresh Grocery Village Delivery (20 Mins)',
+    description: 'Fresh Grocery Anantapur delivery (20 Mins)',
     prefill: {
       name: (options.customerName || 'Customer').trim(),
       contact: cleanContact,

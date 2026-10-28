@@ -2,7 +2,7 @@
   en: {
     // Header & Brand
     storeName: 'K-Stores',
-    tagline: '20-Min Village Delivery',
+    tagline: '20-Min Anantapur delivery',
     villageLocation: 'Grama Center, Main Road',
     deliveryPromiseBadge: ' 20 Mins Delivery',
     changeLocation: 'Change',
@@ -23,7 +23,7 @@
     bannerPerk3: '“² WhatsApp Bill to Owner',
     bannerPerk4: 'ª Free Store Pickup Available',
     shopNow: 'Order Now',
-    tickerNotice: '✨ Special Offer: Free Village Delivery on orders above ₹199! Fresh farm vegetables just arrived.',
+    tickerNotice: '✨ Special Offer: Free Anantapur delivery on orders above ₹199! Fresh farm vegetables just arrived.',
 
     // Categories
     all: 'All Items',
@@ -75,7 +75,7 @@
     enterFullName: 'Enter your name',
     phoneNumber: 'Mobile Number',
     enterPhoneNumber: '10-digit mobile number',
-    deliveryAddress: 'Village Delivery Address',
+    deliveryAddress: 'Anantapur delivery Address',
     villageName: 'Village / Ward Name',
     enterVillage: 'e.g. Chinna Bazar, Ramalayam Street',
     doorNo: 'House / Door Number',
@@ -127,7 +127,7 @@
     storeOwnerName: 'RA General Store',
     ownerPhone: '+91 62817 30144',
     storeHours: 'Everyday: 5:00 AM to 8:30 PM',
-    storeAddress: 'on main road , Bommalatapalli beside chennampalli road',
+    storeAddress: 'on main road , Anantapur beside Anantapur road',
     directWhatsApp: 'Chat on WhatsApp',
     faqTitle: 'Frequently Asked Questions (FAQs)',
     faq1Q: 'How does the 20-minute delivery work in our village?',
@@ -340,7 +340,7 @@
     storeOwnerName: 'à°¶à±à°°à±€ à°µà±†à°‚à°•à°Ÿà±‡à°¶à±à°µà°° à°•à°¿à°°à°¾à°£à°¾ & à°œà°¨à°°à°²à± à°¸à±à°Ÿà±‹à°°à±à°¸à±',
     ownerPhone: '+91 62817 30144',
     storeHours: 'Everyday: 5:00 AM to 8:30 PM',
-    storeAddress: 'on main road , Bommalatapalli beside chennampalli road',
+    storeAddress: 'on main road , Anantapur beside Anantapur road',
     directWhatsApp: 'à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¸à°‚à°ªà±à°°à°¦à°¿à°‚à°šà°‚à°¡à°¿',
     faqTitle: 'à°¤à°°à°šà±à°—à°¾ à°…à°¡à°¿à°—à±‡ à°ªà±à°°à°¶à±à°¨à°²à± (FAQs)',
     faq1Q: 'à°®à°¾ à°—à±à°°à°¾à°®à°‚à°²à±‹ 20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°¡à±†à°²à°¿à°µà°°à±€ à°Žà°²à°¾ à°¸à°¾à°§à±à°¯à°‚?',

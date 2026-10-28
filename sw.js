@@ -1,12 +1,13 @@
 /**
- * Sri Sai General Online Store - Service Worker (PWA Shell Caching)
+ * RA Store - Service Worker (PWA Shell Caching)
  * Network-first for navigation/HTML, stale-while-revalidate for local assets.
  * CRITICAL RULE: Never cache API, Firebase, Google Auth, Cloudinary, or Razorpay calls.
  */
 
-const CACHE_NAME = 'sri-sai-store-shell-v3';
+const CACHE_NAME = 'ra-store-shell-v4';
 const SHELL_ASSETS = [
   './index.html',
+  './config.js',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
 ];
@@ -61,19 +62,20 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 2. Same-origin static assets: Cache-first with network fallback
-  if (url.startsWith(self.location.origin) || url.startsWith('https://fonts.googleapis.com')) {
-    e.respondWith(
-      caches.match(e.request).then((cachedResponse) => {
-        if (cachedResponse) return cachedResponse;
-        return fetch(e.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200 && e.request.method === 'GET') {
+  // 2. Static shell assets: Stale-While-Revalidate
+  e.respondWith(
+    caches.match(e.request).then((cachedResponse) => {
+      const fetchPromise = fetch(e.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
             const resClone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
           }
           return networkResponse;
-        });
-      })
-    );
-  }
+        })
+        .catch(() => cachedResponse);
+
+      return cachedResponse || fetchPromise;
+    })
+  );
 });

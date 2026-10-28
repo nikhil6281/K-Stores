@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Staff Portal — RA Store Anantapur</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230C831F'/%3E%3Ctext x='50' y='65' font-size='45' font-weight='bold' fill='%23F8CB46' text-anchor='middle'%3ERA%3C/text%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="config.js"></script>
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #0C831F;
+      --primary-dark: #096317;
+      --bg: #F4F6F8;
+      --card-bg: #FFFFFF;
+      --text: #111827;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --warning: #F59E0B;
+      --warning-bg: #FEF3C7;
+      --danger: #DC2626;
+      --danger-bg: #FEE2E2;
+      --success: #16A34A;
+      --success-bg: #DCFCE7;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 40px;
+    }
+
+    /* Screen Flash on New Order */
+    @keyframes screenFlash {
+      0% { background: #FEF08A; }
+      50% { background: #BBF7D0; }
+      100% { background: var(--bg); }
+    }
+    .flash-alert {
+      animation: screenFlash 1.2s ease;
+    }
+
+    /* Red Alert Blink for Cancelled While Packing */
+    @keyframes cancelBlink {
+      0%, 100% { background: #FEE2E2; border-color: #DC2626; }
+      50% { background: #FECAAC; border-color: #B91C1C; }
+    }
+    .cancel-alert-banner {
+      animation: cancelBlink 1s infinite;
+      border: 2px solid #DC2626;
+      padding: 12px;
+      border-radius: 8px;
+      color: #991B1B;
+      font-weight: 800;
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    /* Header */
+    .top-bar {
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: #E5E7EB;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #374151;
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+      min-height: 48px;
+      touch-action: manipulation;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:active { background: var(--primary-dark); }
+    .btn-outline { background: #fff; border: 1px solid var(--border); color: var(--text); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-small { padding: 6px 12px; min-height: 38px; font-size: 12px; }
+    .btn-lang {
+      background: #EFF6FF;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      min-height: 38px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: #FFFFFF;
+      padding: 6px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 12px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      min-height: 44px;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+
+    /* Auth Box */
+    .auth-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 20px;
+      text-align: center;
+      max-width: 440px;
+      margin: 40px auto;
+    }
+
+    /* Order Card */
+    .order-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+    .order-id {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .order-time {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge-cod { background: var(--warning-bg); color: #B45309; }
+    .badge-paid { background: var(--success-bg); color: #15803D; }
+    .badge-morning { background: #EFF6FF; color: #1E40AF; }
+
+    /* Customer Info Block */
+    .customer-block {
+      background: #F9FAFB;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    .customer-name {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .customer-address {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1F2937;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      margin-bottom: 8px;
+    }
+    .action-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      min-height: 40px;
+      border: 1px solid var(--border);
+      background: #FFFFFF;
+      color: var(--text);
+    }
+
+    /* Packing Checklist */
+    .items-list {
+      margin: 14px 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #FFFFFF;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row.checked {
+      background: #F0FDF4;
+    }
+    .item-row.unavailable {
+      background: #FEF2F2;
+      text-decoration: line-through;
+      color: #991B1B;
+    }
+    .item-check-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      flex: 1;
+    }
+    .item-checkbox {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--primary);
+    }
+    .item-details {
+      font-size: 14px;
+    }
+    .item-name { font-weight: 700; }
+    .item-qty { color: var(--primary); font-weight: 700; }
+    .item-price { font-size: 12px; color: var(--muted); }
+
+    /* Total Row */
+    .order-total-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: #F3F4F6;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    /* Action Grid */
+    .order-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 500px) {
+      .order-actions-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Summary Card */
+    .summary-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1F2937;
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal {
+      background: #FFFFFF;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 440px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="brand-wrap">
+      <span class="brand-title">RA Store</span>
+      <span class="brand-badge">STAFF PORTAL</span>
+    </div>
+    <div class="top-actions">
+      <button class="btn-lang" id="langToggleBtn">తెలుగు</button>
+      <button class="btn btn-outline btn-small" id="wakeLockBtn" title="Prevent screen timeout">⚡ Screen On</button>
+      <button class="btn btn-outline btn-small" id="audioToggleBtn" title="Sound alerts">🔔 Sound</button>
+      <button class="btn btn-outline btn-small" id="logoutBtn" style="display: none;" title="Sign out">🚪</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Login View -->
+    <div id="loginView" class="auth-card">
+      <div style="font-size: 40px; margin-bottom: 12px;">👷</div>
+      <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Staff Sign In</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">
+        Sign in with the Google Account assigned by the owner to pack groceries and coordinate deliveries in Anantapur.
+      </p>
+      <button class="btn btn-primary" id="loginGoogleBtn" style="width: 100%;">
+        Sign In with Google
+      </button>
+      <div id="authError" style="color: var(--danger); font-size: 13px; margin-top: 14px; display: none; font-weight: 600;"></div>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboardView" style="display: none;">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="active" id="tabActiveBtn">📦 Active Orders (<span id="activeCountBadge">0</span>)</button>
+        <button class="tab-btn" data-tab="completed" id="tabCompletedBtn">✅ Completed Today</button>
+        <button class="tab-btn" data-tab="summary" id="tabSummaryBtn">📊 Today's Summary</button>
+      </div>
+
+      <!-- Tab 1: Active Orders -->
+      <div id="activeTab">
+        <div id="activeOrdersList">
+          <p style="text-align: center; color: var(--muted); padding: 32px 0;">Listening for live orders...</p>
+        </div>
+      </div>
+
+      <!-- Tab 2: Completed Orders -->
+      <div id="completedTab" style="display: none;">
+        <div id="completedOrdersList">
+          <p style="text-align: center; color: var(--muted); padding: 32px 0;">No completed orders yet today.</p>
+        </div>
+      </div>
+
+      <!-- Tab 3: Summary -->
+      <div id="summaryTab" style="display: none;">
+        <div class="summary-card">
+          <h3 style="font-size: 16px; margin-bottom: 16px;" id="tSummaryTitle">Staff Daily Summary</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div style="background: #F3F4F6; padding: 14px; border-radius: 8px;">
+              <div style="font-size: 12px; color: var(--muted);" id="tDeliveredCount">Orders Delivered</div>
+              <div style="font-size: 22px; font-weight: 800;" id="sumDeliveredCount">0</div>
+            </div>
+            <div style="background: #FEF3C7; padding: 14px; border-radius: 8px;">
+              <div style="font-size: 12px; color: #92400E;" id="tPendingCod">Pending COD Cash</div>
+              <div style="font-size: 22px; font-weight: 800; color: #B45309;" id="sumPendingCod">₹0</div>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: var(--muted);" id="tSummaryNotice">
+            * Keep all collected COD cash safe for end-of-day store handover.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COD Collection Confirmation Modal -->
+  <div class="modal-overlay" id="codModal">
+    <div class="modal">
+      <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px; color: #B45309;" id="tCodModalTitle">💵 Collect Cash on Delivery</h3>
+      <p style="font-size: 14px; margin-bottom: 16px;" id="tCodModalText">
+        Please collect exactly <strong id="codAmountText" style="font-size: 18px; color: var(--primary);">₹0</strong> from the customer before handing over the groceries.
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button class="btn btn-outline" id="codCancelBtn">Not Yet</button>
+        <button class="btn btn-primary" id="codConfirmBtn">Cash Collected ✅</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Cancellation Modal -->
+  <div class="modal-overlay" id="cancelRequestModal">
+    <div class="modal">
+      <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 8px; color: var(--danger);">Request Cancellation</h3>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">
+        Staff cannot cancel orders directly. Submitting this request alerts the owner with your reason.
+      </p>
+      <div style="margin-bottom: 14px;">
+        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Reason for Request</label>
+        <select id="cancelReasonSelect" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; margin-bottom: 8px;">
+          <option value="Customer unreachable by phone">Customer phone unreachable</option>
+          <option value="Address not found in Anantapur">Address not found in Anantapur</option>
+          <option value="Customer refused delivery">Customer refused delivery</option>
+          <option value="Key items out of stock">Key items out of stock</option>
+          <option value="Other">Other Reason</option>
+        </select>
+        <input type="text" id="cancelReasonCustom" placeholder="Additional details..." style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; display: none;">
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button class="btn btn-outline" id="cancelRequestCloseBtn">Back</button>
+        <button class="btn btn-danger" id="cancelRequestSubmitBtn">Submit Request</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Hidden Printable Packing Slip Frame -->
+  <div id="printSlipArea" style="display: none;"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-placeholder",
+      authDomain: "k-store-ae9dd.firebaseapp.com",
+      databaseURL: "https://k-store-ae9dd-default-rtdb.firebaseio.com",
+      projectId: "k-store-ae9dd",
+      storageBucket: "k-store-ae9dd.appspot.com",
+      messagingSenderId: "117073811544",
+      appId: "1:117073811544:web:8669ae4eb8b80fc28d3e6e"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let currentUser = null;
+    let currentStaffData = null;
+    let ordersCache = {};
+    let currentLang = 'en';
+    let audioEnabled = true;
+    let wakeLock = null;
+    let pendingCodOrderId = null;
+    let pendingCancelPushKey = null;
+
+    const I18N = {
+      en: {
+        toggleLang: "తెలుగు",
+        activeOrders: "Active Orders",
+        completedToday: "Completed Today",
+        summaryToday: "Today's Summary",
+        acceptBtn: "Accept Order",
+        packedBtn: "Mark Packed 📦",
+        outBtn: "Out for Delivery 🛵",
+        deliveredBtn: "Mark Delivered ✅",
+        call: "📞 Call",
+        wa: "💬 WhatsApp",
+        copy: "📋 Copy",
+        maps: "🗺️ Maps",
+        reqCancel: "Request Cancel",
+        cancelledBanner: "🚨 ORDER CANCELLED BY CUSTOMER — DO NOT PACK OR DISPATCH!",
+        itemUnavailablePrompt: "Enter reason item is unavailable (alerts owner):"
+      },
+      te: {
+        toggleLang: "English",
+        activeOrders: "ప్రస్తుత ఆర్డర్లు",
+        completedToday: "పూర్తయినవి",
+        summaryToday: "నేటి సారాంశం",
+        acceptBtn: "స్వీకరించండి",
+        packedBtn: "ప్యాక్ చేయబడింది 📦",
+        outBtn: "బయలుదేరింది 🛵",
+        deliveredBtn: "చేరింది ✅",
+        call: "📞 కాల్",
+        wa: "💬 WhatsApp",
+        copy: "📋 కాపీ",
+        maps: "🗺️ మ్యాప్స్",
+        reqCancel: "రద్దు అభ్యర్థన",
+        cancelledBanner: "🚨 కస్టమర్ ఆర్డర్‌ను రద్దు చేశారు — ప్యాక్ చేయవద్దు!",
+        itemUnavailablePrompt: "ఈ వస్తువు ఎందుకు అందుబాటులో లేదో నమోదు చేయండి (యజమానికి చేరుతుంది):"
+      }
+    };
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    // Audio chime using Web Audio
+    let audioCtx = null;
+    function playChime() {
+      if (!audioEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.8);
+      } catch (e) {}
+
+      // Vibration on Android mobile
+      if ("vibrate" in navigator) {
+        try { navigator.vibrate([200, 100, 200]); } catch (e) {}
+      }
+
+      // Visual flash
+      document.body.classList.add('flash-alert');
+      setTimeout(() => { document.body.classList.remove('flash-alert'); }, 1200);
+    }
+
+    // Wake lock
+    async function toggleWakeLock() {
+      const btn = document.getElementById('wakeLockBtn');
+      if (wakeLock !== null) {
+        try {
+          await wakeLock.release();
+          wakeLock = null;
+          btn.innerText = "⚡ Screen Off";
+          btn.style.color = "var(--text)";
+        } catch (e) {}
+      } else {
+        try {
+          if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            btn.innerText = "⚡ Screen ON";
+            btn.style.color = "var(--primary)";
+            wakeLock.addEventListener('release', () => {
+              wakeLock = null;
+              btn.innerText = "⚡ Screen Off";
+            });
+          }
+        } catch (e) {
+          showToast("Wake Lock not supported on this browser.");
+        }
+      }
+    }
+
+    // Auth State
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        // Check staff permissions
+        const [staffSnap, adminSnap] = await Promise.all([
+          db.ref(\`staff/\${user.uid}\`).once('value'),
+          db.ref(\`admins/\${user.uid}\`).once('value')
+        ]);
+
+        const staffVal = staffSnap.val();
+        const isAdmin = adminSnap.val() === true;
+
+        if (isAdmin || (staffVal && staffVal.active === true)) {
+          currentUser = user;
+          currentStaffData = staffVal || { name: 'Owner / Staff', role: 'Store Admin' };
+          document.getElementById('loginView').style.display = 'none';
+          document.getElementById('dashboardView').style.display = 'block';
+          document.getElementById('logoutBtn').style.display = 'inline-flex';
+          initLiveOrdersListener();
+        } else {
+          auth.signOut();
+          const errBox = document.getElementById('authError');
+          errBox.innerText = "🚫 Access Denied: Your Google account is not registered as active store staff. Please ask the store owner to add you in admin.html.";
+          errBox.style.display = 'block';
+        }
+      } else {
+        currentUser = null;
+        currentStaffData = null;
+        document.getElementById('loginView').style.display = 'block';
+        document.getElementById('dashboardView').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'none';
+      }
+    });
+
+    document.getElementById('loginGoogleBtn').addEventListener('click', async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        await auth.signInWithPopup(provider);
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+    document.getElementById('wakeLockBtn').addEventListener('click', toggleWakeLock);
+
+    document.getElementById('audioToggleBtn').addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('audioToggleBtn');
+      btn.innerText = audioEnabled ? "🔔 Sound" : "🔕 Muted";
+      btn.style.color = audioEnabled ? "var(--primary)" : "var(--muted)";
+    });
+
+    document.getElementById('langToggleBtn').addEventListener('click', () => {
+      currentLang = currentLang === 'en' ? 'te' : 'en';
+      document.getElementById('langToggleBtn').innerText = currentLang === 'en' ? "తెలుగు" : "English";
+      renderOrders();
+    });
+
+    // Tab Navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        document.getElementById('activeTab').style.display = tab === 'active' ? 'block' : 'none';
+        document.getElementById('completedTab').style.display = tab === 'completed' ? 'block' : 'none';
+        document.getElementById('summaryTab').style.display = tab === 'summary' ? 'block' : 'none';
+      });
+    });
+
+    // Realtime Listener
+    let isInitialLoad = true;
+    function initLiveOrdersListener() {
+      db.ref('orders').limitToLast(100).on('value', (snap) => {
+        const val = snap.val() || {};
+        const oldKeys = Object.keys(ordersCache);
+        const newKeys = Object.keys(val);
+
+        // Chime for new active order
+        if (!isInitialLoad) {
+          const freshOrders = newKeys.filter(k => !oldKeys.includes(k));
+          if (freshOrders.length > 0) {
+            playChime();
+          }
+        }
+        isInitialLoad = false;
+        ordersCache = val;
+        renderOrders();
+      });
+    }
+
+    function renderOrders() {
+      const activeList = document.getElementById('activeOrdersList');
+      const completedList = document.getElementById('completedOrdersList');
+      const t = I18N[currentLang];
+
+      const orders = Object.entries(ordersCache).map(([k, v]) => ({ pushKey: k, ...v }));
+
+      // Sort: oldest active first
+      orders.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+
+      const activeOrders = orders.filter(o => {
+        // Show COD or paid online
+        if (o.paymentMethod === 'online_razorpay' && o.paymentStatus !== 'paid') return false;
+        return o.status === 'placed' || o.status === 'accepted' || o.status === 'packed' || o.status === 'out_for_delivery';
+      });
+
+      const completedOrders = orders.filter(o => o.status === 'delivered' || o.status === 'cancelled');
+      completedOrders.reverse(); // newest completed first
+
+      document.getElementById('activeCountBadge').innerText = activeOrders.length;
+
+      // Summary counts
+      let deliveredCount = 0;
+      let pendingCod = 0;
+      orders.forEach(o => {
+        if (o.status === 'delivered') deliveredCount++;
+        if (o.paymentMethod === 'cod' && o.status !== 'cancelled' && o.paymentStatus !== 'cod_collected') {
+          pendingCod += Number(o.total || 0);
+        }
+      });
+      document.getElementById('sumDeliveredCount').innerText = deliveredCount;
+      document.getElementById('sumPendingCod').innerText = \`₹\${pendingCod}\`;
+
+      if (activeOrders.length === 0) {
+        activeList.innerHTML = \`<p style="text-align: center; color: var(--muted); padding: 40px 0;">No active orders right now. Good job! 🎉</p>\`;
+      } else {
+        activeList.innerHTML = activeOrders.map(o => renderOrderCard(o, t)).join('');
+      }
+
+      if (completedOrders.length === 0) {
+        completedList.innerHTML = \`<p style="text-align: center; color: var(--muted); padding: 40px 0;">No completed orders yet today.</p>\`;
+      } else {
+        completedList.innerHTML = completedOrders.map(o => renderOrderCard(o, t, true)).join('');
+      }
+
+      attachCardEventListeners();
+    }
+
+    function renderOrderCard(o, t, isCompleted = false) {
+      const isCod = o.paymentMethod === 'cod';
+      const isPaid = o.paymentStatus === 'paid';
+      const isMorning = !!o.scheduledSlot;
+      const isCancelled = o.status === 'cancelled';
+
+      const items = Array.isArray(o.items) ? o.items : [];
+      const packingChecks = o.packingChecks || {};
+      const unavailableItems = o.unavailableItems || {};
+
+      let itemsHtml = items.map((item, idx) => {
+        const isChecked = !!packingChecks[idx];
+        const isUnavail = !!unavailableItems[idx];
+        const itemClass = isUnavail ? 'unavailable' : (isChecked ? 'checked' : '');
+
+        return \`
+          <div class="item-row \${itemClass}">
+            <label class="item-check-label">
+              <input type="checkbox" class="item-checkbox" data-pushkey="\${o.pushKey}" data-itemidx="\${idx}" \${isChecked ? 'checked' : ''} \${isCompleted || isCancelled ? 'disabled' : ''}>
+              <div class="item-details">
+                <div class="item-name">\${escapeHtml(item.name || 'Item')}</div>
+                <div class="item-qty">\${escapeHtml(item.quantity || 1)} × \${escapeHtml(item.unit || 'unit')}</div>
+              </div>
+            </label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="item-price">₹\${Number(item.price || 0) * Number(item.quantity || 1)}</span>
+              \${!isCompleted && !isCancelled ? \`
+                <button type="button" class="btn btn-outline btn-small item-unavail-btn" data-pushkey="\${o.pushKey}" data-itemidx="\${idx}" data-itemname="\${escapeHtml(item.name || '')}" style="color: #991B1B; padding: 4px 8px; font-size: 11px;">⚠️</button>
+              \` : ''}
+            </div>
+          </div>
+        \`;
+      }).join('');
+
+      let actionButtons = '';
+      if (!isCompleted && !isCancelled) {
+        if (o.status === 'placed') {
+          actionButtons = \`<button class="btn btn-primary advance-btn" data-pushkey="\${o.pushKey}" data-next="accepted">\${t.acceptBtn}</button>\`;
+        } else if (o.status === 'accepted') {
+          actionButtons = \`<button class="btn btn-primary advance-btn" data-pushkey="\${o.pushKey}" data-next="packed">\${t.packedBtn}</button>\`;
+        } else if (o.status === 'packed') {
+          actionButtons = \`<button class="btn btn-primary advance-btn" data-pushkey="\${o.pushKey}" data-next="out_for_delivery">\${t.outBtn}</button>\`;
+        } else if (o.status === 'out_for_delivery') {
+          actionButtons = \`<button class="btn btn-primary advance-btn" data-pushkey="\${o.pushKey}" data-next="delivered">\${t.deliveredBtn}</button>\`;
+        }
+      }
+
+      const mapQuery = encodeURIComponent((o.customer?.address || '') + ' Anantapur');
+
+      return \`
+        <div class="order-card" id="card-\${o.pushKey}">
+          \${isCancelled ? \`<div class="cancel-alert-banner">\${t.cancelledBanner}</div>\` : ''}
+
+          <div class="order-header">
+            <div>
+              <div class="order-id">#\${escapeHtml(o.id || o.pushKey)}</div>
+              <div class="order-time">\${o.createdAt ? new Date(o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+              \${isCod ? \`<span class="badge badge-cod">💵 COD: Collect ₹\${o.total}</span>\` : ''}
+              \${isPaid ? \`<span class="badge badge-paid">⚡ PAID ✅</span>\` : ''}
+              \${isMorning ? \`<span class="badge badge-morning">⏰ Morning Slot</span>\` : ''}
+            </div>
+          </div>
+
+          <div class="customer-block">
+            <div class="customer-name">👤 \${escapeHtml(o.customer?.name || 'Customer')}</div>
+            <div class="customer-address">📍 \${escapeHtml(o.customer?.address || 'Anantapur')}</div>
+            \${o.customer?.notes ? \`<div style="font-size: 13px; color: #4B5563; margin-bottom: 6px;">📝 Note: <strong>\${escapeHtml(o.customer.notes)}</strong></div>\` : ''}
+
+            <div class="action-links">
+              \${o.customer?.phone ? \`
+                <a href="tel:\${escapeHtml(o.customer.phone)}" class="action-link" style="color: #1D4ED8;">\${t.call}</a>
+                <a href="https://wa.me/91\${escapeHtml(o.customer.phone.replace(/\\D/g,''))}?text=\${encodeURIComponent(\`Hello \${o.customer.name || ''}, this is RA Store Staff regarding your grocery order #\${o.id}.\`)}" target="_blank" class="action-link" style="color: #15803D;">\${t.wa}</a>
+              \` : ''}
+              <button class="action-link copy-addr-btn" data-addr="\${escapeHtml(o.customer?.address || '')}">\${t.copy}</button>
+              <a href="https://www.google.com/maps/search/?api=1&query=\${mapQuery}" target="_blank" class="action-link" style="color: #2563EB;">\${t.maps}</a>
+            </div>
+          </div>
+
+          <div class="items-list">
+            \${itemsHtml}
+          </div>
+
+          <div class="order-total-bar">
+            <span>Bill Total:</span>
+            <span style="font-size: 18px; color: var(--primary);">₹\${o.total || 0}</span>
+          </div>
+
+          \${!isCompleted && !isCancelled ? \`
+            <div class="order-actions-grid">
+              \${actionButtons}
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline print-slip-btn" data-pushkey="\${o.pushKey}" style="flex: 1;">🖨️ Slip</button>
+                <button class="btn btn-outline req-cancel-btn" data-pushkey="\${o.pushKey}" style="flex: 1; color: var(--danger);">\${t.reqCancel}</button>
+              </div>
+            </div>
+          \` : \`
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted);">
+              <span>Status: <strong>\${o.status.toUpperCase()}</strong></span>
+              <button class="btn btn-outline btn-small print-slip-btn" data-pushkey="\${o.pushKey}">🖨️ Print Slip</button>
+            </div>
+          \`}
+        </div>
+      \`;
+    }
+
+    function attachCardEventListeners() {
+      // Packing item checkboxes
+      document.querySelectorAll('.item-checkbox').forEach(cb => {
+        cb.addEventListener('change', async (e) => {
+          const pushKey = cb.getAttribute('data-pushkey');
+          const idx = cb.getAttribute('data-itemidx');
+          const checked = cb.checked;
+          try {
+            await db.ref(\`orders/\${pushKey}/packingChecks/\${idx}\`).set(checked);
+          } catch (err) {
+            console.error('Check update failed:', err);
+          }
+        });
+      });
+
+      // Item Unavailable button
+      document.querySelectorAll('.item-unavail-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const pushKey = btn.getAttribute('data-pushkey');
+          const idx = btn.getAttribute('data-itemidx');
+          const name = btn.getAttribute('data-itemname');
+          const reason = prompt(\`\${I18N[currentLang].itemUnavailablePrompt} "\${name}"\`);
+          if (reason) {
+            await db.ref(\`orders/\${pushKey}/unavailableItems/\${idx}\`).set({
+              itemIndex: idx,
+              name: name,
+              reason: reason,
+              flaggedAt: new Date().toISOString(),
+              flaggedBy: currentUser?.email || 'staff'
+            });
+            showToast("Item flagged as unavailable. Owner alerted.");
+          }
+        });
+      });
+
+      // Copy Address
+      document.querySelectorAll('.copy-addr-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const addr = btn.getAttribute('data-addr');
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(addr).then(() => showToast("Address copied! 📋"));
+          }
+        });
+      });
+
+      // Print slip
+      document.querySelectorAll('.print-slip-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pushKey = btn.getAttribute('data-pushkey');
+          printPackingSlip(pushKey);
+        });
+      });
+
+      // Advance status
+      document.querySelectorAll('.advance-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const pushKey = btn.getAttribute('data-pushkey');
+          const next = btn.getAttribute('data-next');
+          const order = ordersCache[pushKey];
+          if (!order) return;
+
+          // If marking delivered on COD, require cash collection confirmation
+          if (next === 'delivered' && order.paymentMethod === 'cod') {
+            pendingCodOrderId = pushKey;
+            document.getElementById('codAmountText').innerText = \`₹\${order.total}\`;
+            document.getElementById('codModal').style.display = 'flex';
+            return;
+          }
+
+          await advanceOrderStatus(pushKey, next);
+        });
+      });
+
+      // Request Cancel
+      document.querySelectorAll('.req-cancel-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          pendingCancelPushKey = btn.getAttribute('data-pushkey');
+          document.getElementById('cancelRequestModal').style.display = 'flex';
+        });
+      });
+    }
+
+    async function advanceOrderStatus(pushKey, nextStatus, codCollected = false) {
+      const nowIso = new Date().toISOString();
+      const updates = {
+        status: nextStatus,
+        updatedAt: nowIso,
+        handledBy: currentUser?.email || 'staff'
+      };
+
+      if (codCollected) {
+        updates.paymentStatus = 'cod_collected';
+        updates.codCollectedAt = nowIso;
+        updates.codCollected = true;
+      }
+
+      try {
+        await db.ref(\`orders/\${pushKey}\`).update(updates);
+
+        // Audit log
+        await db.ref(\`audit/audit_\${Date.now()}\`).set({
+          adminUid: currentUser.uid,
+          adminEmail: currentUser.email || 'staff',
+          action: \`STAFF_\${nextStatus.toUpperCase()}\`,
+          orderId: ordersCache[pushKey]?.id || pushKey,
+          details: \`Status moved to \${nextStatus} by staff\`,
+          timestamp: nowIso
+        });
+
+        showToast(\`Order moved to \${nextStatus.toUpperCase()} ✅\`);
+      } catch (err) {
+        alert("Failed to update order status: " + err.message);
+      }
+    }
+
+    // COD Modal confirm
+    document.getElementById('codConfirmBtn').addEventListener('click', async () => {
+      document.getElementById('codModal').style.display = 'none';
+      if (pendingCodOrderId) {
+        await advanceOrderStatus(pendingCodOrderId, 'delivered', true);
+        pendingCodOrderId = null;
+      }
+    });
+    document.getElementById('codCancelBtn').addEventListener('click', () => {
+      document.getElementById('codModal').style.display = 'none';
+      pendingCodOrderId = null;
+    });
+
+    // Cancel Request Submit
+    document.getElementById('cancelRequestSubmitBtn').addEventListener('click', async () => {
+      if (!pendingCancelPushKey) return;
+      const select = document.getElementById('cancelReasonSelect');
+      const custom = document.getElementById('cancelReasonCustom');
+      const reason = select.value === 'Other' ? (custom.value.trim() || 'Staff requested cancellation') : select.value;
+
+      try {
+        await db.ref(\`orders/\${pendingCancelPushKey}/cancelRequest\`).set({
+          reason: reason,
+          requestedBy: currentUser.email || 'staff',
+          requestedAt: new Date().toISOString()
+        });
+        showToast("Cancellation request submitted to owner.");
+      } catch (e) {
+        alert("Could not submit request: " + e.message);
+      }
+
+      document.getElementById('cancelRequestModal').style.display = 'none';
+      pendingCancelPushKey = null;
+    });
+    document.getElementById('cancelRequestCloseBtn').addEventListener('click', () => {
+      document.getElementById('cancelRequestModal').style.display = 'none';
+      pendingCancelPushKey = null;
+    });
+    document.getElementById('cancelReasonSelect').addEventListener('change', (e) => {
+      document.getElementById('cancelReasonCustom').style.display = e.target.value === 'Other' ? 'block' : 'none';
+    });
+
+    // Print Thermal Slip (58mm/80mm)
+    function printPackingSlip(pushKey) {
+      const o = ordersCache[pushKey];
+      if (!o) return;
+      const items = Array.isArray(o.items) ? o.items : [];
+
+      const slipHtml = \`
+        <div style="font-family: monospace; width: 280px; padding: 10px; font-size: 12px; color: #000;">
+          <div style="text-align: center; font-weight: bold; font-size: 16px;">RA STORE</div>
+          <div style="text-align: center; font-size: 11px;">Anantapur, Andhra Pradesh</div>
+          <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 8px;">STAFF PACKING SLIP</div>
+          <div><strong>Order:</strong> #\${escapeHtml(o.id || pushKey)}</div>
+          <div><strong>Time:</strong> \${new Date(o.createdAt).toLocaleString()}</div>
+          <div><strong>Customer:</strong> \${escapeHtml(o.customer?.name || '')}</div>
+          <div><strong>Phone:</strong> \${escapeHtml(o.customer?.phone || '')}</div>
+          <div style="border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 8px;"><strong>Address:</strong> \${escapeHtml(o.customer?.address || '')}</div>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead>
+              <tr style="border-bottom: 1px solid #000;">
+                <th style="text-align: left;">Item</th>
+                <th style="text-align: right;">Qty</th>
+                <th style="text-align: right;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              \${items.map(it => \`
+                <tr>
+                  <td>\${escapeHtml(it.name || '')}</td>
+                  <td style="text-align: right;">\${it.quantity}</td>
+                  <td style="text-align: right;">₹\${Number(it.price) * Number(it.quantity)}</td>
+                </tr>
+              \`).join('')}
+            </tbody>
+          </table>
+          <div style="border-top: 1px dashed #000; margin-top: 8px; padding-top: 6px; font-weight: bold; display: flex; justify-content: space-between;">
+            <span>TOTAL:</span>
+            <span>₹\${o.total || 0}</span>
+          </div>
+          <div style="margin-top: 4px; font-weight: bold;">
+            PAYMENT: \${o.paymentMethod === 'cod' ? \`COD (COLLECT ₹\${o.total})\` : 'ONLINE (PAID)'}
+          </div>
+        </div>
+      \`;
+
+      const win = window.open('', '_blank', 'width=350,height=500');
+      win.document.write(slipHtml);
+      win.document.close();
+      win.focus();
+      setTimeout(() => { win.print(); win.close(); }, 300);
+    }
+  </script>
+</body>
+</html>

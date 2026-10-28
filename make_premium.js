@@ -236,7 +236,7 @@ export const HeroBanner: React.FC = () => {
         {/* Luxury Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold tracking-wide uppercase mb-6 backdrop-blur-md">
           <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-          <span>RA General Store • Bommalatapalli Village</span>
+          <span>RA General Store • Anantapur Village</span>
         </div>
 
         {/* Serif Headings */}
@@ -247,7 +247,7 @@ export const HeroBanner: React.FC = () => {
 
         <p className="mt-5 text-base sm:text-lg text-slate-300 max-w-2xl font-normal leading-relaxed">
           Premium pantry staples, dairy, farm-fresh vegetables, and household essentials. 
-          Prompt 20-minute delivery right beside Chennampalli road.
+          Prompt 20-minute delivery right beside Anantapur road.
         </p>
 
         {/* Feature Highlights */}
@@ -330,7 +330,7 @@ export const Footer: React.FC = () => {
             <div className="space-y-2.5 text-sm text-slate-400">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                <span>on main road , Bommalatapalli beside chennampalli road</span>
+                <span>on main road , Anantapur beside Anantapur road</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Clock className="w-4 h-4 text-amber-400 shrink-0" />
@@ -362,7 +362,7 @@ export const Footer: React.FC = () => {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} RA General Store. All rights reserved.</p>
           <p className="flex items-center gap-1.5">
-            <span>Built with care for Bommalatapalli</span>
+            <span>Built with care for Anantapur</span>
             <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400" />
           </p>
         </div>

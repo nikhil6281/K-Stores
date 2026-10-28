@@ -46,7 +46,7 @@ export const HeroBanner: React.FC = () => (
       <div style={{maxWidth:'600px',margin:'0 auto',position:'relative',textAlign:'center'}}>
         <div style={{display:'inline-flex',alignItems:'center',gap:'8px',background:'rgba(0,0,0,0.12)',borderRadius:'999px',padding:'5px 16px',fontSize:'12px',fontWeight:700,marginBottom:'14px',color:'#1a1a1a'}}>
           <span style={{width:'8px',height:'8px',borderRadius:'50%',background:'#0C831F',display:'inline-block'}}/>
-          Delivery in 20 minutes • Bommalatapalli
+          Delivery in 20 minutes • Anantapur
         </div>
 
         <h1 style={{fontSize:'clamp(1.5rem,5vw,2.4rem)',fontWeight:800,color:'#1a1a1a',margin:'0 0 8px',lineHeight:1.2}}>
@@ -77,7 +77,7 @@ export const HeroBanner: React.FC = () => (
       <div style={{background:'#fff',borderRadius:'16px',boxShadow:'0 4px 24px rgba(0,0,0,0.12)',padding:'14px 18px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'8px'}}>
         <div>
           <p style={{margin:0,fontSize:'12px',color:'#666',fontWeight:500}}>Delivering to</p>
-          <p style={{margin:0,fontSize:'14px',fontWeight:700,color:'#1a1a1a'}}>📍 Bommalatapalli, beside Chennampalli road</p>
+          <p style={{margin:0,fontSize:'14px',fontWeight:700,color:'#1a1a1a'}}>📍 Anantapur, beside Anantapur road</p>
         </div>
         <div style={{textAlign:'right'}}>
           <p style={{margin:0,fontSize:'11px',color:'#0C831F',fontWeight:700}}>Open Now</p>
@@ -342,7 +342,7 @@ fs.writeFileSync('src/components/PromotionsTicker.tsx',
 `import React from 'react';
 export const PromotionsTicker: React.FC = () => (
   <div style={{background:'#fff8e7',borderTop:'1px solid #ffe4a0',borderBottom:'1px solid #ffe4a0',textAlign:'center',padding:'9px 16px',fontSize:'13px',fontWeight:700,color:'#92400e'}}>
-    ✨ Special Offer: Free Village Delivery on orders above ₹199 &nbsp;•&nbsp; Fresh farm vegetables just arrived!
+    ✨ Special Offer: Free Anantapur delivery on orders above ₹199 &nbsp;•&nbsp; Fresh farm vegetables just arrived!
   </div>
 );
 `, 'utf8');

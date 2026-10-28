@@ -176,7 +176,7 @@ export const OfferBanner: React.FC = () => {
     <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-navy-950 py-2.5 px-4 text-center font-medium text-xs sm:text-sm tracking-wide shadow-sm flex items-center justify-center gap-2">
       <Sparkles className="w-4 h-4 text-navy-950 shrink-0 animate-pulse" />
       <span>
-        <strong className="font-bold">Special Offer:</strong> Free Village Delivery on orders above ₹199! Fresh farm vegetables just arrived.
+        <strong className="font-bold">Special Offer:</strong> Free Anantapur delivery on orders above ₹199! Fresh farm vegetables just arrived.
       </span>
     </div>
   );
@@ -528,7 +528,7 @@ export const HeroBanner: React.FC = () => {
         {/* Luxury Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold tracking-wide uppercase mb-6 backdrop-blur-md">
           <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-          <span>RA General Store • Bommalatapalli Village</span>
+          <span>RA General Store • Anantapur Village</span>
         </div>
 
         {/* Playfair Display Title */}
@@ -539,7 +539,7 @@ export const HeroBanner: React.FC = () => {
 
         <p className="mt-5 text-base sm:text-lg text-slate-300 max-w-2xl font-normal leading-relaxed">
           Premium pantry staples, dairy, farm-fresh vegetables, and household essentials. 
-          Prompt 20-minute delivery on main road, beside Chennampalli road.
+          Prompt 20-minute delivery on main road, beside Anantapur road.
         </p>
 
         {/* Feature Highlights */}

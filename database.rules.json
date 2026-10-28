@@ -10,6 +10,13 @@
       }
     },
 
+    "staff": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+
     "users": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
@@ -47,22 +54,25 @@
 
     "orders": {
       ".indexOn": ["uid", "createdAt", "paymentStatus"],
-      ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || query.orderByChild === 'uid' && query.equalTo === auth.uid)",
+      ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true || query.orderByChild === 'uid' && query.equalTo === auth.uid)",
       
       "$orderId": {
-        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('uid').val() === auth.uid)",
-        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true || data.child('uid').val() === auth.uid)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('staff').child(auth.uid).child('active').val() === true && data.exists() && newData.exists()))",
 
         "packingChecks": {
-          ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true)"
+        },
+        "unavailableItems": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true)"
         }
       }
     },
 
     "audit": {
-      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true)",
       "$auditId": {
-        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true && !data.exists() && newData.exists()",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true) && !data.exists() && newData.exists()",
         ".validate": "newData.hasChildren(['adminUid', 'adminEmail', 'action', 'timestamp'])"
       }
     },

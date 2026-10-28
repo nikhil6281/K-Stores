@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
         <div>
           <div style={{display:'flex',alignItems:'center',gap:'4px',marginBottom:'1px'}}>
             <MapPin size={12} color="rgba(255,255,255,0.75)" />
-            <span style={{fontSize:'11px',color:'rgba(255,255,255,0.75)',fontWeight:500}}>Bommalatapalli · 20 min</span>
+            <span style={{fontSize:'11px',color:'rgba(255,255,255,0.75)',fontWeight:500}}>Anantapur · 20 min</span>
           </div>
           <h1 style={{margin:0,fontSize:'18px',fontWeight:800,color:'#fff',letterSpacing:'-0.4px'}}>RA General Store</h1>
         </div>

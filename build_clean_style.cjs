@@ -6,7 +6,7 @@ const htmlContent = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RA General Store - Fresh Groceries & Village Delivery</title>
+<title>RA General Store - Fresh Groceries & Anantapur delivery</title>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f5f8f3;--card:#fff;--ink:#17301f;--mute:#5d7064;--line:#dfe8dc;--g:#1f6b3a;--g2:#e3f1e6;--y:#f2b33d;--r:#c0392b;
@@ -74,7 +74,7 @@ footer{text-align:center;color:var(--mute);padding:24px 16px;font-size:.88rem}
 </head>
 <body>
 <header><div class="bar">
-  <button class="logo" onclick="go('shop')">RA General Store<span>Fresh groceries · Bommalatapalli village delivery</span></button>
+  <button class="logo" onclick="go('shop')">RA General Store<span>Fresh groceries · Anantapur Anantapur delivery</span></button>
   <nav><button id="n-shop" onclick="go('shop')">Shop</button><button id="n-orders" onclick="go('orders')">Your orders</button><button id="n-owner" onclick="go('owner')">Owner</button></nav>
   <button class="cartbtn" onclick="openCart()" aria-label="Open cart">Cart (<span id="cc">0</span>)</button>
   <div class="search"><input id="q" type="search" placeholder="Search tomatoes, milk, rice, oil, soap…" aria-label="Search products" oninput="draw()"></div>
@@ -146,14 +146,14 @@ function stepper(id){if(P(id).out)return '<small style="color:var(--r)">Out of s
 
 function draw(){
   $('cc').textContent=count();
-  $('foot').textContent='RA General Store, Bommalatapalli · Cash on Delivery & UPI · Free village delivery above '+rs(STATE.free);
+  $('foot').textContent='RA General Store, Anantapur · Cash on Delivery & UPI · Free Anantapur delivery above '+rs(STATE.free);
   if(page==='orders')return ordersView();if(page==='owner')return ownerView();
   const q=$('q').value.trim().toLowerCase();
   const list=STATE.products.filter(p=>(cat==="All"||p.cat===cat)&&p.name.toLowerCase().includes(q));
   $('view').innerHTML=`<div class="hero">
-    <h1>RA General Store · Bommalatapalli</h1>
+    <h1>RA General Store · Anantapur</h1>
     <p>Fresh groceries delivered to your door in 20 minutes. Pay cash on delivery or UPI.</p>
-    <div style="margin-top:8px;font-size:0.86rem;color:var(--mute)">📍 on main road, Bommalatapalli beside chennampalli road • Everyday: 5:00 AM to 8:30 PM</div>
+    <div style="margin-top:8px;font-size:0.86rem;color:var(--mute)">📍 on main road, Anantapur beside Anantapur road • Everyday: 5:00 AM to 8:30 PM</div>
   </div>
   <div class="chips">\${cats().map(c=>`<button class="chip \${c===cat?'on':''}" onclick="cat='\${c.replace(/'/g,"\\\\\\'")}';draw()">\${esc(c)}</button>`).join("")}</div>
   \${list.length?`<div class="grid">\${list.map(p=>`<div class="p"><div class="em \${p.img?'ph':''}" aria-hidden="true">\${pic(p)}</div><b>\${esc(p.name)}</b><small>\${p.unit}</small><div class="row"><span class="price">\${rs(p.price)}</span>\${stepper(p.id)}</div></div>`).join("")}</div>`:`<div class="empty">No products match "\${esc(q)}". Try searching another item.</div>`}`;
@@ -165,7 +165,7 @@ function cartView(){
   const s=subtotal(),f=fee(s),ids=Object.keys(cart);
   $('panel').innerHTML=`<h2>Your Cart <button class="x" onclick="closeCart()" aria-label="Close">✕</button></h2>`+(ids.length?
   ids.map(id=>{const p=P(id);return `<div class="line"><span class="em">\${pic(p)}</span><div class="t"><b>\${esc(p.name)}</b><br><small>\${p.unit} · \${rs(p.price)}</small></div>\${stepper(+id)}<b>\${rs(p.price*cart[id])}</b></div>`}).join("")+
-  `<div class="sum"><div><span>Subtotal</span><span>\${rs(s)}</span></div><div><span>Village Delivery</span><span>\${f?rs(f):"Free"}</span></div>\${f?`<small>Add \${rs(STATE.free-s)} more for free delivery</small>`:""}<div class="tot"><span>Total</span><span>\${rs(s+f)}</span></div></div>
+  `<div class="sum"><div><span>Subtotal</span><span>\${rs(s)}</span></div><div><span>Anantapur delivery</span><span>\${f?rs(f):"Free"}</span></div>\${f?`<small>Add \${rs(STATE.free-s)} more for free delivery</small>`:""}<div class="tot"><span>Total</span><span>\${rs(s+f)}</span></div></div>
   <button class="btn" onclick="checkout()">Checkout</button>`
   :`<div class="empty">Your cart is empty.<br>Add some fresh groceries to get started.</div><button class="btn" onclick="closeCart()">Browse products</button>`);
 }
@@ -175,7 +175,7 @@ function checkout(){
   $('panel').innerHTML=`<h2>Delivery Details <button class="x" onclick="closeCart()" aria-label="Close">✕</button></h2>
   <label for="nm">Full Name</label><input class="f" id="nm" value="\${esc(u.nm||'')}" autocomplete="name" placeholder="Your name">
   <label for="ph">WhatsApp Phone Number</label><input class="f" id="ph" type="tel" inputmode="numeric" maxlength="10" value="\${esc(u.ph||'')}" autocomplete="tel" placeholder="10-digit mobile number">
-  <label for="ad">Village Delivery Address</label><textarea class="f" id="ad" rows="3" autocomplete="street-address" placeholder="House number / Landmark, Bommalatapalli">\${esc(u.ad||'')}</textarea>
+  <label for="ad">Anantapur delivery Address</label><textarea class="f" id="ad" rows="3" autocomplete="street-address" placeholder="House number / Landmark, Anantapur">\${esc(u.ad||'')}</textarea>
   <div class="cod"><b>Cash on Delivery / UPI:</b> Pay \${rs(s+f)} to the delivery person when your groceries arrive.</div>
   <div id="err" style="color:var(--r);min-height:1.3em;font-size:.9rem"></div>
   <button class="btn" onclick="place()">Place Order · \${rs(s+f)}</button>
@@ -195,7 +195,7 @@ function place(){
   draw();
 }
 
-const waLink=o=>\`https://wa.me/\${STATE.wa}?text=\`+encodeURIComponent(\`*New Order \${o.id} - RA General Store*\\n\`+o.items.map(i=>\`• \${i.n} (\${i.u}) × \${i.q} = \${rs(i.p*i.q)}\`).join("\\n")+\`\\nVillage Delivery: \${o.fee?rs(o.fee):"Free"}\\n*Total: \${rs(o.total)} (Cash on Delivery / UPI)*\\n\\nCustomer: \${o.nm}\\nPhone: \${o.ph}\\nAddress: \${o.ad}\`);
+const waLink=o=>\`https://wa.me/\${STATE.wa}?text=\`+encodeURIComponent(\`*New Order \${o.id} - RA General Store*\\n\`+o.items.map(i=>\`• \${i.n} (\${i.u}) × \${i.q} = \${rs(i.p*i.q)}\`).join("\\n")+\`\\nAnantapur delivery: \${o.fee?rs(o.fee):"Free"}\\n*Total: \${rs(o.total)} (Cash on Delivery / UPI)*\\n\\nCustomer: \${o.nm}\\nPhone: \${o.ph}\\nAddress: \${o.ad}\`);
 const LBL={placed:"Sent to store",delivered:"Delivered",cancelled:"Cancelled"};
 
 function ordersView(){
