@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>RA Store — Owner Portal</title>
+  <title>Sri Sai General Online Store — Owner Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
@@ -49,7 +49,189 @@
     .tab-btn.active { background: var(--surface); color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
     .card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 16px; margin-bottom: 16px; }
-    .order-card { border-left: 5px solid var(--primary); }
+    .order-card { border-left: 6px solid var(--primary); padding: 18px; font-size: 15px; border-radius: 10px; }
+    .order-card-id-total { font-size: 19px; font-weight: 800; }
+    .order-card .btn { min-height: 48px; padding: 10px 16px; font-size: 14px; font-weight: 600; }
+
+    /* Part A: Responsive 2-section layout */
+    .orders-split-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .orders-split-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    .orders-section {
+      background: #F9FAFB;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .orders-section-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #FFFFFF;
+      padding: 14px 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .orders-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 1400px) {
+      .orders-grid {
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      }
+    }
+    .delivery-address-box {
+      background: #F3F4F6;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .delivery-address-label {
+      font-size: 16px;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .delivery-address-content {
+      font-size: 16px;
+      font-weight: 700;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      color: #1F2937;
+      line-height: 1.4;
+    }
+    .delivery-notes-box {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      color: #1E40AF;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .delivery-slot-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+    .late-warning-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #FEE2E2;
+      color: #991B1B;
+      border: 1px solid #FECACA;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    .address-action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .address-action-bar .btn {
+      min-height: 38px;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    .pack-checklist-box {
+      background: #F9FAFB;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0;
+    }
+    .pack-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      margin-bottom: 6px;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .pack-label:hover {
+      background: #F3F4F6;
+    }
+    .pack-checkbox {
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+    .badge-payment-amber {
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-transform: none;
+    }
+    .badge-payment-green {
+      background: #DCFCE7;
+      color: #166534;
+      border: 1px solid #BBF7D0;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-transform: none;
+    }
+    .awaiting-payment-container {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 20px;
+    }
+    .awaiting-payment-summary {
+      font-size: 14px;
+      font-weight: 700;
+      color: #92400E;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
     .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
     .badge-paid { background: #DCFCE7; color: #166534; }
@@ -89,7 +271,7 @@
 <body>
 
   <div class="header">
-    <h1>RA Store <span>OWNER PORTAL</span></h1>
+    <h1>Sri Sai General Online Store <span>OWNER PORTAL</span></h1>
     <div id="authActions" style="display: none; align-items: center; gap: 12px;">
       <span id="userBadge" style="font-size: 13px; color: #9CA3AF;"></span>
       <button class="btn btn-outline" id="logoutBtn">Logout</button>
@@ -122,7 +304,7 @@
       <!-- ============================================== -->
       <div id="ordersTab">
         <div class="filter-bar">
-          <input type="text" id="orderSearchInput" placeholder="Search by ID, name, or phone..." style="flex: 1; min-width: 180px;">
+          <input type="text" id="orderSearchInput" placeholder="Search by ID, name, phone, or address..." style="flex: 1; min-width: 180px;">
           <select id="orderDateFilter">
             <option value="today">Today</option>
             <option value="7days">Last 7 Days</option>
@@ -137,11 +319,12 @@
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          <select id="orderPaymentFilter">
-            <option value="all">All Payments</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Unpaid</option>
+          <select id="orderMethodFilter">
+            <option value="all">All Methods</option>
+            <option value="cod">💵 Cash on Delivery</option>
+            <option value="online">⚡ Online Payments</option>
           </select>
+          <button id="enableAlertsBtn" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary); font-size: 12px;">🔔 Enable Audio Alerts</button>
         </div>
 
         <div id="ordersList">Loading orders...</div>
@@ -225,6 +408,25 @@
             <div class="stat-label">Avg Order Value</div>
             <div class="stat-num" id="statAov">₹0</div>
             <div style="font-size: 11px; color: var(--muted);">Per completed order</div>
+          </div>
+        </div>
+
+        <!-- Daily Cash Summary (A5 & C) -->
+        <div class="stats-grid">
+          <div class="stat-card" style="border-left: 5px solid #F59E0B;">
+            <div class="stat-label">Today's COD To Collect</div>
+            <div class="stat-num" id="statTodayCodToCollect" style="color: #D97706;">₹0</div>
+            <div style="font-size: 11px; color: var(--muted);" id="statTodayCodCount">0 orders</div>
+          </div>
+          <div class="stat-card" style="border-left: 5px solid #10B981;">
+            <div class="stat-label">Today's COD Collected</div>
+            <div class="stat-num" id="statTodayCodCollected" style="color: #059669;">₹0</div>
+            <div style="font-size: 11px; color: var(--muted);" id="statTodayCodCollectedCount">0 collected</div>
+          </div>
+          <div class="stat-card" style="border-left: 5px solid #3B82F6;">
+            <div class="stat-label">Total Pending COD Cash</div>
+            <div class="stat-num" id="statTotalPendingCod" style="color: #2563EB;">₹0</div>
+            <div style="font-size: 11px; color: var(--muted);">All active uncollected COD</div>
           </div>
         </div>
 
@@ -364,7 +566,7 @@
           </div>
 
           <div style="display: flex; align-items: center; gap: 10px;">
-            <img id="imagePreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ERA Store%3C/text%3E%3C/svg%3E" style="width: 60px; height: 60px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); background: #fff;">
+            <img id="imagePreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ESri Sai Store%3C/text%3E%3C/svg%3E" style="width: 60px; height: 60px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); background: #fff;">
             <input type="hidden" id="prodImageUrl">
             <span id="imageStatusText" style="font-size: 12px; color: var(--muted);">No photo taken yet</span>
           </div>
@@ -432,7 +634,7 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ERA Store%3C/text%3E%3C/svg%3E";
+    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ESri Sai Store%3C/text%3E%3C/svg%3E";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD94vWB3NBEjSGmbO6JQ5F1t6L9Js7er8Y",
@@ -448,34 +650,90 @@
 
     let currentUser = null;
     let allOrders = {};
+    let allHistoricalOrders = {};
     let allProducts = {};
     let allCategories = {};
     let allSearchMisses = {};
     let isQuickAddActive = false;
     let deletedProductBackup = null;
     let deleteTimeout = null;
-    let previousOrdersCount = null;
+    let knownPayableKeys = null;
+    let audioAlertsEnabled = false;
+    let sharedAudioCtx = null;
+    let unacceptedChimeInterval = null;
 
-    function playNewOrderChime() {
+    async function writeAudit(action, orderId, details = {}) {
+      if (!currentUser) return;
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.6);
-      } catch (e) {}
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("RA Store: New Order Received!", { body: "A new grocery delivery order just arrived in Bommalatapalli." });
+        await db.ref('audit').push({
+          adminUid: currentUser.uid,
+          adminEmail: currentUser.email || 'admin',
+          action: action,
+          orderId: orderId,
+          details: details,
+          timestamp: new Date().toISOString()
+        });
+      } catch (err) {
+        console.warn('Audit log write error:', err);
       }
     }
+
+    function initAudio() {
+      try {
+        if (!sharedAudioCtx) {
+          sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (sharedAudioCtx.state === 'suspended') {
+          sharedAudioCtx.resume();
+        }
+        audioAlertsEnabled = true;
+        const btn = document.getElementById('enableAlertsBtn');
+        if (btn) {
+          btn.innerText = '🔔 Alerts Active';
+          btn.style.color = '#166534';
+          btn.style.borderColor = '#166534';
+        }
+      } catch (e) {
+        console.warn('Audio init error:', e);
+      }
+    }
+
+    function playNewOrderChime(isSoftRepeat = false) {
+      try {
+        if (!sharedAudioCtx && (audioAlertsEnabled || !isSoftRepeat)) {
+          sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (sharedAudioCtx) {
+          if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+          const osc = sharedAudioCtx.createOscillator();
+          const gain = sharedAudioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(sharedAudioCtx.destination);
+          const gainVal = isSoftRepeat ? 0.08 : 0.3;
+          osc.frequency.setValueAtTime(587.33, sharedAudioCtx.currentTime);
+          osc.frequency.setValueAtTime(880, sharedAudioCtx.currentTime + 0.15);
+          gain.gain.setValueAtTime(gainVal, sharedAudioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, sharedAudioCtx.currentTime + (isSoftRepeat ? 0.4 : 0.6));
+          osc.start();
+          osc.stop(sharedAudioCtx.currentTime + (isSoftRepeat ? 0.4 : 0.6));
+        }
+      } catch (e) {}
+
+      if (!isSoftRepeat && "Notification" in window && Notification.permission === "granted") {
+        new Notification("Sri Sai General Online Store: New Order Received!", { body: "A new payable grocery order arrived in Bommalatapalli." });
+      }
+    }
+
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
+    }
+
+    function isOrderPayable(o) {
+      if (!o) return false;
+      if (o.status === 'cancelled') return false;
+      if (o.paymentMethod === 'cod') return true;
+      if (o.paymentMethod === 'online_razorpay' && o.paymentStatus === 'paid') return true;
+      return false;
     }
 
     auth.onAuthStateChanged(async (user) => {
@@ -507,19 +765,83 @@
     });
     document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
+    document.getElementById('enableAlertsBtn').addEventListener('click', () => {
+      initAudio();
+      playNewOrderChime(false);
+      showToast('Audio alerts enabled!');
+    });
+
     function initRealtimeListeners() {
-      db.ref('orders').on('value', snap => {
+      // Live recent orders query (3 days ago)
+      const threeDaysAgoIso = new Date(Date.now() - (3 * 24 * 3600 * 1000)).toISOString();
+      const ordersLiveRef = db.ref('orders').orderByChild('createdAt').startAt(threeDaysAgoIso);
+
+      ordersLiveRef.on('value', snap => {
         const val = snap.val() || {};
-        const count = Object.keys(val).length;
-        if (previousOrdersCount !== null && count > previousOrdersCount) {
-          playNewOrderChime();
-        }
-        previousOrdersCount = count;
         allOrders = val;
+
+        // Keep allHistoricalOrders populated with at least live orders
+        allHistoricalOrders = { ...allHistoricalOrders, ...val };
+
+        const currentPayableKeys = new Set();
+        let unacceptedCount = 0;
+
+        Object.keys(val).forEach(k => {
+          const o = val[k];
+          if (isOrderPayable(o)) {
+            currentPayableKeys.add(k);
+            if (o.status === 'placed') {
+              unacceptedCount++;
+            }
+          }
+        });
+
+        if (knownPayableKeys === null) {
+          knownPayableKeys = currentPayableKeys;
+        } else {
+          let hasNewPayable = false;
+          currentPayableKeys.forEach(k => {
+            if (!knownPayableKeys.has(k)) {
+              hasNewPayable = true;
+            }
+          });
+          if (hasNewPayable) {
+            playNewOrderChime(false);
+          }
+          knownPayableKeys = currentPayableKeys;
+        }
+
+        // Tab title unaccepted count (Part C)
+        if (unacceptedCount > 0) {
+          document.title = `(${unacceptedCount}) Sri Sai Store — Owner Portal`;
+        } else {
+          document.title = 'Sri Sai General Online Store — Owner Portal';
+        }
+
         renderOrdersList();
         renderCustomersList();
         calculateReports();
       });
+
+      // Also load complete order history once for Reports and Customer CRM
+      db.ref('orders').once('value').then(snap => {
+        allHistoricalOrders = snap.val() || {};
+        renderCustomersList();
+        calculateReports();
+      });
+
+      // Repeat soft chime every 30s if there are unaccepted payable orders
+      if (!unacceptedChimeInterval) {
+        unacceptedChimeInterval = setInterval(() => {
+          let unaccepted = 0;
+          Object.values(allOrders).forEach(o => {
+            if (isOrderPayable(o) && o.status === 'placed') unaccepted++;
+          });
+          if (unaccepted > 0 && audioAlertsEnabled) {
+            playNewOrderChime(true);
+          }
+        }, 30000);
+      }
 
       db.ref('categories').on('value', snap => {
         allCategories = snap.val() || {};
@@ -541,9 +863,10 @@
         const s = snap.val() || {};
         document.getElementById('settingOpenTime').value = s.storeHours?.open || '07:00';
         document.getElementById('settingCloseTime').value = s.storeHours?.close || '19:00';
-        document.getElementById('settingMinOrder').value = s.minOrderValue || 0;
-        document.getElementById('settingDeliveryFee').value = s.deliveryFee || 25;
-        document.getElementById('settingFreeThreshold').value = s.freeDeliveryThreshold || 299;
+        // Bug fix: use ?? instead of || so 0 is preserved
+        document.getElementById('settingMinOrder').value = s.minOrderValue ?? 0;
+        document.getElementById('settingDeliveryFee').value = s.deliveryFee ?? 25;
+        document.getElementById('settingFreeThreshold').value = s.freeDeliveryThreshold ?? 299;
         document.getElementById('settingWhatsapp').value = s.whatsappNumber || '916281730144';
         document.getElementById('settingStoreMode').value = s.storeHours?.mode || 'auto';
         document.getElementById('settingAnnouncement').value = s.announcement || '';
@@ -551,30 +874,145 @@
     }
 
     // =========================================================
-    // ORDERS TAB
+    // ORDERS TAB (Parts A1, A2, A3, A4, A5)
     // =========================================================
+    function renderOrderCardHtml(key, ord, now) {
+      const checks = ord.packingChecks || {};
+      const isCancelled = ord.status === 'cancelled';
+      const isDelivered = ord.status === 'delivered';
+      const isOnline = ord.paymentMethod === 'online_razorpay';
+      const isOnlinePaid = isOnline && (ord.paymentStatus === 'paid' || ord.paymentStatus === 'refund_initiated' || ord.paymentStatus === 'refunded');
+      const isUnpaidOnline = isOnline && !isOnlinePaid;
+
+      const orderDate = new Date(ord.createdAt);
+      const minsSincePlaced = Math.floor((now - orderDate) / 60000);
+      const isLatePlaced = ord.status === 'placed' && minsSincePlaced >= 20;
+
+      // Payment Badge (A4)
+      let paymentBadgeHtml = '';
+      if (ord.paymentMethod === 'cod') {
+        if (ord.paymentStatus === 'cod_collected') {
+          paymentBadgeHtml = `<span class="badge badge-payment-green">COD Collected ₹${escapeHtml(ord.total)} ✅</span>`;
+        } else {
+          paymentBadgeHtml = `<span class="badge badge-payment-amber">Collect ₹${escapeHtml(ord.total)} on delivery</span>`;
+        }
+      } else {
+        if (ord.paymentStatus === 'paid') {
+          paymentBadgeHtml = `<span class="badge badge-payment-green">PAID ✅</span>`;
+        } else if (ord.paymentStatus === 'refund_initiated') {
+          paymentBadgeHtml = `<span class="badge" style="background: #FEE2E2; color: #991B1B;">Refund Initiated</span>`;
+        } else if (ord.paymentStatus === 'refunded') {
+          paymentBadgeHtml = `<span class="badge badge-payment-amber">Refunded ✅</span>`;
+        } else {
+          paymentBadgeHtml = `<span class="badge badge-payment-amber">Unpaid</span>`;
+        }
+      }
+
+      // Can dispatch check: block if unpaid online
+      const dispatchDisabled = isUnpaidOnline ? 'disabled title="Online order has not been paid yet"' : '';
+
+      return `
+        <div class="card order-card" id="card-${escapeHtml(key)}" style="border-left-color: ${isCancelled ? 'var(--danger)' : (isDelivered ? '#3730A3' : 'var(--primary)')};">
+          ${isUnpaidOnline ? `<div class="unpaid-warning">⚠️ Customer has NOT paid online yet. Dispatch blocked until marked PAID.</div>` : ''}
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+            <div>
+              <span class="order-id-total">#${escapeHtml(ord.id)}</span>
+              <span style="font-size: 13px; color: var(--muted); margin-left: 8px;">${orderDate.toLocaleString([], {hour:'2-digit', minute:'2-digit', day:'numeric', month:'short'})}</span>
+              ${isLatePlaced ? `<span class="late-warning-badge">⚠️ >20m unaccepted</span>` : ''}
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              ${paymentBadgeHtml}
+              <span class="badge" style="background: #E5E7EB; color: #3730A3; font-weight: 700;">${escapeHtml(ord.status)}</span>
+            </div>
+          </div>
+
+          <div style="font-size: 15px; margin-bottom: 6px; font-weight: 600;">
+            <strong>${escapeHtml(ord.customer?.name || 'Customer')}</strong> (${escapeHtml(ord.customer?.phone || '')})
+          </div>
+
+          <!-- A1: Prominent Address Block -->
+          <div class="delivery-address-box">
+            <div class="delivery-address-label">📍 Delivery address:</div>
+            <div class="delivery-address-content">${escapeHtml(ord.customer?.address || 'No address provided')}</div>
+
+            ${(ord.customer?.notes || ord.notes) ? `
+              <div class="delivery-notes-box">
+                <strong>📝 Notes:</strong> ${escapeHtml(ord.customer?.notes || ord.notes)}
+              </div>
+            ` : ''}
+
+            ${ord.customer?.scheduledSlot ? `
+              <div class="delivery-slot-badge">
+                ⏰ Scheduled: ${escapeHtml(ord.customer.scheduledSlot)}
+              </div>
+            ` : ''}
+
+            <div class="address-action-bar">
+              ${ord.customer?.phone ? `
+                <a href="tel:${escapeHtml(ord.customer.phone)}" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary);">📞 Call</a>
+                <a href="https://wa.me/91${escapeHtml(ord.customer.phone.replace(/\D/g,''))}?text=${encodeURIComponent(`Hello ${ord.customer?.name || 'Customer'}, regarding your order #${ord.id} from Sri Sai General Online Store.`)}" target="_blank" class="btn" style="background: #25D366; color: #fff;">💬 WhatsApp</a>
+              ` : ''}
+              <button class="btn btn-light action-copy-address" data-address="${escapeHtml(ord.customer?.address || '')}">📋 Copy</button>
+              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((ord.customer?.address || '') + ' Bommalatapalli')}" target="_blank" class="btn btn-outline" style="color: #2563EB; border-color: #93C5FD;">🗺️ Maps</a>
+            </div>
+          </div>
+
+          <!-- A3: Packing checklist with 22px checkbox -->
+          <div class="pack-checklist-box">
+            <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--dark);">PACKING CHECKLIST:</div>
+            ${(ord.items || []).map(it => `
+              <label class="pack-label">
+                <input type="checkbox" class="pack-checkbox" data-order-key="${escapeHtml(key)}" data-item-id="${escapeHtml(it.id)}" ${checks[it.id] ? 'checked' : ''}>
+                <span style="${checks[it.id] ? 'text-decoration: line-through; color: var(--muted);' : 'font-weight: 600; color: #1F2937;'}">${escapeHtml(it.name)} (${escapeHtml(it.quantity)} × ₹${escapeHtml(it.price)})</span>
+              </label>
+            `).join('')}
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 14px;">
+            <div>
+              <span class="order-id-total">Total: ₹${escapeHtml(ord.total)}</span>
+              <span style="font-size: 13px; color: var(--muted); margin-left: 6px;">(${ord.paymentMethod === 'cod' ? 'COD' : 'ONLINE'})</span>
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-outline action-print" data-key="${escapeHtml(key)}" style="color: var(--text); border-color: var(--border);">🖨️ Bill</button>
+
+              ${!isCancelled && !isDelivered ? `
+                ${ord.status === 'placed' ? `<button class="btn btn-light action-status" data-key="${escapeHtml(key)}" data-status="accepted" ${dispatchDisabled}>Accept</button>` : ''}
+                ${ord.status === 'accepted' ? `<button class="btn btn-light action-status" data-key="${escapeHtml(key)}" data-status="packed" ${dispatchDisabled}>Mark Packed</button>` : ''}
+                ${ord.status === 'packed' ? `<button class="btn btn-primary action-status" data-key="${escapeHtml(key)}" data-status="out_for_delivery" ${dispatchDisabled}>Out for Delivery</button>` : ''}
+                ${ord.status === 'out_for_delivery' ? `<button class="btn btn-primary action-status" data-key="${escapeHtml(key)}" data-status="delivered">Delivered ✅</button>` : ''}
+                <button class="btn btn-danger action-cancel-refund" data-key="${escapeHtml(key)}" data-id="${escapeHtml(ord.id)}">Cancel</button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderOrdersList() {
       const list = document.getElementById('ordersList');
       const search = document.getElementById('orderSearchInput').value.toLowerCase().trim();
       const dateFilter = document.getElementById('orderDateFilter').value;
       const statusFilter = document.getElementById('orderStatusFilter').value;
-      const payFilter = document.getElementById('orderPaymentFilter').value;
+      const methodFilter = document.getElementById('orderMethodFilter').value;
 
-      let keys = Object.keys(allOrders).reverse();
       const now = new Date();
+      let keys = Object.keys(allOrders);
 
+      // Filter keys
       keys = keys.filter(k => {
         const o = allOrders[k];
         if (search) {
           const matchId = (o.id || '').toLowerCase().includes(search);
           const matchName = (o.customer?.name || '').toLowerCase().includes(search);
           const matchPhone = (o.customer?.phone || '').includes(search);
-          if (!matchId && !matchName && !matchPhone) return false;
+          const matchAddr = (o.customer?.address || '').toLowerCase().includes(search);
+          if (!matchId && !matchName && !matchPhone && !matchAddr) return false;
         }
 
         if (statusFilter !== 'all' && o.status !== statusFilter) return false;
-        if (payFilter === 'paid' && o.paymentStatus !== 'paid') return false;
-        if (payFilter === 'pending' && o.paymentStatus === 'paid') return false;
 
         const orderDate = new Date(o.createdAt);
         if (dateFilter === 'today') {
@@ -585,101 +1023,264 @@
         return true;
       });
 
-      if (!keys.length) {
-        list.innerHTML = "<p style='color: var(--muted); padding: 20px; text-align: center;'>No orders match your filter.</p>";
+      // Split into unpaid online vs live COD vs live paid online
+      let unpaidOnlineKeys = [];
+      let codKeys = [];
+      let onlinePaidKeys = [];
+
+      keys.forEach(k => {
+        const o = allOrders[k];
+        const isOnline = o.paymentMethod === 'online_razorpay';
+        const isPaidOrRefund = o.paymentStatus === 'paid' || o.paymentStatus === 'refund_initiated' || o.paymentStatus === 'refunded';
+
+        if (isOnline && !isPaidOrRefund) {
+          unpaidOnlineKeys.push(k);
+        } else if (o.paymentMethod === 'cod') {
+          codKeys.push(k);
+        } else {
+          onlinePaidKeys.push(k);
+        }
+      });
+
+      const isActive = o => ['placed', 'accepted', 'packed', 'out_for_delivery'].includes(o.status);
+      const sortOldestFirst = (a, b) => new Date(allOrders[a].createdAt) - new Date(allOrders[b].createdAt);
+      const sortNewestFirst = (a, b) => new Date(allOrders[b].createdAt) - new Date(allOrders[a].createdAt);
+
+      const activeCod = codKeys.filter(k => isActive(allOrders[k])).sort(sortOldestFirst);
+      const completedCod = codKeys.filter(k => !isActive(allOrders[k])).sort(sortNewestFirst);
+      const codActiveTotal = activeCod.reduce((sum, k) => sum + (Number(allOrders[k].total) || 0), 0);
+
+      const activeOnline = onlinePaidKeys.filter(k => isActive(allOrders[k])).sort(sortOldestFirst);
+      const completedOnline = onlinePaidKeys.filter(k => !isActive(allOrders[k])).sort(sortNewestFirst);
+      const onlineActiveTotal = activeOnline.reduce((sum, k) => sum + (Number(allOrders[k].total) || 0), 0);
+
+      if (!activeCod.length && !completedCod.length && !activeOnline.length && !completedOnline.length && !unpaidOnlineKeys.length) {
+        list.innerHTML = "<p style='color: var(--muted); padding: 30px; text-align: center; font-size: 15px;'>No orders match your filter.</p>";
         return;
       }
 
-      list.innerHTML = keys.map(key => {
-        const ord = allOrders[key];
-        const checks = ord.packingChecks || {};
-        const isCancelled = ord.status === 'cancelled';
-        const isDelivered = ord.status === 'delivered';
-        const isUnpaidOnline = ord.paymentMethod === 'online_razorpay' && ord.paymentStatus !== 'paid';
+      let html = '';
 
-        return `
-          <div class="card order-card" style="border-left-color: ${isCancelled ? 'var(--danger)' : (isDelivered ? '#3730A3' : 'var(--primary)')}">
-            ${isUnpaidOnline ? `<div class="unpaid-warning">⚠️ Customer has NOT paid online yet. Do NOT pack until marked PAID.</div>` : ''}
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <div>
-                <strong style="font-size: 15px;">#${escapeHtml(ord.id)}</strong>
-                <span style="font-size: 12px; color: var(--muted); margin-left: 8px;">${new Date(ord.createdAt).toLocaleString([], {hour:'2-digit', minute:'2-digit', day:'numeric', month:'short'})}</span>
+      // Two sections (A4)
+      html += `
+        <div class="orders-split-container">
+          ${(methodFilter === 'all' || methodFilter === 'cod') ? `
+            <div class="orders-section" id="sectionCod">
+              <div class="orders-section-header">
+                <span>💵 Cash on Delivery</span>
+                <span style="font-size: 14px; font-weight: 800; color: var(--primary);">${activeCod.length} active • ₹${codActiveTotal}</span>
               </div>
-              <div style="display: flex; gap: 6px;">
-                <span class="badge badge-${escapeHtml(ord.paymentStatus)}">${escapeHtml(ord.paymentStatus)}</span>
-                <span class="badge" style="background: #E5E7EB; color: #3730A3;">${escapeHtml(ord.status)}</span>
+              <div class="orders-grid">
+                ${activeCod.length ? activeCod.map(k => renderOrderCardHtml(k, allOrders[k], now)).join('') : '<p style="color: var(--muted); padding: 16px; text-align: center;">No active COD orders.</p>'}
               </div>
+              ${completedCod.length ? `
+                <details style="margin-top: 16px;">
+                  <summary style="cursor: pointer; font-weight: 700; color: var(--muted); padding: 8px 4px;">Completed COD (${completedCod.length})</summary>
+                  <div class="orders-grid" style="margin-top: 10px;">
+                    ${completedCod.map(k => renderOrderCardHtml(k, allOrders[k], now)).join('')}
+                  </div>
+                </details>
+              ` : ''}
             </div>
+          ` : ''}
 
-            <div style="font-size: 13px; margin-bottom: 10px;">
-              <strong>${escapeHtml(ord.customer?.name)}</strong> (${escapeHtml(ord.customer?.phone)}) • ${escapeHtml(ord.customer?.address)}
-            </div>
-
-            <div style="background: #F9FAFB; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-              <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">PACKING CHECKLIST:</div>
-              ${(ord.items || []).map(it => `
-                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 4px; cursor: pointer;">
-                  <input type="checkbox" class="pack-checkbox" data-order-key="${escapeHtml(key)}" data-item-id="${escapeHtml(it.id)}" ${checks[it.id] ? 'checked' : ''}>
-                  <span style="${checks[it.id] ? 'text-decoration: line-through; color: var(--muted);' : ''}">${escapeHtml(it.name)} (${escapeHtml(it.quantity)} × ₹${escapeHtml(it.price)})</span>
-                </label>
-              `).join('')}
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <div>
-                <span style="font-weight: 700; font-size: 15px;">Total: ₹${escapeHtml(ord.total)} (${ord.paymentMethod === 'cod' ? 'COD' : 'ONLINE'})</span>
-                ${ord.paymentMethod === 'cod' && isDelivered ? `
-                  <label style="margin-left: 10px; font-size: 12px; font-weight: 600; cursor: pointer;">
-                    <input type="checkbox" class="cod-collected-checkbox" data-key="${escapeHtml(key)}" ${ord.codCollected ? 'checked' : ''}> Cash Collected
-                  </label>
-                ` : ''}
+          ${(methodFilter === 'all' || methodFilter === 'online') ? `
+            <div class="orders-section" id="sectionOnline">
+              <div class="orders-section-header">
+                <span>⚡ Online Payments (Paid)</span>
+                <span style="font-size: 14px; font-weight: 800; color: var(--primary);">${activeOnline.length} active • ₹${onlineActiveTotal}</span>
               </div>
-
-              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <button class="btn btn-outline action-print" data-key="${escapeHtml(key)}" style="color: var(--text); border-color: var(--border);">🖨️ Bill</button>
-                
-                ${!isCancelled && !isDelivered ? `
-                  ${ord.status === 'placed' ? `<button class="btn btn-light action-status" data-key="${escapeHtml(key)}" data-status="accepted">Accept</button>` : ''}
-                  ${ord.status === 'accepted' ? `<button class="btn btn-light action-status" data-key="${escapeHtml(key)}" data-status="packed">Mark Packed</button>` : ''}
-                  ${ord.status === 'packed' ? `<button class="btn btn-primary action-status" data-key="${escapeHtml(key)}" data-status="out_for_delivery">Out for Delivery</button>` : ''}
-                  ${ord.status === 'out_for_delivery' ? `<button class="btn btn-primary action-status" data-key="${escapeHtml(key)}" data-status="delivered">Delivered ✅</button>` : ''}
-                  <button class="btn btn-danger action-cancel-refund" data-key="${escapeHtml(key)}" data-id="${escapeHtml(ord.id)}">Cancel</button>
-                ` : ''}
+              <div class="orders-grid">
+                ${activeOnline.length ? activeOnline.map(k => renderOrderCardHtml(k, allOrders[k], now)).join('') : '<p style="color: var(--muted); padding: 16px; text-align: center;">No active paid online orders.</p>'}
               </div>
+              ${completedOnline.length ? `
+                <details style="margin-top: 16px;">
+                  <summary style="cursor: pointer; font-weight: 700; color: var(--muted); padding: 8px 4px;">Completed Online (${completedOnline.length})</summary>
+                  <div class="orders-grid" style="margin-top: 10px;">
+                    ${completedOnline.map(k => renderOrderCardHtml(k, allOrders[k], now)).join('')}
+                  </div>
+                </details>
+              ` : ''}
             </div>
-          </div>
+          ` : ''}
+        </div>
+      `;
+
+      // A2: Collapsed bottom row for unpaid online orders
+      if (unpaidOnlineKeys.length) {
+        html += `
+          <details class="awaiting-payment-container">
+            <summary class="awaiting-payment-summary">
+              <span>⏳ ${unpaidOnlineKeys.length} awaiting payment</span>
+              <span style="font-size: 12px; font-weight: 600; color: #92400E;">Click to view read-only list</span>
+            </summary>
+            <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+              ${unpaidOnlineKeys.map(k => {
+                const ord = allOrders[k];
+                const mins = Math.floor((now - new Date(ord.createdAt)) / 60000);
+                const ageStr = mins < 60 ? `${mins}m ago` : `${Math.floor(mins/60)}h ${mins%60}m ago`;
+                return `
+                  <div style="background: #fff; border: 1px solid #FDE68A; padding: 10px 14px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                      <strong>#${escapeHtml(ord.id)}</strong> • <span style="font-weight: 700; color: var(--primary);">₹${escapeHtml(ord.total)}</span> • <span style="color: var(--muted); font-size: 12px;">${ageStr}</span> • <span style="font-size: 13px;">${escapeHtml(ord.customer?.name || '')} (${escapeHtml(ord.customer?.phone || '')})</span>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                      <button class="btn btn-outline action-reconcile" data-key="${escapeHtml(k)}" style="padding: 4px 10px; font-size: 12px; min-height: 36px; color: #92400E; border-color: #F59E0B;">Reconcile</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </details>
         `;
-      }).join('');
+      }
+
+      list.innerHTML = html;
     }
 
-    ['orderSearchInput', 'orderDateFilter', 'orderStatusFilter', 'orderPaymentFilter'].forEach(id => {
+    ['orderSearchInput', 'orderDateFilter', 'orderStatusFilter', 'orderMethodFilter'].forEach(id => {
       document.getElementById(id).addEventListener('input', renderOrdersList);
     });
 
     document.getElementById('ordersList').addEventListener('click', async (e) => {
+      // Copy address
+      if (e.target.classList.contains('action-copy-address')) {
+        const addr = e.target.getAttribute('data-address');
+        if (addr) {
+          navigator.clipboard.writeText(addr).then(() => {
+            showToast('Delivery address copied to clipboard!');
+          }).catch(() => {
+            showToast('Failed to copy address.');
+          });
+        }
+        return;
+      }
+
+      // Reconcile awaiting payment order
+      if (e.target.classList.contains('action-reconcile')) {
+        const key = e.target.getAttribute('data-key');
+        e.target.disabled = true;
+        e.target.innerText = "Checking...";
+        try {
+          const token = await currentUser.getIdToken();
+          const res = await fetch(`${WORKER_API}/api/admin/reconcile-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ orderId: key, pushKey: key })
+          });
+          const d = await res.json();
+          if (res.ok && d.success) {
+            showToast(`Order #${d.orderId || key} reconciled: ${d.paymentStatus || d.status || 'Updated'}`);
+          } else {
+            showToast(d.error || 'Reconciliation checked.');
+          }
+          await writeAudit('ORDER_RECONCILED', key, { result: d });
+        } catch (err) {
+          showToast('Failed to connect to Worker for reconcile.');
+        } finally {
+          e.target.disabled = false;
+          e.target.innerText = "Reconcile";
+        }
+        return;
+      }
+
+      // Status change progression
       if (e.target.classList.contains('action-status')) {
         const key = e.target.getAttribute('data-key');
-        const st = e.target.getAttribute('data-status');
-        await db.ref(`orders/${key}/status`).set(st);
+        const targetStatus = e.target.getAttribute('data-status');
+        const ord = allOrders[key];
+        if (!ord) return;
+
+        // Block unpaid online dispatch (A5)
+        if (ord.paymentMethod === 'online_razorpay' && ord.paymentStatus !== 'paid') {
+          alert('Online order is not paid! Dispatch and progression blocked.');
+          return;
+        }
+
+        // Strict status sequence (A5): placed -> accepted -> packed -> out_for_delivery -> delivered
+        const validNext = {
+          placed: 'accepted',
+          accepted: 'packed',
+          packed: 'out_for_delivery',
+          out_for_delivery: 'delivered'
+        };
+        if (validNext[ord.status] !== targetStatus) {
+          alert(`Invalid status progression from ${ord.status} to ${targetStatus}`);
+          return;
+        }
+
+        // COD confirmation on delivered (A5)
+        if (targetStatus === 'delivered' && ord.paymentMethod === 'cod') {
+          if (!confirm(`Cash collected ₹${ord.total}?`)) return;
+          await db.ref(`orders/${key}`).update({
+            status: 'delivered',
+            paymentStatus: 'cod_collected',
+            codCollected: true,
+            codCollectedAt: new Date().toISOString()
+          });
+          await writeAudit('ORDER_DELIVERED_COD_COLLECTED', key, { total: ord.total });
+          showToast(`Order #${ord.id} delivered and cash collected.`);
+        } else {
+          await db.ref(`orders/${key}/status`).set(targetStatus);
+          await writeAudit(`ORDER_STATUS_${targetStatus.toUpperCase()}`, key);
+          showToast(`Order #${ord.id} updated to ${targetStatus}.`);
+        }
+        return;
       }
+
+      // Print bill
       if (e.target.classList.contains('action-print')) {
         const key = e.target.getAttribute('data-key');
         printOrderSlip(allOrders[key]);
+        return;
       }
+
+      // Cancel order with custom prompt and reason (A5)
       if (e.target.classList.contains('action-cancel-refund')) {
         const key = e.target.getAttribute('data-key');
         const humanId = e.target.getAttribute('data-id');
-        if (!confirm(`Cancel order #${humanId}? Paid online orders will be refunded immediately.`)) return;
-        const token = await currentUser.getIdToken();
-        const res = await fetch(`${WORKER_API}/api/cancel-order`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ pushKey: key, reason: 'Owner cancelled' })
-        });
-        const d = await res.json();
-        if (res.ok) showToast(`Order #${humanId} cancelled.`);
-        else alert(d.error || 'Cancellation error');
+        const ord = allOrders[key];
+        if (!ord) return;
+
+        if (ord.status === 'out_for_delivery' || ord.status === 'delivered') {
+          alert('Cannot cancel order once out for delivery or delivered.');
+          return;
+        }
+
+        let confirmMsg = '';
+        if (ord.paymentMethod === 'cod') {
+          confirmMsg = `Cancel order #${humanId}? (Cash on Delivery: no payment to refund)`;
+        } else if (ord.paymentStatus === 'paid') {
+          confirmMsg = `Cancel order #${humanId}? (₹${ord.total} will be refunded to the customer's original payment method)`;
+        } else {
+          confirmMsg = `Cancel order #${humanId}? (Unpaid online: this just closes the order)`;
+        }
+
+        if (!confirm(confirmMsg)) return;
+
+        const reason = prompt(`Reason for cancelling order #${humanId}:`, 'Owner cancelled');
+        if (!reason || !reason.trim()) {
+          showToast('Cancellation aborted: reason required.');
+          return;
+        }
+
+        try {
+          const token = await currentUser.getIdToken();
+          const res = await fetch(`${WORKER_API}/api/cancel-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ orderId: key, pushKey: key, reason: reason.trim() })
+          });
+          const d = await res.json();
+          if (res.ok && d.success) {
+            showToast(`Order #${humanId} cancelled.`);
+          } else {
+            alert(d.error || 'Cancellation error');
+          }
+          await writeAudit('ORDER_CANCELLED', key, { reason: reason.trim(), response: d });
+        } catch (err) {
+          alert('Network error connecting to Worker API.');
+        }
       }
     });
 
@@ -689,25 +1290,35 @@
         const item = e.target.getAttribute('data-item-id');
         await db.ref(`orders/${key}/packingChecks/${item}`).set(e.target.checked);
       }
-      if (e.target.classList.contains('cod-collected-checkbox')) {
-        const key = e.target.getAttribute('data-key');
-        await db.ref(`orders/${key}/codCollected`).set(e.target.checked);
-      }
     });
 
     function printOrderSlip(ord) {
       if (!ord) return;
+      let paymentDisplay = '';
+      if (ord.paymentMethod === 'cod') {
+        paymentDisplay = `COD – COLLECT ₹${ord.total}`;
+      } else if (ord.paymentStatus === 'paid') {
+        paymentDisplay = 'ONLINE – PAID';
+      } else if (ord.paymentStatus === 'refunded') {
+        paymentDisplay = 'ONLINE – REFUNDED';
+      } else {
+        paymentDisplay = 'ONLINE – NOT PAID';
+      }
+
       const slip = document.getElementById('printableSlip');
       slip.innerHTML = `
-        <div style="max-width: 380px; margin: 0 auto; border: 1px dashed #000; padding: 15px; font-size: 13px;">
-          <h2 style="text-align: center; margin: 0;">RA STORE</h2>
-          <div style="text-align: center; font-size: 11px;">Main Road, Bommalatapalli</div>
+        <div style="max-width: 380px; margin: 0 auto; border: 1px dashed #000; padding: 15px; font-size: 13px; font-family: monospace;">
+          <h2 style="text-align: center; margin: 0; font-size: 16px;">SRI SAI GENERAL ONLINE STORE</h2>
+          <div style="text-align: center; font-size: 11px;">Main Road, Bommalatapalli (515134)</div>
           <hr style="margin: 8px 0; border: none; border-top: 1px dashed #000;">
           <div><strong>Order:</strong> #${escapeHtml(ord.id)}</div>
           <div><strong>Date:</strong> ${new Date(ord.createdAt).toLocaleString()}</div>
-          <div><strong>Customer:</strong> ${escapeHtml(ord.customer?.name)}</div>
-          <div><strong>Phone:</strong> ${escapeHtml(ord.customer?.phone)}</div>
-          <div><strong>Address:</strong> ${escapeHtml(ord.customer?.address)}</div>
+          <div><strong>Customer:</strong> ${escapeHtml(ord.customer?.name || '')}</div>
+          <div><strong>Phone:</strong> ${escapeHtml(ord.customer?.phone || '')}</div>
+          <div style="margin-top: 4px;"><strong>📍 Delivery Address:</strong></div>
+          <div style="white-space: pre-wrap; overflow-wrap: anywhere; font-weight: bold; margin-bottom: 4px;">${escapeHtml(ord.customer?.address || '')}</div>
+          ${(ord.customer?.notes || ord.notes) ? `<div style="margin-top: 4px;"><strong>📝 Notes:</strong> ${escapeHtml(ord.customer?.notes || ord.notes)}</div>` : ''}
+          ${ord.customer?.scheduledSlot ? `<div style="margin-top: 4px;"><strong>⏰ Slot:</strong> ${escapeHtml(ord.customer.scheduledSlot)}</div>` : ''}
           <hr style="margin: 8px 0; border: none; border-top: 1px dashed #000;">
           <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
             ${(ord.items || []).map(i => `
@@ -723,22 +1334,23 @@
           <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-top: 4px;">
             <span>TOTAL:</span><span>₹${ord.total}</span>
           </div>
-          <div style="margin-top: 6px; font-weight: bold;">PAYMENT: ${ord.paymentMethod === 'cod' ? 'CASH ON DELIVERY' : 'ONLINE (PAID)'}</div>
-          <div style="text-align: center; margin-top: 12px; font-size: 11px;">Thank you for shopping local!</div>
+          <div style="margin-top: 6px; font-weight: bold;">PAYMENT: ${paymentDisplay}</div>
+          <div style="text-align: center; margin-top: 12px; font-size: 11px;">Thank you for shopping with Sri Sai General Online Store!</div>
         </div>
       `;
       window.print();
     }
 
     // =========================================================
-    // TAB 4: CUSTOMERS CRM LOGIC (Phase 4)
+    // TAB 4: CUSTOMERS CRM LOGIC (Phase 4 & Part A5)
     // =========================================================
     let customerProfiles = {};
 
     function buildCustomerProfiles() {
       customerProfiles = {};
-      Object.keys(allOrders).forEach(key => {
-        const o = allOrders[key];
+      const orderSource = Object.keys(allHistoricalOrders).length ? allHistoricalOrders : allOrders;
+      Object.keys(orderSource).forEach(key => {
+        const o = orderSource[key];
         const phone = o.customer?.phone || 'unknown';
         if (!customerProfiles[phone]) {
           customerProfiles[phone] = {
@@ -756,17 +1368,23 @@
         }
 
         const cp = customerProfiles[phone];
-        cp.totalOrders++;
-        cp.orders.push(o);
+        const isCancelled = o.status === 'cancelled';
+        const isCod = o.paymentMethod === 'cod';
+        const isOnlinePaid = o.paymentMethod === 'online_razorpay' && (o.paymentStatus === 'paid' || o.paymentStatus === 'refund_initiated' || o.paymentStatus === 'refunded');
 
-        if (o.status !== 'cancelled') {
-          cp.totalSpent += (Number(o.total) || 0);
-        } else {
+        if (isCancelled) {
           cp.cancelledOrders++;
+        } else if (isCod || isOnlinePaid) {
+          cp.totalOrders++;
+          const total = Number(o.total) || 0;
+          const refundAmt = Number(o.refundAmount) || (o.paymentStatus === 'refunded' ? total : 0);
+          cp.totalSpent += Math.max(0, total - refundAmt);
+
+          if (isCod) cp.codOrders++;
+          else cp.onlineOrders++;
         }
 
-        if (o.paymentMethod === 'cod') cp.codOrders++;
-        else cp.onlineOrders++;
+        cp.orders.push(o);
 
         if (new Date(o.createdAt) > new Date(cp.lastOrderDate)) {
           cp.lastOrderDate = o.createdAt;
@@ -830,7 +1448,7 @@
 
                 <div style="display: flex; gap: 8px;">
                   <a href="tel:${escapeHtml(c.phone)}" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary); font-size: 12px;">📞 Call</a>
-                  <a href="https://wa.me/91${escapeHtml(c.phone.replace(/\D/g,''))}?text=${encodeURIComponent(`Hello ${c.name}, this is RA Store Bommalatapalli regarding your grocery orders.`)}" target="_blank" class="btn" style="background: #25D366; color: #fff; font-size: 12px;">💬 WhatsApp</a>
+                  <a href="https://wa.me/91${escapeHtml(c.phone.replace(/\D/g,''))}?text=${encodeURIComponent(`Hello ${c.name}, this is Sri Sai General Online Store Bommalatapalli regarding your grocery orders.`)}" target="_blank" class="btn" style="background: #25D366; color: #fff; font-size: 12px;">💬 WhatsApp</a>
                   <button class="btn btn-light action-view-cust-orders" data-phone="${escapeHtml(phone)}" style="font-size: 12px;">History</button>
                 </div>
               </div>
@@ -875,41 +1493,71 @@
     });
 
     // =========================================================
-    // TAB 5: REPORTS & CSV EXPORT LOGIC (Phase 4)
+    // TAB 5: REPORTS & CSV EXPORT LOGIC (Part A5 & Part C)
     // =========================================================
     function calculateReports() {
       const now = new Date();
       let todaySales = 0, todayOrders = 0;
       let weekSales = 0, weekOrders = 0;
       let totalSales = 0, completedOrders = 0;
+      let todayCodToCollect = 0, todayCodCount = 0;
+      let todayCodCollected = 0, todayCodCollectedCount = 0;
+      let totalPendingCod = 0;
       const itemCounts = {};
 
-      Object.values(allOrders).forEach(o => {
+      const orderSource = Object.keys(allHistoricalOrders).length ? allHistoricalOrders : allOrders;
+
+      Object.values(orderSource).forEach(o => {
         const orderDate = new Date(o.createdAt);
         const isNotCancelled = o.status !== 'cancelled';
+        if (!isNotCancelled) return;
+
+        const isCod = o.paymentMethod === 'cod';
+        const isOnlinePaid = o.paymentMethod === 'online_razorpay' && (o.paymentStatus === 'paid' || o.paymentStatus === 'refund_initiated' || o.paymentStatus === 'refunded');
+
+        // Part A5: Count only COD or (online AND paid); subtract refunds; never count cancelled/unpaid
+        if (!isCod && !isOnlinePaid) return;
+
         const total = Number(o.total) || 0;
+        const refundAmt = Number(o.refundAmount) || (o.paymentStatus === 'refunded' ? total : 0);
+        const netRevenue = Math.max(0, total - refundAmt);
 
-        if (isNotCancelled) {
-          totalSales += total;
-          completedOrders++;
+        totalSales += netRevenue;
+        completedOrders++;
 
-          if (orderDate.toDateString() === now.toDateString()) {
-            todaySales += total;
-            todayOrders++;
-          }
-          if ((now - orderDate) <= 7 * 24 * 3600 * 1000) {
-            weekSales += total;
-            weekOrders++;
-          }
-
-          // Top items
-          (o.items || []).forEach(it => {
-            const name = it.name || 'Unknown';
-            if (!itemCounts[name]) itemCounts[name] = { qty: 0, revenue: 0 };
-            itemCounts[name].qty += (it.quantity || 1);
-            itemCounts[name].revenue += ((Number(it.price) || 0) * (it.quantity || 1));
-          });
+        const isToday = orderDate.toDateString() === now.toDateString();
+        if (isToday) {
+          todaySales += netRevenue;
+          todayOrders++;
         }
+        if ((now - orderDate) <= 7 * 24 * 3600 * 1000) {
+          weekSales += netRevenue;
+          weekOrders++;
+        }
+
+        // COD cash tracking (A5 & C)
+        if (isCod) {
+          if (o.paymentStatus === 'cod_collected') {
+            if (isToday) {
+              todayCodCollected += total;
+              todayCodCollectedCount++;
+            }
+          } else {
+            totalPendingCod += total;
+            if (isToday) {
+              todayCodToCollect += total;
+              todayCodCount++;
+            }
+          }
+        }
+
+        // Top items
+        (o.items || []).forEach(it => {
+          const name = it.name || 'Unknown';
+          if (!itemCounts[name]) itemCounts[name] = { qty: 0, revenue: 0 };
+          itemCounts[name].qty += (it.quantity || 1);
+          itemCounts[name].revenue += ((Number(it.price) || 0) * (it.quantity || 1));
+        });
       });
 
       document.getElementById('statTodaySales').innerText = `₹${todaySales}`;
@@ -919,6 +1567,20 @@
       document.getElementById('statTotalSales').innerText = `₹${totalSales}`;
       document.getElementById('statTotalOrders').innerText = `${completedOrders} total orders`;
       document.getElementById('statAov').innerText = completedOrders > 0 ? `₹${Math.round(totalSales / completedOrders)}` : '₹0';
+
+      // Daily COD Cash elements
+      const elToCollect = document.getElementById('statTodayCodToCollect');
+      if (elToCollect) elToCollect.innerText = `₹${todayCodToCollect}`;
+      const elToCollectCount = document.getElementById('statTodayCodCount');
+      if (elToCollectCount) elToCollectCount.innerText = `${todayCodCount} COD orders today`;
+
+      const elCollected = document.getElementById('statTodayCodCollected');
+      if (elCollected) elCollected.innerText = `₹${todayCodCollected}`;
+      const elCollectedCount = document.getElementById('statTodayCodCollectedCount');
+      if (elCollectedCount) elCollectedCount.innerText = `${todayCodCollectedCount} collected today`;
+
+      const elPending = document.getElementById('statTotalPendingCod');
+      if (elPending) elPending.innerText = `₹${totalPendingCod}`;
 
       // Render Top Items
       const sortedItems = Object.keys(itemCounts).sort((a,b) => itemCounts[b].qty - itemCounts[a].qty).slice(0, 8);
@@ -946,27 +1608,62 @@
       `;
     }
 
-    // CSV Download
-    document.getElementById('exportOrdersCsvBtn').addEventListener('click', () => {
-      const orders = Object.values(allOrders);
-      if (!orders.length) { alert('No orders to export.'); return; }
+    // CSV Download (Part A5 & Part C)
+    function sanitizeCsvCell(val) {
+      if (val === null || val === undefined) return '""';
+      let str = String(val);
+      // Neutralize formula injection (= + - @ \t \r)
+      if (/^[=\+\-@\t\r]/.test(str)) {
+        str = "'" + str;
+      }
+      str = str.replace(/"/g, '""');
+      return `"${str}"`;
+    }
 
-      let csv = "Order ID,Date,Customer Name,Phone,Address,Payment Method,Payment Status,Order Status,Subtotal,Delivery Fee,Total,Items\n";
+    document.getElementById('exportOrdersCsvBtn').addEventListener('click', () => {
+      const orderSource = Object.keys(allHistoricalOrders).length ? allHistoricalOrders : allOrders;
+      const orders = Object.values(orderSource).filter(o => {
+        if (o.status === 'cancelled') return false;
+        const isCod = o.paymentMethod === 'cod';
+        const isOnlinePaid = o.paymentMethod === 'online_razorpay' && (o.paymentStatus === 'paid' || o.paymentStatus === 'refund_initiated' || o.paymentStatus === 'refunded');
+        return isCod || isOnlinePaid;
+      });
+
+      if (!orders.length) { alert('No eligible orders to export.'); return; }
+
+      let csv = "Order ID,Date,Customer Name,Phone,Delivery Address,Delivery Notes,Scheduled Slot,Payment Method,Payment Status,Razorpay Payment ID,Refund Amount,Order Status,Subtotal,Delivery Fee,Total,Items\n";
 
       orders.forEach(o => {
         const date = new Date(o.createdAt).toISOString();
         const items = (o.items || []).map(i => `${i.name} (${i.quantity}x${i.price})`).join('; ');
-        const cleanName = (o.customer?.name || '').replace(/,/g, ' ');
-        const cleanAddr = (o.customer?.address || '').replace(/,/g, ' ');
+        const refundAmt = o.refundAmount || (o.paymentStatus === 'refunded' ? o.total : 0);
 
-        csv += `"${o.id}","${date}","${cleanName}","${o.customer?.phone}","${cleanAddr}","${o.paymentMethod}","${o.paymentStatus}","${o.status}",${o.subtotal},${o.deliveryFee},${o.total},"${items}"\n`;
+        csv += [
+          sanitizeCsvCell(o.id),
+          sanitizeCsvCell(date),
+          sanitizeCsvCell(o.customer?.name || ''),
+          sanitizeCsvCell(o.customer?.phone || ''),
+          sanitizeCsvCell(o.customer?.address || ''),
+          sanitizeCsvCell(o.customer?.notes || o.notes || ''),
+          sanitizeCsvCell(o.customer?.scheduledSlot || ''),
+          sanitizeCsvCell(o.paymentMethod || ''),
+          sanitizeCsvCell(o.paymentStatus || ''),
+          sanitizeCsvCell(o.razorpayPaymentId || ''),
+          sanitizeCsvCell(refundAmt),
+          sanitizeCsvCell(o.status || ''),
+          sanitizeCsvCell(o.subtotal || 0),
+          sanitizeCsvCell(o.deliveryFee || 0),
+          sanitizeCsvCell(o.total || 0),
+          sanitizeCsvCell(items)
+        ].join(',') + '\n';
       });
 
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      // UTF-8 BOM so Telugu characters open correctly in Excel
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `RA_Store_Orders_${new Date().toISOString().slice(0,10)}.csv`;
+      a.download = `Sri_Sai_Orders_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
