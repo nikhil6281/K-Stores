@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   
   <!-- SEO & Social Meta -->
-  <title>RA Store — Fresh Groceries Delivered in Bommalatapalli</title>
+  <title>Sri Sai General Online Store — Fresh Groceries Delivered in Bommalatapalli</title>
   <meta name="description" content="Order fresh vegetables, milk, and groceries online in Bommalatapalli. 100% refund guarantee before dispatch. Fast village delivery.">
   <link rel="canonical" href="https://nikhil6281.github.io/K-Stores/">
-  <meta property="og:title" content="RA Store — Fresh Groceries Delivered in Bommalatapalli">
+  <meta property="og:title" content="Sri Sai General Online Store — Fresh Groceries Delivered in Bommalatapalli">
   <meta property="og:description" content="Local grocery delivery for Bommalatapalli. Browse fresh items, order online, or choose Cash on Delivery.">
   <meta property="og:url" content="https://nikhil6281.github.io/K-Stores/">
   <meta property="og:type" content="website">
@@ -16,14 +16,14 @@
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230C831F'/%3E%3Ctext x='50' y='65' font-size='45' font-weight='bold' fill='%23F8CB46' text-anchor='middle'%3ERA%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230C831F'/%3E%3Ctext x='50' y='65' font-size='45' font-weight='bold' fill='%23F8CB46' text-anchor='middle'%3ESS%3C/text%3E%3C/svg%3E">
 
   <!-- Schema.org JSON-LD for Bommalatapalli -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "GroceryStore",
-    "name": "RA Store",
+    "name": "Sri Sai General Online Store",
     "telephone": "+916281730144",
     "address": {
       "@type": "PostalAddress",
@@ -70,10 +70,11 @@
 
     button, .btn, .chip, a, input, select, textarea { touch-action: manipulation; }
 
-    .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
-    .brand { font-size: 20px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 6px; }
-    .brand-badge { background: var(--accent); color: var(--dark); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
-    .nav-actions { display: flex; align-items: center; gap: 8px; }
+    .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .brand { font-size: 17px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 6px; min-width: 0; flex-shrink: 1; text-decoration: none; }
+    .brand-title { white-space: normal; line-height: 1.15; font-size: 14px; font-weight: 800; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .brand-badge { background: var(--accent); color: var(--dark); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+    .nav-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     
     .btn { padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; transition: 0.15s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; }
     .btn-primary { background: var(--primary); color: #fff; }
@@ -96,6 +97,64 @@
     .chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #F3F4F6; border: 1px solid var(--border); color: var(--text); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; }
     .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     .chip-count { font-size: 10px; opacity: 0.8; }
+
+    /* Category Section Styles & Blink Keyframes (B1) */
+    .category-section { margin-bottom: 24px; }
+    .category-section-header {
+      position: sticky;
+      top: 110px;
+      z-index: 85;
+      background: var(--surface);
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .category-section-count {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      background: #F3F4F6;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    @keyframes sectionBlink {
+      0% { background-color: transparent; }
+      25% { background-color: rgba(12, 131, 31, 0.18); border-radius: 10px; }
+      50% { background-color: transparent; }
+      75% { background-color: rgba(12, 131, 31, 0.18); border-radius: 10px; }
+      100% { background-color: transparent; }
+    }
+    .section-blink {
+      animation: sectionBlink 1.2s ease-in-out;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .section-blink {
+        animation: none !important;
+        outline: 3px solid var(--primary) !important;
+        outline-offset: 4px;
+      }
+    }
+
+    /* In-page Checkout Notice (B3) */
+    .checkout-notice {
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .checkout-notice-error { background: #FEE2E2; border: 1px solid #FECACA; color: #991B1B; }
+    .checkout-notice-warning { background: #FEF3C7; border: 1px solid #FDE68A; color: #92400E; }
+    .checkout-notice-info { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
 
     .refund-hero { background: #FEF3C7; border-left: 4px solid var(--accent); padding: 10px 16px; margin: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px; }
     .refund-hero-title { font-weight: 700; font-size: 13px; color: #92400E; }
@@ -270,18 +329,19 @@
       .action-qty { min-height: 40px; min-width: 36px; font-size: 15px; }
       .qty-display { font-size: 12px; min-width: 16px; }
 
-      .navbar { padding: 8px 10px; }
-      .brand { font-size: 16px; gap: 4px; }
-      .brand-badge { display: none; }
-      .nav-actions { gap: 4px; }
-      .btn-lang { padding: 4px 8px; font-size: 11px; min-height: 36px; }
-      #ordersNavBtn { padding: 4px 8px; font-size: 11px; min-height: 36px; }
+      .navbar { padding: 6px 8px; gap: 4px; }
+      .brand { font-size: 14px; gap: 3px; min-width: 0; }
+      .brand-title { font-size: 12px; line-height: 1.15; }
+      .brand-badge { font-size: 8px; padding: 1px 4px; }
+      .nav-actions { gap: 3px; }
+      .btn-lang { padding: 4px 6px; font-size: 11px; min-height: 34px; }
+      #ordersNavBtn { padding: 4px 6px; font-size: 11px; min-height: 34px; }
       .nav-orders-text-full { display: none; }
       .nav-orders-text-short { display: inline; }
-      .header-cart-btn { padding: 4px 8px; min-height: 36px; }
+      .header-cart-btn { padding: 4px 6px; min-height: 34px; }
       .nav-cart-text { display: none; }
-      #loginBtn { padding: 4px 8px; font-size: 11px; min-height: 36px; }
-      #userEmailSpan { max-width: 65px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+      #loginBtn { padding: 4px 6px; font-size: 11px; min-height: 34px; }
+      #userEmailSpan { max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
 
       .clear-cart-text { display: none; }
     }
@@ -315,7 +375,7 @@
 
   <header class="navbar">
     <div class="brand">
-      RA Store <span class="brand-badge">BOMMALATAPALLI</span>
+      <span class="brand-title" id="navbarBrandTitle">Sri Sai General Online Store</span> <span class="brand-badge">BOMMALATAPALLI</span>
     </div>
     <div class="nav-actions">
       <button class="btn-lang" id="langToggleBtn" aria-label="Change Language">తెలుగు</button>
@@ -424,12 +484,12 @@
       <a href="./refund-policy.html">Refund & Cancellation</a>
       <a href="./terms.html">Terms of Service</a>
     </div>
-    <div><strong>RA Store</strong> • Main Road beside Chennampalli Road, Bommalatapalli, AP</div>
+    <div><strong>Sri Sai General Online Store</strong> • Main Road beside Chennampalli Road, Bommalatapalli, AP</div>
     <div style="margin-top: 6px;">
       Helpline / WhatsApp: <a href="tel:+916281730144" style="color: #E5E7EB; text-decoration: underline;">+91 62817 30144</a> • 
       <a href="https://wa.me/916281730144" target="_blank" style="color: #25D366; text-decoration: underline;">Chat on WhatsApp</a>
     </div>
-    <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">© 2026 RA Store. All rights reserved. Fast local grocery delivery.</div>
+    <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">© 2026 Sri Sai General Online Store. All rights reserved. Fast local grocery delivery.</div>
   </footer>
 
   <!-- Phase 3: Floating Call & WhatsApp Buttons (Does not cover cart bar) -->
@@ -437,7 +497,7 @@
     <a href="tel:+916281730144" class="floating-btn floating-call-btn" aria-label="Call Store Helpline" title="Call Store">
       📞
     </a>
-    <a href="https://wa.me/916281730144?text=Hello%20RA%20Store%2C%20I%20have%20a%20question%20about%20groceries%20in%20Bommalatapalli" target="_blank" class="floating-btn floating-wa-btn" aria-label="Chat on WhatsApp" title="WhatsApp Store">
+    <a href="https://wa.me/916281730144?text=Hello%20Sri%20Sai%20General%20Online%20Store%2C%20I%20have%20a%20question%20about%20groceries%20in%20Bommalatapalli" target="_blank" class="floating-btn floating-wa-btn" aria-label="Chat on WhatsApp" title="WhatsApp Store">
       💬
     </a>
   </div>
@@ -513,7 +573,7 @@
     <div class="modal">
       <div class="drawer-drag-handle"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 700;" id="loginModalTitle">Sign In to RA Store</h3>
+        <h3 style="font-size: 16px; font-weight: 700;" id="loginModalTitle">Sign In to Sri Sai General Online Store</h3>
         <button class="modal-close-btn" data-modal="loginModal" aria-label="Close login modal" style="background: none; border: none; font-size: 18px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">✕</button>
       </div>
 
@@ -604,20 +664,22 @@
         </div>
       </div>
 
+      <div id="checkoutNoticeMsg" class="checkout-notice" style="display: none;"></div>
+
       <form id="checkoutForm">
         <div class="form-group">
           <label for="custName" id="tLabelName">Your Full Name</label>
-          <input type="text" id="custName" required placeholder="e.g. Ramesh Reddy" autocomplete="name">
+          <input type="text" id="custName" required minlength="2" placeholder="e.g. Ramesh Reddy" autocomplete="name">
         </div>
 
         <div class="form-group">
           <label for="custPhone" id="tLabelPhone">WhatsApp / Mobile Number (For Delivery Calls)</label>
-          <input type="tel" id="custPhone" required pattern="[0-9]{10}" placeholder="10-digit mobile number" autocomplete="tel">
+          <input type="tel" id="custPhone" required pattern="[6-9][0-9]{9}" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel">
         </div>
 
         <div class="form-group">
           <label for="custAddress" id="tLabelAddress">Delivery Address / Landmark in Bommalatapalli</label>
-          <textarea id="custAddress" required rows="2" placeholder="e.g. Near Ramalayam Temple / Water Tank" autocomplete="street-address"></textarea>
+          <textarea id="custAddress" required minlength="10" rows="2" placeholder="e.g. Near Ramalayam Temple / Water Tank" autocomplete="street-address"></textarea>
           
           <!-- Quick Landmark Chips -->
           <div class="landmark-chips-wrap">
@@ -745,7 +807,7 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ERA Store%3C/text%3E%3C/svg%3E";
+    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ESri Sai Store%3C/text%3E%3C/svg%3E";
 
     function safeImage(url) {
       if (!url || typeof url !== 'string') return SVG_PLACEHOLDER;
@@ -885,7 +947,7 @@
         moreForFree: "Add ₹{val} more for Free Delivery",
         reorder: "🔁 Reorder Last",
         viewCartText: "View Cart ⌃",
-        phoneLoginTitle: "Sign In to RA Store",
+        phoneLoginTitle: "Sign In to Sri Sai General Online Store",
         phoneLoginSub: "Enter your 10-digit mobile number for instant village grocery delivery and tracking.",
         sendOtpBtn: "Send OTP via SMS",
         sendingOtp: "Sending OTP...",
@@ -916,8 +978,25 @@
         stepDelivered: "Delivered",
         stepCancelled: "Cancelled",
         reorderOrderBtn: "🔁 Reorder Items",
-        cancelOrderBtn: "Cancel (100% Refund)",
-        itemsAddedToast: "Items added to cart!"
+        cancelOrderBtn: "Cancel Order",
+        itemsAddedToast: "Items added to cart!",
+        validNameErr: "Please enter your full name (at least 2 characters).",
+        validPhoneErr: "Please enter a valid 10-digit mobile number starting with 6-9.",
+        validAddressErr: "Please enter your detailed address in Bommalatapalli (at least 10 characters).",
+        priceUpdatedMsg: "Prices were updated. Server total is ₹{serverTotal} (was ₹{clientTotal}). Please review and tap Confirm again.",
+        orderHeldNotice: "Payment not completed — your order is held for 15 minutes.",
+        payNowBtn: "Pay Now ⚡",
+        confirmingPayment: "Confirming your payment with bank… please wait…",
+        paymentFailedContact: "Payment verification pending. If amount was debited, it will be automatically confirmed or contact store at {phone}.",
+        cancelCodConfirm: "Cancel this Cash on Delivery order?",
+        cancelPaidConfirm: "Cancel this order? ₹{amount} will be refunded to your original payment method in 5-7 working days.",
+        cancelUnpaidConfirm: "Cancel this unpaid order?",
+        badgePaid: "PAID ✅",
+        badgeCod: "Pay on delivery 💵",
+        badgeAwaiting: "⏳ Awaiting payment",
+        badgeRefundInitiated: "Refund initiated",
+        badgeRefunded: "Refunded ✅",
+        expired: "Expired"
       },
       te: {
         toggleText: "English",
@@ -949,7 +1028,7 @@
         moreForFree: "ఉచిత డెలివరీ కోసం ఇంకో ₹{val} జోడించండి",
         reorder: "🔁 మళ్ళీ ఆర్డర్",
         viewCartText: "కార్ట్ చూడండి ⌃",
-        phoneLoginTitle: "RA స్టోర్‌కు లాగిన్ అవ్వండి",
+        phoneLoginTitle: "శ్రీ సాయి జనరల్ ఆన్‌లైన్ స్టోర్‌కు లాగిన్ అవ్వండి",
         phoneLoginSub: "కిరాణా డెలివరీ మరియు ఆర్డర్ ట్రాకింగ్ కోసం మీ 10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి.",
         sendOtpBtn: "SMS ద్వారా OTP పంపండి",
         sendingOtp: "OTP పంపుతున్నాం...",
@@ -980,8 +1059,25 @@
         stepDelivered: "చేరింది ✅",
         stepCancelled: "రద్దయింది ❌",
         reorderOrderBtn: "🔁 మళ్ళీ ఆర్డర్",
-        cancelOrderBtn: "రద్దు చేయండి (100% వాపసు)",
-        itemsAddedToast: "వస్తువులు కార్ట్‌కు జోడించబడ్డాయి!"
+        cancelOrderBtn: "రద్దు చేయండి",
+        itemsAddedToast: "వస్తువులు కార్ట్‌కు జోడించబడ్డాయి!",
+        validNameErr: "దయచేసి మీ పూర్తి పేరు నమోదు చేయండి (కనీసం 2 అక్షరాలు).",
+        validPhoneErr: "దయచేసి 6, 7, 8 లేదా 9 తో మొదలయ్యే 10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి.",
+        validAddressErr: "దయచేసి బొమ్మలాటపల్లిలోని మీ ఇంటి చిరునామా నమోదు చేయండి (కనీసం 10 అక్షరాలు).",
+        priceUpdatedMsg: "ధరలు మారాయి. మొత్తం బిల్లు ₹{serverTotal} (గతంలో ₹{clientTotal}). దయచేసి మళ్ళీ ధృవీకరించండి.",
+        orderHeldNotice: "చెల్లింపు పూర్తి కాలేదు — మీ ఆర్డర్ 15 నిమిషాల పాటు భద్రపరచబడింది.",
+        payNowBtn: "ఇప్పుడే చెల్లించండి ⚡",
+        confirmingPayment: "మీ చెల్లింపును ధృవీకరిస్తున్నాం… దయచేసి వేచి ఉండండి…",
+        paymentFailedContact: "చెల్లింపు ధృవీకరణ వేచి ఉంది. ఖాతాలో డబ్బులు కట్ అయితే, కొద్దిసేపట్లో ఆర్డర్ అప్‌డేట్ అవుతుంది లేదా స్టోర్ నంబర్ {phone} కి సంప్రదించండి.",
+        cancelCodConfirm: "ఈ క్యాష్ ఆన్ డెలివరీ ఆర్డర్‌ను రద్దు చేయాలనుకుంటున్నారా?",
+        cancelPaidConfirm: "ఈ ఆర్డర్ రద్దు చేయాలనుకుంటున్నారా? ₹{amount} మొత్తం మీ అసలు బ్యాంక్ ఖాతాకు 5-7 రోజుల్లో రీఫండ్ అవుతుంది.",
+        cancelUnpaidConfirm: "ఈ ఆర్డర్‌ను రద్దు చేయాలనుకుంటున్నారా?",
+        badgePaid: "చెల్లించారు ✅",
+        badgeCod: "డెలివరీ వద్ద నగదు 💵",
+        badgeAwaiting: "⏳ చెల్లింపు కోసం వేచి ఉంది",
+        badgeRefundInitiated: "రీఫండ్ ప్రారంభమైంది",
+        badgeRefunded: "రీఫండ్ చేయబడింది ✅",
+        expired: "గడువు ముగిసింది"
       }
     };
 
@@ -994,6 +1090,9 @@
       document.getElementById('tRefundTitle').innerText = t.refundTitle;
       document.getElementById('tRefundDesc').innerText = t.refundDesc;
       document.getElementById('tCatalogHeading').innerText = t.catalogHeading;
+      
+      const brandTitleEl = document.getElementById('navbarBrandTitle');
+      if (brandTitleEl) brandTitleEl.innerText = (lang === 'te' ? 'శ్రీ సాయి జనరల్ ఆన్‌లైన్ స్టోర్' : 'Sri Sai General Online Store');
       
       const ordersFull = document.querySelector('.nav-orders-text-full');
       const ordersShort = document.querySelector('.nav-orders-text-short');
@@ -1409,6 +1508,94 @@
       }
     });
 
+    function getHeaderOffset() {
+      const nav = document.querySelector('.navbar');
+      const sticky = document.querySelector('.sticky-controls');
+      return (nav ? nav.offsetHeight : 57) + (sticky ? sticky.offsetHeight : 95);
+    }
+
+    let isUserClickScrolling = false;
+
+    function scrollToCategorySection(catId, shouldBlink = true) {
+      if (catId === 'all') {
+        isUserClickScrolling = true;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => { isUserClickScrolling = false; }, 800);
+        return;
+      }
+
+      const sec = document.getElementById(`cat-${catId}`);
+      if (sec) {
+        isUserClickScrolling = true;
+        const offset = getHeaderOffset();
+        const rect = sec.getBoundingClientRect();
+        const targetY = window.pageYOffset + rect.top - offset - 8;
+        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+
+        if (shouldBlink) {
+          sec.classList.remove('section-blink');
+          void sec.offsetWidth; // Force reflow
+          sec.classList.add('section-blink');
+          setTimeout(() => {
+            sec.classList.remove('section-blink');
+            isUserClickScrolling = false;
+          }, 1400);
+        } else {
+          setTimeout(() => { isUserClickScrolling = false; }, 800);
+        }
+      }
+    }
+
+    function highlightActiveChip(catId) {
+      const chips = document.querySelectorAll('#categoryChipsBar .chip');
+      chips.forEach(chip => {
+        const c = chip.getAttribute('data-cat');
+        if (c === catId) {
+          chip.classList.add('active');
+          chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+          chip.classList.remove('active');
+        }
+      });
+    }
+
+    // Scroll-Spy
+    let scrollSpyThrottle = null;
+    window.addEventListener('scroll', () => {
+      if (searchQuery) return; // Scroll-spy off while searching
+      if (isUserClickScrolling) return;
+
+      if (scrollSpyThrottle) return;
+      scrollSpyThrottle = setTimeout(() => {
+        scrollSpyThrottle = null;
+        const sections = Array.from(document.querySelectorAll('.category-section'));
+        if (!sections.length) return;
+
+        const offset = getHeaderOffset();
+        const probeY = offset + 50;
+        let activeCat = 'all';
+
+        if (window.pageYOffset < 120) {
+          activeCat = 'all';
+        } else {
+          for (let i = sections.length - 1; i >= 0; i--) {
+            const sec = sections[i];
+            const rect = sec.getBoundingClientRect();
+            if (rect.top <= probeY) {
+              activeCat = sec.getAttribute('data-cat-id') || 'all';
+              break;
+            }
+          }
+        }
+
+        if (currentCategory !== activeCat) {
+          currentCategory = activeCat;
+          syncUrlParams();
+          highlightActiveChip(activeCat);
+        }
+      }, 100);
+    }, { passive: true });
+
     function renderCategoryChips() {
       const bar = document.getElementById('categoryChipsBar');
       const catKeys = Object.keys(categoriesCatalog).sort((a,b) => (categoriesCatalog[a].order || 0) - (categoriesCatalog[b].order || 0));
@@ -1424,6 +1611,7 @@
         const cat = categoriesCatalog[k];
         if (cat.active === false) return;
         const count = Object.values(productsCatalog).filter(p => p.categoryId === k).length;
+        if (count === 0) return;
         const name = (currentLang === 'te' && cat.nameTe) ? cat.nameTe : cat.name;
         html += `
           <div class="chip ${currentCategory === k ? 'active' : ''}" data-cat="${escapeHtml(k)}">
@@ -1438,10 +1626,12 @@
     document.getElementById('categoryChipsBar').addEventListener('click', (e) => {
       const chip = e.target.closest('.chip');
       if (chip) {
-        currentCategory = chip.getAttribute('data-cat');
+        const cat = chip.getAttribute('data-cat');
+        if (!cat) return;
+        currentCategory = cat;
+        highlightActiveChip(cat);
         syncUrlParams();
-        renderCategoryChips();
-        renderProducts();
+        scrollToCategorySection(cat, true);
       }
     });
 
@@ -1487,145 +1677,226 @@
       searchClearBtn.style.display = 'block';
     }
 
-    // Phase 3: Product rendering with MRP, discount %, and Tap-to-Zoom
+    // Shared Lazy Image IntersectionObserver
+    let sharedLazyObserver = null;
+    function observeLazyImages() {
+      if (window.IntersectionObserver) {
+        if (!sharedLazyObserver) {
+          sharedLazyObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                const img = entry.target;
+                const imgId = img.getAttribute('data-img-id');
+                const imgV = img.getAttribute('data-img-v');
+                if (imgId) {
+                  loadProductImageLazily(imgId, imgV);
+                  obs.unobserve(img);
+                }
+              }
+            });
+          }, { rootMargin: '200px' });
+        }
+        document.querySelectorAll('img[data-img-lazy="true"]').forEach(img => {
+          sharedLazyObserver.observe(img);
+        });
+      } else {
+        Object.keys(productsCatalog).forEach(id => {
+          const p = productsCatalog[id];
+          if (p && p.hasImage && !getCachedProductImage(id, p.imageVersion)) {
+            loadProductImageLazily(id, p.imageVersion);
+          }
+        });
+      }
+    }
+
+    function renderProductControlsHtml(id, p) {
+      if (!p) p = productsCatalog[id];
+      if (!p) return '';
+      const inCart = cart[id] || 0;
+      const isOutOfStock = p.inStock === false;
+      if (isOutOfStock) {
+        return `<button class="btn btn-outline" disabled style="padding: 6px 10px; font-size: 11px; opacity: 0.6; min-height: 40px;">${I18N[currentLang].outOfStock}</button>`;
+      }
+      if (inCart === 0) {
+        return `<button class="btn btn-primary action-add-cart" data-id="${escapeHtml(id)}">${I18N[currentLang].addBtn}</button>`;
+      }
+      return `
+        <div class="qty-stepper-wrap">
+          <button class="btn btn-outline action-qty" data-id="${escapeHtml(id)}" data-delta="-1" aria-label="Decrease quantity">-</button>
+          <span class="qty-display">${inCart}</span>
+          <button class="btn btn-outline action-qty" data-id="${escapeHtml(id)}" data-delta="1" aria-label="Increase quantity">+</button>
+        </div>
+      `;
+    }
+
+    function updateProductCardControls(id) {
+      const el = document.getElementById(`prodControls-${id}`);
+      if (el) {
+        el.innerHTML = renderProductControlsHtml(id, productsCatalog[id]);
+      }
+    }
+
+    function renderProductCardHtml(id) {
+      const p = productsCatalog[id];
+      if (!p) return '';
+      const isOutOfStock = p.inStock === false;
+      const displayName = (currentLang === 'te' && p.nameTe) ? p.nameTe : p.name;
+      
+      let displayImg = SVG_PLACEHOLDER;
+      let needsLazyLoad = false;
+      if (p.hasImage) {
+        const cached = getCachedProductImage(id, p.imageVersion);
+        if (cached) {
+          displayImg = cached;
+        } else {
+          displayImg = SVG_PLACEHOLDER;
+          needsLazyLoad = true;
+        }
+      } else {
+        displayImg = safeImage(p.image || p.imageUrl || p.imageURL || '');
+      }
+
+      // MRP & Discount calculation
+      let mrpHtml = '';
+      let discountHtml = '';
+      if (p.mrp && Number(p.mrp) > Number(p.price)) {
+        const disc = Math.round(((Number(p.mrp) - Number(p.price)) / Number(p.mrp)) * 100);
+        mrpHtml = `<span class="product-mrp">₹${escapeHtml(p.mrp)}</span>`;
+        discountHtml = `<span class="discount-pill">${disc}% OFF</span>`;
+      }
+
+      return `
+        <div class="card" id="card-${escapeHtml(id)}" style="${isOutOfStock ? 'opacity: 0.75;' : ''}">
+          ${isOutOfStock ? `<span class="out-of-stock-badge">${I18N[currentLang].outOfStock}</span>` : discountHtml}
+          <div class="product-img-wrap" data-action="zoom-image" data-id="${escapeHtml(id)}" title="Tap to zoom">
+            <img class="product-img product-img-${escapeHtml(id)}" ${needsLazyLoad ? `data-img-lazy="true" data-img-id="${escapeHtml(id)}" data-img-v="${escapeHtml(p.imageVersion || '')}"` : ''} loading="lazy" width="140" height="140" src="${displayImg}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null; this.src='${SVG_PLACEHOLDER}';">
+          </div>
+          <div class="product-info">
+            <div class="product-title">${escapeHtml(displayName)}</div>
+            <div class="product-unit">${escapeHtml(p.unit || '1 pack')}</div>
+          </div>
+          <div class="product-bottom-row">
+            <div class="product-price-wrap">
+              <div>
+                <span class="product-price">₹${escapeHtml(p.price)}</span>
+                ${mrpHtml}
+              </div>
+            </div>
+            
+            <div class="product-controls-container" id="prodControls-${escapeHtml(id)}">
+              ${renderProductControlsHtml(id, p)}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Render products: category sections in admin order (or flat search results)
     function renderProducts() {
-      const grid = document.getElementById('productsGrid');
-      let pKeys = Object.keys(productsCatalog);
+      const gridContainer = document.getElementById('productsGrid');
+      let allKeys = Object.keys(productsCatalog);
 
-      pKeys = pKeys.filter(id => {
-        const p = productsCatalog[id];
-        if (currentCategory !== 'all' && p.categoryId !== currentCategory) return false;
-
-        if (searchQuery) {
+      if (searchQuery) {
+        // Flat search results
+        const matches = allKeys.filter(id => {
+          const p = productsCatalog[id];
           const nameEn = (p.name || '').toLowerCase();
           const nameTe = (p.nameTe || '').toLowerCase();
           const keywords = (p.keywords || '').toLowerCase();
           const cat = (categoriesCatalog[p.categoryId]?.name || '').toLowerCase();
           const catTe = (categoriesCatalog[p.categoryId]?.nameTe || '').toLowerCase();
 
-          const matches = nameEn.includes(searchQuery) ||
-                          nameTe.includes(searchQuery) ||
-                          keywords.includes(searchQuery) ||
-                          cat.includes(searchQuery) ||
-                          catTe.includes(searchQuery);
-          if (!matches) return false;
-        }
-        return true;
-      });
+          return nameEn.includes(searchQuery) ||
+                 nameTe.includes(searchQuery) ||
+                 keywords.includes(searchQuery) ||
+                 cat.includes(searchQuery) ||
+                 catTe.includes(searchQuery);
+        });
 
-      if (!pKeys.length) {
-        if (searchQuery && !loggedMisses.has(searchQuery)) {
-          loggedMisses.add(searchQuery);
-          db.ref('searchMisses').push({
-            term: searchQuery,
-            category: currentCategory,
-            timestamp: new Date().toISOString()
-          }).catch(() => {});
+        if (!matches.length) {
+          if (!loggedMisses.has(searchQuery)) {
+            loggedMisses.add(searchQuery);
+            db.ref('searchMisses').push({
+              term: searchQuery,
+              category: currentCategory,
+              timestamp: new Date().toISOString()
+            }).catch(() => {});
+          }
+
+          const askMsg = encodeURIComponent(`Hello Sri Sai General Online Store! Do you have "${searchQuery}" in stock in Bommalatapalli?`);
+          gridContainer.className = 'grid';
+          gridContainer.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <div class="empty-icon">🔍</div>
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">No items found for "${escapeHtml(searchQuery)}"</h3>
+              <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">We might have it in the store or can procure it for you!</p>
+              <a href="https://wa.me/${storeSettings.whatsappNumber}?text=${askMsg}" target="_blank" class="btn" style="background: #25D366; color: #fff; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                Ask Store on WhatsApp
+              </a>
+            </div>
+          `;
+          return;
         }
 
-        const askMsg = encodeURIComponent(`Hello RA Store! Do you have "${searchQuery}" in stock in Bommalatapalli?`);
-        grid.innerHTML = `
-          <div class="empty-state" style="grid-column: 1 / -1;">
-            <div class="empty-icon">🔍</div>
-            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">No items found for "${escapeHtml(searchQuery || currentCategory)}"</h3>
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">We might have it in the store or can procure it for you!</p>
-            <a href="https://wa.me/${storeSettings.whatsappNumber}?text=${askMsg}" target="_blank" class="btn" style="background: #25D366; color: #fff; text-decoration: none; min-height: 44px;">
-              Ask Store on WhatsApp
-            </a>
-          </div>
-        `;
+        gridContainer.className = 'grid';
+        gridContainer.innerHTML = matches.map(id => renderProductCardHtml(id)).join('');
+        observeLazyImages();
         return;
       }
 
-      grid.innerHTML = pKeys.map(id => {
-        const p = productsCatalog[id];
-        const inCart = cart[id] || 0;
-        const isOutOfStock = p.inStock === false;
-        const displayName = (currentLang === 'te' && p.nameTe) ? p.nameTe : p.name;
-        
-        let displayImg = SVG_PLACEHOLDER;
-        let needsLazyLoad = false;
-        if (p.hasImage) {
-          const cached = getCachedProductImage(id, p.imageVersion);
-          if (cached) {
-            displayImg = cached;
-          } else {
-            displayImg = SVG_PLACEHOLDER;
-            needsLazyLoad = true;
-          }
-        } else {
-          displayImg = safeImage(p.image || p.imageUrl || p.imageURL || '');
-        }
+      // Grouped by Category in admin-defined order
+      gridContainer.className = 'products-container';
+      const catKeys = Object.keys(categoriesCatalog).sort((a,b) => (categoriesCatalog[a].order || 0) - (categoriesCatalog[b].order || 0));
 
-        // MRP & Discount calculation
-        let mrpHtml = '';
-        let discountHtml = '';
-        if (p.mrp && Number(p.mrp) > Number(p.price)) {
-          const disc = Math.round(((Number(p.mrp) - Number(p.price)) / Number(p.mrp)) * 100);
-          mrpHtml = `<span class="product-mrp">₹${escapeHtml(p.mrp)}</span>`;
-          discountHtml = `<span class="discount-pill">${disc}% OFF</span>`;
-        }
+      const categorizedProductIds = new Set();
+      let sectionsHtml = '';
 
-        return `
-          <div class="card" style="${isOutOfStock ? 'opacity: 0.75;' : ''}">
-            ${isOutOfStock ? `<span class="out-of-stock-badge">${I18N[currentLang].outOfStock}</span>` : discountHtml}
-            <div class="product-img-wrap" data-action="zoom-image" data-id="${escapeHtml(id)}" title="Tap to zoom">
-              <img class="product-img product-img-${escapeHtml(id)}" ${needsLazyLoad ? `data-img-lazy="true" data-img-id="${escapeHtml(id)}" data-img-v="${escapeHtml(p.imageVersion || '')}"` : ''} loading="lazy" width="140" height="140" src="${displayImg}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null; this.src='${SVG_PLACEHOLDER}';">
+      catKeys.forEach(k => {
+        const cat = categoriesCatalog[k];
+        if (cat.active === false) return;
+        const catProducts = allKeys.filter(id => productsCatalog[id].categoryId === k);
+        if (!catProducts.length) return;
+
+        catProducts.forEach(id => categorizedProductIds.add(id));
+        const name = (currentLang === 'te' && cat.nameTe) ? cat.nameTe : cat.name;
+
+        sectionsHtml += `
+          <section id="cat-${escapeHtml(k)}" class="category-section" data-cat-id="${escapeHtml(k)}">
+            <div class="category-section-header">
+              <span>${escapeHtml(cat.icon || '🏷️')} ${escapeHtml(name)}</span>
+              <span style="font-size: 12px; font-weight: normal; color: var(--muted);">${catProducts.length} items</span>
             </div>
-            <div class="product-info">
-              <div class="product-title">${escapeHtml(displayName)}</div>
-              <div class="product-unit">${escapeHtml(p.unit || '1 pack')}</div>
+            <div class="grid">
+              ${catProducts.map(id => renderProductCardHtml(id)).join('')}
             </div>
-            <div class="product-bottom-row">
-              <div class="product-price-wrap">
-                <div>
-                  <span class="product-price">₹${escapeHtml(p.price)}</span>
-                  ${mrpHtml}
-                </div>
-              </div>
-              
-              ${isOutOfStock ? `
-                <button class="btn btn-outline" disabled style="padding: 6px 10px; font-size: 11px; opacity: 0.6; min-height: 40px;">${I18N[currentLang].outOfStock}</button>
-              ` : (inCart === 0 ? `
-                <button class="btn btn-primary action-add-cart" data-id="${escapeHtml(id)}">${I18N[currentLang].addBtn}</button>
-              ` : `
-                <div class="qty-stepper-wrap">
-                  <button class="btn btn-outline action-qty" data-id="${escapeHtml(id)}" data-delta="-1" aria-label="Decrease quantity">-</button>
-                  <span class="qty-display">${inCart}</span>
-                  <button class="btn btn-outline action-qty" data-id="${escapeHtml(id)}" data-delta="1" aria-label="Increase quantity">+</button>
-                </div>
-              `)}
-            </div>
-          </div>
+          </section>
         `;
-      }).join('');
+      });
 
-      if (window.IntersectionObserver) {
-        const observer = new IntersectionObserver((entries, obs) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const img = entry.target;
-              const imgId = img.getAttribute('data-img-id');
-              const imgV = img.getAttribute('data-img-v');
-              if (imgId) {
-                loadProductImageLazily(imgId, imgV);
-                obs.unobserve(img);
-              }
-            }
-          });
-        }, { rootMargin: '200px' });
-
-        document.querySelectorAll('img[data-img-lazy="true"]').forEach(img => {
-          observer.observe(img);
-        });
-      } else {
-        pKeys.forEach(id => {
-          const p = productsCatalog[id];
-          if (p.hasImage && !getCachedProductImage(id, p.imageVersion)) {
-            loadProductImageLazily(id, p.imageVersion);
-          }
-        });
+      // Products with no valid category -> "Other" section
+      const otherProducts = allKeys.filter(id => !categorizedProductIds.has(id));
+      if (otherProducts.length) {
+        sectionsHtml += `
+          <section id="cat-other" class="category-section" data-cat-id="other">
+            <div class="category-section-header">
+              <span>📦 ${currentLang === 'te' ? 'ఇతర వస్తువులు' : 'Other Items'}</span>
+              <span style="font-size: 12px; font-weight: normal; color: var(--muted);">${otherProducts.length} items</span>
+            </div>
+            <div class="grid">
+              ${otherProducts.map(id => renderProductCardHtml(id)).join('')}
+            </div>
+          </section>
+        `;
       }
+
+      if (!sectionsHtml) {
+        gridContainer.className = 'grid';
+        gridContainer.innerHTML = `<p style="padding: 20px; color: var(--muted); text-align: center; grid-column: 1 / -1;">No products available right now.</p>`;
+        return;
+      }
+
+      gridContainer.innerHTML = sectionsHtml;
+      observeLazyImages();
     }
 
     // Tap to Zoom Image Handler
@@ -1661,7 +1932,7 @@
       if (e.target.classList.contains('action-add-cart')) {
         const id = e.target.getAttribute('data-id');
         cart[id] = 1;
-        saveCart();
+        saveCart(id);
       }
       if (e.target.classList.contains('action-qty')) {
         const id = e.target.getAttribute('data-id');
@@ -1674,14 +1945,21 @@
         }
         cart[id] = currentQty + delta;
         if (cart[id] <= 0) delete cart[id];
-        saveCart();
+        saveCart(id);
       }
     });
 
-    function saveCart() {
+    function saveCart(updatedProductId) {
       localStorage.setItem('ra_store_cart', JSON.stringify(cart));
       updateCartUI();
-      renderProducts();
+      if (updatedProductId) {
+        updateProductCardControls(updatedProductId);
+      } else {
+        document.querySelectorAll('.product-controls-container').forEach(el => {
+          const pid = el.id.replace('prodControls-', '');
+          if (pid) el.innerHTML = renderProductControlsHtml(pid, productsCatalog[pid]);
+        });
+      }
     }
 
     function updateCartUI() {
@@ -1713,7 +1991,7 @@
         if (contactWrap) contactWrap.classList.add('with-cart-bar');
         const viewCartHint = `<span style="font-size: 11px; font-weight: 600; color: var(--primary); text-decoration: underline; margin-left: 4px;">${I18N[currentLang].viewCartText}</span>`;
         document.getElementById('cartSummaryText').innerHTML = `${count} Items • ₹${subtotal} ${viewCartHint}`;
-        const freeThresh = storeSettings.freeDeliveryThreshold || 299;
+        const freeThresh = storeSettings.freeDeliveryThreshold ?? 299;
         if (subtotal >= freeThresh) {
           document.getElementById('freeDeliveryNotice').innerText = I18N[currentLang].freeDelNotice;
         } else {
@@ -1724,7 +2002,7 @@
         if (contactWrap) contactWrap.classList.remove('with-cart-bar');
       }
 
-      const fee = subtotal >= (storeSettings.freeDeliveryThreshold || 299) ? 0 : (storeSettings.deliveryFee || 25);
+      const fee = subtotal >= (storeSettings.freeDeliveryThreshold ?? 299) ? 0 : (storeSettings.deliveryFee ?? 25);
       document.getElementById('modalSubtotal').innerText = `₹${subtotal}`;
       document.getElementById('modalDelivery').innerText = fee === 0 ? I18N[currentLang].free : `₹${fee}`;
       document.getElementById('modalTotal').innerText = `₹${subtotal + fee}`;
@@ -1774,8 +2052,8 @@
       footer.style.display = 'block';
 
       // Free delivery progress calculation
-      const freeThresh = storeSettings.freeDeliveryThreshold || 299;
-      const deliveryFee = subtotal >= freeThresh ? 0 : (storeSettings.deliveryFee || 25);
+      const freeThresh = storeSettings.freeDeliveryThreshold ?? 299;
+      const deliveryFee = subtotal >= freeThresh ? 0 : (storeSettings.deliveryFee ?? 25);
       const percent = Math.min(100, Math.round((subtotal / freeThresh) * 100));
 
       document.getElementById('cartFreeDeliveryProgressFill').style.width = `${percent}%`;
@@ -1936,7 +2214,7 @@
       document.getElementById('checkoutItemCount').innerText = `${count} items`;
       document.getElementById('checkoutMiniItemsList').innerText = itemNames.join(' • ') || 'No items selected';
 
-      const fee = subtotal >= (storeSettings.freeDeliveryThreshold || 299) ? 0 : (storeSettings.deliveryFee || 25);
+      const fee = subtotal >= (storeSettings.freeDeliveryThreshold ?? 299) ? 0 : (storeSettings.deliveryFee ?? 25);
       document.getElementById('modalSubtotal').innerText = `₹${subtotal}`;
       document.getElementById('modalDelivery').innerText = fee === 0 ? I18N[currentLang].free : `₹${fee}`;
       document.getElementById('modalTotal').innerText = `₹${subtotal + fee}`;
@@ -1977,6 +2255,34 @@
       });
     });
 
+    let checkoutSessionRequestId = null;
+
+    function showCheckoutNotice(html, type = 'info') {
+      const el = document.getElementById('checkoutNoticeMsg');
+      if (!el) return;
+      el.innerHTML = html;
+      el.className = 'checkout-notice';
+      if (type === 'danger') {
+        el.style.background = '#FEE2E2';
+        el.style.borderColor = '#FECACA';
+        el.style.color = '#B91C1C';
+      } else if (type === 'warning') {
+        el.style.background = '#FEF3C7';
+        el.style.borderColor = '#FDE68A';
+        el.style.color = '#B45309';
+      } else {
+        el.style.background = '#EFF6FF';
+        el.style.borderColor = '#BFDBFE';
+        el.style.color = '#1E40AF';
+      }
+      el.style.display = 'block';
+    }
+
+    function hideCheckoutNotice() {
+      const el = document.getElementById('checkoutNoticeMsg');
+      if (el) el.style.display = 'none';
+    }
+
     function openCheckout() {
       if (Object.keys(cart).length === 0) {
         showToast("Your cart is empty!");
@@ -1989,6 +2295,8 @@
         return;
       }
 
+      checkoutSessionRequestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+      hideCheckoutNotice();
       loadUserProfileIntoCheckout();
       updateCheckoutSummary();
       openModal('checkoutModal');
@@ -2005,10 +2313,13 @@
       }
 
       const submitBtn = document.getElementById('placeOrderSubmitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = "Securing order...";
+      hideCheckoutNotice();
 
       const items = Object.keys(cart).map(id => ({ id, quantity: cart[id] }));
+      if (!items.length) {
+        showCheckoutNotice("Your cart is empty!", 'danger');
+        return;
+      }
       
       let deliveryNotes = document.getElementById('custNotes').value.trim();
       let scheduledSlotInfo = null;
@@ -2024,6 +2335,23 @@
         notes: deliveryNotes,
         scheduledSlot: scheduledSlotInfo
       };
+
+      // Validation
+      if (customer.name.length < 2) {
+        showCheckoutNotice(I18N[currentLang].validNameErr, 'danger');
+        return;
+      }
+      if (!/^[6-9]\d{9}$/.test(customer.phone)) {
+        showCheckoutNotice(I18N[currentLang].validPhoneErr, 'danger');
+        return;
+      }
+      if (customer.address.length < 10) {
+        showCheckoutNotice(I18N[currentLang].validAddressErr, 'danger');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Securing order...";
 
       // Save user profile locally & to Firebase under users node
       localStorage.setItem('ra_customer_profile', JSON.stringify({
@@ -2047,7 +2375,9 @@
       }
 
       const payMethod = document.querySelector('input[name="payMethod"]:checked').value;
-      const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+      if (!checkoutSessionRequestId) {
+        checkoutSessionRequestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+      }
 
       try {
         const token = await currentUser.getIdToken();
@@ -2061,13 +2391,33 @@
             items,
             customer,
             paymentMethod: payMethod,
-            requestId
+            requestId: checkoutSessionRequestId
           })
         });
 
         const data = await res.json();
         if (!res.ok) {
-          alert('Order issue: ' + (data.error || 'Server rejected order.'));
+          showCheckoutNotice('Order issue: ' + (data.error || 'Server rejected order.'), 'danger');
+          submitBtn.disabled = false;
+          submitBtn.innerText = isStoreCurrentlyOpen ? I18N[currentLang].confirmOrderBtn : I18N[currentLang].scheduleForMorning;
+          return;
+        }
+
+        // Server price check
+        let clientSubtotal = 0;
+        items.forEach(it => {
+          if (productsCatalog[it.id]) clientSubtotal += (Number(productsCatalog[it.id].price) * it.quantity);
+        });
+        const deliveryFee = (clientSubtotal >= (storeSettings.freeDeliveryThreshold ?? 199)) ? 0 : (storeSettings.deliveryFee ?? 25);
+        const clientTotal = clientSubtotal + deliveryFee;
+
+        if (data.total !== undefined && Math.abs(Number(data.total) - Number(clientTotal)) > 0.01) {
+          const priceMsg = I18N[currentLang].priceUpdatedMsg
+            .replace('{serverTotal}', data.total)
+            .replace('{clientTotal}', clientTotal);
+          showCheckoutNotice(priceMsg, 'warning');
+          submitBtn.disabled = false;
+          submitBtn.innerText = I18N[currentLang].confirmOrderBtn;
           return;
         }
 
@@ -2078,10 +2428,35 @@
             key: data.razorpayKeyId,
             amount: data.amount,
             currency: 'INR',
-            name: 'RA Store Bommalatapalli',
+            name: 'Sri Sai General Online Store Bommalatapalli',
             description: `Order #${data.orderId}`,
             order_id: data.razorpayOrderId,
+            modal: {
+              ondismiss: function () {
+                submitBtn.disabled = false;
+                submitBtn.innerText = I18N[currentLang].confirmOrderBtn;
+                const heldHtml = `
+                  <div style="font-weight: 700; margin-bottom: 4px;">⚠️ ${I18N[currentLang].orderHeldNotice}</div>
+                  <div style="font-size: 12px; margin-bottom: 10px;">Order #${escapeHtml(data.orderId)} • ₹${escapeHtml(data.total)}</div>
+                  <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-primary" id="retryPayBtn" style="flex: 1; padding: 10px; font-size: 13px; min-height: 44px;">${I18N[currentLang].payNowBtn}</button>
+                    <button type="button" class="btn btn-outline" id="cancelHeldOrderBtn" style="flex: 1; padding: 10px; font-size: 13px; min-height: 44px; color: var(--danger); border-color: var(--danger);">Cancel</button>
+                  </div>
+                `;
+                showCheckoutNotice(heldHtml, 'warning');
+                document.getElementById('retryPayBtn')?.addEventListener('click', () => {
+                  submitBtn.disabled = true;
+                  submitBtn.innerText = "Opening payment…";
+                  rzp.open();
+                });
+                document.getElementById('cancelHeldOrderBtn')?.addEventListener('click', () => {
+                  closeModal('checkoutModal');
+                });
+              }
+            },
             handler: async function (response) {
+              showCheckoutNotice(I18N[currentLang].confirmingPayment, 'info');
+              let verified = false;
               try {
                 let verifyHeaders = { 'Content-Type': 'application/json' };
                 if (currentUser) {
@@ -2102,15 +2477,45 @@
                 });
                 const verifyData = await verifyRes.json();
                 if (verifyRes.ok && verifyData.success) {
+                  verified = true;
                   cart = {};
                   saveCart();
                   closeModal('checkoutModal');
                   showOrderSuccess(data.orderId, customer, data.total);
-                } else {
-                  alert('Verification issue: ' + (verifyData.error || 'Contact store.'));
+                  return;
                 }
               } catch (err) {
-                alert('Connection error during verification. Will verify via webhook.');
+                console.warn('Verify fetch failed, listening to DB', err);
+              }
+
+              // Fallback: listen to Firebase RTDB for up to 60s
+              if (!verified) {
+                showCheckoutNotice(I18N[currentLang].confirmingPayment, 'info');
+                const orderKey = data.orderId;
+                const statusRef = db.ref('orders/' + orderKey + '/paymentStatus');
+                let confirmed = false;
+                const timer = setTimeout(() => {
+                  if (!confirmed) {
+                    statusRef.off('value', onStatus);
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = I18N[currentLang].confirmOrderBtn;
+                    const helpline = (storeSettings && storeSettings.whatsappNumber) || '916281730144';
+                    showCheckoutNotice(I18N[currentLang].paymentFailedContact.replace('{phone}', helpline), 'danger');
+                  }
+                }, 60000);
+
+                const onStatus = (snap) => {
+                  if (snap.val() === 'paid') {
+                    confirmed = true;
+                    clearTimeout(timer);
+                    statusRef.off('value', onStatus);
+                    cart = {};
+                    saveCart();
+                    closeModal('checkoutModal');
+                    showOrderSuccess(data.orderId, customer, data.total);
+                  }
+                };
+                statusRef.on('value', onStatus);
               }
             },
             prefill: {
@@ -2124,10 +2529,11 @@
           const rzp = new Razorpay(options);
           rzp.on('payment.failed', function (resp) {
             submitBtn.disabled = false;
-            submitBtn.innerText = I18N[currentLang].confirmOrderBtn;
-            alert("Payment failed: " + (resp.error?.description || "Transaction declined. Cart preserved."));
+            submitBtn.innerText = isStoreCurrentlyOpen ? I18N[currentLang].confirmOrderBtn : I18N[currentLang].scheduleForMorning;
+            showCheckoutNotice("Payment failed: " + (resp.error?.description || "Transaction declined. Cart preserved."), 'danger');
           });
           rzp.open();
+          // Notice: We deliberately do NOT re-enable submitBtn here, keeping it disabled while the Razorpay window is active!
         } else {
           cart = {};
           saveCart();
@@ -2135,17 +2541,17 @@
           showOrderSuccess(data.orderId, customer, data.total);
         }
       } catch (err) {
-        alert('Network error connecting to store server. Please try again.');
-      } finally {
+        showCheckoutNotice('Network error connecting to store server. Please try again.', 'danger');
         submitBtn.disabled = false;
         submitBtn.innerText = isStoreCurrentlyOpen ? I18N[currentLang].confirmOrderBtn : I18N[currentLang].scheduleForMorning;
       }
     });
 
     function showOrderSuccess(orderId, customer, total) {
+      checkoutSessionRequestId = null;
       document.getElementById('successOrderIdText').innerText = `Order #${escapeHtml(orderId)}`;
       const slotNote = customer.scheduledSlot ? `\nScheduled Delivery: ${customer.scheduledSlot}` : '';
-      const msg = encodeURIComponent(`Hello RA Store! I placed order #${orderId} for ₹${total}.${slotNote}\nName: ${customer.name}\nAddress: ${customer.address}`);
+      const msg = encodeURIComponent(`Hello Sri Sai General Online Store! I placed order #${orderId} for ₹${total}.${slotNote}\nName: ${customer.name}\nAddress: ${customer.address}`);
       document.getElementById('successWhatsappLink').href = `https://wa.me/${storeSettings.whatsappNumber}?text=${msg}`;
       openModal('successModal');
     }
@@ -2180,19 +2586,35 @@
         };
 
         const t = I18N[currentLang];
+        const now = Date.now();
 
         list.innerHTML = Object.keys(orders).reverse().map(k => {
           const o = orders[k];
           const st = o.status || 'placed';
-          const refundNote = o.paymentStatus === 'refund_initiated' ? ' (Refund Initiated)' : (o.paymentStatus === 'refunded' ? ' (Refunded ✅)' : '');
           const currentRank = stepRanks[st] !== undefined ? stepRanks[st] : 0;
           const isCancelled = st === 'cancelled';
+          const isDelivered = st === 'delivered';
+          const canCancel = (st === 'placed' || st === 'accepted' || st === 'packed');
 
-          const canCancel = st !== 'out_for_delivery' && st !== 'delivered' && st !== 'cancelled';
+          // Payment badge
+          let payBadgeHtml = '';
+          if (o.paymentMethod === 'cod') {
+            payBadgeHtml = `<span style="background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeCod}</span>`;
+          } else if (o.paymentStatus === 'paid' || o.paymentStatus === 'cod_collected') {
+            payBadgeHtml = `<span style="background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgePaid}</span>`;
+          } else if (o.paymentStatus === 'refund_initiated') {
+            payBadgeHtml = `<span style="background: #E0E7FF; color: #3730A3; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeRefundInitiated}</span>`;
+          } else if (o.paymentStatus === 'refunded') {
+            payBadgeHtml = `<span style="background: #E2E8F0; color: #475569; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeRefunded}</span>`;
+          } else {
+            // Pending / unpaid online order
+            payBadgeHtml = `<span style="background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeAwaiting}</span>`;
+          }
 
           // Visual stepper timeline
           let timelineHtml = '';
           if (isCancelled) {
+            const refundNote = o.paymentStatus === 'refund_initiated' ? ' (Refund Initiated)' : (o.paymentStatus === 'refunded' ? ' (Refunded ✅)' : '');
             timelineHtml = `
               <div style="background: #FEE2E2; border: 1px solid #FECACA; color: var(--danger); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin: 10px 0;">
                 ❌ ${t.stepCancelled}${refundNote}
@@ -2224,17 +2646,56 @@
             `;
           }
 
+          // Online pending order expiry countdown and Pay Now
+          const isPendingOnline = (o.paymentMethod === 'online_razorpay' && o.paymentStatus === 'pending' && !isCancelled && !isDelivered);
+          const orderCreatedMs = new Date(o.createdAt).getTime() || now;
+          const expiresMs = o.expiresAt ? new Date(o.expiresAt).getTime() : (orderCreatedMs + 15 * 60 * 1000);
+          const isExpired = isPendingOnline && (now > expiresMs);
+          const remainingSecs = Math.max(0, Math.floor((expiresMs - now) / 1000));
+          const remMins = Math.floor(remainingSecs / 60);
+          const remSecs = remainingSecs % 60;
+
+          let pendingActionHtml = '';
+          if (isPendingOnline) {
+            if (isExpired) {
+              pendingActionHtml = `
+                <div style="background: #FEE2E2; border: 1px solid #FECACA; color: var(--danger); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin: 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                  <span>⏰ Payment window expired (15m)</span>
+                  <span style="font-weight: 700;">${t.expired}</span>
+                </div>
+              `;
+            } else {
+              pendingActionHtml = `
+                <div style="background: #FEF3C7; border: 1px solid #FDE68A; padding: 8px 12px; border-radius: 8px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                  <span style="font-size: 12px; color: #92400E; font-weight: 600;">⏳ Held for: <strong>${remMins}m ${remSecs < 10 ? '0' : ''}${remSecs}s</strong></span>
+                  <button type="button" class="btn btn-primary action-pay-now-pending" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id)}" data-rzp-order="${escapeHtml(o.razorpayOrderId || '')}" data-total="${escapeHtml(o.total)}" style="font-size: 12px; padding: 6px 14px; min-height: 38px;">
+                    ${t.payNowBtn}
+                  </button>
+                </div>
+              `;
+            }
+          }
+
           const itemsJson = escapeHtml(JSON.stringify(o.items || []));
 
           return `
             <div class="order-card-box">
-              <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 14px;">
-                <span>#${escapeHtml(o.id)}</span>
-                <span style="color: var(--primary);">₹${escapeHtml(o.total)}</span>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-weight: 700; font-size: 14px;">#${escapeHtml(o.id)}</span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  ${payBadgeHtml}
+                  <span style="font-weight: 700; color: var(--primary); font-size: 15px;">₹${escapeHtml(o.total)}</span>
+                </div>
               </div>
               <div style="font-size: 11px; color: var(--muted); margin: 2px 0 6px;">${new Date(o.createdAt).toLocaleString()}</div>
               
               ${timelineHtml}
+
+              <div style="font-size: 12px; color: var(--text); background: #F8FAFC; border: 1px solid var(--border); padding: 8px 10px; border-radius: 6px; margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere;">
+                <span style="font-weight: 700; color: var(--muted); font-size: 11px;">📍 Delivery Address:</span>
+                <div>${escapeHtml(o.customer?.address || 'Bommalatapalli')}</div>
+                ${o.customer?.notes ? `<div style="font-size: 11px; color: var(--muted); margin-top: 4px;">📝 <strong>Notes:</strong> ${escapeHtml(o.customer.notes)}</div>` : ''}
+              </div>
 
               <div style="font-size: 12px; color: var(--muted); margin: 8px 0;">
                 ${(o.items || []).map(i => `${escapeHtml(i.name)} (${i.quantity})`).join(', ')}
@@ -2246,12 +2707,14 @@
                 </div>
               ` : ''}
 
+              ${pendingActionHtml}
+
               <div style="display: flex; gap: 8px; margin-top: 10px;">
                 <button class="btn btn-outline action-reorder-past-order" data-order-id="${escapeHtml(o.id)}" data-items="${itemsJson}" style="flex: 1; font-size: 12px; min-height: 38px;">
                   ${t.reorderOrderBtn}
                 </button>
                 ${canCancel ? `
-                  <button class="btn btn-outline action-cancel-my-order" data-key="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); font-size: 12px; padding: 4px 10px; min-height: 38px;">
+                  <button class="btn btn-outline action-cancel-my-order" data-key="${escapeHtml(k)}" data-method="${escapeHtml(o.paymentMethod || '')}" data-paystatus="${escapeHtml(o.paymentStatus || '')}" data-total="${escapeHtml(o.total || 0)}" style="color: var(--danger); border-color: var(--danger); font-size: 12px; padding: 4px 10px; min-height: 38px;">
                     ${t.cancelOrderBtn}
                   </button>
                 ` : ''}
@@ -2290,12 +2753,99 @@
         return;
       }
 
-      if (e.target.classList.contains('action-cancel-my-order')) {
-        const orderKey = e.target.getAttribute('data-key');
-        if (!confirm('Cancel this order for an automatic 100% full refund?')) return;
+      // Pay Now for pending online order
+      const payPendingBtn = e.target.closest('.action-pay-now-pending');
+      if (payPendingBtn) {
+        const rzpOrderId = payPendingBtn.getAttribute('data-rzp-order');
+        const orderId = payPendingBtn.getAttribute('data-id');
+        const total = payPendingBtn.getAttribute('data-total');
+
+        if (!rzpOrderId) {
+          showToast("Payment link unavailable. Please contact store.");
+          return;
+        }
+
+        payPendingBtn.disabled = true;
+        payPendingBtn.innerText = "Opening…";
+
+        await loadRazorpaySdk();
+        const options = {
+          key: storeSettings.razorpayKeyId || 'rzp_live_SKfV6022e039Q3',
+          amount: Math.round(Number(total) * 100),
+          currency: 'INR',
+          name: 'Sri Sai General Online Store Bommalatapalli',
+          description: `Order #${orderId}`,
+          order_id: rzpOrderId,
+          handler: async function (response) {
+            payPendingBtn.innerText = "Confirming…";
+            try {
+              let verifyHeaders = { 'Content-Type': 'application/json' };
+              if (currentUser) {
+                try {
+                  const verifyToken = await currentUser.getIdToken();
+                  verifyHeaders['Authorization'] = `Bearer ${verifyToken}`;
+                } catch (e) {}
+              }
+              const verifyRes = await fetch(`${WORKER_API}/api/verify-payment`, {
+                method: 'POST',
+                headers: verifyHeaders,
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  orderId: orderId
+                })
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyRes.ok && verifyData.success) {
+                showToast("Payment successful! Order updated.");
+              } else {
+                showToast("Payment received. Verifying shortly…");
+              }
+            } catch (err) {
+              showToast("Network issue during verification. Will update automatically.");
+            }
+          },
+          prefill: {
+            name: currentUser.displayName || '',
+            contact: currentUser.phoneNumber || '',
+            email: currentUser.email || ''
+          },
+          theme: { color: '#0C831F' }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function () {
+          payPendingBtn.disabled = false;
+          payPendingBtn.innerText = I18N[currentLang].payNowBtn;
+          showToast("Payment declined.");
+        });
+        rzp.open();
+        return;
+      }
+
+      // Cancel order button
+      const cancelBtn = e.target.closest('.action-cancel-my-order');
+      if (cancelBtn) {
+        const orderKey = cancelBtn.getAttribute('data-key');
+        const payMethod = cancelBtn.getAttribute('data-method');
+        const payStatus = cancelBtn.getAttribute('data-paystatus');
+        const total = cancelBtn.getAttribute('data-total');
+        const t = I18N[currentLang];
+
+        let confirmMsg = '';
+        if (payMethod === 'cod') {
+          confirmMsg = t.cancelCodConfirm;
+        } else if (payStatus === 'paid') {
+          confirmMsg = t.cancelPaidConfirm.replace('{amount}', total);
+        } else {
+          confirmMsg = t.cancelUnpaidConfirm;
+        }
+
+        if (!confirm(confirmMsg)) return;
         
-        e.target.disabled = true;
-        e.target.innerText = "Processing refund...";
+        cancelBtn.disabled = true;
+        cancelBtn.innerText = "Cancelling…";
 
         try {
           const token = await currentUser.getIdToken();
@@ -2305,21 +2855,25 @@
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ orderId: orderKey })
+            body: JSON.stringify({
+              orderId: orderKey,
+              pushKey: orderKey,
+              reason: 'Customer cancelled from My Orders'
+            })
           });
 
           const data = await res.json();
           if (res.ok && data.success) {
-            showToast('Order cancelled. 100% refund initiated!');
+            showToast(payStatus === 'paid' ? 'Order cancelled. 100% refund initiated!' : 'Order cancelled successfully.');
           } else {
-            alert('Cancellation error: ' + (data.error || 'Please contact store.'));
-            e.target.disabled = false;
-            e.target.innerText = I18N[currentLang].cancelOrderBtn;
+            showToast('Cancellation error: ' + (data.error || 'Please contact store.'));
+            cancelBtn.disabled = false;
+            cancelBtn.innerText = t.cancelOrderBtn;
           }
         } catch (err) {
-          alert('Network issue connecting to server. Please try again.');
-          e.target.disabled = false;
-          e.target.innerText = I18N[currentLang].cancelOrderBtn;
+          showToast('Network issue connecting to server. Please try again.');
+          cancelBtn.disabled = false;
+          cancelBtn.innerText = t.cancelOrderBtn;
         }
       }
     });
