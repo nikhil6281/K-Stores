@@ -1,10 +1,10 @@
 /**
- * RA Store - Service Worker (PWA Shell Caching)
+ * Sri Sai General Online Store - Service Worker (PWA Shell Caching)
  * Network-first for navigation/HTML, stale-while-revalidate for local assets.
  * CRITICAL RULE: Never cache API, Firebase, Google Auth, Cloudinary, or Razorpay calls.
  */
 
-const CACHE_NAME = 'ra-store-shell-v2';
+const CACHE_NAME = 'sri-sai-store-shell-v3';
 const SHELL_ASSETS = [
   './index.html',
   './manifest.json',
