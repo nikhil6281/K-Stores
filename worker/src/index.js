@@ -1,5 +1,5 @@
 /**
- * Cloudflare Worker for Sri Sai General Online Store (Bommalatapalli, AP)
+ * Cloudflare Worker for RA Store (Anantapur, AP)
  * Contract implementation for Order creation, Payment verification, Webhooks,
  * Cancellations/Refunds, Admin reconciliation, and Scheduled unpaid order expiry.
  */
@@ -308,7 +308,7 @@ export default {
     try {
       // 1. Health check
       if (pathname === '/' || pathname === '/health') {
-        return jsonResponse({ status: 'ok', store: 'Sri Sai General Online Store' }, 200, cors);
+        return jsonResponse({ status: 'ok', store: 'RA Store', city: 'Anantapur' }, 200, cors);
       }
 
       // 2. POST /api/create-order
@@ -319,6 +319,11 @@ export default {
       // 3. POST /api/verify-payment
       if (pathname === '/api/verify-payment' && request.method === 'POST') {
         return await handleVerifyPayment(request, env, cors);
+      }
+
+      // 3b. POST /api/razorpay-callback (Redirect mode for in-app browsers)
+      if (pathname === '/api/razorpay-callback' && request.method === 'POST') {
+        return await handleRazorpayCallback(request, env, cors);
       }
 
       // 4. POST /api/razorpay-webhook
@@ -339,6 +344,11 @@ export default {
       // 7. POST /api/admin/reconcile-order
       if (pathname === '/api/admin/reconcile-order' && request.method === 'POST') {
         return await handleAdminReconcileOrder(request, env, cors);
+      }
+
+      // 8. POST /api/worker/verify-staff
+      if (pathname === '/api/worker/verify-staff' && request.method === 'POST') {
+        return await handleWorkerVerifyStaff(request, env, cors);
       }
 
       return jsonError('Route not found', 'NOT_FOUND', 404, cors);
@@ -383,6 +393,17 @@ async function handleCreateOrder(request, env, cors) {
   }
   if (!customer || !customer.name || !customer.phone || !customer.address) {
     return jsonError('Customer name, phone, and address are required', 'INVALID_CUSTOMER', 400, cors);
+  }
+
+  // Address and PIN validation for Anantapur
+  const cleanAddress = (customer.address || '').trim();
+  if (cleanAddress.length < 10) {
+    return jsonError('Please enter a complete delivery address with landmark in Anantapur (min 10 characters).', 'INVALID_ADDRESS', 400, cors);
+  }
+  const servedPins = ['515001', '515002', '515003', '515004', '515005'];
+  const pinMatch = cleanAddress.match(/\b(5\d{5})\b/);
+  if (pinMatch && !servedPins.includes(pinMatch[1])) {
+    return jsonError(`Delivery is only available in Anantapur PIN codes: ${servedPins.join(', ')}`, 'PIN_NOT_SERVICED', 400, cors);
   }
 
   // Idempotency check: check if requestId already created an order
@@ -941,4 +962,86 @@ async function handleScheduledOrderExpiry(env) {
   } catch (err) {
     console.error('Scheduled order expiry error:', err);
   }
+}
+
+
+async function isUserStaff(uid, env) {
+  if (!uid) return false;
+  const staff = await rtdbFetch(env, `staff/${uid}`, 'GET');
+  if (staff && staff.active === true) return true;
+  return await isUserAdmin(uid, env);
+}
+
+
+/**
+ * Worker / Staff Verification Endpoint:
+ * - Verifies Firebase ID token.
+ * - Checks admin list or staff records by email, phone, or UID.
+ * - Auto-links staff/{user.uid} so RTDB security rules evaluate instantly.
+ */
+async function handleWorkerVerifyStaff(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) {
+    return jsonError('Unauthorized: valid login required', 'UNAUTHORIZED', 401, cors);
+  }
+
+  // 1. Check if owner/admin
+  const isAdmin = await isUserAdmin(user.uid, env);
+  if (isAdmin) {
+    return jsonResponse({
+      success: true,
+      isStaff: true,
+      isAdmin: true,
+      role: 'Store Owner',
+      name: 'Owner',
+      uid: user.uid
+    }, 200, cors);
+  }
+
+  // 2. Query staff records from RTDB
+  const staffObj = await rtdbFetch(env, 'staff', 'GET') || {};
+  let matchedRecord = null;
+  let matchedKey = null;
+
+  const userEmail = (user.email || '').toLowerCase().trim();
+  const userPhone = (user.phone || '').replace(/[^0-9]/g, '');
+
+  for (const [k, s] of Object.entries(staffObj)) {
+    if (!s) continue;
+    const sEmail = (s.email || '').toLowerCase().trim();
+    const sPhone = (s.phone || '').replace(/[^0-9]/g, '');
+
+    if (k === user.uid || (userEmail && sEmail === userEmail) || (userPhone && sPhone && (userPhone.endsWith(sPhone) || sPhone.endsWith(userPhone)))) {
+      matchedRecord = s;
+      matchedKey = k;
+      break;
+    }
+  }
+
+  if (matchedRecord && matchedRecord.active === true) {
+    if (matchedKey !== user.uid) {
+      await rtdbFetch(env, `staff/${user.uid}`, 'PATCH', {
+        name: matchedRecord.name || 'Staff Member',
+        email: user.email || matchedRecord.email || '',
+        phone: user.phone || matchedRecord.phone || '',
+        role: matchedRecord.role || 'Staff',
+        active: true,
+        linkedKey: matchedKey,
+        lastLogin: new Date().toISOString()
+      }).catch(err => console.warn('Could not link staff UID:', err));
+    }
+
+    return jsonResponse({
+      success: true,
+      isStaff: true,
+      isAdmin: false,
+      role: matchedRecord.role || 'Staff',
+      name: matchedRecord.name || 'Staff Member',
+      uid: user.uid
+    }, 200, cors);
+  }
+
+  return jsonError('Access Denied: Account not registered as active staff', 'STAFF_NOT_FOUND', 403, cors);
 }

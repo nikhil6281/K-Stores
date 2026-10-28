@@ -4,9 +4,10 @@
  * CRITICAL RULE: Never cache API, Firebase, Google Auth, Cloudinary, or Razorpay calls.
  */
 
-const CACHE_NAME = 'ra-store-shell-v4';
+const CACHE_NAME = 'ra-store-shell-v6';
 const SHELL_ASSETS = [
   './index.html',
+  './worker.html',
   './config.js',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
@@ -48,34 +49,35 @@ self.addEventListener('fetch', (e) => {
   if (e.request.mode === 'navigate' || e.request.destination === 'document') {
     e.respondWith(
       fetch(e.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const resClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
           }
-          return networkResponse;
+          return response;
         })
         .catch(() => {
-          return caches.match('./index.html');
+          return caches.match(e.request).then((cached) => {
+            if (cached) return cached;
+            return caches.match('./index.html');
+          });
         })
     );
     return;
   }
 
-  // 2. Static shell assets: Stale-While-Revalidate
+  // 2. Static Assets (CSS, JS, Fonts): Stale-While-Revalidate
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      const fetchPromise = fetch(e.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const resClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
-          }
-          return networkResponse;
-        })
-        .catch(() => cachedResponse);
+    caches.match(e.request).then((cached) => {
+      const fetchPromise = fetch(e.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && e.request.method === 'GET') {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+        }
+        return networkResponse;
+      }).catch(() => null);
 
-      return cachedResponse || fetchPromise;
+      return cached || fetchPromise;
     })
   );
 });
