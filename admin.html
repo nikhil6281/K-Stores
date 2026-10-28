@@ -516,13 +516,17 @@
           <input type="text" id="prodName" required placeholder="e.g. Fresh Tomatoes / టమోటా">
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
           <div class="form-group">
-            <label>Price (₹)</label>
-            <input type="number" id="prodPrice" required step="0.5" placeholder="40">
+            <label>Price (₹) *</label>
+            <input type="number" id="prodPrice" required step="0.5" min="0.5" placeholder="40">
           </div>
           <div class="form-group">
-            <label>Unit / Quantity</label>
+            <label>MRP (₹, Optional)</label>
+            <input type="number" id="prodMrp" step="0.5" min="0" placeholder="50">
+          </div>
+          <div class="form-group">
+            <label>Unit / Quantity *</label>
             <input type="text" id="prodUnit" required placeholder="e.g. 1 kg / 500 ml">
           </div>
         </div>
@@ -577,6 +581,8 @@
             <input type="checkbox" id="prodInStock" checked> In Stock
           </label>
         </div>
+
+        <div id="productFormError" style="display: none; background: #FEE2E2; border: 1px solid #FECACA; color: #B91C1C; padding: 10px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; margin-bottom: 12px;"></div>
 
         <button type="submit" id="saveProductBtn" class="btn btn-primary" style="width: 100%; padding: 12px;">Save Product</button>
       </form>
@@ -700,6 +706,25 @@
 
     function playNewOrderChime(isSoftRepeat = false) {
       try {
+        const audio = new Audio('audio/notification.mp3');
+        audio.volume = isSoftRepeat ? 0.25 : 1.0;
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            playSynthesizedDing(isSoftRepeat);
+          });
+        }
+      } catch (e) {
+        playSynthesizedDing(isSoftRepeat);
+      }
+
+      if (!isSoftRepeat && "Notification" in window && Notification.permission === "granted") {
+        new Notification("Sri Sai General Online Store: New Order Received!", { body: "A new payable grocery order arrived in Bommalatapalli." });
+      }
+    }
+
+    function playSynthesizedDing(isSoftRepeat) {
+      try {
         if (!sharedAudioCtx && (audioAlertsEnabled || !isSoftRepeat)) {
           sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
@@ -718,10 +743,6 @@
           osc.stop(sharedAudioCtx.currentTime + (isSoftRepeat ? 0.4 : 0.6));
         }
       } catch (e) {}
-
-      if (!isSoftRepeat && "Notification" in window && Notification.permission === "granted") {
-        new Notification("Sri Sai General Online Store: New Order Received!", { body: "A new payable grocery order arrived in Bommalatapalli." });
-      }
     }
 
     if ("Notification" in window && Notification.permission === "default") {
@@ -772,9 +793,8 @@
     });
 
     function initRealtimeListeners() {
-      // Live recent orders query (3 days ago)
-      const threeDaysAgoIso = new Date(Date.now() - (3 * 24 * 3600 * 1000)).toISOString();
-      const ordersLiveRef = db.ref('orders').orderByChild('createdAt').startAt(threeDaysAgoIso);
+      // Live recent orders query (limitToLast 200 for performance)
+      const ordersLiveRef = db.ref('orders').limitToLast(200);
 
       ordersLiveRef.on('value', snap => {
         const val = snap.val() || {};
@@ -800,9 +820,15 @@
           knownPayableKeys = currentPayableKeys;
         } else {
           let hasNewPayable = false;
+          const now = Date.now();
           currentPayableKeys.forEach(k => {
             if (!knownPayableKeys.has(k)) {
-              hasNewPayable = true;
+              const o = val[k];
+              const orderTime = new Date(o.createdAt).getTime() || 0;
+              // Chime only if order age is < 2 minutes
+              if ((now - orderTime) < 2 * 60 * 1000) {
+                hasNewPayable = true;
+              }
             }
           });
           if (hasNewPayable) {
@@ -1965,15 +1991,38 @@
       const pastedUrl = document.getElementById('prodImageUrlInput').value.trim();
       const existingProduct = allProducts[id] || {};
 
+      const name = document.getElementById('prodName').value.trim();
+      const priceVal = parseFloat(document.getElementById('prodPrice').value);
+      const mrpInput = document.getElementById('prodMrp');
+      const mrpVal = (mrpInput && mrpInput.value.trim() !== '') ? parseFloat(mrpInput.value) : null;
+      const errBox = document.getElementById('productFormError');
+
+      if (!name) {
+        if (errBox) { errBox.innerText = 'Product name is required.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (isNaN(priceVal) || priceVal <= 0) {
+        if (errBox) { errBox.innerText = 'Price must be greater than ₹0.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (mrpVal !== null && (isNaN(mrpVal) || mrpVal < priceVal)) {
+        if (errBox) { errBox.innerText = 'MRP must be greater than or equal to Price.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (errBox) errBox.style.display = 'none';
+
       const prodData = {
-        name: document.getElementById('prodName').value.trim(),
-        price: Number(document.getElementById('prodPrice').value),
+        name: name,
+        price: priceVal,
         unit: document.getElementById('prodUnit').value.trim(),
         categoryId: document.getElementById('prodCategory').value,
         keywords: document.getElementById('prodKeywords').value.trim(),
         inStock: document.getElementById('prodInStock').checked,
         updatedAt: new Date().toISOString()
       };
+      if (mrpVal !== null) {
+        prodData.mrp = mrpVal;
+      }
 
       if (currentPendingImageDataUrl) {
         await db.ref(`productImages/${id}`).set(currentPendingImageDataUrl);
@@ -2006,6 +2055,7 @@
         document.getElementById('prodImageUrl').value = '';
         document.getElementById('prodImageUrlInput').value = '';
         document.getElementById('imageStatusText').innerText = "No photo taken yet";
+        if (errBox) errBox.style.display = 'none';
         startLiveCamera();
       } else {
         document.getElementById('productModal').style.display = 'none';
@@ -2020,11 +2070,16 @@
         document.getElementById('editProductId').value = id;
         document.getElementById('prodName').value = p.name;
         document.getElementById('prodPrice').value = p.price;
+        const mrpEl = document.getElementById('prodMrp');
+        if (mrpEl) mrpEl.value = (p.mrp !== undefined && p.mrp !== null) ? p.mrp : '';
         document.getElementById('prodUnit').value = p.unit;
         document.getElementById('prodCategory').value = p.categoryId || '';
         document.getElementById('prodKeywords').value = p.keywords || '';
         document.getElementById('prodInStock').checked = p.inStock !== false;
         document.getElementById('productModalTitle').innerText = 'Edit Product';
+
+        const errBox = document.getElementById('productFormError');
+        if (errBox) errBox.style.display = 'none';
 
         if (p.hasImage) {
           document.getElementById('prodImageUrl').value = '';
@@ -2088,27 +2143,40 @@
     });
 
     // =========================================================
-    // CATEGORIES
+    // CATEGORIES (with Up/Down order reordering)
     // =========================================================
     function renderCategoriesList() {
       const container = document.getElementById('categoriesListContainer');
-      const cKeys = Object.keys(allCategories);
+      const cKeys = Object.keys(allCategories).sort((a,b) => (allCategories[a].order || 0) - (allCategories[b].order || 0));
       if (!cKeys.length) {
         container.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No categories yet.</p>";
         return;
       }
       container.innerHTML = `
         <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px;">
-          ${cKeys.map(k => `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border);">
-              <div>
-                <span style="font-size: 16px; margin-right: 8px;">${escapeHtml(allCategories[k].icon || '🏷️')}</span>
-                <strong>${escapeHtml(allCategories[k].name)}</strong>
-                ${allCategories[k].nameTe ? `<span style="font-size: 12px; color: var(--muted); margin-left: 6px;">(${escapeHtml(allCategories[k].nameTe)})</span>` : ''}
+          ${cKeys.map((k, idx) => {
+            const cat = allCategories[k];
+            const isFirst = idx === 0;
+            const isLast = idx === cKeys.length - 1;
+            const productCount = Object.values(allProducts).filter(p => p.categoryId === k).length;
+            return `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                  <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <button type="button" class="btn btn-outline action-move-cat-up" data-id="${escapeHtml(k)}" data-idx="${idx}" ${isFirst ? 'disabled' : ''} style="font-size: 10px; padding: 2px 6px; line-height: 1; min-height: 22px;" title="Move Up">▲</button>
+                    <button type="button" class="btn btn-outline action-move-cat-down" data-id="${escapeHtml(k)}" data-idx="${idx}" ${isLast ? 'disabled' : ''} style="font-size: 10px; padding: 2px 6px; line-height: 1; min-height: 22px;" title="Move Down">▼</button>
+                  </div>
+                  <div>
+                    <span style="font-size: 16px; margin-right: 6px;">${escapeHtml(cat.icon || '🏷️')}</span>
+                    <strong>${escapeHtml(cat.name)}</strong>
+                    ${cat.nameTe ? `<span style="font-size: 12px; color: var(--muted); margin-left: 6px;">(${escapeHtml(cat.nameTe)})</span>` : ''}
+                    <span style="font-size: 11px; color: var(--muted); margin-left: 8px;">(${productCount} products)</span>
+                  </div>
+                </div>
+                <button class="btn btn-outline action-delete-cat" data-id="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); font-size: 11px; padding: 4px 10px; min-height: 34px;">Delete</button>
               </div>
-              <button class="btn btn-outline action-delete-cat" data-id="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); font-size: 11px; padding: 4px 8px;">Delete</button>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       `;
     }
@@ -2133,13 +2201,51 @@
     });
 
     document.getElementById('categoriesListContainer').addEventListener('click', async (e) => {
-      if (e.target.classList.contains('action-delete-cat')) {
-        const catId = e.target.getAttribute('data-id');
+      const upBtn = e.target.closest('.action-move-cat-up');
+      if (upBtn && !upBtn.disabled) {
+        const catId = upBtn.getAttribute('data-id');
+        const idx = parseInt(upBtn.getAttribute('data-idx'), 10);
+        const sortedKeys = Object.keys(allCategories).sort((a,b) => (allCategories[a].order || 0) - (allCategories[b].order || 0));
+        if (idx > 0) {
+          const prevId = sortedKeys[idx - 1];
+          const currOrder = allCategories[catId].order ?? (idx + 1);
+          const prevOrder = allCategories[prevId].order ?? idx;
+          const newCurrOrder = prevOrder;
+          const newPrevOrder = (prevOrder === currOrder) ? currOrder + 1 : currOrder;
+          await db.ref(`categories/${catId}/order`).set(newCurrOrder);
+          await db.ref(`categories/${prevId}/order`).set(newPrevOrder);
+          showToast('Category order updated');
+        }
+        return;
+      }
+
+      const downBtn = e.target.closest('.action-move-cat-down');
+      if (downBtn && !downBtn.disabled) {
+        const catId = downBtn.getAttribute('data-id');
+        const idx = parseInt(downBtn.getAttribute('data-idx'), 10);
+        const sortedKeys = Object.keys(allCategories).sort((a,b) => (allCategories[a].order || 0) - (allCategories[b].order || 0));
+        if (idx < sortedKeys.length - 1) {
+          const nextId = sortedKeys[idx + 1];
+          const currOrder = allCategories[catId].order ?? (idx + 1);
+          const nextOrder = allCategories[nextId].order ?? (idx + 2);
+          const newCurrOrder = nextOrder;
+          const newNextOrder = (nextOrder === currOrder) ? currOrder - 1 : currOrder;
+          await db.ref(`categories/${catId}/order`).set(newCurrOrder);
+          await db.ref(`categories/${nextId}/order`).set(newNextOrder);
+          showToast('Category order updated');
+        }
+        return;
+      }
+
+      const delBtn = e.target.closest('.action-delete-cat');
+      if (delBtn) {
+        const catId = delBtn.getAttribute('data-id');
         const items = Object.values(allProducts).filter(p => p.categoryId === catId);
         if (items.length > 0) {
-          alert(`Cannot delete: ${items.length} products belong to this category!`);
+          alert(`Cannot delete: ${items.length} products still belong to this category!`);
           return;
         }
+        if (!confirm(`Delete category "${allCategories[catId]?.name}"?`)) return;
         await db.ref(`categories/${catId}`).remove();
         showToast('Category deleted.');
       }
@@ -2155,18 +2261,22 @@
     });
 
     // =========================================================
-    // SETTINGS SAVING
+    // SETTINGS SAVING (with safe 0 values for free delivery)
     // =========================================================
     document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+      const minOrderRaw = document.getElementById('settingMinOrder').value;
+      const deliveryFeeRaw = document.getElementById('settingDeliveryFee').value;
+      const freeThreshRaw = document.getElementById('settingFreeThreshold').value;
+
       const updates = {
         storeHours: {
           open: document.getElementById('settingOpenTime').value,
           close: document.getElementById('settingCloseTime').value,
           mode: document.getElementById('settingStoreMode').value
         },
-        minOrderValue: Number(document.getElementById('settingMinOrder').value),
-        deliveryFee: Number(document.getElementById('settingDeliveryFee').value),
-        freeDeliveryThreshold: Number(document.getElementById('settingFreeThreshold').value),
+        minOrderValue: (minOrderRaw !== '' && !isNaN(parseFloat(minOrderRaw))) ? parseFloat(minOrderRaw) : 0,
+        deliveryFee: (deliveryFeeRaw !== '' && !isNaN(parseFloat(deliveryFeeRaw))) ? parseFloat(deliveryFeeRaw) : 25,
+        freeDeliveryThreshold: (freeThreshRaw !== '' && !isNaN(parseFloat(freeThreshRaw))) ? parseFloat(freeThreshRaw) : 299,
         whatsappNumber: document.getElementById('settingWhatsapp').value.trim(),
         announcement: document.getElementById('settingAnnouncement').value.trim()
       };

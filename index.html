@@ -1991,7 +1991,7 @@
         if (contactWrap) contactWrap.classList.add('with-cart-bar');
         const viewCartHint = `<span style="font-size: 11px; font-weight: 600; color: var(--primary); text-decoration: underline; margin-left: 4px;">${I18N[currentLang].viewCartText}</span>`;
         document.getElementById('cartSummaryText').innerHTML = `${count} Items • ₹${subtotal} ${viewCartHint}`;
-        const freeThresh = storeSettings.freeDeliveryThreshold || 299;
+        const freeThresh = storeSettings.freeDeliveryThreshold ?? 299;
         if (subtotal >= freeThresh) {
           document.getElementById('freeDeliveryNotice').innerText = I18N[currentLang].freeDelNotice;
         } else {
@@ -2002,7 +2002,7 @@
         if (contactWrap) contactWrap.classList.remove('with-cart-bar');
       }
 
-      const fee = subtotal >= (storeSettings.freeDeliveryThreshold || 299) ? 0 : (storeSettings.deliveryFee || 25);
+      const fee = subtotal >= (storeSettings.freeDeliveryThreshold ?? 299) ? 0 : (storeSettings.deliveryFee ?? 25);
       document.getElementById('modalSubtotal').innerText = `₹${subtotal}`;
       document.getElementById('modalDelivery').innerText = fee === 0 ? I18N[currentLang].free : `₹${fee}`;
       document.getElementById('modalTotal').innerText = `₹${subtotal + fee}`;
@@ -2052,8 +2052,8 @@
       footer.style.display = 'block';
 
       // Free delivery progress calculation
-      const freeThresh = storeSettings.freeDeliveryThreshold || 299;
-      const deliveryFee = subtotal >= freeThresh ? 0 : (storeSettings.deliveryFee || 25);
+      const freeThresh = storeSettings.freeDeliveryThreshold ?? 299;
+      const deliveryFee = subtotal >= freeThresh ? 0 : (storeSettings.deliveryFee ?? 25);
       const percent = Math.min(100, Math.round((subtotal / freeThresh) * 100));
 
       document.getElementById('cartFreeDeliveryProgressFill').style.width = `${percent}%`;
@@ -2214,7 +2214,7 @@
       document.getElementById('checkoutItemCount').innerText = `${count} items`;
       document.getElementById('checkoutMiniItemsList').innerText = itemNames.join(' • ') || 'No items selected';
 
-      const fee = subtotal >= (storeSettings.freeDeliveryThreshold || 299) ? 0 : (storeSettings.deliveryFee || 25);
+      const fee = subtotal >= (storeSettings.freeDeliveryThreshold ?? 299) ? 0 : (storeSettings.deliveryFee ?? 25);
       document.getElementById('modalSubtotal').innerText = `₹${subtotal}`;
       document.getElementById('modalDelivery').innerText = fee === 0 ? I18N[currentLang].free : `₹${fee}`;
       document.getElementById('modalTotal').innerText = `₹${subtotal + fee}`;
