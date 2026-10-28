@@ -30,3 +30,9 @@ server/data
 *.njsproj
 *.sln
 *.sw?
+
+# Worker secrets and local files
+*service-account*.json
+*.pem
+worker/.wrangler
+worker/setup-secrets.cjs
