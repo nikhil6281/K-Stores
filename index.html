@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="config.js"></script>
+  <script src="config.js?v=20260418v6"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';">
@@ -361,6 +361,68 @@
         scroll-behavior: auto !important;
       }
     }
+  
+    /* Mobile Bottom Navigation (Blinkit style) */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #FFFFFF;
+      border-top: 1px solid var(--border);
+      z-index: 150;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+    .bottom-nav-item {
+      flex: 1;
+      height: 100%;
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+      touch-action: manipulation;
+    }
+    .bottom-nav-item.active {
+      color: var(--primary);
+    }
+    .bnav-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+    .bnav-label {
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-bottom-nav {
+        display: flex;
+      }
+      body {
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+      }
+      .bottom-bar {
+        bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.12) !important;
+      }
+      .floating-contact-wrap {
+        bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -508,6 +570,27 @@
     </a>
   </div>
 
+  
+  <!-- Blinkit-style Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Bottom Navigation">
+    <button class="bottom-nav-item active" id="bnavHomeBtn" aria-label="Home">
+      <span class="bnav-icon">🏠</span>
+      <span class="bnav-label" id="tBnavHome">Home</span>
+    </button>
+    <button class="bottom-nav-item" id="bnavCategoriesBtn" aria-label="Categories">
+      <span class="bnav-icon">🏷️</span>
+      <span class="bnav-label" id="tBnavCategories">Categories</span>
+    </button>
+    <button class="bottom-nav-item" id="bnavOrdersBtn" aria-label="My Orders">
+      <span class="bnav-icon">🛍️</span>
+      <span class="bnav-label" id="tBnavOrders">Orders</span>
+    </button>
+    <button class="bottom-nav-item" id="bnavAccountBtn" aria-label="Account">
+      <span class="bnav-icon">👤</span>
+      <span class="bnav-label" id="tBnavAccount">Account</span>
+    </button>
+  </nav>
+
   <!-- Floating Cart Bar -->
   <div class="bottom-bar" id="cartBottomBar" style="display: none;" role="region" aria-label="Cart Summary">
     <div class="bottom-bar-info" id="cartBottomBarSummary">
@@ -585,7 +668,7 @@
 
       <!-- Step 1: Mobile Number Input -->
       <div id="phoneInputStep">
-        <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;" id="tPhoneLoginSub">Enter your 10-digit mobile number for instant village grocery delivery and tracking.</p>
+        <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;" id="tPhoneLoginSub">Enter your 10-digit mobile number for fast grocery delivery and order tracking in Anantapur.</p>
         
         <div class="phone-input-group">
           <span class="phone-prefix">🇮🇳 +91</span>

@@ -346,6 +346,11 @@ export default {
         return await handleAdminReconcileOrder(request, env, cors);
       }
 
+      // 8. POST /api/worker/verify-staff
+      if (pathname === '/api/worker/verify-staff' && request.method === 'POST') {
+        return await handleWorkerVerifyStaff(request, env, cors);
+      }
+
       return jsonError('Route not found', 'NOT_FOUND', 404, cors);
     } catch (err) {
       console.error('Unhandled Worker error:', err);
@@ -965,4 +970,78 @@ async function isUserStaff(uid, env) {
   const staff = await rtdbFetch(env, `staff/${uid}`, 'GET');
   if (staff && staff.active === true) return true;
   return await isUserAdmin(uid, env);
+}
+
+
+/**
+ * Worker / Staff Verification Endpoint:
+ * - Verifies Firebase ID token.
+ * - Checks admin list or staff records by email, phone, or UID.
+ * - Auto-links staff/{user.uid} so RTDB security rules evaluate instantly.
+ */
+async function handleWorkerVerifyStaff(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) {
+    return jsonError('Unauthorized: valid login required', 'UNAUTHORIZED', 401, cors);
+  }
+
+  // 1. Check if owner/admin
+  const isAdmin = await isUserAdmin(user.uid, env);
+  if (isAdmin) {
+    return jsonResponse({
+      success: true,
+      isStaff: true,
+      isAdmin: true,
+      role: 'Store Owner',
+      name: 'Owner',
+      uid: user.uid
+    }, 200, cors);
+  }
+
+  // 2. Query staff records from RTDB
+  const staffObj = await rtdbFetch(env, 'staff', 'GET') || {};
+  let matchedRecord = null;
+  let matchedKey = null;
+
+  const userEmail = (user.email || '').toLowerCase().trim();
+  const userPhone = (user.phone || '').replace(/[^0-9]/g, '');
+
+  for (const [k, s] of Object.entries(staffObj)) {
+    if (!s) continue;
+    const sEmail = (s.email || '').toLowerCase().trim();
+    const sPhone = (s.phone || '').replace(/[^0-9]/g, '');
+
+    if (k === user.uid || (userEmail && sEmail === userEmail) || (userPhone && sPhone && (userPhone.endsWith(sPhone) || sPhone.endsWith(userPhone)))) {
+      matchedRecord = s;
+      matchedKey = k;
+      break;
+    }
+  }
+
+  if (matchedRecord && matchedRecord.active === true) {
+    if (matchedKey !== user.uid) {
+      await rtdbFetch(env, `staff/${user.uid}`, 'PATCH', {
+        name: matchedRecord.name || 'Staff Member',
+        email: user.email || matchedRecord.email || '',
+        phone: user.phone || matchedRecord.phone || '',
+        role: matchedRecord.role || 'Staff',
+        active: true,
+        linkedKey: matchedKey,
+        lastLogin: new Date().toISOString()
+      }).catch(err => console.warn('Could not link staff UID:', err));
+    }
+
+    return jsonResponse({
+      success: true,
+      isStaff: true,
+      isAdmin: false,
+      role: matchedRecord.role || 'Staff',
+      name: matchedRecord.name || 'Staff Member',
+      uid: user.uid
+    }, 200, cors);
+  }
+
+  return jsonError('Access Denied: Account not registered as active staff', 'STAFF_NOT_FOUND', 403, cors);
 }

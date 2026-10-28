@@ -11,8 +11,9 @@
     },
 
     "staff": {
-      ".read": "auth != null",
-      "$uid": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$key": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('email').val() === auth.token.email || data.child('uid').val() === auth.uid || $key === auth.uid)",
         ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
       }
     },
@@ -58,13 +59,16 @@
       
       "$orderId": {
         ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true || data.child('uid').val() === auth.uid)",
-        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('staff').child(auth.uid).child('active').val() === true && data.exists() && newData.exists()))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('staff').child(auth.uid).child('active').val() === true && data.exists() && newData.exists() && newData.child('status').val() != 'cancelled' && data.child('status').val() != 'cancelled'))",
 
         "packingChecks": {
           ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true)"
         },
         "unavailableItems": {
           ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true)"
+        },
+        "cancellationRequest": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true || data.parent().child('uid').val() === auth.uid)"
         }
       }
     },
