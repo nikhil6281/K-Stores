@@ -691,7 +691,7 @@ let STATE = store.get('ra_blinkit_state', {
   free: 199,
   fee: 15,
   wa: "916281730144",
-  razorpay_key: "rzp_live_TWh8sGQzToEEZT",
+  razorpay_key: "rzp_live_TtGrq3sfJkM0pA",
   pin: "9874"
 });
 
@@ -1119,7 +1119,7 @@ function initiateOrder() {
     }
 
     const options = {
-      key: STATE.razorpay_key || 'rzp_live_TWh8sGQzToEEZT',
+      key: STATE.razorpay_key || 'rzp_live_TtGrq3sfJkM0pA',
       amount: Math.round(tot * 100),
       currency: "INR",
       name: "RA General Store",
@@ -1519,7 +1519,7 @@ function ownerView() {
     ` : `
       <div style="background:#fff;padding:20px;border-radius:14px;border:1px solid #ddd">
         <label class="f-lbl">Razorpay Live Key ID (Active)</label>
-        <input class="f-inp" value="${esc(STATE.razorpay_key||'rzp_live_TWh8sGQzToEEZT')}" onchange="setCfg('razorpay_key',this.value.trim())">
+        <input class="f-inp" value="${esc(STATE.razorpay_key||'rzp_live_TtGrq3sfJkM0pA')}" onchange="setCfg('razorpay_key',this.value.trim())">
         <small style="color:var(--b-green);display:block;margin-top:3px;font-weight:600">✓ Connected to your live Razorpay account</small>
 
         <label class="f-lbl" style="margin-top:14px">Firebase Realtime Database</label>

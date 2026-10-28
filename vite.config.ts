@@ -19,6 +19,6 @@ export default defineConfig({
   },
   define: {
     // Expose Razorpay key ID to frontend (never the secret)
-    'import.meta.env.VITE_RAZORPAY_KEY_ID': JSON.stringify('rzp_test_TVd0zW6feQlmUb'),
+    'import.meta.env.VITE_RAZORPAY_KEY_ID': JSON.stringify('rzp_live_TtGrq3sfJkM0pA'),
   }
 })

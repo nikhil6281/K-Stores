@@ -198,3 +198,4 @@ console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');
 
 if (failCount > 0) process.exit(1);
+

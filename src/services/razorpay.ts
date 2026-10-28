@@ -4,7 +4,7 @@
   }
 }
 
-export const RAZORPAY_KEY_ID = 'rzp_live_TWh8sGQzToEEZT';
+export const RAZORPAY_KEY_ID = 'rzp_live_TtGrq3sfJkM0pA';
 
 export interface RazorpayOrderResponse {
   success: boolean;

@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const KEY_ID = process.env.RAZORPAY_KEY_ID || '';
+const KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_live_TtGrq3sfJkM0pA';
 const KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 
 if (!KEY_SECRET) {

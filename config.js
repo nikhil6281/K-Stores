@@ -47,8 +47,8 @@ const APP_CONFIG = {
   hours: "7:00 AM - 9:00 PM IST",
   hoursTelugu: "ఉదయం 7:00 AM నుండి రాత్రి 9:00 PM IST",
   workerApi: "https://ra-store-api.chowdarynikhil095.workers.dev",
-  razorpayKeyId: "rzp_live_SKfV6022e039Q3",
-  razorpayTestKeyId: "rzp_test_TWgfmbYBnc7AU9",
+  razorpayKeyId: "rzp_live_TtGrq3sfJkM0pA",
+  razorpayTestKeyId: "rzp_live_TtGrq3sfJkM0pA",
   currency: "INR"
 };
 
@@ -61,3 +61,4 @@ if (typeof window !== 'undefined') {
 if (typeof globalThis !== 'undefined') {
   globalThis.APP_CONFIG = APP_CONFIG;
 }
+
