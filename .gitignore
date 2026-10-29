@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local
+server/.env
+server/node_modules
+server/data
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +30,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Worker secrets and local files
+*service-account*.json
+*.pem
+worker/.wrangler
+worker/setup-secrets.cjs
