@@ -291,6 +291,7 @@
 
     <div id="dashboardView" style="display: none;">
       <div class="tabs">
+        <button class="tab-btn" data-tab="alerts" id="alertsTabBtn">⚠️ Alerts <span id="alertsBadge" class="badge" style="display:none; background:#ef4444; color:#fff; border-radius:10px; padding:2px 7px; font-size:11px; margin-left:4px;">0</span></button>
         <button class="tab-btn active" data-tab="orders">📦 Live Orders</button>
         <button class="tab-btn" data-tab="products">🛒 Products</button>
         <button class="tab-btn" data-tab="categories">🏷️ Categories</button>
@@ -304,6 +305,64 @@
       <!-- ============================================== -->
       <!-- TAB 1: ORDERS SECTION -->
       <!-- ============================================== -->
+      
+      <!-- ============================================== -->
+      <!-- TAB 0: ALERTS INBOX (Milestone 5) -->
+      <!-- ============================================== -->
+      <div id="alertsTab" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 700;">Alerts Inbox</h2>
+            <p style="font-size: 12px; color: var(--muted);">Critical action items: Worker cancellation requests, delivery OTP lockouts, out-of-stock items, and payment mismatches.</p>
+          </div>
+          <button class="btn btn-outline btn-small" id="refreshAlertsBtn">🔄 Refresh Alerts</button>
+        </div>
+
+        <!-- 1. Worker Cancellation Requests -->
+        <div class="card" style="margin-bottom: 16px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #991B1B; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <span>🛑 Worker Cancellation Requests</span>
+            <span id="cancelReqCount" class="badge" style="background: #FEE2E2; color: #991B1B; font-size: 11px;">0</span>
+          </h3>
+          <div id="cancelRequestsContainer">
+            <p style="color: var(--muted); font-size: 13px;">No pending cancellation requests.</p>
+          </div>
+        </div>
+
+        <!-- 2. Delivery OTP Lockouts -->
+        <div class="card" style="margin-bottom: 16px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #B45309; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <span>🔒 Delivery OTP Lockouts (5+ Failed Attempts)</span>
+            <span id="otpLockoutCount" class="badge" style="background: #FEF3C7; color: #92400E; font-size: 11px;">0</span>
+          </h3>
+          <div id="otpLockoutsContainer">
+            <p style="color: var(--muted); font-size: 13px;">No locked orders.</p>
+          </div>
+        </div>
+
+        <!-- 3. Out of Stock Catalog Items -->
+        <div class="card" style="margin-bottom: 16px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #D97706; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <span>📦 Out-of-Stock Catalog Products</span>
+            <span id="oosCount" class="badge" style="background: #FEF3C7; color: #B45309; font-size: 11px;">0</span>
+          </h3>
+          <div id="oosProductsContainer">
+            <p style="color: var(--muted); font-size: 13px;">All products currently in stock.</p>
+          </div>
+        </div>
+
+        <!-- 4. Payment Mismatches & Refund Issues -->
+        <div class="card">
+          <h3 style="font-size: 15px; font-weight: 700; color: #6B21A8; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <span>💳 Payment Mismatches & Refund Flags</span>
+            <span id="payIssuesCount" class="badge" style="background: #F3E8FF; color: #6B21A8; font-size: 11px;">0</span>
+          </h3>
+          <div id="payIssuesContainer">
+            <p style="color: var(--muted); font-size: 13px;">No payment anomalies detected.</p>
+          </div>
+        </div>
+      </div>
+
       <div id="ordersTab">
         <div class="filter-bar">
           <input type="text" id="orderSearchInput" placeholder="Search by ID, name, phone, or address..." style="flex: 1; min-width: 180px;">
@@ -1135,8 +1194,24 @@
             </div>
           </div>
 
-          <div style="font-size: 15px; margin-bottom: 6px; font-weight: 600;">
-            <strong>${escapeHtml(ord.customer?.name || 'Customer')}</strong> (${escapeHtml(ord.customer?.phone || '')})
+          ${ord.cancellationRequest && ord.cancellationRequest.status === 'pending_owner_review' && !isCancelled ? `
+            <div style="background: #FEE2E2; border: 1px solid #FECACA; padding: 10px 12px; border-radius: 6px; margin: 8px 0; color: #991B1B; font-size: 13px;">
+              <strong>🛑 Worker Cancellation Request:</strong> "${escapeHtml(ord.cancellationRequest.reason || 'Staff requested cancellation')}" by <em>${escapeHtml(ord.cancellationRequest.requestedBy || 'Staff')}</em>
+              <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <button class="btn btn-danger btn-small action-approve-cancel" data-key="${escapeHtml(key)}">Approve & Cancel Order</button>
+                <button class="btn btn-outline btn-small action-reject-cancel" data-key="${escapeHtml(key)}">Reject Request</button>
+              </div>
+            </div>
+          ` : ''}
+
+          <div style="font-size: 15px; margin-bottom: 6px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <div><strong>${escapeHtml(ord.customer?.name || 'Customer')}</strong> (${escapeHtml(ord.customer?.phone || '')})</div>
+            ${ord.claimedBy ? `
+              <div style="font-size: 12px; color: #1E40AF; background: #EFF6FF; border: 1px solid #BFDBFE; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px;">
+                <span>👤 Claimed by: <strong>${escapeHtml(ord.claimedBy.name || ord.claimedBy.email)}</strong></span>
+                <button class="btn btn-outline btn-small action-admin-unclaim" data-key="${escapeHtml(key)}" style="padding: 1px 6px; font-size: 11px;">Release</button>
+              </div>
+            ` : `<span style="font-size: 11px; color: var(--muted);">👤 Unclaimed</span>`}
           </div>
 
           <!-- A1: Prominent Address Block -->
@@ -1712,7 +1787,7 @@
                     ${isRisk ? `<span class="badge-risk">⚠️ High Cancellation Risk</span>` : ''}
                   </div>
                   <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">
-                    📞 ${escapeHtml(c.phone)} • ✉️ ${escapeHtml(c.email || 'No Email')}
+                    📞 <span id="cust-phone-${escapeHtml(phone)}">${maskCustomerPhone(c.phone)}</span> <button class="btn btn-outline btn-small reveal-phone-btn" data-phone="${escapeHtml(phone)}" data-name="${escapeHtml(c.name)}" style="padding: 1px 6px; font-size: 10px; margin-left: 4px;">👁️ Reveal</button> • ✉️ ${escapeHtml(c.email || 'No Email')}
                   </div>
                   <div style="font-size: 12px; margin-top: 4px;">
                     <strong>${c.totalOrders} orders</strong> (${c.codOrders} COD / ${c.onlineOrders} Online) • Spent: <strong style="color: var(--primary);">₹${c.totalSpent}</strong>
@@ -1720,8 +1795,8 @@
                 </div>
 
                 <div style="display: flex; gap: 8px;">
-                  <a href="tel:${escapeHtml(c.phone)}" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary); font-size: 12px;">📞 Call</a>
-                  <a href="https://wa.me/91${escapeHtml(c.phone.replace(/\D/g,''))}?text=${encodeURIComponent(`Hello ${c.name}, this is RA Store Anantapur regarding your grocery orders.`)}" target="_blank" class="btn" style="background: #25D366; color: #fff; font-size: 12px;">💬 WhatsApp</a>
+                  <span id="cust-actions-${escapeHtml(phone)}" style="display:none; gap:8px;"><a href="tel:${escapeHtml(c.phone)}" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary); font-size: 12px;">📞 Call</a>
+                  <a href="https://wa.me/91${escapeHtml(c.phone.replace(/\D/g,''))}?text=${encodeURIComponent(`Hello ${c.name}, this is RA Store Anantapur regarding your grocery orders.`)}" target="_blank" class="btn" style="background: #25D366; color: #fff; font-size: 12px;">💬 WhatsApp</a></span>
                   <button class="btn btn-light action-view-cust-orders" data-phone="${escapeHtml(phone)}" style="font-size: 12px;">History</button>
                 </div>
               </div>
@@ -1782,8 +1857,9 @@
 
       Object.values(orderSource).forEach(o => {
         const orderDate = new Date(o.createdAt);
-        const isNotCancelled = o.status !== 'cancelled';
-        if (!isNotCancelled) return;
+        // M5: Strict Accounting Rule - Count revenue ONLY for DELIVERED orders
+        const isDelivered = o.status === 'delivered';
+        if (!isDelivered) return;
 
         const isCod = o.paymentMethod === 'cod';
         const isOnlinePaid = o.paymentMethod === 'online_razorpay' && (o.paymentStatus === 'paid' || o.paymentStatus === 'refund_initiated' || o.paymentStatus === 'refunded');
@@ -1936,7 +2012,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Sri_Sai_Orders_${new Date().toISOString().slice(0,10)}.csv`;
+      a.download = `RA_Store_Orders_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -2192,6 +2268,7 @@
                 <div style="font-size: 14px; font-weight: 700; color: var(--primary); margin: 4px 0;">₹${escapeHtml(p.price)}</div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
                   <button class="btn btn-light action-edit-prod" data-id="${escapeHtml(k)}" style="padding: 4px 8px; font-size: 11px;">Edit</button>
+                  <button class="btn btn-outline action-price-history" data-id="${escapeHtml(k)}" style="padding: 4px 6px; font-size: 11px;" title="View Price History">📜 Log</button>
                   <button class="btn btn-outline action-delete-prod" data-id="${escapeHtml(k)}" style="color: var(--danger); border-color: var(--danger); padding: 4px 8px; font-size: 11px;">Delete</button>
                 </div>
               </div>
@@ -2289,6 +2366,25 @@
       } else {
         prodData.image = existingProduct.image || '';
         prodData.hasImage = false;
+      }
+
+      // M5: Record Price History audit log if price or mrp changed
+      if (existingProduct.price !== undefined && (existingProduct.price !== priceVal || (mrpVal !== null && existingProduct.mrp !== mrpVal))) {
+        try {
+          const histRef = db.ref(`priceHistory/${id}`).push();
+          await histRef.set({
+            productId: id,
+            productName: name,
+            oldPrice: existingProduct.price || 0,
+            newPrice: priceVal,
+            oldMrp: existingProduct.mrp || existingProduct.price || 0,
+            newMrp: mrpVal || priceVal,
+            changedBy: (auth.currentUser && auth.currentUser.email) || 'Owner',
+            timestamp: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn('Could not record price history:', e);
+        }
       }
 
       await db.ref(`products/${id}`).update(prodData);
@@ -2551,7 +2647,7 @@
     document.querySelector('.tabs').addEventListener('click', (e) => {
       if (e.target.classList.contains('tab-btn')) {
         const t = e.target.getAttribute('data-tab');
-        ['orders', 'products', 'categories', 'customers', 'reports', 'misses', 'settings'].forEach(tab => {
+        ['alerts', 'orders', 'products', 'categories', 'customers', 'reports', 'misses', 'settings', 'staff'].forEach(tab => {
           document.getElementById(tab + 'Tab').style.display = tab === t ? 'block' : 'none';
         });
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tab') === t));
@@ -2571,6 +2667,302 @@
       toast.style.display = 'flex';
       setTimeout(() => { if (!deletedProductBackup) toast.style.display = 'none'; }, 4000);
     }
-  </script>
+  
+    // ==========================================
+    // MILESTONE 5: HELPERS & EVENT HANDLERS
+    // ==========================================
+
+    function maskCustomerPhone(phone) {
+      if (!phone) return '******';
+      const clean = String(phone).replace(/\D/g, '');
+      if (clean.length >= 4) {
+        return '******' + clean.slice(-4);
+      }
+      return '******';
+    }
+
+    // Alerts Inbox Renderer
+    function renderAlertsInbox() {
+      const cancelContainer = document.getElementById('cancelRequestsContainer');
+      const otpContainer = document.getElementById('otpLockoutsContainer');
+      const oosContainer = document.getElementById('oosProductsContainer');
+      const payContainer = document.getElementById('payIssuesContainer');
+
+      let totalAlerts = 0;
+
+      // 1. Worker Cancellation Requests
+      const cancelOrders = Object.entries(allOrders).filter(([k, o]) => 
+        o.cancellationRequest && o.cancellationRequest.status === 'pending_owner_review' && o.status !== 'cancelled'
+      );
+      document.getElementById('cancelReqCount').innerText = cancelOrders.length;
+      totalAlerts += cancelOrders.length;
+
+      if (cancelOrders.length) {
+        cancelContainer.innerHTML = cancelOrders.map(([k, o]) => `
+          <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <div style="font-weight: 700; color: #991B1B;">Order #${escapeHtml(o.id || k)} • ${escapeHtml(o.customer?.name || 'Customer')} (₹${o.total || 0})</div>
+              <div style="font-size: 13px; margin: 4px 0;"><strong>Reason:</strong> ${escapeHtml(o.cancellationRequest.reason || 'None')}</div>
+              <div style="font-size: 11px; color: var(--muted);">Requested by: ${escapeHtml(o.cancellationRequest.requestedBy || 'Staff')} • ${new Date(o.cancellationRequest.requestedAt || o.createdAt).toLocaleTimeString()}</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-danger btn-small action-approve-cancel" data-key="${escapeHtml(k)}">Approve & Cancel</button>
+              <button class="btn btn-outline btn-small action-reject-cancel" data-key="${escapeHtml(k)}">Reject</button>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        cancelContainer.innerHTML = '<p style="color: var(--muted); font-size: 13px;">No pending cancellation requests.</p>';
+      }
+
+      // 2. Delivery OTP Lockouts
+      const lockedOrders = Object.entries(allOrders).filter(([k, o]) => 
+        o.status === 'out_for_delivery' && (o.deliveryOtpLocked === true || (o.deliveryOtpAttempts && o.deliveryOtpAttempts >= 5))
+      );
+      document.getElementById('otpLockoutCount').innerText = lockedOrders.length;
+      totalAlerts += lockedOrders.length;
+
+      if (lockedOrders.length) {
+        otpContainer.innerHTML = lockedOrders.map(([k, o]) => `
+          <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <div style="font-weight: 700; color: #92400E;">Order #${escapeHtml(o.id || k)} • ${escapeHtml(o.customer?.name || 'Customer')}</div>
+              <div style="font-size: 12px; color: #B45309; margin-top: 2px;">⚠️ 5+ failed OTP verification attempts at doorstep.</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-light action-reissue-otp" data-key="${escapeHtml(k)}" style="color: #1E40AF; border-color: #93C5FD;">🔑 Reissue New OTP</button>
+              <button class="btn btn-light action-deliver-without-otp" data-key="${escapeHtml(k)}" style="color: #92400E; border-color: #FDE68A;">⚠️ Deliver (Override)</button>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        otpContainer.innerHTML = '<p style="color: var(--muted); font-size: 13px;">No locked orders.</p>';
+      }
+
+      // 3. Out-of-Stock Products
+      const oosProducts = Object.entries(allProducts).filter(([k, p]) => p.inStock === false || p.stock === 0);
+      document.getElementById('oosCount').innerText = oosProducts.length;
+      totalAlerts += oosProducts.length;
+
+      if (oosProducts.length) {
+        oosContainer.innerHTML = oosProducts.map(([k, p]) => `
+          <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <span style="font-weight: 700;">${escapeHtml(p.name)}</span>
+              <span style="font-size: 12px; color: var(--muted); margin-left: 8px;">₹${escapeHtml(p.price)} • ${escapeHtml(p.unit || 'unit')}</span>
+            </div>
+            <button class="btn btn-outline btn-small action-quick-restock" data-id="${escapeHtml(k)}" style="color: #065F46; border-color: #A7F3D0; font-size: 11px;">✅ Mark In-Stock</button>
+          </div>
+        `).join('');
+      } else {
+        oosContainer.innerHTML = '<p style="color: var(--muted); font-size: 13px;">All catalog products are in stock.</p>';
+      }
+
+      // 4. Payment Mismatches & Refund Flags
+      const payIssues = Object.entries(allOrders).filter(([k, o]) => 
+        o.paymentStatus === 'mismatch' || o.paymentMismatch === true || (o.paymentMethod === 'online_razorpay' && o.refundError)
+      );
+      document.getElementById('payIssuesCount').innerText = payIssues.length;
+      totalAlerts += payIssues.length;
+
+      if (payIssues.length) {
+        payContainer.innerHTML = payIssues.map(([k, o]) => `
+          <div style="background: #FAF5FF; border: 1px solid #E9D5FF; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <div style="font-weight: 700; color: #6B21A8;">Order #${escapeHtml(o.id || k)} • Status: ${escapeHtml(o.paymentStatus)}</div>
+              <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">${escapeHtml(o.paymentMismatchNote || o.refundError || 'Payment reconciliation anomaly')}</div>
+            </div>
+            <button class="btn btn-light action-reconcile" data-key="${escapeHtml(k)}" style="color: #6B21A8; border-color: #D8B4FE;">🔍 Reconcile</button>
+          </div>
+        `).join('');
+      } else {
+        payContainer.innerHTML = '<p style="color: var(--muted); font-size: 13px;">No payment anomalies detected.</p>';
+      }
+
+      // Update badge
+      const badge = document.getElementById('alertsBadge');
+      if (badge) {
+        badge.innerText = totalAlerts;
+        badge.style.display = totalAlerts > 0 ? 'inline-block' : 'none';
+      }
+    }
+
+    // Hook renderAlertsInbox into data updates
+    const origRenderOrdersList = renderOrdersList;
+    renderOrdersList = function() {
+      origRenderOrdersList();
+      renderAlertsInbox();
+    };
+
+    document.getElementById('refreshAlertsBtn')?.addEventListener('click', renderAlertsInbox);
+
+    // Global listener for Alerts & Orders actions
+    document.addEventListener('click', async (e) => {
+      // 1. Release Claim (Admin)
+      const unclaimBtn = e.target.closest('.action-admin-unclaim');
+      if (unclaimBtn) {
+        const key = unclaimBtn.getAttribute('data-key');
+        if (!confirm('Release staff claim on this order? It will return to the unclaimed pool.')) return;
+        try {
+          await db.ref('orders/' + key + '/claimedBy').remove();
+          showToast('Order claim released.');
+          renderOrdersList();
+        } catch (err) {
+          alert('Could not release claim: ' + err.message);
+        }
+        return;
+      }
+
+      // 2. Approve Cancellation Request
+      const approveCancelBtn = e.target.closest('.action-approve-cancel');
+      if (approveCancelBtn) {
+        const key = approveCancelBtn.getAttribute('data-key');
+        const ord = allOrders[key];
+        if (!ord) return;
+        if (!confirm(`Approve cancellation for Order #${ord.id || key}? If paid online, a refund will be processed.`)) return;
+
+        try {
+          if (ord.paymentMethod === 'online_razorpay' && ord.paymentStatus === 'paid') {
+            const token = await auth.currentUser.getIdToken();
+            const res = await fetch(`${WORKER_API_BASE}/api/cancel-order`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ orderId: key, reason: ord.cancellationRequest?.reason || 'Approved staff cancellation request' })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Refund initiation failed');
+          } else {
+            await db.ref('orders/' + key).update({
+              status: 'cancelled',
+              cancellationReason: ord.cancellationRequest?.reason || 'Approved staff cancellation request',
+              cancelledAt: new Date().toISOString(),
+              'cancellationRequest/status': 'approved'
+            });
+          }
+          showToast('Order cancelled and customer notified.');
+          renderOrdersList();
+        } catch (err) {
+          alert('Error cancelling order: ' + err.message);
+        }
+        return;
+      }
+
+      // 3. Reject Cancellation Request
+      const rejectCancelBtn = e.target.closest('.action-reject-cancel');
+      if (rejectCancelBtn) {
+        const key = rejectCancelBtn.getAttribute('data-key');
+        if (!confirm('Reject staff cancellation request and keep this order active?')) return;
+        try {
+          await db.ref('orders/' + key + '/cancellationRequest').update({
+            status: 'rejected',
+            reviewedAt: new Date().toISOString(),
+            reviewedBy: auth.currentUser?.email || 'Owner'
+          });
+          showToast('Cancellation request rejected. Order remains active.');
+          renderOrdersList();
+        } catch (err) {
+          alert('Error: ' + err.message);
+        }
+        return;
+      }
+
+      // 4. Quick Restock Product
+      const restockBtn = e.target.closest('.action-quick-restock');
+      if (restockBtn) {
+        const id = restockBtn.getAttribute('data-id');
+        try {
+          await db.ref('products/' + id).update({ inStock: true, stock: 100, updatedAt: new Date().toISOString() });
+          showToast('Product marked in stock!');
+          renderAlertsInbox();
+        } catch (err) {
+          alert('Error: ' + err.message);
+        }
+        return;
+      }
+
+      // 5. Price History Log Modal
+      const histBtn = e.target.closest('.action-price-history');
+      if (histBtn) {
+        const id = histBtn.getAttribute('data-id');
+        const p = allProducts[id] || {};
+        document.getElementById('priceHistoryTitle').innerText = `Price History: ${p.name || id}`;
+        const content = document.getElementById('priceHistoryContent');
+        content.innerHTML = '<p style="color: var(--muted); font-size: 13px;">Loading price audit trail...</p>';
+        document.getElementById('priceHistoryModal').style.display = 'flex';
+
+        try {
+          const snap = await db.ref('priceHistory/' + id).once('value');
+          const logs = snap.val();
+          if (!logs) {
+            content.innerHTML = '<p style="color: var(--muted); font-size: 13px; text-align: center; padding: 20px;">No previous price changes recorded for this item.</p>';
+          } else {
+            const list = Object.values(logs).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            content.innerHTML = list.map(item => `
+              <div style="border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; font-weight: 700;">
+                  <span>Price: ₹${item.oldPrice} ➔ ₹${item.newPrice}</span>
+                  <span style="color: ${item.newPrice >= item.oldPrice ? 'var(--primary)' : 'var(--danger)'};">
+                    ${item.newPrice >= item.oldPrice ? '+' : ''}₹${item.newPrice - item.oldPrice}
+                  </span>
+                </div>
+                ${item.oldMrp !== undefined ? `<div style="font-size: 12px; color: var(--muted); margin-top: 2px;">MRP: ₹${item.oldMrp} ➔ ₹${item.newMrp}</div>` : ''}
+                <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
+                  Changed by: ${escapeHtml(item.changedBy || 'Owner')} • ${new Date(item.timestamp).toLocaleString()}
+                </div>
+              </div>
+            `).join('');
+          }
+        } catch (err) {
+          content.innerHTML = `<p style="color: var(--danger); font-size: 13px;">Error loading history: ${escapeHtml(err.message)}</p>`;
+        }
+        return;
+      }
+
+      // 6. CRM Phone Reveal with DPDP Audit Log
+      const revealBtn = e.target.closest('.reveal-phone-btn');
+      if (revealBtn) {
+        const phone = revealBtn.getAttribute('data-phone');
+        const name = revealBtn.getAttribute('data-name');
+        try {
+          await db.ref('auditLogs/phoneReveals').push({
+            adminEmail: (auth.currentUser && auth.currentUser.email) || 'Owner',
+            customerPhone: phone,
+            customerName: name || '',
+            timestamp: new Date().toISOString()
+          });
+
+          const span = document.getElementById('cust-phone-' + phone);
+          if (span) {
+            span.innerText = phone;
+            span.style.fontWeight = '700';
+            span.style.color = '#1D4ED8';
+          }
+          const actionsSpan = document.getElementById('cust-actions-' + phone);
+          if (actionsSpan) {
+            actionsSpan.style.display = 'inline-flex';
+          }
+          revealBtn.style.display = 'none';
+          showToast('Phone revealed and audit logged.');
+        } catch (err) {
+          alert('Could not reveal phone: ' + err.message);
+        }
+        return;
+      }
+    });
+</script>
+
+  <!-- PRICE HISTORY MODAL (M5) -->
+  <div class="modal-overlay" id="priceHistoryModal" style="display: none;">
+    <div class="modal" style="max-width: 540px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700;" id="priceHistoryTitle">Product Price History</h3>
+        <button class="modal-close-btn" data-modal="priceHistoryModal" style="background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+      <div id="priceHistoryContent" style="max-height: 420px; overflow-y: auto;">
+        <p style="color: var(--muted); font-size: 13px;">Loading price history...</p>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

@@ -1058,6 +1058,222 @@ it('M4.5: Offline network state detection preserves customer cart in localStorag
   assert(localStorageCart.includes('item_102'));
 });
 
+
+// ==========================================
+// Milestone 5: Admin Audit & Operations Tests
+// ==========================================
+
+it('M5.1: Order Claiming concurrency & ownership isolation', () => {
+  const mockOrder = { id: 'ORD-101', total: 450, claimedBy: null };
+
+  function claimOrder(order, worker) {
+    if (order.claimedBy) {
+      return { success: false, reason: 'ALREADY_CLAIMED', claimedBy: order.claimedBy };
+    }
+    order.claimedBy = {
+      uid: worker.uid,
+      name: worker.name,
+      email: worker.email,
+      claimedAt: new Date().toISOString()
+    };
+    return { success: true, claimedBy: order.claimedBy };
+  }
+
+  function unclaimOrder(order, worker, isOwner = false) {
+    if (!order.claimedBy) return { success: false, reason: 'NOT_CLAIMED' };
+    if (!isOwner && order.claimedBy.uid !== worker.uid) {
+      return { success: false, reason: 'NOT_CLAIMANT' };
+    }
+    order.claimedBy = null;
+    return { success: true };
+  }
+
+  const worker1 = { uid: 'w1', name: 'Ramesh', email: 'ramesh@fast.in' };
+  const worker2 = { uid: 'w2', name: 'Suresh', email: 'suresh@fast.in' };
+
+  // Worker 1 claims order
+  const res1 = claimOrder(mockOrder, worker1);
+  assert.strictEqual(res1.success, true);
+  assert.strictEqual(mockOrder.claimedBy.uid, 'w1');
+
+  // Worker 2 attempts to claim same order -> fails
+  const res2 = claimOrder(mockOrder, worker2);
+  assert.strictEqual(res2.success, false);
+  assert.strictEqual(res2.reason, 'ALREADY_CLAIMED');
+  assert.strictEqual(res2.claimedBy.uid, 'w1');
+
+  // Worker 2 attempts to unclaim -> denied
+  const unclaimRes2 = unclaimOrder(mockOrder, worker2, false);
+  assert.strictEqual(unclaimRes2.success, false);
+  assert.strictEqual(unclaimRes2.reason, 'NOT_CLAIMANT');
+
+  // Owner forces release of claim -> succeeds
+  const ownerUnclaim = unclaimOrder(mockOrder, null, true);
+  assert.strictEqual(ownerUnclaim.success, true);
+  assert.strictEqual(mockOrder.claimedBy, null);
+});
+
+it('M5.2: Alerts Inbox aggregation across cancellation requests, lockouts, and stock', () => {
+  const sampleOrders = {
+    'ord_1': { id: '101', status: 'placed', total: 300 },
+    'ord_2': { id: '102', status: 'accepted', cancellationRequest: { status: 'pending_owner_review', reason: 'Customer unreachable' }, total: 450 },
+    'ord_3': { id: '103', status: 'out_for_delivery', deliveryOtpLocked: true, total: 600 },
+    'ord_4': { id: '104', status: 'cancelled', cancellationRequest: { status: 'approved' }, total: 200 }
+  };
+
+  const sampleProducts = {
+    'p1': { name: 'Rice', inStock: true, price: 60 },
+    'p2': { name: 'Toor Dal', inStock: false, price: 140 },
+    'p3': { name: 'Sugar', inStock: true, stock: 0, price: 45 }
+  };
+
+  function computeAlerts(orders, products) {
+    const cancelRequests = Object.values(orders).filter(o => 
+      o.cancellationRequest && o.cancellationRequest.status === 'pending_owner_review' && o.status !== 'cancelled'
+    );
+    const otpLockouts = Object.values(orders).filter(o => 
+      o.status === 'out_for_delivery' && (o.deliveryOtpLocked === true || (o.deliveryOtpAttempts && o.deliveryOtpAttempts >= 5))
+    );
+    const oosItems = Object.values(products).filter(p => p.inStock === false || p.stock === 0);
+
+    return {
+      cancelCount: cancelRequests.length,
+      lockoutCount: otpLockouts.length,
+      oosCount: oosItems.length,
+      totalBadgeCount: cancelRequests.length + otpLockouts.length + oosItems.length
+    };
+  }
+
+  const alerts = computeAlerts(sampleOrders, sampleProducts);
+  assert.strictEqual(alerts.cancelCount, 1);
+  assert.strictEqual(alerts.lockoutCount, 1);
+  assert.strictEqual(alerts.oosCount, 2);
+  assert.strictEqual(alerts.totalBadgeCount, 4);
+});
+
+it('M5.3: Strict Delivered-Only Revenue Accounting', () => {
+  const mixedOrders = [
+    { id: '1', status: 'delivered', paymentMethod: 'cod', paymentStatus: 'cod_collected', total: 500 },
+    { id: '2', status: 'delivered', paymentMethod: 'online_razorpay', paymentStatus: 'paid', total: 800 },
+    { id: '3', status: 'out_for_delivery', paymentMethod: 'cod', total: 400 }, // In flight, NOT revenue
+    { id: '4', status: 'placed', paymentMethod: 'online_razorpay', paymentStatus: 'paid', total: 650 }, // Placed, NOT revenue
+    { id: '5', status: 'delivered', paymentMethod: 'online_razorpay', paymentStatus: 'refunded', total: 300, refundAmount: 300 }, // Full refund
+    { id: '6', status: 'cancelled', paymentMethod: 'cod', total: 250 }
+  ];
+
+  function calculateDeliveredAccounting(orders) {
+    let deliveredRevenue = 0;
+    let deliveredOrdersCount = 0;
+    let inFlightPipelineRevenue = 0;
+    let inFlightCount = 0;
+
+    orders.forEach(o => {
+      if (o.status === 'delivered') {
+        const total = Number(o.total) || 0;
+        const refund = Number(o.refundAmount) || (o.paymentStatus === 'refunded' ? total : 0);
+        deliveredRevenue += Math.max(0, total - refund);
+        deliveredOrdersCount++;
+      } else if (['placed', 'accepted', 'packed', 'out_for_delivery'].includes(o.status)) {
+        inFlightPipelineRevenue += Number(o.total) || 0;
+        inFlightCount++;
+      }
+    });
+
+    return { deliveredRevenue, deliveredOrdersCount, inFlightPipelineRevenue, inFlightCount };
+  }
+
+  const report = calculateDeliveredAccounting(mixedOrders);
+  // Delivered: #1 (500) + #2 (800) + #5 (300 - 300 refund = 0) = 1300
+  assert.strictEqual(report.deliveredRevenue, 1300);
+  assert.strictEqual(report.deliveredOrdersCount, 3);
+  // In-flight pipeline: #3 (400) + #4 (650) = 1050
+  assert.strictEqual(report.inFlightPipelineRevenue, 1050);
+  assert.strictEqual(report.inFlightCount, 2);
+});
+
+it('M5.4: CRM Phone Privacy Masking & DPDP Audit Trail', () => {
+  function maskCustomerPhone(phone) {
+    if (!phone) return '******';
+    const clean = String(phone).replace(/\D/g, '');
+    if (clean.length >= 4) {
+      return '******' + clean.slice(-4);
+    }
+    return '******';
+  }
+
+  assert.strictEqual(maskCustomerPhone('+919876543210'), '******3210');
+  assert.strictEqual(maskCustomerPhone('9440012345'), '******2345');
+
+  const auditLog = [];
+  function recordPhoneRevealAudit(adminEmail, customerPhone) {
+    const entry = {
+      adminEmail,
+      customerPhone,
+      timestamp: new Date().toISOString()
+    };
+    auditLog.push(entry);
+    return entry;
+  }
+
+  const reveal = recordPhoneRevealAudit('owner@rastore.com', '9876543210');
+  assert.strictEqual(auditLog.length, 1);
+  assert.strictEqual(reveal.adminEmail, 'owner@rastore.com');
+  assert.strictEqual(reveal.customerPhone, '9876543210');
+  assert(reveal.timestamp.length > 10);
+});
+
+it('M5.5: Product Price History audit logging', () => {
+  const priceHistoryDb = {};
+
+  function recordPriceChange(productId, oldPrice, newPrice, oldMrp, newMrp, userEmail) {
+    if (oldPrice === newPrice && oldMrp === newMrp) return null;
+    if (!priceHistoryDb[productId]) priceHistoryDb[productId] = [];
+    const entry = {
+      productId,
+      oldPrice,
+      newPrice,
+      oldMrp,
+      newMrp,
+      changedBy: userEmail,
+      timestamp: new Date().toISOString()
+    };
+    priceHistoryDb[productId].push(entry);
+    return entry;
+  }
+
+  const change1 = recordPriceChange('prod_rice_25kg', 1200, 1250, 1350, 1400, 'owner@rastore.in');
+  assert.notStrictEqual(change1, null);
+  assert.strictEqual(priceHistoryDb['prod_rice_25kg'].length, 1);
+  assert.strictEqual(priceHistoryDb['prod_rice_25kg'][0].newPrice, 1250);
+
+  // No change -> does not log
+  const noChange = recordPriceChange('prod_rice_25kg', 1250, 1250, 1400, 1400, 'owner@rastore.in');
+  assert.strictEqual(noChange, null);
+  assert.strictEqual(priceHistoryDb['prod_rice_25kg'].length, 1);
+});
+
+it('M5.6: Safe CSV export sanitization & filename', () => {
+  function sanitizeCsvCell(val) {
+    if (val === null || val === undefined) return '""';
+    let str = String(val);
+    if (/^[=\+\-@\t\r]/.test(str)) {
+      str = "'" + str;
+    }
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+
+  assert.strictEqual(sanitizeCsvCell('=SUM(A1:A10)'), "\"\'=SUM(A1:A10)\"");
+  assert.strictEqual(sanitizeCsvCell('+cmd|"/C calc"'), "\"\'" + '+cmd|""/C calc"""');
+  assert.strictEqual(sanitizeCsvCell('@cmd'), "\"\'@cmd\"");
+  assert.strictEqual(sanitizeCsvCell('-50.00'), "\"'-50.00\"");
+  assert.strictEqual(sanitizeCsvCell('Anantapur Main Road'), '"Anantapur Main Road"');
+
+  const now = new Date('2026-10-29T12:00:00Z');
+  const filename = `RA_Store_Orders_${now.toISOString().slice(0, 10)}.csv`;
+  assert.strictEqual(filename, 'RA_Store_Orders_2026-10-29.csv');
+  assert(!filename.includes('Sri_Sai'), 'Filename must not contain old brand');
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');
