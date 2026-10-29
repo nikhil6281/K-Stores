@@ -1,3 +1,25 @@
+
+// ==========================================
+// Milestone 3: Geo Utilities & Validation
+// ==========================================
+
+function getHaversineDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function isValidIndiaGeo(lat, lng) {
+  if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) return false;
+  return (lat >= 6 && lat <= 38 && lng >= 68 && lng <= 98);
+}
+
 /**
  * Cloudflare Worker for RA Store (Anantapur, AP)
  * Contract implementation for Order creation, Payment verification, Webhooks,
@@ -1342,4 +1364,35 @@ async function handleAdminDeliverWithoutOtp(request, env, cors) {
     status: 'delivered',
     deliveredWithoutOtp: true
   }, 200, cors);
+}
+
+
+/**
+ * Scheduled Cron Task: Purges precise GPS coordinates 30 days after delivery (DPDP Act compliance)
+ */
+async function handlePurgeOldDeliveryGeo(env) {
+  try {
+    const orders = await rtdbFetch(env, 'orders', 'GET') || {};
+    const cutoffMs = Date.now() - (30 * 24 * 3600 * 1000); // 30 days
+    let purgedCount = 0;
+
+    for (const [k, ord] of Object.entries(orders)) {
+      if (!ord || ord.status !== 'delivered' || !ord.deliveredAt) continue;
+      const deliveredMs = new Date(ord.deliveredAt).getTime();
+      if (deliveredMs < cutoffMs) {
+        if (ord.delivery && ord.delivery.geo) {
+          await rtdbFetch(env, `orders/${k}/delivery/geo`, 'DELETE');
+          if (ord.customer && ord.customer.geo) {
+            await rtdbFetch(env, `orders/${k}/customer/geo`, 'DELETE');
+          }
+          purgedCount++;
+        }
+      }
+    }
+    if (purgedCount > 0) {
+      console.log(`[DPDP Retention] Purged precise GPS from ${purgedCount} orders older than 30 days.`);
+    }
+  } catch (err) {
+    console.warn('[DPDP Retention] Error purging old GPS coordinates:', err);
+  }
 }

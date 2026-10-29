@@ -49,7 +49,11 @@ const APP_CONFIG = {
   workerApi: "https://ra-store-api.chowdarynikhil095.workers.dev",
   razorpayKeyId: "rzp_live_TtGrq3sfJkM0pA",
   razorpayTestKeyId: "rzp_live_TtGrq3sfJkM0pA",
-  currency: "INR"
+  currency: "INR",
+  storeLat: 14.6819,
+  storeLng: 77.6006,
+  deliveryRadiusKm: 5,
+  requireLocation: false
 };
 
 if (typeof module !== 'undefined' && module.exports) {

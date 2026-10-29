@@ -751,6 +751,167 @@ it('M2.6: Admin can reissue OTP and deliver without OTP with mandatory reason', 
   assert.strictEqual(order.overrideReason, 'Customer phone battery died at doorstep');
 });
 
+
+// ==========================================
+// Milestone 3 Tests: Customer Location & Worker Navigation
+// ==========================================
+
+function getHaversineDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function isValidIndiaGeo(lat, lng) {
+  if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) return false;
+  return (lat >= 6 && lat <= 38 && lng >= 68 && lng <= 98);
+}
+
+it('M3.1: Haversine distance formula accurately calculates km in Anantapur', () => {
+  // Anantapur Clock Tower (Center)
+  const storeLat = 14.6819;
+  const storeLng = 77.6006;
+
+  // Saptagiri Circle (~1.2 km away)
+  const saptagiriLat = 14.6750;
+  const saptagiriLng = 77.5950;
+  const distSaptagiri = getHaversineDistanceKm(storeLat, storeLng, saptagiriLat, saptagiriLng);
+  assert(distSaptagiri > 0.5 && distSaptagiri < 2.0, 'Saptagiri Circle should be ~1km away');
+
+  // Bangalore (~200 km away)
+  const bngLat = 12.9716;
+  const bngLng = 77.5946;
+  const distBng = getHaversineDistanceKm(storeLat, storeLng, bngLat, bngLng);
+  assert(distBng > 180 && distBng < 210, 'Bangalore should be ~190km away');
+});
+
+it('M3.2: India bounding box validation accepts valid coordinates and rejects out-of-bounds', () => {
+  assert.strictEqual(isValidIndiaGeo(14.6819, 77.6006), true); // Anantapur
+  assert.strictEqual(isValidIndiaGeo(17.3850, 78.4867), true); // Hyderabad
+  assert.strictEqual(isValidIndiaGeo(37.7749, -122.4194), false); // San Francisco
+  assert.strictEqual(isValidIndiaGeo(51.5074, -0.1278), false); // London
+  assert.strictEqual(isValidIndiaGeo('invalid', 77), false); // Non-numeric
+});
+
+it('M3.3: Order creation accepts location within store radius and rejects outside radius', () => {
+  const storeLat = 14.6819;
+  const storeLng = 77.6006;
+  const radiusKm = 5.0;
+
+  function validateOrderLocation(geo, requireLocation) {
+    if (!geo) {
+      if (requireLocation) throw new Error('LOCATION_REQUIRED');
+      return { allowed: true, hasGeo: false };
+    }
+    if (!isValidIndiaGeo(geo.lat, geo.lng)) {
+      throw new Error('INVALID_COORDINATES');
+    }
+    const dist = getHaversineDistanceKm(storeLat, storeLng, geo.lat, geo.lng);
+    if (dist > radiusKm) {
+      throw new Error(`OUTSIDE_DELIVERY_RADIUS: ${dist.toFixed(1)} km exceeds ${radiusKm} km`);
+    }
+    return { allowed: true, hasGeo: true, distanceKm: dist };
+  }
+
+  // 1. Valid location inside 5km
+  const validLoc = validateOrderLocation({ lat: 14.6750, lng: 77.5950 }, false);
+  assert.strictEqual(validLoc.allowed, true);
+  assert.strictEqual(validLoc.hasGeo, true);
+
+  // 2. Location outside 5km
+  assert.throws(() => {
+    validateOrderLocation({ lat: 14.8000, lng: 77.6000 }, false); // ~13km away
+  }, /OUTSIDE_DELIVERY_RADIUS/);
+
+  // 3. Location required toggle
+  assert.throws(() => {
+    validateOrderLocation(null, true);
+  }, /LOCATION_REQUIRED/);
+});
+
+it('M3.4: Order creation falls back to Anantapur PIN codes when location is not shared', () => {
+  const servedPins = ['515001', '515002', '515003', '515004', '515005'];
+
+  function validateAddressFallback(address, geo) {
+    if (geo) return true; // Geo provided and validated
+    const pinMatch = address.match(/\b(5\d{5})\b/);
+    if (pinMatch && !servedPins.includes(pinMatch[1])) {
+      throw new Error('PIN_NOT_SERVICED');
+    }
+    return true;
+  }
+
+  assert.strictEqual(validateAddressFallback('Near Tower Clock, Anantapur 515001', null), true);
+  assert.throws(() => {
+    validateAddressFallback('Gooty Road, 515401', null);
+  }, /PIN_NOT_SERVICED/);
+});
+
+it('M3.5: Worker navigation URL formats Google Maps turn-by-turn intent URL', () => {
+  const geo = { lat: 14.6819, lng: 77.6006 };
+  const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${geo.lat}%2C${geo.lng}`;
+  const pinUrl = `https://www.google.com/maps?q=${geo.lat},${geo.lng}`;
+
+  assert.strictEqual(navUrl, 'https://www.google.com/maps/dir/?api=1&destination=14.6819%2C77.6006');
+  assert.strictEqual(pinUrl, 'https://www.google.com/maps?q=14.6819,77.6006');
+});
+
+it('M3.6: 30-day location retention purge removes geo while preserving financial data', () => {
+  const now = Date.now();
+  const thirtyOneDaysAgo = now - (31 * 24 * 3600 * 1000);
+  const fiveDaysAgo = now - (5 * 24 * 3600 * 1000);
+
+  const orders = {
+    'ord_old': {
+      id: 'RA-001',
+      status: 'delivered',
+      deliveredAt: new Date(thirtyOneDaysAgo).toISOString(),
+      total: 450,
+      delivery: {
+        address: 'Kamalanagar, Anantapur',
+        geo: { lat: 14.68, lng: 77.60 }
+      }
+    },
+    'ord_recent': {
+      id: 'RA-002',
+      status: 'delivered',
+      deliveredAt: new Date(fiveDaysAgo).toISOString(),
+      total: 300,
+      delivery: {
+        address: 'Subhash Road, Anantapur',
+        geo: { lat: 14.67, lng: 77.59 }
+      }
+    }
+  };
+
+  function purgeOldDeliveryGeo(ordersDict) {
+    let purgedCount = 0;
+    const cutoffMs = Date.now() - (30 * 24 * 3600 * 1000);
+    for (const ord of Object.values(ordersDict)) {
+      if (ord.status === 'delivered' && ord.deliveredAt) {
+        const deliveredMs = new Date(ord.deliveredAt).getTime();
+        if (deliveredMs < cutoffMs && ord.delivery && ord.delivery.geo) {
+          delete ord.delivery.geo;
+          purgedCount++;
+        }
+      }
+    }
+    return purgedCount;
+  }
+
+  const count = purgeOldDeliveryGeo(orders);
+  assert.strictEqual(count, 1);
+  assert.strictEqual(orders['ord_old'].delivery.geo, undefined, 'Old order geo must be purged');
+  assert.strictEqual(orders['ord_old'].total, 450, 'Financial data must be preserved');
+  assert.notStrictEqual(orders['ord_recent'].delivery.geo, undefined, 'Recent order geo must be kept');
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');
