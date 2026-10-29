@@ -26,8 +26,9 @@
     },
 
     "staffRequests": {
-      ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || $uid === auth.uid)",
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
       "$uid": {
+        ".read": "auth != null && ($uid === auth.uid || root.child('admins').child(auth.uid).val() === true)",
         ".write": "auth != null && ($uid === auth.uid || root.child('admins').child(auth.uid).val() === true)",
         ".validate": "newData.hasChildren(['status', 'requestedAt'])"
       }
@@ -74,7 +75,7 @@
       
       "$orderId": {
         ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true || data.child('uid').val() === auth.uid)",
-        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('staff').child(auth.uid).child('active').val() === true && data.exists() && newData.exists() && newData.child('status').val() != 'cancelled' && data.child('status').val() != 'cancelled'))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('staff').child(auth.uid).child('active').val() === true && data.exists() && newData.exists() && newData.child('status').val() != 'cancelled' && newData.child('status').val() != 'delivered' && data.child('status').val() != 'cancelled'))",
 
         "packingChecks": {
           ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true)"
@@ -89,8 +90,8 @@
     },
 
     "orderPrivate": {
-      ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || data.child('customerUid').val() === auth.uid)",
       "$orderId": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (data.child('customerUid').val() === auth.uid && root.child('orders').child($orderId).child('status').val() === 'out_for_delivery'))",
         ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
       }
     },

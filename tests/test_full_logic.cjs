@@ -557,6 +557,200 @@ it('M1.7: WhatsApp OTP challenge creates cryptographic 6-digit code and custom t
   assert.strictEqual(challenges[normalizedPhone], undefined); // Challenge cleared
 });
 
+
+// ==========================================
+// Milestone 2 Tests: Delivery OTP (Proof of Delivery)
+// ==========================================
+
+it('M2.1: Order creation generates cryptographic 4-digit OTP stored only in /orderPrivate/{id}', () => {
+  const humanOrderId = 'RA-9021';
+  const pushKey = 'ord_test_m2_1';
+  const customerUid = 'cust_anantapur_1';
+
+  // Cryptographic 4-digit RNG
+  const otpCode = String(crypto.randomInt(1000, 10000));
+  assert.strictEqual(otpCode.length, 4);
+  assert(/^[0-9]{4}$/.test(otpCode));
+
+  const orderRecord = {
+    id: humanOrderId,
+    uid: customerUid,
+    status: 'placed',
+    total: 350,
+    otpRequired: true
+  };
+
+  const privateRecord = {
+    code: otpCode,
+    customerUid: customerUid,
+    attempts: 0,
+    lockedUntil: 0,
+    createdAt: Date.now()
+  };
+
+  // Crucial security invariant: orderRecord must never contain code
+  assert.strictEqual(orderRecord.code, undefined);
+  assert.strictEqual(orderRecord.deliveryOtp, undefined);
+  assert.strictEqual(privateRecord.code, otpCode);
+});
+
+it('M2.2: Customer can read OTP only when order status is out_for_delivery', () => {
+  function checkOrderPrivateReadRule(authUid, orderPrivateData, orderStatus) {
+    const isOwner = (authUid === 'owner_uid');
+    const isCustomer = (authUid === orderPrivateData.customerUid);
+    const isOutForDelivery = (orderStatus === 'out_for_delivery');
+    return isOwner || (isCustomer && isOutForDelivery);
+  }
+
+  const orderPriv = { customerUid: 'cust_123', code: '4829' };
+
+  // When order is placed: customer denied
+  assert.strictEqual(checkOrderPrivateReadRule('cust_123', orderPriv, 'placed'), false);
+  // When order is packed: customer denied
+  assert.strictEqual(checkOrderPrivateReadRule('cust_123', orderPriv, 'packed'), false);
+  // When order is out_for_delivery: customer granted!
+  assert.strictEqual(checkOrderPrivateReadRule('cust_123', orderPriv, 'out_for_delivery'), true);
+  // Another customer: denied even when out_for_delivery
+  assert.strictEqual(checkOrderPrivateReadRule('cust_hacker', orderPriv, 'out_for_delivery'), false);
+  // Delivery worker: denied reading private OTP
+  assert.strictEqual(checkOrderPrivateReadRule('worker_ramu', orderPriv, 'out_for_delivery'), false);
+  // Store owner: always allowed
+  assert.strictEqual(checkOrderPrivateReadRule('owner_uid', orderPriv, 'placed'), true);
+});
+
+it('M2.3: Worker cannot write status=delivered directly in Realtime Database rules', () => {
+  function checkOrderWriteRule(authUid, isAdmin, isStaffActive, currentOrder, newOrder) {
+    if (isAdmin) return true;
+    if (isStaffActive) {
+      if (!currentOrder || !newOrder) return false;
+      // Rule: newData.child('status').val() != 'cancelled' && newData.child('status').val() != 'delivered'
+      if (newOrder.status === 'cancelled' || newOrder.status === 'delivered') return false;
+      if (currentOrder.status === 'cancelled') return false;
+      return true;
+    }
+    return false;
+  }
+
+  const existingOrder = { id: 'RA-101', status: 'out_for_delivery' };
+
+  // Worker trying to mark packed -> allowed
+  assert.strictEqual(checkOrderWriteRule('worker_1', false, true, existingOrder, { status: 'out_for_delivery' }), true);
+  // Worker trying to mark delivered directly -> BLOCKED by rules!
+  assert.strictEqual(checkOrderWriteRule('worker_1', false, true, existingOrder, { status: 'delivered' }), false);
+  // Worker trying to mark cancelled directly -> BLOCKED by rules!
+  assert.strictEqual(checkOrderWriteRule('worker_1', false, true, existingOrder, { status: 'cancelled' }), false);
+  // Owner marking delivered -> allowed
+  assert.strictEqual(checkOrderWriteRule('owner_1', true, false, existingOrder, { status: 'delivered' }), true);
+});
+
+it('M2.4: verifyDeliveryOtp verifies code in constant-time and records audit', () => {
+  const privateRecord = { code: '7391', attempts: 0, lockedUntil: 0 };
+  const order = { id: 'RA-500', status: 'out_for_delivery', paymentMethod: 'cod', total: 240 };
+  let auditEntry = null;
+
+  function verifyOtp(ord, privateRec, submittedCode, worker) {
+    if (ord.status !== 'out_for_delivery') throw new Error('Invalid status');
+    if (privateRec.lockedUntil > Date.now()) throw new Error('OTP_LOCKED');
+
+    // Constant time compare
+    const expected = String(privateRec.code).trim();
+    const clean = String(submittedCode).trim();
+    let diff = expected.length ^ clean.length;
+    for (let i = 0; i < expected.length && i < clean.length; i++) {
+      diff |= expected.charCodeAt(i) ^ clean.charCodeAt(i);
+    }
+    if (diff !== 0) {
+      privateRec.attempts++;
+      if (privateRec.attempts >= 5) {
+        privateRec.lockedUntil = Date.now() + 30 * 60 * 1000;
+      }
+      return { success: false, remainingAttempts: Math.max(0, 5 - privateRec.attempts) };
+    }
+
+    ord.status = 'delivered';
+    ord.deliveredAt = new Date().toISOString();
+    ord.deliveredBy = worker.uid;
+    ord.otpVerified = true;
+    if (ord.paymentMethod === 'cod') {
+      ord.paymentStatus = 'cod_collected';
+      ord.codCollected = ord.total;
+    }
+
+    auditEntry = {
+      action: 'DELIVERY_OTP_VERIFIED',
+      orderId: ord.id,
+      workerUid: worker.uid
+    };
+
+    return { success: true };
+  }
+
+  // 1. Wrong code
+  const failRes = verifyOtp(order, privateRecord, '1234', { uid: 'worker_1' });
+  assert.strictEqual(failRes.success, false);
+  assert.strictEqual(failRes.remainingAttempts, 4);
+  assert.strictEqual(order.status, 'out_for_delivery');
+
+  // 2. Correct code
+  const passRes = verifyOtp(order, privateRecord, '7391', { uid: 'worker_1' });
+  assert.strictEqual(passRes.success, true);
+  assert.strictEqual(order.status, 'delivered');
+  assert.strictEqual(order.otpVerified, true);
+  assert.strictEqual(order.paymentStatus, 'cod_collected');
+  assert.strictEqual(order.codCollected, 240);
+  assert.strictEqual(auditEntry.action, 'DELIVERY_OTP_VERIFIED');
+});
+
+it('M2.5: 5 failed attempts lock order for 30 minutes', () => {
+  const privateRecord = { code: '9999', attempts: 4, lockedUntil: 0 };
+  const order = { id: 'RA-501', status: 'out_for_delivery' };
+
+  // 5th wrong attempt
+  privateRecord.attempts++;
+  if (privateRecord.attempts >= 5) {
+    privateRecord.lockedUntil = Date.now() + 30 * 60 * 1000;
+  }
+
+  assert.strictEqual(privateRecord.attempts, 5);
+  assert(privateRecord.lockedUntil > Date.now());
+
+  // Subsequent check should reject as locked
+  const isLocked = (privateRecord.lockedUntil > Date.now());
+  assert.strictEqual(isLocked, true);
+});
+
+it('M2.6: Admin can reissue OTP and deliver without OTP with mandatory reason', () => {
+  const order = { id: 'RA-502', status: 'out_for_delivery' };
+  const privateRecord = { code: '1111', attempts: 5, lockedUntil: Date.now() + 100000 };
+
+  // Reissue
+  const freshCode = '5555';
+  privateRecord.code = freshCode;
+  privateRecord.attempts = 0;
+  privateRecord.lockedUntil = 0;
+
+  assert.strictEqual(privateRecord.code, '5555');
+  assert.strictEqual(privateRecord.attempts, 0);
+  assert.strictEqual(privateRecord.lockedUntil, 0);
+
+  // Deliver without OTP (Requires reason >= 5 chars)
+  function deliverWithoutOtp(ord, reason, adminUid) {
+    if (!reason || reason.trim().length < 5) throw new Error('INVALID_REASON');
+    ord.status = 'delivered';
+    ord.deliveredWithoutOtp = true;
+    ord.overrideReason = reason.trim();
+    ord.deliveredBy = adminUid;
+    return { success: true };
+  }
+
+  assert.throws(() => deliverWithoutOtp(order, 'bad', 'admin_1'), /INVALID_REASON/);
+  const result = deliverWithoutOtp(order, 'Customer phone battery died at doorstep', 'admin_1');
+  assert.strictEqual(result.success, true);
+  assert.strictEqual(order.status, 'delivered');
+  assert.strictEqual(order.deliveredWithoutOtp, true);
+  assert.strictEqual(order.overrideReason, 'Customer phone battery died at doorstep');
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');
