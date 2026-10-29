@@ -1131,6 +1131,7 @@
             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
               ${paymentBadgeHtml}
               <span class="badge" style="background: #E5E7EB; color: #3730A3; font-weight: 700;">${escapeHtml(ord.status)}</span>
+              ${ord.status === 'delivered' ? (ord.otpVerified ? '<span class="badge" style="background: #D1FAE5; color: #065F46; font-weight: 700;">OTP Verified ✅</span>' : (ord.deliveredWithoutOtp ? '<span class="badge" style="background: #FEF3C7; color: #92400E; font-weight: 700;">No OTP (Override)</span>' : '')) : (ord.status === 'out_for_delivery' ? '<span class="badge" style="background: #DBEAFE; color: #1E40AF; font-weight: 700;">OTP Pending ⏳</span>' : '')}
             </div>
           </div>
 
@@ -1161,6 +1162,10 @@
                 <a href="https://wa.me/91${escapeHtml(ord.customer.phone.replace(/\D/g,''))}?text=${encodeURIComponent(`Hello ${ord.customer?.name || 'Customer'}, regarding your order #${ord.id} from RA Store Anantapur.`)}" target="_blank" class="btn" style="background: #25D366; color: #fff;">💬 WhatsApp</a>
               ` : ''}
               <button class="btn btn-light action-copy-address" data-address="${escapeHtml(ord.customer?.address || '')}">📋 Copy</button>
+              ${ord.status === 'out_for_delivery' ? `
+                <button class="btn btn-light action-reissue-otp" data-key="${escapeHtml(key)}" style="color: #1E40AF; border-color: #93C5FD;">🔑 Reissue OTP</button>
+                <button class="btn btn-light action-deliver-without-otp" data-key="${escapeHtml(key)}" style="color: #92400E; border-color: #FDE68A;">⚠️ Deliver (No Code)</button>
+              ` : ''}
               <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((ord.customer?.address || '') + ' Anantapur')}" target="_blank" class="btn btn-outline" style="color: #2563EB; border-color: #93C5FD;">🗺️ Maps</a>
             </div>
           </div>
@@ -1350,6 +1355,63 @@
     });
 
     document.getElementById('ordersList').addEventListener('click', async (e) => {
+      // Reissue OTP
+      const reissueBtn = e.target.closest('.action-reissue-otp');
+      if (reissueBtn) {
+        const key = reissueBtn.getAttribute('data-key');
+        const ord = allOrders[key];
+        if (!confirm('Reissue 4-digit delivery code for order #' + (ord ? ord.id : key) + '? This will reset failed attempts.')) return;
+        try {
+          const token = await auth.currentUser.getIdToken();
+          const apiUrl = (window.APP_CONFIG && window.APP_CONFIG.workerApi) || 'https://ra-store-api.chowdarynikhil095.workers.dev';
+          const res = await fetch(apiUrl + '/api/admin/reissue-delivery-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ orderPushKey: key })
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert('New Delivery Code generated: ' + data.newCode);
+            renderOrdersList();
+          } else {
+            alert('Error: ' + data.error);
+          }
+        } catch (err) {
+          alert('Network error: ' + err.message);
+        }
+        return;
+      }
+
+      // Deliver without OTP
+      const overrideBtn = e.target.closest('.action-deliver-without-otp');
+      if (overrideBtn) {
+        const key = overrideBtn.getAttribute('data-key');
+        const ord = allOrders[key];
+        const reason = prompt('Enter explanation / reason to mark order #' + (ord ? ord.id : key) + ' DELIVERED without OTP (minimum 5 characters):');
+        if (!reason || reason.trim().length < 5) {
+          if (reason !== null) alert('A reason of at least 5 characters is required.');
+          return;
+        }
+        try {
+          const token = await auth.currentUser.getIdToken();
+          const apiUrl = (window.APP_CONFIG && window.APP_CONFIG.workerApi) || 'https://ra-store-api.chowdarynikhil095.workers.dev';
+          const res = await fetch(apiUrl + '/api/admin/deliver-without-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ orderPushKey: key, reason: reason.trim() })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast('Order marked delivered via owner override.');
+            renderOrdersList();
+          } else {
+            alert('Error: ' + data.error);
+          }
+        } catch (err) {
+          alert('Network error: ' + err.message);
+        }
+        return;
+      }
       // Copy address
       if (e.target.classList.contains('action-copy-address')) {
         const addr = e.target.getAttribute('data-address');

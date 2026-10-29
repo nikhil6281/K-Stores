@@ -1045,3 +1045,301 @@ async function handleWorkerVerifyStaff(request, env, cors) {
 
   return jsonError('Access Denied: Account not registered as active staff', 'STAFF_NOT_FOUND', 403, cors);
 }
+
+
+// ==========================================
+// Milestone 2: Delivery OTP Handlers
+// ==========================================
+
+async function isUserStaffOrAdmin(user, env) {
+  if (!user || !user.uid) return false;
+  if (await isUserAdmin(user.uid, env)) return true;
+  try {
+    const staffRecord = await rtdbFetch(env, `staff/${user.uid}`, 'GET');
+    if (staffRecord && staffRecord.active === true) return true;
+  } catch (e) {
+    console.warn('Error checking staff status:', e);
+  }
+  return false;
+}
+
+/**
+ * POST /api/verify-delivery-otp
+ * - Caller must be authenticated active staff or owner.
+ * - Order must be out_for_delivery.
+ * - Checks attempts < 5 and lockedUntil.
+ * - Constant-time comparison of 4-digit code.
+ * - On success, sets status: delivered, deliveredAt, deliveredBy, otpVerified: true,
+ *   and for COD marks paymentStatus: cod_collected with amount in an atomic audit log.
+ */
+async function handleVerifyDeliveryOtp(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) {
+    return jsonError('Unauthorized: valid staff login required', 'UNAUTHORIZED', 401, cors);
+  }
+
+  const isStaffOrAdmin = await isUserStaffOrAdmin(user, env);
+  if (!isStaffOrAdmin) {
+    return jsonError('Forbidden: active staff or store owner access required', 'FORBIDDEN', 403, cors);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const { orderPushKey, code } = body;
+
+  if (!orderPushKey) {
+    return jsonError('orderPushKey is required', 'INVALID_PARAM', 400, cors);
+  }
+
+  const order = await rtdbFetch(env, `orders/${orderPushKey}`, 'GET');
+  if (!order) {
+    return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+  }
+
+  if (order.status === 'delivered') {
+    return jsonResponse({
+      success: true,
+      orderId: order.id,
+      status: 'delivered',
+      alreadyDelivered: true,
+      message: 'Order is already marked delivered'
+    }, 200, cors);
+  }
+
+  if (order.status !== 'out_for_delivery') {
+    return jsonError(`Order cannot be delivered in status "${order.status}". It must be "out_for_delivery".`, 'INVALID_STATUS', 400, cors);
+  }
+
+  const nowIso = new Date().toISOString();
+
+  // If order does not require OTP
+  if (order.otpRequired === false) {
+    const updatePayload = {
+      status: 'delivered',
+      deliveredAt: nowIso,
+      deliveredBy: user.uid,
+      deliveredByName: user.email || user.name || 'Staff',
+      otpVerified: false,
+      updatedAt: nowIso
+    };
+    if (order.paymentMethod === 'cod') {
+      updatePayload.paymentStatus = 'cod_collected';
+      updatePayload.codCollected = Number(order.total) || 0;
+      updatePayload.codCollectedAt = nowIso;
+      updatePayload.codCollectedBy = user.email || 'staff';
+    }
+    await rtdbFetch(env, `orders/${orderPushKey}`, 'PATCH', updatePayload);
+    await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+      adminUid: user.uid,
+      adminEmail: user.email || 'staff',
+      action: 'DELIVERY_COMPLETED_NO_OTP',
+      orderId: order.id,
+      timestamp: nowIso
+    });
+    return jsonResponse({ success: true, orderId: order.id, status: 'delivered', otpVerified: false }, 200, cors);
+  }
+
+  // Fetch private record
+  const privateRecord = await rtdbFetch(env, `orderPrivate/${orderPushKey}`, 'GET');
+  if (!privateRecord || !privateRecord.code) {
+    return jsonError('No delivery OTP record found. Please ask store owner to reissue delivery code.', 'NO_OTP_RECORD', 400, cors);
+  }
+
+  const now = Date.now();
+  if (privateRecord.lockedUntil && privateRecord.lockedUntil > now) {
+    const remMins = Math.ceil((privateRecord.lockedUntil - now) / 60000);
+    return jsonError(`Verification is LOCKED due to 5 failed attempts. Please wait ${remMins} min or ask store owner for override.`, 'OTP_LOCKED', 423, cors);
+  }
+
+  const cleanCode = String(code || '').trim();
+  if (!/^\d{4}$/.test(cleanCode)) {
+    return jsonError('Please enter a 4-digit numeric code', 'INVALID_FORMAT', 400, cors);
+  }
+
+  // Constant-time comparison
+  const expected = String(privateRecord.code).trim();
+  let diff = expected.length ^ cleanCode.length;
+  for (let i = 0; i < expected.length && i < cleanCode.length; i++) {
+    diff |= expected.charCodeAt(i) ^ cleanCode.charCodeAt(i);
+  }
+
+  if (diff !== 0) {
+    const attempts = (privateRecord.attempts || 0) + 1;
+    const isNowLocked = attempts >= 5;
+    const lockedUntil = isNowLocked ? (now + 30 * 60 * 1000) : 0;
+
+    await rtdbFetch(env, `orderPrivate/${orderPushKey}`, 'PATCH', {
+      attempts: attempts,
+      lockedUntil: lockedUntil
+    });
+
+    if (isNowLocked) {
+      await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+        adminUid: user.uid,
+        adminEmail: user.email || 'staff',
+        action: 'DELIVERY_OTP_LOCKED_5_FAILS',
+        orderId: order.id,
+        timestamp: nowIso
+      });
+      return jsonError('Incorrect code entered 5 times. Delivery verification is now LOCKED for 30 minutes. Contact store owner.', 'OTP_LOCKED', 423, cors);
+    }
+
+    const remaining = Math.max(0, 5 - attempts);
+    return jsonError(`Incorrect delivery code. ${remaining} attempt(s) remaining.`, 'INVALID_OTP', 400, cors);
+  }
+
+  // OTP verified! Mark order delivered
+  const updatePayload = {
+    status: 'delivered',
+    deliveredAt: nowIso,
+    deliveredBy: user.uid,
+    deliveredByName: user.email || user.name || 'Staff',
+    otpVerified: true,
+    updatedAt: nowIso
+  };
+
+  if (order.paymentMethod === 'cod') {
+    updatePayload.paymentStatus = 'cod_collected';
+    updatePayload.codCollected = Number(order.total) || 0;
+    updatePayload.codCollectedAt = nowIso;
+    updatePayload.codCollectedBy = user.email || 'staff';
+  }
+
+  await rtdbFetch(env, `orders/${orderPushKey}`, 'PATCH', updatePayload);
+
+  await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+    adminUid: user.uid,
+    adminEmail: user.email || 'staff',
+    action: 'DELIVERY_OTP_VERIFIED',
+    orderId: order.id,
+    timestamp: nowIso
+  });
+
+  return jsonResponse({
+    success: true,
+    orderId: order.id,
+    status: 'delivered',
+    otpVerified: true
+  }, 200, cors);
+}
+
+/**
+ * POST /api/admin/reissue-delivery-otp
+ * - Store owner generates a fresh 4-digit code and resets attempts.
+ */
+async function handleAdminReissueDeliveryOtp(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user || !(await isUserAdmin(user.uid, env))) {
+    return jsonError('Unauthorized: Store Owner access required', 'FORBIDDEN', 403, cors);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const { orderPushKey } = body;
+  if (!orderPushKey) {
+    return jsonError('orderPushKey is required', 'INVALID_PARAM', 400, cors);
+  }
+
+  const order = await rtdbFetch(env, `orders/${orderPushKey}`, 'GET');
+  if (!order) {
+    return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+  }
+
+  const arr = new Uint16Array(1);
+  crypto.getRandomValues(arr);
+  const newCode = String(1000 + (arr[0] % 9000));
+
+  await rtdbFetch(env, `orderPrivate/${orderPushKey}`, 'PUT', {
+    code: newCode,
+    customerUid: order.uid,
+    attempts: 0,
+    lockedUntil: 0,
+    reissuedAt: Date.now()
+  });
+
+  await rtdbFetch(env, `orders/${orderPushKey}`, 'PATCH', {
+    otpRequired: true,
+    updatedAt: new Date().toISOString()
+  });
+
+  await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+    adminUid: user.uid,
+    adminEmail: user.email || 'admin',
+    action: 'DELIVERY_OTP_REISSUED',
+    orderId: order.id,
+    timestamp: new Date().toISOString()
+  });
+
+  return jsonResponse({
+    success: true,
+    orderId: order.id,
+    newCode: newCode
+  }, 200, cors);
+}
+
+/**
+ * POST /api/admin/deliver-without-otp
+ * - Store owner override: marks delivered with mandatory explanation.
+ */
+async function handleAdminDeliverWithoutOtp(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user || !(await isUserAdmin(user.uid, env))) {
+    return jsonError('Unauthorized: Store Owner access required', 'FORBIDDEN', 403, cors);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const { orderPushKey, reason } = body;
+  if (!orderPushKey) {
+    return jsonError('orderPushKey is required', 'INVALID_PARAM', 400, cors);
+  }
+
+  const cleanReason = String(reason || '').trim();
+  if (cleanReason.length < 5) {
+    return jsonError('An explanation / reason of at least 5 characters is required for override.', 'INVALID_REASON', 400, cors);
+  }
+
+  const order = await rtdbFetch(env, `orders/${orderPushKey}`, 'GET');
+  if (!order) {
+    return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+  }
+
+  const nowIso = new Date().toISOString();
+  const updatePayload = {
+    status: 'delivered',
+    deliveredAt: nowIso,
+    deliveredBy: user.uid,
+    deliveredByName: 'Store Owner (Override)',
+    deliveredWithoutOtp: true,
+    overrideReason: cleanReason,
+    updatedAt: nowIso
+  };
+
+  if (order.paymentMethod === 'cod') {
+    updatePayload.paymentStatus = 'cod_collected';
+    updatePayload.codCollected = Number(order.total) || 0;
+    updatePayload.codCollectedAt = nowIso;
+    updatePayload.codCollectedBy = user.email || 'owner';
+  }
+
+  await rtdbFetch(env, `orders/${orderPushKey}`, 'PATCH', updatePayload);
+
+  await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+    adminUid: user.uid,
+    adminEmail: user.email || 'admin',
+    action: 'DELIVERY_OVERRIDE_WITHOUT_OTP',
+    orderId: order.id,
+    reason: cleanReason,
+    timestamp: nowIso
+  });
+
+  return jsonResponse({
+    success: true,
+    orderId: order.id,
+    status: 'delivered',
+    deliveredWithoutOtp: true
+  }, 200, cors);
+}

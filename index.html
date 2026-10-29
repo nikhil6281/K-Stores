@@ -2678,6 +2678,19 @@
         const t = I18N[currentLang];
         const now = Date.now();
 
+        // Load OTP for out_for_delivery orders
+        Object.keys(orders).forEach(k => {
+          if (orders[k] && orders[k].status === 'out_for_delivery') {
+            db.ref('orderPrivate/' + k).once('value').then(snap => {
+              const p = snap.val();
+              const el = document.getElementById('otp-code-' + k);
+              if (el && p && p.code) {
+                el.innerText = p.code;
+              }
+            }).catch(() => {});
+          }
+        });
+
         list.innerHTML = Object.keys(orders).reverse().map(k => {
           const o = orders[k];
           const st = o.status || 'placed';
@@ -2780,6 +2793,20 @@
               <div style="font-size: 11px; color: var(--muted); margin: 2px 0 6px;">${new Date(o.createdAt).toLocaleString()}</div>
               
               ${timelineHtml}
+
+              ${(st === 'out_for_delivery') ? `
+                <div id="otp-box-${escapeHtml(k)}" class="delivery-otp-box" style="background: linear-gradient(135deg, #ECFDF5, #D1FAE5); border: 2px solid #10B981; border-radius: 12px; padding: 14px; margin: 12px 0; text-align: center; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
+                  <div style="font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+                    🔑 ${t.deliveryOtpTitle}
+                  </div>
+                  <div id="otp-code-${escapeHtml(k)}" style="font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #065F46; font-family: monospace; margin: 6px 0;">
+                    ----
+                  </div>
+                  <div style="font-size: 11px; color: #047857; font-weight: 600;">
+                    ${t.deliveryOtpSub}
+                  </div>
+                </div>
+              ` : ''}
 
               <div style="font-size: 12px; color: var(--text); background: #F8FAFC; border: 1px solid var(--border); padding: 8px 10px; border-radius: 6px; margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere;">
                 <span style="font-weight: 700; color: var(--muted); font-size: 11px;">📍 Delivery Address:</span>
