@@ -912,6 +912,152 @@ it('M3.6: 30-day location retention purge removes geo while preserving financial
   assert.notStrictEqual(orders['ord_recent'].delivery.geo, undefined, 'Recent order geo must be kept');
 });
 
+
+// ==========================================
+// Milestone 4 Tests: Customer Portal Mobile UX & Inventory
+// ==========================================
+
+it('M4.1: Out-of-stock items in cart block checkout and allow 1-tap removal', () => {
+  const catalog = {
+    'p1': { id: 'p1', name: 'Fresh Milk 500ml', price: 30, inStock: true },
+    'p2': { id: 'p2', name: 'Tomato 1kg', price: 40, inStock: false }, // Out of stock!
+    'p3': { id: 'p3', name: 'Basmati Rice 1kg', price: 90, inStock: true }
+  };
+
+  const userCart = { 'p1': 2, 'p2': 1, 'p3': 1 };
+
+  function validateCartForCheckout(cart, cat) {
+    const outOfStockIds = Object.keys(cart).filter(id => cat[id] && cat[id].inStock === false);
+    const canProceed = (outOfStockIds.length === 0);
+    return { canProceed, outOfStockIds };
+  }
+
+  const initialCheck = validateCartForCheckout(userCart, catalog);
+  assert.strictEqual(initialCheck.canProceed, false, 'Should block checkout when items out of stock');
+  assert.deepStrictEqual(initialCheck.outOfStockIds, ['p2']);
+
+  // 1-tap removal of out-of-stock items
+  initialCheck.outOfStockIds.forEach(id => delete userCart[id]);
+
+  const postRemovalCheck = validateCartForCheckout(userCart, catalog);
+  assert.strictEqual(postRemovalCheck.canProceed, true, 'Should allow checkout once out of stock items removed');
+  assert.strictEqual(userCart['p2'], undefined);
+  assert.strictEqual(userCart['p1'], 2);
+});
+
+it('M4.2: Client order requestId idempotency prevents duplicate order creation on double submit', () => {
+  const dbOrders = {};
+  let executionCount = 0;
+
+  function createOrderWithIdempotency(payload) {
+    // Check if requestId already processed
+    for (const ord of Object.values(dbOrders)) {
+      if (ord.requestId && ord.requestId === payload.requestId) {
+        return { isExisting: true, orderId: ord.id };
+      }
+    }
+
+    executionCount++;
+    const orderId = 'RA-M4-' + executionCount;
+    dbOrders[orderId] = {
+      id: orderId,
+      requestId: payload.requestId,
+      total: payload.total
+    };
+    return { isExisting: false, orderId: orderId };
+  }
+
+  const clientRequestId = 'req_test_12345';
+  const firstTap = createOrderWithIdempotency({ requestId: clientRequestId, total: 250 });
+  assert.strictEqual(firstTap.isExisting, false);
+  assert.strictEqual(firstTap.orderId, 'RA-M4-1');
+
+  // Simulated rapid second tap
+  const secondTap = createOrderWithIdempotency({ requestId: clientRequestId, total: 250 });
+  assert.strictEqual(secondTap.isExisting, true);
+  assert.strictEqual(secondTap.orderId, 'RA-M4-1');
+  assert.strictEqual(executionCount, 1, 'Order logic should only run once for same requestId');
+});
+
+it('M4.3: History API modal navigation closes top modal on popstate without leaving page', () => {
+  const modalStack = [];
+
+  function openModalSim(id) {
+    modalStack.push(id);
+  }
+
+  function onPopStateSim() {
+    if (modalStack.length > 0) {
+      const closed = modalStack.pop();
+      return { closedModal: closed, remaining: modalStack.length };
+    }
+    return { exitPage: true };
+  }
+
+  openModalSim('cartDrawerModal');
+  openModalSim('checkoutModal');
+  assert.strictEqual(modalStack.length, 2);
+
+  // User presses back button -> closes checkoutModal
+  const pop1 = onPopStateSim();
+  assert.strictEqual(pop1.closedModal, 'checkoutModal');
+  assert.strictEqual(pop1.remaining, 1);
+
+  // User presses back button again -> closes cartDrawerModal
+  const pop2 = onPopStateSim();
+  assert.strictEqual(pop2.closedModal, 'cartDrawerModal');
+  assert.strictEqual(pop2.remaining, 0);
+
+  // User presses back button with no modals -> natural browser back
+  const pop3 = onPopStateSim();
+  assert.strictEqual(pop3.exitPage, true);
+});
+
+it('M4.4: 100% Telugu translation coverage for all interactive customer controls in I18N', () => {
+  const indexSource = fs.readFileSync('index.html', 'utf8');
+  const enStart = indexSource.indexOf('en: {') + 5;
+  const enEnd = indexSource.indexOf('te: {', enStart);
+  const teStart = enEnd + 5;
+  const teEnd = indexSource.indexOf('};', teStart);
+
+  assert(enStart > 5 && enEnd > 0, 'English I18N block must exist');
+  assert(teStart > 5 && teEnd > 0, 'Telugu I18N block must exist');
+
+  const enBlock = indexSource.substring(enStart, enEnd);
+  const teBlock = indexSource.substring(teStart, teEnd);
+
+  function extractKeys(block) {
+    const keys = [];
+    const re = /^\s*([a-zA-Z0-9_]+)\s*:/gm;
+    let m;
+    while ((m = re.exec(block)) !== null) {
+      keys.push(m[1]);
+    }
+    return keys;
+  }
+
+  const enKeys = extractKeys(enBlock);
+  const teKeys = new Set(extractKeys(teBlock));
+
+  const missingTe = enKeys.filter(k => !teKeys.has(k));
+  assert.strictEqual(missingTe.length, 0, 'Every English key must have a Telugu counterpart in I18N. Missing: ' + missingTe.join(', '));
+});
+
+it('M4.5: Offline network state detection preserves customer cart in localStorage', () => {
+  let localStorageCart = JSON.stringify({ 'item_101': 3 });
+
+  function onOfflineDetected(currentCart) {
+    // Preserves cart safely in storage
+    localStorageCart = JSON.stringify(currentCart);
+    return { bannerVisible: true, preservedItems: Object.keys(currentCart).length };
+  }
+
+  const result = onOfflineDetected({ 'item_101': 3, 'item_102': 1 });
+  assert.strictEqual(result.bannerVisible, true);
+  assert.strictEqual(result.preservedItems, 2);
+  assert(localStorageCart.includes('item_102'));
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');

@@ -69,6 +69,7 @@ function jsonResponse(data, status = 200, corsHeaders = {}) {
     status,
     headers: {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
       ...corsHeaders
     }
   });

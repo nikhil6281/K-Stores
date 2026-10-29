@@ -1121,7 +1121,10 @@
         badgeAwaiting: "⏳ Awaiting payment",
         badgeRefundInitiated: "Refund initiated",
         badgeRefunded: "Refunded ✅",
-        expired: "Expired"
+        expired: "Expired",
+        outOfStockCartBanner: "⚠️ Some items in your cart are out of stock. Please remove them to proceed.",
+        removeOutOfStockBtn: "Remove Out-of-Stock Items",
+        offlineNotice: "⚡ You are currently offline. Check your internet connection."
       },
       te: {
         toggleText: "English",
@@ -1202,7 +1205,10 @@
         badgeAwaiting: "⏳ చెల్లింపు కోసం వేచి ఉంది",
         badgeRefundInitiated: "రీఫండ్ ప్రారంభమైంది",
         badgeRefunded: "రీఫండ్ చేయబడింది ✅",
-        expired: "గడువు ముగిసింది"
+        expired: "గడువు ముగిసింది",
+        outOfStockCartBanner: "⚠️ మీ కార్ట్‌లోని కొన్ని వస్తువులు స్టాక్‌లో లేవు. కొనసాగడానికి దయచేసి వాటిని తొలగించండి.",
+        removeOutOfStockBtn: "స్టాక్ లేని వస్తువులను తొలగించండి",
+        offlineNotice: "⚡ మీరు ఆఫ్‌లైన్‌లో ఉన్నారు. మీ ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేయండి."
       }
     };
 
@@ -2220,9 +2226,9 @@
             </div>
             <div class="cart-item-actions">
               <div class="qty-stepper-wrap">
-                <button class="btn btn-outline action-drawer-qty" data-id="${escapeHtml(id)}" data-delta="-1" aria-label="Decrease quantity" style="min-width: 36px; min-height: 36px; font-size: 14px; padding: 0;">-</button>
+                <button class="btn btn-outline action-drawer-qty" data-id="${escapeHtml(id)}" data-delta="-1" aria-label="Decrease quantity" style="min-width: 44px; min-height: 44px; font-size: 16px; font-weight: 700; padding: 0;">-</button>
                 <span class="qty-display" style="min-width: 18px; font-size: 13px;">${qty}</span>
-                <button class="btn btn-outline action-drawer-qty" data-id="${escapeHtml(id)}" data-delta="1" aria-label="Increase quantity" style="min-width: 36px; min-height: 36px; font-size: 14px; padding: 0;">+</button>
+                <button class="btn btn-outline action-drawer-qty" data-id="${escapeHtml(id)}" data-delta="1" aria-label="Increase quantity" style="min-width: 44px; min-height: 44px; font-size: 16px; font-weight: 700; padding: 0;">+</button>
               </div>
               <button class="action-drawer-remove" data-id="${escapeHtml(id)}" title="Remove item" aria-label="Remove item" style="background: none; border: none; font-size: 16px; color: var(--muted); cursor: pointer; padding: 6px 4px; min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center;">🗑️</button>
             </div>
@@ -2241,6 +2247,14 @@
     document.getElementById('cartBottomBarSummary').addEventListener('click', openCartDrawer);
 
     document.getElementById('cartDrawerItemsList').addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'removeOosBtn') {
+        const oos = Object.keys(cart).filter(id => productsCatalog[id] && productsCatalog[id].inStock === false);
+        oos.forEach(id => delete cart[id]);
+        saveCart();
+        renderCartDrawerItems();
+        showToast((currentLang === 'te') ? 'స్టాక్ లేని వస్తువులు తొలగించబడ్డాయి.' : 'Out of stock items removed.');
+        return;
+      }
       const qtyBtn = e.target.closest('.action-drawer-qty');
       if (qtyBtn) {
         const id = qtyBtn.getAttribute('data-id');
@@ -3036,10 +3050,13 @@
       if (el) {
         el.style.display = 'flex';
         document.body.classList.add('modal-open');
+        try {
+          history.pushState({ modalId: id }, '');
+        } catch (e) {}
       }
     }
 
-    function closeModal(id) {
+    function closeModal(id, fromPopState = false) {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
       if (id === 'ordersModal' && ordersRef) {
@@ -3050,7 +3067,20 @@
       if (!anyOpen) {
         document.body.classList.remove('modal-open');
       }
+      if (!fromPopState && history.state && history.state.modalId === id) {
+        try {
+          history.back();
+        } catch (e) {}
+      }
     }
+
+    window.addEventListener('popstate', (e) => {
+      const openModals = Array.from(document.querySelectorAll('.modal-overlay')).filter(m => m.style.display === 'flex' || m.style.display === 'block');
+      if (openModals.length > 0) {
+        const topModal = openModals[openModals.length - 1];
+        closeModal(topModal.id, true);
+      }
+    });
 
     document.querySelectorAll('.modal-close-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -3069,11 +3099,12 @@
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-overlay').forEach(m => {
-          if (m.style.display === 'flex' || m.style.display === 'block') {
-            closeModal(m.id);
-          }
-        });
+        const openModals = Array.from(document.querySelectorAll('.modal-overlay')).filter(m => m.style.display === 'flex' || m.style.display === 'block');
+        if (openModals.length > 0) {
+          closeModal(openModals[openModals.length - 1].id);
+        }
+      }
+    });
       }
     });
 
