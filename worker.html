@@ -1227,11 +1227,29 @@
           '<div class="customer-address">📍 ' + escapeHtml((o.customer && o.customer.address) || 'Anantapur') + '</div>' +
           (o.customer && o.customer.notes ? '<div class="customer-notes">📝 Note: <strong>' + escapeHtml(o.customer.notes) + '</strong></div>' : '') +
 
+          (((o.delivery && o.delivery.geo) || (o.customer && o.customer.geo)) ? (
+            '<div style="margin: 6px 0; padding: 6px 8px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 6px; font-size: 11px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">' +
+              '<span style="color: #065F46; font-weight: 700;">📍 GPS Pin (~' + (((o.delivery && o.delivery.geo) || o.customer.geo).accuracy || 20) + 'm accuracy)</span>' +
+              '<a href="https://www.google.com/maps/dir/?api=1&destination=' + (((o.delivery && o.delivery.geo) || o.customer.geo).lat) + '%2C' + (((o.delivery && o.delivery.geo) || o.customer.geo).lng) + '" target="_blank" style="background: #2563EB; color: #fff; padding: 3px 8px; border-radius: 4px; font-weight: 700; text-decoration: none; font-size: 11px;">🗺️ Turn-by-Turn Navigate</a>' +
+            '</div>'
+          ) : (
+            (!isCompleted && o.customer && o.customer.phone ? (
+              '<div style="margin: 4px 0; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; align-items: center;">' +
+                '<span>📍 No GPS pin shared</span>' +
+                '<a href="https://wa.me/91' + escapeHtml(o.customer.phone.replace(/\D/g,'')) + '?text=' + encodeURIComponent('Hello ' + ((o.customer && o.customer.name) || 'Customer') + ', this is your delivery partner from RA Store Anantapur for order #' + (o.id || o.pushKey) + '. Please share your location in WhatsApp so I can reach your doorstep quickly.') + '" target="_blank" style="color: #15803D; font-weight: 600; text-decoration: none;">💬 Ask WhatsApp Location</a>' +
+              '</div>'
+            ) : '')
+          )) +
+
           '<div class="action-links">' +
             (!isCompleted && o.customer && o.customer.phone ? '<a href="tel:' + escapeHtml(o.customer.phone) + '" class="action-link" style="color: #1D4ED8;">' + t.call + '</a>' +
               '<a href="https://wa.me/91' + escapeHtml(o.customer.phone.replace(/\D/g,'')) + '?text=' + encodeURIComponent('Hello ' + ((o.customer && o.customer.name) || '') + ', this is RA Store Staff regarding your grocery order #' + o.id + '.') + '" target="_blank" class="action-link" style="color: #15803D;">' + t.wa + '</a>' : '') +
             '<button class="action-link copy-addr-btn" data-addr="' + escapeHtml((o.customer && o.customer.address) || '') + '">' + t.copy + '</button>' +
-            '<a href="https://www.google.com/maps/search/?api=1&query=' + mapQuery + '" target="_blank" class="action-link" style="color: #2563EB;">' + t.maps + '</a>' +
+            (((o.delivery && o.delivery.geo) || (o.customer && o.customer.geo)) ? (
+              '<a href="https://www.google.com/maps?q=' + (((o.delivery && o.delivery.geo) || o.customer.geo).lat) + ',' + (((o.delivery && o.delivery.geo) || o.customer.geo).lng) + '" target="_blank" class="action-link" style="color: #2563EB;">📌 ' + t.maps + '</a>'
+            ) : (
+              '<a href="https://www.google.com/maps/search/?api=1&query=' + mapQuery + '" target="_blank" class="action-link" style="color: #2563EB;">' + t.maps + '</a>'
+            )) +
           '</div>' +
         '</div>' +
 

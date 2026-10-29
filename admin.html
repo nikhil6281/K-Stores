@@ -1166,7 +1166,11 @@
                 <button class="btn btn-light action-reissue-otp" data-key="${escapeHtml(key)}" style="color: #1E40AF; border-color: #93C5FD;">🔑 Reissue OTP</button>
                 <button class="btn btn-light action-deliver-without-otp" data-key="${escapeHtml(key)}" style="color: #92400E; border-color: #FDE68A;">⚠️ Deliver (No Code)</button>
               ` : ''}
-              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((ord.customer?.address || '') + ' Anantapur')}" target="_blank" class="btn btn-outline" style="color: #2563EB; border-color: #93C5FD;">🗺️ Maps</a>
+              ${(ord.delivery?.geo || ord.customer?.geo) ? `
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${(ord.delivery?.geo || ord.customer?.geo).lat}%2C${(ord.delivery?.geo || ord.customer?.geo).lng}" target="_blank" class="btn" style="background: #2563EB; color: #fff; font-weight: 700;">🗺️ Navigate</a>
+              ` : `
+                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((ord.customer?.address || '') + ' Anantapur')}" target="_blank" class="btn btn-outline" style="color: #2563EB; border-color: #93C5FD;">🗺️ Search Maps</a>
+              `}
             </div>
           </div>
 
@@ -2506,6 +2510,22 @@
     // =========================================================
     // SETTINGS SAVING (with safe 0 values for free delivery)
     // =========================================================
+    document.getElementById('btnUseCurrentStoreLocation').addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('Geolocation not supported in this browser');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          document.getElementById('settingStoreLat').value = pos.coords.latitude.toFixed(4);
+          document.getElementById('settingStoreLng').value = pos.coords.longitude.toFixed(4);
+          showToast('Updated store coordinates from GPS fix!');
+        },
+        err => alert('Could not get GPS fix: ' + err.message),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+
     document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
       const minOrderRaw = document.getElementById('settingMinOrder').value;
       const deliveryFeeRaw = document.getElementById('settingDeliveryFee').value;
