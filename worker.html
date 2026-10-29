@@ -1183,8 +1183,32 @@
         '</div>';
       }).join('');
 
+            const isClaimedByMe = currentUser && o.claimedBy && (o.claimedBy.uid === currentUser.uid);
+      const isClaimedByOther = currentUser && o.claimedBy && (o.claimedBy.uid !== currentUser.uid);
+      let claimingHtml = '';
+      if (!isCompleted && !isCancelled) {
+        if (isClaimedByMe) {
+          claimingHtml = '<div style="margin-bottom: 8px; padding: 6px 10px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">' +
+            '<span style="color: #1E40AF; font-weight: 700;">👤 ' + (currentLang === 'te' ? 'మీరు క్లెయిమ్ చేశారు' : 'Claimed by you') + '</span>' +
+            '<button type="button" class="btn btn-outline btn-small unclaim-order-btn" data-pushkey="' + o.pushKey + '" style="font-size: 11px; padding: 2px 8px;">' + (currentLang === 'te' ? 'వదిలివేయండి' : 'Unclaim') + '</button>' +
+          '</div>';
+        } else if (isClaimedByOther) {
+          claimingHtml = '<div style="margin-bottom: 8px; padding: 6px 10px; background: #FEE2E2; border: 1px solid #FECACA; border-radius: 6px; font-size: 12px; color: #991B1B; font-weight: 700;">' +
+            '🔒 ' + (currentLang === 'te' ? 'మరొక వర్కర్ తీసుకున్నారు' : 'Taken by ' + escapeHtml(o.claimedBy.name || o.claimedBy.email || 'another worker')) +
+          '</div>';
+        } else {
+          claimingHtml = '<div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">' +
+            '<span style="font-size: 12px; color: var(--muted);">' + (currentLang === 'te' ? 'క్లెయిమ్ చేయలేదు' : 'Unclaimed order') + '</span>' +
+            '<button type="button" class="btn btn-outline btn-small claim-order-btn" data-pushkey="' + o.pushKey + '" style="background: #EFF6FF; color: #1D4ED8; border-color: #93C5FD; font-weight: 700; font-size: 11px; padding: 4px 10px;">🙋 ' + (currentLang === 'te' ? 'ఈ ఆర్డర్ తీసుకోండి' : 'Claim Order') + '</button>' +
+          '</div>';
+        }
+      }
+
       let actionButtons = '';
       if (!isCompleted && !isCancelled) {
+        if (isClaimedByOther) {
+          actionButtons = '<div style="font-size: 12px; color: var(--muted); text-align: center; padding: 8px; background: #F9FAFB; border-radius: 6px;">' + (currentLang === 'te' ? 'ఈ ఆర్డర్ మరొక వర్కర్ డెలివరీ చేస్తున్నారు' : 'Claimed by another worker') + '</div>';
+        } else
         if (o.status === 'placed') {
           actionButtons = '<button class="btn btn-primary advance-btn" data-pushkey="' + o.pushKey + '" data-next="accepted">' + t.acceptBtn + '</button>';
         } else if (o.status === 'accepted') {
@@ -1222,7 +1246,7 @@
           '</div>' +
         '</div>' +
 
-        '<div class="customer-block">' +
+        claimingHtml + '<div class="customer-block">' +
           '<div class="customer-name">👤 ' + escapeHtml((o.customer && o.customer.name) || 'Customer') + '</div>' +
           '<div class="customer-address">📍 ' + escapeHtml((o.customer && o.customer.address) || 'Anantapur') + '</div>' +
           (o.customer && o.customer.notes ? '<div class="customer-notes">📝 Note: <strong>' + escapeHtml(o.customer.notes) + '</strong></div>' : '') +
@@ -1276,6 +1300,45 @@
     }
 
     function attachCardEventListeners() {
+      // Order claiming handlers (M5)
+      document.querySelectorAll('.claim-order-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!currentUser) return;
+          const pushKey = btn.getAttribute('data-pushkey');
+          const workerInfo = {
+            uid: currentUser.uid,
+            name: currentUser.displayName || currentUser.email || 'Staff Worker',
+            email: currentUser.email || '',
+            claimedAt: new Date().toISOString()
+          };
+          try {
+            const res = await db.ref('orders/' + pushKey + '/claimedBy').transaction(current => {
+              if (!current) return workerInfo;
+              return undefined;
+            });
+            if (res.committed) {
+              showToast(currentLang === 'te' ? 'ఆర్డర్ మీకు కేటాయించబడింది!' : 'Order claimed by you!');
+            } else {
+              alert(currentLang === 'te' ? 'ఈ ఆర్డర్ ఇప్పటికే మరొకరు తీసుకున్నారు.' : 'Order was already claimed by another worker.');
+            }
+          } catch (err) {
+            alert('Error claiming order: ' + err.message);
+          }
+        });
+      });
+
+      document.querySelectorAll('.unclaim-order-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const pushKey = btn.getAttribute('data-pushkey');
+          if (!confirm(currentLang === 'te' ? 'ఈ ఆర్డర్ క్లెయిమ్ విడుదల చేయాలా?' : 'Release your claim on this order?')) return;
+          try {
+            await db.ref('orders/' + pushKey + '/claimedBy').remove();
+            showToast(currentLang === 'te' ? 'క్లెయిమ్ విడుదల చేయబడింది.' : 'Claim released.');
+          } catch (err) {
+            alert('Error releasing claim: ' + err.message);
+          }
+        });
+      });
       // Packing item checkboxes
       document.querySelectorAll('.item-checkbox').forEach(cb => {
         cb.addEventListener('change', async () => {
