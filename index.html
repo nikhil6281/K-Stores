@@ -1177,6 +1177,80 @@
     </div>
   </div>
 
+  
+  <!-- Add/Edit Address Modal (Part D) -->
+  <div class="modal-overlay" id="addressModal" role="dialog" aria-modal="true" aria-labelledby="addressModalTitle">
+    <div class="modal">
+      <div class="drawer-drag-handle"></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700;" id="addressModalTitle">Add New Address</h3>
+        <button type="button" class="modal-close-btn" data-modal="addressModal" aria-label="Close" style="background: none; border: none; font-size: 20px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">✕</button>
+      </div>
+
+      <form id="addressForm">
+        <input type="hidden" id="editAddressId" value="">
+
+        <!-- Address Tag Selection -->
+        <div class="form-group">
+          <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px;" id="tLabelAddrTag">Address Tag</label>
+          <div style="display: flex; gap: 8px;">
+            <label style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">
+              <input type="radio" name="addrTag" value="home" checked> 🏠 <span class="tag-label-home">Home</span>
+            </label>
+            <label style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">
+              <input type="radio" name="addrTag" value="shop"> 🏪 <span class="tag-label-shop">Shop</span>
+            </label>
+            <label style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">
+              <input type="radio" name="addrTag" value="other"> 📍 <span class="tag-label-other">Other</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="addrName" id="tLabelAddrName">Full Name</label>
+          <input type="text" id="addrName" required minlength="2" placeholder="e.g. Ramesh Reddy">
+        </div>
+
+        <div class="form-group">
+          <label for="addrPhone" id="tLabelAddrPhone">Mobile Number</label>
+          <input type="tel" id="addrPhone" required pattern="[6-9][0-9]{9}" maxlength="10" placeholder="10-digit mobile number">
+        </div>
+
+        <div class="form-group">
+          <label for="addrAddress" id="tLabelAddrStreet">House No / Street / Area</label>
+          <textarea id="addrAddress" required minlength="10" rows="2" placeholder="e.g. D.No 12/34, 2nd Cross, Kamalanagar, Anantapur"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label id="tLabelAddrLandmark">Anantapur Landmark</label>
+          <div class="landmark-chips" id="addrLandmarkChips" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">
+            <button type="button" class="landmark-chip" data-val="Near Clock Tower, Anantapur">Clock Tower</button>
+            <button type="button" class="landmark-chip" data-val="Near Saptagiri Circle, Anantapur">Saptagiri Circle</button>
+            <button type="button" class="landmark-chip" data-val="Rudrampeta, Anantapur">Rudrampeta</button>
+            <button type="button" class="landmark-chip" data-val="Kamalanagar, Anantapur">Kamalanagar</button>
+          </div>
+        </div>
+
+        <!-- Optional Saved GPS Pin -->
+        <div style="background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px; padding: 10px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <button type="button" class="btn btn-outline btn-small" id="btnPinAddrGps" style="color: var(--primary); border-color: var(--primary); font-weight: 700; font-size: 12px;">
+              📍 <span id="tBtnPinAddrGps">Capture GPS Pin (Optional)</span>
+            </button>
+            <span id="addrGpsStatus" style="font-size: 11px; color: var(--muted); font-weight: 600;">No GPS saved</span>
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="addrSetDefault" style="width: auto;">
+          <label for="addrSetDefault" style="font-size: 13px; font-weight: 600; margin: 0; cursor: pointer;" id="tLabelSetDefault">Set as default delivery address</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btnSaveAddress" style="width: 100%; justify-content: center; min-height: 44px; font-weight: 700;">Save Address</button>
+      </form>
+    </div>
+  </div>
+
   <div class="toast" id="toastMsg" role="status" aria-live="polite"></div>
 
   <script>
