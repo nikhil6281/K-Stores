@@ -362,9 +362,9 @@
       }
     }
   
-    /* Mobile Bottom Navigation (Blinkit style) */
+        /* Bottom Navigation (Blinkit style) - visible on mobile and inside 480px appWrapper */
     .mobile-bottom-nav {
-      display: none;
+      display: flex;
       position: fixed;
       bottom: 0;
       left: 0;
@@ -372,11 +372,50 @@
       height: 56px;
       background: #FFFFFF;
       border-top: 1px solid var(--border);
-      z-index: 150;
+      z-index: 300;
       justify-content: space-around;
       align-items: center;
       padding-bottom: env(safe-area-inset-bottom, 0px);
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+    }
+    .bnav-badge {
+      position: absolute;
+      top: 4px;
+      right: calc(50% - 18px);
+      background: var(--primary);
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      border: 1.5px solid #FFFFFF;
+    }
+    .address-tag-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      background: #E5E7EB;
+      color: var(--text);
+    }
+    .address-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      transition: border-color 0.15s ease;
+    }
+    .address-card.is-default {
+      border-color: var(--primary);
+      background: #F0FDF4;
     }
     .bottom-nav-item {
       flex: 1;
@@ -436,7 +475,8 @@
         min-height: 100vh;
         margin: 0;
       }
-      #appWrapper {
+      .mobile-bottom-nav { max-width: 480px !important; left: 50% !important; transform: translateX(-50%) !important; }
+    #appWrapper {
         width: 100%;
         max-width: 480px;
         min-height: 100vh;
@@ -515,22 +555,15 @@
     </div>
     <div class="nav-actions">
       <button class="btn-lang" id="langToggleBtn" aria-label="Change Language">తెలుగు</button>
-      <button class="btn btn-outline" id="ordersNavBtn" aria-label="View My Orders"><span class="nav-orders-text-full">My Orders</span><span class="nav-orders-text-short">Orders</span></button>
-      <button class="btn btn-outline header-cart-btn" id="cartNavBtn" aria-label="View Cart">
-        🛒 <span class="nav-cart-text">Cart</span>
-        <span id="headerCartBadge" class="header-cart-badge" style="display: none;">0</span>
-      </button>
       <div id="authContainer" style="display: flex; align-items: center; gap: 4px;">
         <button class="btn btn-outline" id="loginBtn" aria-label="Sign in">Sign In</button>
-        <div id="userProfileNav" style="display: none; align-items: center; gap: 4px;">
-          <span id="userEmailSpan" style="font-size: 11px; font-weight: 600; color: var(--primary);"></span>
-          <button id="logoutBtn" title="Sign Out" aria-label="Sign out" style="background: none; border: none; font-size: 13px; color: var(--muted); cursor: pointer; padding: 4px 6px;">🚪</button>
-        </div>
+        <button class="btn btn-outline" id="headerCustomerName" style="display: none; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 700; color: var(--primary); padding: 5px 10px; border-color: var(--primary);" aria-label="View Account"></button>
       </div>
     </div>
   </header>
 
-  <div class="sticky-controls">
+  <div id="homeView">
+<div class="sticky-controls">
     <div class="search-wrapper" role="search">
       <span class="search-icon">🔍</span>
       <input type="search" id="searchInput" class="search-input" aria-label="Search groceries" placeholder="Search fresh groceries (e.g. Milk, Tomato, పాలు)...">
@@ -642,21 +675,170 @@
   </div>
 
   
-  <!-- Blinkit-style Mobile Bottom Navigation -->
+  
+</div>
+
+  <!-- ============================================== -->
+  <!-- PART D: ACCOUNT IN-PAGE VIEW (Full Height)     -->
+  <!-- ============================================== -->
+  <div id="accountView" style="display: none; padding: 14px 16px 80px; min-height: calc(100vh - 56px); background: #F8FAFC;">
+    <!-- Signed-in Account Section -->
+    <div id="accountSignedInWrap" style="display: none;">
+      <!-- 1. Profile Card -->
+      <div class="card" style="margin-bottom: 14px; padding: 16px; background: #FFFFFF; border-radius: 12px; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div id="accountAvatar" style="width: 50px; height: 50px; border-radius: 50%; background: #DCFCE7; color: #166534; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            U
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h3 id="accountUserName" style="font-size: 16px; font-weight: 700; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">User</h3>
+              <button type="button" id="btnEditNameToggle" style="background: none; border: none; font-size: 13px; color: var(--primary); cursor: pointer; padding: 2px 4px;" title="Edit Name">✏️</button>
+            </div>
+            <div id="accountUserContact" style="font-size: 13px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              +91 ••••• •••••
+            </div>
+          </div>
+        </div>
+
+        <!-- Inline Name Editor Form -->
+        <div id="inlineEditNameBox" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);">
+          <label style="font-size: 11px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px;" id="tEditNameLabel">Edit Your Name</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="inputEditName" style="flex: 1; padding: 8px 10px; font-size: 13px; border: 1px solid var(--border); border-radius: 6px;" maxlength="40">
+            <button type="button" class="btn btn-primary btn-small" id="btnSaveName">Save</button>
+            <button type="button" class="btn btn-light btn-small" id="btnCancelEditName">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Two Stats: Orders Placed & Last Order -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+        <div class="card" style="padding: 12px 14px; background: #FFFFFF; border-radius: 10px; border: 1px solid var(--border);">
+          <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;" id="tStatOrdersPlaced">Orders Placed</div>
+          <div style="font-size: 22px; font-weight: 800; color: var(--primary); margin-top: 4px;" id="statOrdersCount">0</div>
+        </div>
+        <div class="card" style="padding: 12px 14px; background: #FFFFFF; border-radius: 10px; border: 1px solid var(--border);">
+          <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;" id="tStatLastOrder">Last Order</div>
+          <div style="font-size: 13px; font-weight: 700; color: var(--text); margin-top: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="statLastOrderDate">None yet</div>
+        </div>
+      </div>
+
+      <!-- 3. Saved Addresses Section -->
+      <div class="card" style="margin-bottom: 14px; padding: 16px; background: #FFFFFF; border-radius: 12px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="font-size: 15px; font-weight: 700; margin: 0;" id="tSavedAddresses">Saved Addresses</h3>
+          <button type="button" class="btn btn-outline btn-small" id="btnAddAddressBtn" style="padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--primary); border-color: var(--primary);">+ Add New</button>
+        </div>
+        <div id="savedAddressesContainer">
+          <p style="font-size: 12px; color: var(--muted); margin: 0;" id="tNoSavedAddresses">No saved addresses yet. Add Home or Shop address for 1-tap checkout.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signed-out Account Section -->
+    <div id="accountSignedOutWrap" style="display: block;">
+      <div class="card" style="margin-bottom: 14px; padding: 24px 16px; background: #FFFFFF; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+        <div style="font-size: 40px; margin-bottom: 10px;">🛍️</div>
+        <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 6px;" id="tAccountWelcomeTitle">Welcome to RA Store</h3>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.4;" id="tAccountWelcomeSub">Sign in with your mobile number or Google account to view your saved addresses, track deliveries, and manage your profile.</p>
+        <button type="button" class="btn btn-primary" id="accountSignInBtn" style="width: 100%; justify-content: center; min-height: 44px; font-weight: 700;">Sign In</button>
+      </div>
+    </div>
+
+    <!-- 4. Store Info -->
+    <div class="card" style="margin-bottom: 14px; padding: 14px; background: #FFFFFF; border-radius: 12px; border: 1px solid var(--border);">
+      <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+        <span>🏪</span> <span id="tStoreInfoTitle">Store & Delivery Timings</span>
+      </h3>
+      <div style="font-size: 12px; line-height: 1.6; color: var(--text);">
+        <div>🚚 <strong id="tDeliverySlotLabel">Morning Delivery Slot:</strong> 7:00 AM – 9:00 AM IST (Daily)</div>
+        <div>⏰ <strong id="tStoreHoursLabel">Store Operating Hours:</strong> <span id="accountStoreHoursText">07:00 AM – 07:00 PM</span></div>
+        <div style="color: var(--muted); font-size: 11px; margin-top: 4px;">Serving all areas in Anantapur (515001 - 515005).</div>
+      </div>
+    </div>
+
+    <!-- 5. Help & Support -->
+    <div class="card" style="margin-bottom: 14px; padding: 14px; background: #FFFFFF; border-radius: 12px; border: 1px solid var(--border);">
+      <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+        <span>🤝</span> <span id="tHelpSupportTitle">Help & Support</span>
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <a href="tel:+916281730144" class="btn btn-outline" style="justify-content: center; gap: 8px; font-size: 13px; font-weight: 700; min-height: 40px; color: var(--text); border-color: var(--border);" id="accountCallStoreLink">
+          📞 Call Store (+91 62817 30144)
+        </a>
+        <a href="https://wa.me/916281730144?text=Hello%20RA%20Store%2C%20I%20need%20help%20with%20my%20groceries" target="_blank" class="btn" style="justify-content: center; gap: 8px; font-size: 13px; font-weight: 700; min-height: 40px; background: #25D366; color: white;" id="accountWhatsappLink">
+          💬 WhatsApp Chat (+91 62817 30144)
+        </a>
+      </div>
+    </div>
+
+    <!-- 6. About & Policies -->
+    <div class="card" style="margin-bottom: 14px; padding: 8px 14px; background: #FFFFFF; border-radius: 12px; border: 1px solid var(--border);">
+      <h3 style="font-size: 14px; font-weight: 700; margin: 8px 0 6px;" id="tAboutPoliciesTitle">About & Policies</h3>
+      <div style="display: flex; flex-direction: column;">
+        <a href="./about-us.html" style="padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+          <span id="tAboutUsLink">About Us</span> <span style="color: var(--muted);">›</span>
+        </a>
+        <a href="./contact-us.html" style="padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+          <span id="tContactUsLink">Contact Us</span> <span style="color: var(--muted);">›</span>
+        </a>
+        <a href="./terms.html" style="padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+          <span id="tTermsLink">Terms of Service</span> <span style="color: var(--muted);">›</span>
+        </a>
+        <a href="./privacy-policy.html" style="padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+          <span id="tPrivacyLink">Privacy Policy</span> <span style="color: var(--muted);">›</span>
+        </a>
+        <a href="./refund-policy.html" style="padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+          <span id="tRefundPolicyLink">Cancellation & Refund Policy</span> <span style="color: var(--muted);">›</span>
+        </a>
+        <a href="./shipping-policy.html" style="padding: 10px 0; font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+          <span id="tShippingPolicyLink">Shipping & Delivery Policy</span> <span style="color: var(--muted);">›</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 7. Share RA Store -->
+    <button type="button" class="btn btn-outline" id="btnShareStore" style="width: 100%; margin-bottom: 14px; justify-content: center; gap: 8px; font-size: 13px; font-weight: 700; color: #1D4ED8; border-color: #93C5FD; background: #EFF6FF; min-height: 42px;">
+      <span>🔗</span> <span id="tShareStoreBtn">Share RA Store with Friends & Family</span>
+    </button>
+
+    <!-- 8. LOG OUT Button (Signed-in only) -->
+    <div id="accountLogoutSection" style="display: none;">
+      <button type="button" class="btn" id="accountLogoutBtn" style="width: 100%; justify-content: center; background: #FFFFFF; color: #DC2626; border: 1.5px solid #DC2626; font-size: 14px; font-weight: 700; min-height: 44px; margin-bottom: 12px;">
+        <span id="tLogoutBtnText">🚪 Log Out</span>
+      </button>
+
+      <!-- 9. Delete My Account Link -->
+      <div style="text-align: center; margin-bottom: 16px;">
+        <button type="button" id="btnDeleteAccount" style="background: none; border: none; color: #9CA3AF; font-size: 12px; text-decoration: underline; cursor: pointer;">
+          <span id="tDeleteAccountLink">Delete my account</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 10. Small Footer Line with App Version -->
+    <div style="text-align: center; font-size: 11px; color: var(--muted); padding: 10px 0 20px;">
+      RA Store v2.1.0 • Anantapur, Andhra Pradesh
+    </div>
+  </div>
+
+<!-- Blinkit-style Mobile Bottom Navigation -->
   <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Bottom Navigation">
-    <button class="bottom-nav-item active" id="bnavHomeBtn" aria-label="Home">
+    <button class="bottom-nav-item active" id="bnavHomeBtn" data-tab="home" aria-label="Home">
       <span class="bnav-icon">🏠</span>
       <span class="bnav-label" id="tBnavHome">Home</span>
     </button>
-    <button class="bottom-nav-item" id="bnavCategoriesBtn" aria-label="Categories">
-      <span class="bnav-icon">🏷️</span>
-      <span class="bnav-label" id="tBnavCategories">Categories</span>
+    <button class="bottom-nav-item" id="bnavCartBtn" data-tab="cart" aria-label="Cart" style="position: relative;">
+      <span class="bnav-icon">🛒</span>
+      <span class="bnav-label" id="tBnavCart">Cart</span>
+      <span id="bnavCartBadge" class="bnav-badge" style="display: none;">0</span>
     </button>
-    <button class="bottom-nav-item" id="bnavOrdersBtn" aria-label="My Orders">
-      <span class="bnav-icon">🛍️</span>
+    <button class="bottom-nav-item" id="bnavOrdersBtn" data-tab="orders" aria-label="Orders">
+      <span class="bnav-icon">📦</span>
       <span class="bnav-label" id="tBnavOrders">Orders</span>
     </button>
-    <button class="bottom-nav-item" id="bnavAccountBtn" aria-label="Account">
+    <button class="bottom-nav-item" id="bnavAccountBtn" data-tab="account" aria-label="Account">
       <span class="bnav-icon">👤</span>
       <span class="bnav-label" id="tBnavAccount">Account</span>
     </button>
@@ -1195,7 +1377,55 @@
         expired: "Expired",
         outOfStockCartBanner: "⚠️ Some items in your cart are out of stock. Please remove them to proceed.",
         removeOutOfStockBtn: "Remove Out-of-Stock Items",
-        offlineNotice: "⚡ You are currently offline. Check your internet connection."
+        offlineNotice: "⚡ You are currently offline. Check your internet connection.",
+        bnavHome: "Home",
+        bnavCart: "Cart",
+        bnavOrders: "Orders",
+        bnavAccount: "Account",
+        accountWelcomeTitle: "Welcome to RA Store",
+        accountWelcomeSub: "Sign in with your mobile number or Google account to view your saved addresses, track deliveries, and manage your profile.",
+        statOrdersPlaced: "Orders Placed",
+        statLastOrder: "Last Order",
+        noneYet: "None yet",
+        savedAddresses: "Saved Addresses",
+        noSavedAddresses: "No saved addresses yet. Add Home or Shop address for 1-tap checkout.",
+        addNewAddressBtn: "+ Add New",
+        storeInfoTitle: "Store & Delivery Timings",
+        deliverySlotLabel: "Morning Delivery Slot:",
+        storeHoursLabel: "Store Operating Hours:",
+        helpSupportTitle: "Help & Support",
+        callStoreText: "📞 Call Store (+91 62817 30144)",
+        whatsappStoreText: "💬 WhatsApp Chat (+91 62817 30144)",
+        aboutPoliciesTitle: "About & Policies",
+        aboutUsLink: "About Us",
+        contactUsLink: "Contact Us",
+        termsLink: "Terms of Service",
+        privacyLink: "Privacy Policy",
+        refundPolicyLink: "Cancellation & Refund Policy",
+        shippingPolicyLink: "Shipping & Delivery Policy",
+        shareStoreBtn: "Share RA Store with Friends & Family",
+        logoutBtnText: "🚪 Log Out",
+        logoutConfirm: "Log out of RA Store?",
+        loggedOutToast: "Logged out successfully",
+        deleteAccountLink: "Delete my account",
+        deleteAccountConfirm: "Are you sure you want to delete your profile and saved addresses? Your past orders will remain in the store records.",
+        accountDeletedToast: "Account data deleted",
+        gettingLocation: "Getting location…",
+        shareLocationBtn: "Share my location",
+        updateLocationBtn: "Update location",
+        locationSaved: "Location saved (~{acc}m accuracy)",
+        locationApprox: "Location saved (approximate: ~{acc}m)",
+        tryAgain: "Try again",
+        checkMap: "🗺️ Check Map",
+        removeLocation: "✕ Remove",
+        locErrDenied: "Location permission denied. Tap the lock icon (🔒) in your address bar → Permissions → Location → Allow, then retry.",
+        locErrUnavailable: "Position unavailable. Please ensure your device GPS/Location is turned ON and try again.",
+        locErrTimeout: "Location request timed out. Please move near a window or outdoors and retry.",
+        locErrUnsupported: "Geolocation is not supported by your browser.",
+        locErrInApp: "In-app browser may block GPS. Tap top-right menu ⋮ → Open in Chrome.",
+        defaultBadge: "Default",
+        setDefaultBtn: "Set Default",
+        deleteAddrConfirm: "Delete this address?",
       },
       te: {
         toggleText: "English",
@@ -1279,7 +1509,55 @@
         expired: "గడువు ముగిసింది",
         outOfStockCartBanner: "⚠️ మీ కార్ట్‌లోని కొన్ని వస్తువులు స్టాక్‌లో లేవు. కొనసాగడానికి దయచేసి వాటిని తొలగించండి.",
         removeOutOfStockBtn: "స్టాక్ లేని వస్తువులను తొలగించండి",
-        offlineNotice: "⚡ మీరు ఆఫ్‌లైన్‌లో ఉన్నారు. మీ ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేయండి."
+        offlineNotice: "⚡ మీరు ఆఫ్‌లైన్‌లో ఉన్నారు. మీ ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేయండి.",
+        bnavHome: "హోమ్",
+        bnavCart: "కార్ట్",
+        bnavOrders: "ఆర్డర్లు",
+        bnavAccount: "ఖాతా",
+        accountWelcomeTitle: "RA స్టోర్‌కు స్వాగతం",
+        accountWelcomeSub: "మీ భద్రపరిచిన చిరునామాలు, డెలివరీలు మరియు ప్రొఫైల్ కోసం మీ మొబైల్ నంబర్ లేదా Google తో లాగిన్ అవ్వండి.",
+        statOrdersPlaced: "చేసిన ఆర్డర్లు",
+        statLastOrder: "చివరి ఆర్డర్",
+        noneYet: "ఇంకా లేవు",
+        savedAddresses: "భద్రపరిచిన చిరునామాలు",
+        noSavedAddresses: "ఇంకా చిరునామాలు లేవు. సులభంగా ఆర్డర్ చేయడానికి హోమ్ లేదా షాప్ అడ్రస్ జోడించండి.",
+        addNewAddressBtn: "+ కొత్తది జోడించండి",
+        storeInfoTitle: "స్టోర్ & డెలివరీ సమాచారం",
+        deliverySlotLabel: "ఉదయం డెలివరీ సమయం:",
+        storeHoursLabel: "స్టోర్ తెరిచే వేళలు:",
+        helpSupportTitle: "సహాయం & మద్దతు",
+        callStoreText: "📞 కాల్ చేయండి (+91 62817 30144)",
+        whatsappStoreText: "💬 వాట్సాప్ చాట్ (+91 62817 30144)",
+        aboutPoliciesTitle: "మా గురించి & నిబంధనలు",
+        aboutUsLink: "మా గురించి",
+        contactUsLink: "మమ్మల్ని సంప్రదించండి",
+        termsLink: "నిబంధనలు & షరతులు",
+        privacyLink: "గోప్యతా విధానం",
+        refundPolicyLink: "రద్దు & రీఫండ్ విధానం",
+        shippingPolicyLink: "షిప్పింగ్ & డెలివరీ విధానం",
+        shareStoreBtn: "స్నేహితులు & కుటుంబ సభ్యులతో షేర్ చేయండి",
+        logoutBtnText: "🚪 లాగ్ అవుట్",
+        logoutConfirm: "RA స్టోర్ నుండి లాగ్ అవుట్ అవ్వాలా?",
+        loggedOutToast: "లాగ్ అవుట్ అయ్యారు",
+        deleteAccountLink: "నా ఖాతాను తొలగించండి",
+        deleteAccountConfirm: "మీ ప్రొఫైల్ మరియు భద్రపరిచిన చిరునామాలను తొలగించాలనుకుంటున్నారా? మీ గత ఆర్డర్ల రికార్డులు స్టోర్ వద్ద ఉంటాయి.",
+        accountDeletedToast: "ఖాతా వివరాలు తొలగించబడ్డాయి",
+        gettingLocation: "లొకేషన్ తీసుకుంటోంది…",
+        shareLocationBtn: "లొకేషన్ షేర్ చేయండి",
+        updateLocationBtn: "లొకేషన్ మార్చండి",
+        locationSaved: "లొకేషన్ సేవ్ చేయబడింది (~{acc}మీ ఖచ్చితత్వం)",
+        locationApprox: "లొకేషన్ సేవ్ చేయబడింది (సుమారు: ~{acc}మీ)",
+        tryAgain: "మళ్లీ ప్రయత్నించండి",
+        checkMap: "🗺️ మ్యాప్ చూడండి",
+        removeLocation: "✕ తొలగించు",
+        locErrDenied: "లొకేషన్ అనుమతి నిరాకరించబడింది. అడ్రస్ బార్‌లోని లాక్ చిహ్నాన్ని (🔒) నొక్కి → Permissions → Location → Allow చేసి, మళ్లీ ప్రయత్నించండి.",
+        locErrUnavailable: "లొకేషన్ అందుబాటులో లేదు. దయచేసి ఫోన్‌లో GPS/లొకేషన్ ఆన్ చేసి మళ్లీ ప్రయత్నించండి.",
+        locErrTimeout: "లొకేషన్ సమయం ముగిసింది. దయచేసి కిటికీ లేదా బయటకు వచ్చి మళ్లీ ప్రయత్నించండి.",
+        locErrUnsupported: "మీ బ్రౌజర్ లొకేషన్‌కు మద్దతు ఇవ్వదు.",
+        locErrInApp: "ఇన్-యాప్ బ్రౌజర్‌లో జీపీఎస్ బ్లాక్ కావచ్చు. పైన ⋮ మెనూ నొక్కి 'Open in Chrome' ఎంచుకోండి.",
+        defaultBadge: "డిఫాల్ట్",
+        setDefaultBtn: "డిఫాల్ట్‌గా ఉంచు",
+        deleteAddrConfirm: "ఈ చిరునామాను తొలగించాలనుకుంటున్నారా?"
       }
     };
 
@@ -1617,20 +1895,35 @@
     auth.getRedirectResult().catch(() => {});
     auth.onAuthStateChanged(user => {
       currentUser = user;
+      const loginBtn = document.getElementById('loginBtn');
+      const headerCustName = document.getElementById('headerCustomerName');
+
       if (user) {
-        document.getElementById('loginBtn').style.display = 'none';
-        document.getElementById('userProfileNav').style.display = 'inline-flex';
-        
-        let displayStr = user.displayName;
-        if (!displayStr && user.phoneNumber) {
-          displayStr = '📱 ' + user.phoneNumber.replace('+91', '');
+        if (loginBtn) loginBtn.style.display = 'none';
+
+        // Extract first name (max 12 chars with ellipsis)
+        let firstName = '';
+        if (user.displayName) {
+          firstName = user.displayName.trim().split(/\s+/)[0];
+        } else if (user.phoneNumber) {
+          firstName = user.phoneNumber.replace('+91', '').trim();
+        } else if (user.email) {
+          firstName = user.email.split('@')[0];
         }
-        if (!displayStr && user.email) {
-          displayStr = user.email.split('@')[0];
+        const localProf = JSON.parse(localStorage.getItem('ra_customer_profile_' + user.uid) || localStorage.getItem('ra_customer_profile') || '{}');
+        if (!firstName && localProf.name) {
+          firstName = localProf.name.trim().split(/\s+/)[0];
         }
-        document.getElementById('userEmailSpan').innerText = displayStr || 'User';
+        if (!firstName) firstName = 'Customer';
+        if (firstName.length > 12) firstName = firstName.slice(0, 11) + '…';
+
+        if (headerCustName) {
+          headerCustName.innerText = firstName;
+          headerCustName.style.display = 'inline-flex';
+        }
 
         loadUserProfileIntoCheckout();
+        initUserAccountData(user);
 
         if (pendingCheckoutAfterLogin) {
           pendingCheckoutAfterLogin = false;
@@ -1638,8 +1931,18 @@
           openCheckout();
         }
       } else {
-        document.getElementById('loginBtn').style.display = 'inline-block';
-        document.getElementById('userProfileNav').style.display = 'none';
+        if (loginBtn) {
+          loginBtn.style.display = 'inline-block';
+          loginBtn.innerText = I18N[currentLang]?.signIn || 'Sign In';
+        }
+        if (headerCustName) headerCustName.style.display = 'none';
+        cachedAddresses = [];
+        userOrderStats = { count: 0, lastDate: null };
+        updateAccountSignedOutUI();
+      }
+
+      if (currentNavTab === 'account') {
+        renderAccountView();
       }
     });
 
@@ -2178,6 +2481,15 @@
       });
 
       // Header cart badge update
+      const bnavBadge = document.getElementById('bnavCartBadge');
+      if (bnavBadge) {
+        if (count > 0) {
+          bnavBadge.innerText = count > 99 ? '99+' : count;
+          bnavBadge.style.display = 'inline-flex';
+        } else {
+          bnavBadge.style.display = 'none';
+        }
+      }
       const headerBadge = document.getElementById('headerCartBadge');
       if (headerBadge) {
         if (count > 0) {
@@ -2315,7 +2627,7 @@
       openModal('cartDrawerModal');
     }
 
-    document.getElementById('cartNavBtn').addEventListener('click', openCartDrawer);
+    document.getElementById('cartNavBtn')?.addEventListener('click', openCartDrawer);
 
     document.getElementById('cartBottomBarSummary').addEventListener('click', openCartDrawer);
 
@@ -2770,7 +3082,7 @@
     }
 
     // Phase 3: Order History & Status Timeline Stepper
-    document.getElementById('ordersNavBtn').addEventListener('click', () => {
+    document.getElementById('ordersNavBtn')?.addEventListener('click', () => {
       if (!currentUser) {
         pendingCheckoutAfterLogin = false;
         openLoginModal();
@@ -3232,6 +3544,787 @@
         offlineBanner.style.display = isOnline ? 'none' : 'block';
       }
     });
+
+    
+    // ========================================================
+    // PART C: NAVIGATION CONTROLLER & SCROLL PRESERVATION
+    // ========================================================
+    let currentNavTab = 'home';
+    let previousNavTab = 'home';
+    let homeScrollY = 0;
+
+    function setActiveNavTab(tab, updatePrevious = true) {
+      if (updatePrevious && tab !== currentNavTab && (currentNavTab === 'home' || currentNavTab === 'account')) {
+        previousNavTab = currentNavTab;
+      }
+      currentNavTab = tab;
+      document.querySelectorAll('.bottom-nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+      });
+    }
+
+    // Home Tab
+    document.getElementById('bnavHomeBtn')?.addEventListener('click', () => {
+      if (currentNavTab !== 'home') {
+        // Close any open overlays/modals
+        ['cartDrawerModal', 'ordersModal', 'addressModal', 'loginModal'].forEach(m => {
+          const el = document.getElementById(m);
+          if (el && (el.style.display === 'flex' || el.style.display === 'block')) {
+            closeModal(m);
+          }
+        });
+
+        // Switch to Home view
+        document.getElementById('accountView').style.display = 'none';
+        document.getElementById('homeView').style.display = 'block';
+        setActiveNavTab('home');
+
+        // Restore Home scroll position instantly
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        window.scrollTo({ top: Math.min(homeScrollY, maxScroll), behavior: 'auto' });
+      } else {
+        // Already on Home: smooth-scroll to top so first categories are in view & reset chips
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const chipsBar = document.getElementById('categoryChipsBar');
+        if (chipsBar) chipsBar.scrollTo({ left: 0, behavior: 'smooth' });
+        homeScrollY = 0;
+      }
+    });
+
+    // Cart Tab
+    document.getElementById('bnavCartBtn')?.addEventListener('click', () => {
+      if (currentNavTab === 'home') {
+        homeScrollY = window.scrollY || window.pageYOffset || 0;
+      }
+      // Close other modals first
+      ['ordersModal', 'addressModal', 'loginModal'].forEach(m => {
+        const el = document.getElementById(m);
+        if (el && el.style.display === 'flex') closeModal(m);
+      });
+      setActiveNavTab('cart');
+      openCartDrawer();
+    });
+
+    // Orders Tab
+    document.getElementById('bnavOrdersBtn')?.addEventListener('click', () => {
+      if (currentNavTab === 'home') {
+        homeScrollY = window.scrollY || window.pageYOffset || 0;
+      }
+      // Close other modals first
+      ['cartDrawerModal', 'addressModal'].forEach(m => {
+        const el = document.getElementById(m);
+        if (el && el.style.display === 'flex') closeModal(m);
+      });
+      setActiveNavTab('orders');
+
+      if (!currentUser) {
+        pendingOrdersAfterLogin = true;
+        openModal('loginModal');
+      } else {
+        openOrdersModal();
+      }
+    });
+
+    // Account Tab
+    document.getElementById('bnavAccountBtn')?.addEventListener('click', () => {
+      if (currentNavTab === 'home') {
+        homeScrollY = window.scrollY || window.pageYOffset || 0;
+      }
+      // Close any open overlays
+      ['cartDrawerModal', 'ordersModal', 'addressModal', 'loginModal'].forEach(m => {
+        const el = document.getElementById(m);
+        if (el && (el.style.display === 'flex' || el.style.display === 'block')) {
+          closeModal(m);
+        }
+      });
+
+      document.getElementById('homeView').style.display = 'none';
+      document.getElementById('accountView').style.display = 'block';
+      setActiveNavTab('account');
+      renderAccountView();
+      window.scrollTo({ top: 0, behavior: 'auto' });
+
+      try {
+        history.pushState({ tab: 'account' }, '');
+      } catch (e) {}
+    });
+
+    // Header Customer Name click -> open Account tab
+    document.getElementById('headerCustomerName')?.addEventListener('click', () => {
+      document.getElementById('bnavAccountBtn')?.click();
+    });
+
+    // Account view Sign In button
+    document.getElementById('accountSignInBtn')?.addEventListener('click', () => {
+      openModal('loginModal');
+    });
+
+    // Hook modal close to revert bottom nav highlight
+    const originalCloseModal = closeModal;
+    closeModal = function(id, fromPopState = false) {
+      originalCloseModal(id, fromPopState);
+      if (currentNavTab === 'cart' || currentNavTab === 'orders') {
+        setActiveNavTab(previousNavTab, false);
+      }
+    };
+
+    // Override popstate to handle Android back button from Account to Home
+    window.addEventListener('popstate', (e) => {
+      const openModals = Array.from(document.querySelectorAll('.modal-overlay')).filter(m => m.style.display === 'flex' || m.style.display === 'block');
+      if (openModals.length > 0) {
+        // Modal was closed by standard handler
+        return;
+      }
+      if (currentNavTab === 'account') {
+        // Android back button: return to Home view
+        document.getElementById('accountView').style.display = 'none';
+        document.getElementById('homeView').style.display = 'block';
+        setActiveNavTab('home');
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        window.scrollTo({ top: Math.min(homeScrollY, maxScroll), behavior: 'auto' });
+      }
+    });
+
+    // ========================================================
+    // PART D: ACCOUNT TAB CONTROLLER & SAVED ADDRESSES
+    // ========================================================
+    let cachedAddresses = [];
+    let userOrderStats = { count: 0, lastDate: null };
+    let tempAddressGeo = null;
+
+    function initUserAccountData(user) {
+      if (!user) return;
+
+      // 1. Listen to saved addresses
+      db.ref('users/' + user.uid + '/addresses').on('value', snap => {
+        const data = snap.val();
+        if (data) {
+          cachedAddresses = Object.keys(data).map(k => ({ id: k, ...data[k] }));
+        } else {
+          cachedAddresses = [];
+        }
+        localStorage.setItem('ra_customer_addresses_' + user.uid, JSON.stringify(cachedAddresses));
+        renderSavedAddressesList();
+        renderCheckoutSavedAddressChips();
+      });
+
+      // 2. Fetch order stats (Orders Placed & Last Order date)
+      db.ref('orders').orderByChild('uid').equalTo(user.uid).once('value', snap => {
+        const orders = snap.val();
+        if (orders) {
+          const list = Object.values(orders);
+          userOrderStats.count = list.length;
+          const sorted = list.filter(o => o.createdAt).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+          if (sorted.length > 0 && sorted[0].createdAt) {
+            try {
+              userOrderStats.lastDate = new Date(sorted[0].createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+            } catch(e) {
+              userOrderStats.lastDate = sorted[0].createdAt.split('T')[0];
+            }
+          }
+        } else {
+          userOrderStats = { count: 0, lastDate: null };
+        }
+        updateAccountStatsUI();
+      });
+    }
+
+    function updateAccountStatsUI() {
+      const countEl = document.getElementById('statOrdersCount');
+      const dateEl = document.getElementById('statLastOrderDate');
+      if (countEl) countEl.innerText = userOrderStats.count;
+      if (dateEl) dateEl.innerText = userOrderStats.lastDate || (I18N[currentLang]?.noneYet || 'None yet');
+    }
+
+    function updateAccountSignedOutUI() {
+      const signedInWrap = document.getElementById('accountSignedInWrap');
+      const signedOutWrap = document.getElementById('accountSignedOutWrap');
+      const logoutSection = document.getElementById('accountLogoutSection');
+      if (signedInWrap) signedInWrap.style.display = 'none';
+      if (signedOutWrap) signedOutWrap.style.display = 'block';
+      if (logoutSection) logoutSection.style.display = 'none';
+    }
+
+    function renderAccountView() {
+      const signedInWrap = document.getElementById('accountSignedInWrap');
+      const signedOutWrap = document.getElementById('accountSignedOutWrap');
+      const logoutSection = document.getElementById('accountLogoutSection');
+      const storeHoursText = document.getElementById('accountStoreHoursText');
+
+      if (storeHoursText && storeSettings.storeHours) {
+        storeHoursText.innerText = `${storeSettings.storeHours.open || '07:00'} - ${storeSettings.storeHours.close || '19:00'} IST`;
+      }
+
+      if (currentUser) {
+        if (signedInWrap) signedInWrap.style.display = 'block';
+        if (signedOutWrap) signedOutWrap.style.display = 'none';
+        if (logoutSection) logoutSection.style.display = 'block';
+
+        // Profile card
+        const localProf = JSON.parse(localStorage.getItem('ra_customer_profile_' + currentUser.uid) || localStorage.getItem('ra_customer_profile') || '{}');
+        const name = localProf.name || currentUser.displayName || 'RA Customer';
+        const initial = name.charAt(0).toUpperCase() || 'U';
+
+        let contactStr = '';
+        if (currentUser.phoneNumber) contactStr = currentUser.phoneNumber;
+        else if (currentUser.email) contactStr = currentUser.email;
+        else if (localProf.phone) contactStr = '+91 ' + localProf.phone;
+
+        const avatarEl = document.getElementById('accountAvatar');
+        const nameEl = document.getElementById('accountUserName');
+        const contactEl = document.getElementById('accountUserContact');
+
+        if (avatarEl) avatarEl.innerText = initial;
+        if (nameEl) nameEl.innerText = name;
+        if (contactEl) contactEl.innerText = contactStr;
+
+        updateAccountStatsUI();
+        renderSavedAddressesList();
+      } else {
+        updateAccountSignedOutUI();
+      }
+    }
+
+    // Inline Name Editor
+    document.getElementById('btnEditNameToggle')?.addEventListener('click', () => {
+      const box = document.getElementById('inlineEditNameBox');
+      const input = document.getElementById('inputEditName');
+      const curName = document.getElementById('accountUserName')?.innerText || '';
+      if (box) {
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        if (box.style.display === 'block' && input) {
+          input.value = curName;
+          input.focus();
+        }
+      }
+    });
+
+    document.getElementById('btnCancelEditName')?.addEventListener('click', () => {
+      const box = document.getElementById('inlineEditNameBox');
+      if (box) box.style.display = 'none';
+    });
+
+    document.getElementById('btnSaveName')?.addEventListener('click', async () => {
+      const input = document.getElementById('inputEditName');
+      const newName = input?.value.trim();
+      if (!newName || newName.length < 2) {
+        showToast('Please enter at least 2 characters');
+        return;
+      }
+      if (currentUser) {
+        const localProf = JSON.parse(localStorage.getItem('ra_customer_profile_' + currentUser.uid) || '{}');
+        localProf.name = newName;
+        localStorage.setItem('ra_customer_profile_' + currentUser.uid, JSON.stringify(localProf));
+        localStorage.setItem('ra_customer_profile', JSON.stringify(localProf));
+
+        try {
+          await db.ref('users/' + currentUser.uid + '/profile').update({
+            name: newName,
+            updatedAt: new Date().toISOString()
+          });
+        } catch(e) {}
+
+        const nameEl = document.getElementById('accountUserName');
+        if (nameEl) nameEl.innerText = newName;
+        const avatarEl = document.getElementById('accountAvatar');
+        if (avatarEl) avatarEl.innerText = newName.charAt(0).toUpperCase();
+
+        const headerName = document.getElementById('headerCustomerName');
+        if (headerName) {
+          const first = newName.split(/\s+/)[0];
+          headerName.innerText = first.length > 12 ? first.slice(0, 11) + '…' : first;
+        }
+
+        document.getElementById('inlineEditNameBox').style.display = 'none';
+        showToast('Profile name updated!');
+      }
+    });
+
+    // Saved Addresses Rendering
+    function renderSavedAddressesList() {
+      const container = document.getElementById('savedAddressesContainer');
+      if (!container) return;
+
+      if (!cachedAddresses || cachedAddresses.length === 0) {
+        container.innerHTML = `<p style="font-size: 12px; color: var(--muted); margin: 0;">${I18N[currentLang]?.noSavedAddresses || 'No saved addresses yet. Add Home or Shop address for 1-tap checkout.'}</p>`;
+        return;
+      }
+
+      const t = I18N[currentLang];
+      const htmlCards = cachedAddresses.map(addr => {
+        const tagIcon = addr.tag === 'home' ? '🏠' : (addr.tag === 'shop' ? '🏪' : '📍');
+        const tagText = addr.tag ? addr.tag.toUpperCase() : 'OTHER';
+        const isDef = !!addr.isDefault;
+
+        return `
+          <div class="address-card ${isDef ? 'is-default' : ''}" data-addr-id="${escapeHtml(addr.id)}">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="address-tag-badge">${tagIcon} ${tagText}</span>
+                ${isDef ? `<span style="font-size: 10px; font-weight: 700; background: #DCFCE7; color: #166534; padding: 2px 6px; border-radius: 4px;">${t.defaultBadge || 'DEFAULT'}</span>` : ''}
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn btn-light btn-small btn-edit-addr" data-id="${escapeHtml(addr.id)}" style="font-size: 11px; padding: 2px 6px;">✏️</button>
+                <button type="button" class="btn btn-light btn-small btn-del-addr" data-id="${escapeHtml(addr.id)}" style="font-size: 11px; padding: 2px 6px; color: var(--danger);">✕</button>
+              </div>
+            </div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--text);">${escapeHtml(addr.name || '')} • ${escapeHtml(addr.phone || '')}</div>
+            <div style="font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4;">${escapeHtml(addr.address || '')}</div>
+            ${addr.geo ? `<div style="font-size: 11px; color: #047857; margin-top: 4px; font-weight: 600;">📍 GPS Saved (~${addr.geo.accuracy || 25}m)</div>` : ''}
+            ${!isDef ? `<div style="margin-top: 8px;"><button type="button" class="btn btn-outline btn-small btn-set-default-addr" data-id="${escapeHtml(addr.id)}" style="font-size: 11px; padding: 3px 8px;">${t.setDefaultBtn || 'Set Default'}</button></div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = htmlCards;
+
+      // Attach actions to address cards
+      container.querySelectorAll('.btn-set-default-addr').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          if (currentUser && id) {
+            const updates = {};
+            cachedAddresses.forEach(a => {
+              updates[a.id + '/isDefault'] = a.id === id;
+            });
+            await db.ref('users/' + currentUser.uid + '/addresses').update(updates);
+            showToast('Default address updated!');
+          }
+        });
+      });
+
+      container.querySelectorAll('.btn-del-addr').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          const confirmMsg = I18N[currentLang]?.deleteAddrConfirm || 'Delete this address?';
+          if (!confirm(confirmMsg)) return;
+          if (currentUser && id) {
+            await db.ref('users/' + currentUser.uid + '/addresses/' + id).remove();
+            showToast('Address deleted');
+          }
+        });
+      });
+
+      container.querySelectorAll('.btn-edit-addr').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          const addr = cachedAddresses.find(a => a.id === id);
+          if (addr) openAddressModalForEdit(addr);
+        });
+      });
+    }
+
+    // Add / Edit Address Modal handling
+    document.getElementById('btnAddAddressBtn')?.addEventListener('click', () => {
+      openAddressModalForNew();
+    });
+
+    function openAddressModalForNew() {
+      const form = document.getElementById('addressForm');
+      if (form) form.reset();
+      document.getElementById('editAddressId').value = '';
+      document.getElementById('addressModalTitle').innerText = 'Add New Address';
+      tempAddressGeo = null;
+      document.getElementById('addrGpsStatus').innerText = 'No GPS saved';
+      document.getElementById('addrGpsStatus').style.color = 'var(--muted)';
+
+      // Pre-fill profile name and phone if available
+      if (currentUser) {
+        const localProf = JSON.parse(localStorage.getItem('ra_customer_profile_' + currentUser.uid) || '{}');
+        document.getElementById('addrName').value = localProf.name || currentUser.displayName || '';
+        document.getElementById('addrPhone').value = localProf.phone || (currentUser.phoneNumber ? currentUser.phoneNumber.replace('+91','') : '');
+      }
+
+      openModal('addressModal');
+    }
+
+    function openAddressModalForEdit(addr) {
+      document.getElementById('editAddressId').value = addr.id;
+      document.getElementById('addressModalTitle').innerText = 'Edit Address';
+      const tagRadios = document.querySelectorAll('input[name="addrTag"]');
+      tagRadios.forEach(r => { r.checked = (r.value === (addr.tag || 'home')); });
+
+      document.getElementById('addrName').value = addr.name || '';
+      document.getElementById('addrPhone').value = addr.phone || '';
+      document.getElementById('addrAddress').value = addr.address || '';
+      document.getElementById('addrSetDefault').checked = !!addr.isDefault;
+
+      tempAddressGeo = addr.geo || null;
+      const gpsStatus = document.getElementById('addrGpsStatus');
+      if (tempAddressGeo) {
+        gpsStatus.innerText = `✅ GPS Saved (~${tempAddressGeo.accuracy}m)`;
+        gpsStatus.style.color = '#047857';
+      } else {
+        gpsStatus.innerText = 'No GPS saved';
+        gpsStatus.style.color = 'var(--muted)';
+      }
+
+      openModal('addressModal');
+    }
+
+    // Landmark chip clicks in Address Modal
+    document.getElementById('addrLandmarkChips')?.addEventListener('click', (e) => {
+      if (e.target && e.target.classList.contains('landmark-chip')) {
+        const val = e.target.getAttribute('data-val');
+        const txt = document.getElementById('addrAddress');
+        if (txt && val) {
+          if (!txt.value.includes(val)) {
+            txt.value = (txt.value.trim() ? txt.value.trim() + ', ' : '') + val;
+          }
+        }
+      }
+    });
+
+    // Capture GPS pin in Address Modal
+    document.getElementById('btnPinAddrGps')?.addEventListener('click', () => {
+      const btn = document.getElementById('btnPinAddrGps');
+      const statusEl = document.getElementById('addrGpsStatus');
+      if (!navigator.geolocation) {
+        statusEl.innerText = 'GPS not supported';
+        return;
+      }
+      btn.disabled = true;
+      statusEl.innerText = 'Acquiring GPS fix…';
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          btn.disabled = false;
+          tempAddressGeo = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            accuracy: Math.round(pos.coords.accuracy)
+          };
+          statusEl.innerText = `✅ GPS Saved (~${tempAddressGeo.accuracy}m)`;
+          statusEl.style.color = '#047857';
+          showToast('GPS coordinates pinned to address!');
+        },
+        err => {
+          btn.disabled = false;
+          statusEl.innerText = 'Failed to get GPS';
+          statusEl.style.color = 'var(--danger)';
+          showToast('Location error: ' + err.message);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    });
+
+    // Save Address form submit
+    document.getElementById('addressForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) {
+        showToast('Please sign in to save addresses');
+        return;
+      }
+
+      const editId = document.getElementById('editAddressId').value;
+      const tag = document.querySelector('input[name="addrTag"]:checked')?.value || 'home';
+      const name = document.getElementById('addrName').value.trim();
+      const phone = document.getElementById('addrPhone').value.trim();
+      const address = document.getElementById('addrAddress').value.trim();
+      const isDefault = document.getElementById('addrSetDefault').checked;
+
+      if (name.length < 2 || !/^[6-9]\d{9}$/.test(phone) || address.length < 10) {
+        showToast('Please fill all required fields properly');
+        return;
+      }
+
+      const saveBtn = document.getElementById('btnSaveAddress');
+      saveBtn.disabled = true;
+      saveBtn.innerText = 'Saving…';
+
+      try {
+        const addrId = editId || ('addr_' + Date.now());
+        const addrData = {
+          id: addrId,
+          tag,
+          name,
+          phone,
+          address,
+          isDefault,
+          geo: tempAddressGeo,
+          updatedAt: new Date().toISOString()
+        };
+
+        const updates = {};
+        updates[addrId] = addrData;
+
+        // If setting as default or if this is the only address, ensure others are not default
+        if (isDefault || cachedAddresses.length === 0) {
+          addrData.isDefault = true;
+          cachedAddresses.forEach(a => {
+            if (a.id !== addrId) updates[a.id + '/isDefault'] = false;
+          });
+        }
+
+        await db.ref('users/' + currentUser.uid + '/addresses').update(updates);
+        closeModal('addressModal');
+        showToast('Address saved successfully!');
+      } catch(err) {
+        showToast('Error saving address: ' + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = 'Save Address';
+      }
+    });
+
+    // Pre-fill default address in Checkout
+    function renderCheckoutSavedAddressChips() {
+      const wrap = document.getElementById('checkoutSavedAddressChipsWrap');
+      const container = document.getElementById('checkoutSavedAddressChips');
+      if (!wrap || !container) return;
+
+      if (!cachedAddresses || cachedAddresses.length === 0) {
+        wrap.style.display = 'none';
+        return;
+      }
+
+      wrap.style.display = 'block';
+      container.innerHTML = cachedAddresses.map(a => {
+        const tagIcon = a.tag === 'home' ? '🏠' : (a.tag === 'shop' ? '🏪' : '📍');
+        return `<button type="button" class="btn btn-outline btn-small btn-quick-addr" data-id="${escapeHtml(a.id)}" style="font-size: 11px; padding: 4px 8px; font-weight: 700;">${tagIcon} ${escapeHtml(a.tag?.toUpperCase() || 'ADDR')} ${a.isDefault ? '★' : ''}</button>`;
+      }).join('');
+
+      container.querySelectorAll('.btn-quick-addr').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          const addr = cachedAddresses.find(a => a.id === id);
+          if (addr) applySavedAddressToCheckout(addr);
+        });
+      });
+    }
+
+    function applySavedAddressToCheckout(addr) {
+      if (!addr) return;
+      document.getElementById('custName').value = addr.name || '';
+      document.getElementById('custPhone').value = addr.phone || '';
+      document.getElementById('custAddress').value = addr.address || '';
+
+      if (addr.geo) {
+        capturedLocation = { lat: addr.geo.lat, lng: addr.geo.lng, accuracy: addr.geo.accuracy };
+        const detailsRow = document.getElementById('locationDetailsRow');
+        const accText = document.getElementById('locationAccuracyText');
+        if (detailsRow) detailsRow.style.display = 'block';
+        if (accText) accText.innerText = `✅ Saved address GPS (~${addr.geo.accuracy}m accuracy)`;
+        const btn = document.getElementById('btnShareLocation');
+        if (btn) btn.innerHTML = `<span>📍</span> <span>${I18N[currentLang]?.updateLocationBtn || "Update location"}</span>`;
+      }
+      showToast('Address pre-filled from ' + (addr.tag || 'saved address'));
+    }
+
+    // Share RA Store
+    document.getElementById('btnShareStore')?.addEventListener('click', async () => {
+      const shareData = {
+        title: 'RA Store — Anantapur Grocery Delivery',
+        text: 'Order fresh groceries in Anantapur with fast doorstep delivery from RA Store!',
+        url: window.location.origin + '/K-Stores/'
+      };
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch(e) {
+          if (e.name === 'AbortError') return;
+        }
+      }
+      const text = encodeURIComponent(shareData.text + ' ' + shareData.url);
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    });
+
+    // Logout Button in Account view
+    document.getElementById('accountLogoutBtn')?.addEventListener('click', async () => {
+      const confirmMsg = I18N[currentLang]?.logoutConfirm || 'Log out of RA Store?';
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        if (ordersRef) {
+          ordersRef.off();
+          ordersRef = null;
+        }
+        await auth.signOut();
+        currentUser = null;
+        cachedAddresses = [];
+        userOrderStats = { count: 0, lastDate: null };
+
+        // Header back to Sign In
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) {
+          loginBtn.style.display = 'inline-block';
+          loginBtn.innerText = I18N[currentLang]?.signIn || 'Sign In';
+        }
+        const custNameEl = document.getElementById('headerCustomerName');
+        if (custNameEl) custNameEl.style.display = 'none';
+
+        // Return to Home view
+        document.getElementById('accountView').style.display = 'none';
+        document.getElementById('homeView').style.display = 'block';
+        setActiveNavTab('home');
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        window.scrollTo({ top: Math.min(homeScrollY, maxScroll), behavior: 'auto' });
+
+        showToast(I18N[currentLang]?.loggedOutToast || 'Logged out');
+      } catch(err) {
+        showToast('Logout error: ' + err.message);
+      }
+    });
+
+    // Delete Account Link in Account view
+    document.getElementById('btnDeleteAccount')?.addEventListener('click', async () => {
+      const confirmMsg = I18N[currentLang]?.deleteAccountConfirm || 'Are you sure you want to delete your profile and saved addresses? Your past orders will remain in the store records.';
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        if (currentUser && currentUser.uid) {
+          await db.ref('users/' + currentUser.uid + '/profile').remove();
+          await db.ref('users/' + currentUser.uid + '/addresses').remove();
+          localStorage.removeItem('ra_customer_profile_' + currentUser.uid);
+          localStorage.removeItem('ra_customer_addresses_' + currentUser.uid);
+        }
+        await auth.signOut();
+        currentUser = null;
+        cachedAddresses = [];
+        userOrderStats = { count: 0, lastDate: null };
+
+        // Header back to Sign In
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) {
+          loginBtn.style.display = 'inline-block';
+          loginBtn.innerText = I18N[currentLang]?.signIn || 'Sign In';
+        }
+        const custNameEl = document.getElementById('headerCustomerName');
+        if (custNameEl) custNameEl.style.display = 'none';
+
+        // Return to Home view
+        document.getElementById('accountView').style.display = 'none';
+        document.getElementById('homeView').style.display = 'block';
+        setActiveNavTab('home');
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        window.scrollTo({ top: Math.min(homeScrollY, maxScroll), behavior: 'auto' });
+
+        showToast(I18N[currentLang]?.accountDeletedToast || 'Account data deleted');
+      } catch(err) {
+        showToast('Error: ' + err.message);
+      }
+    });
+
+    // ========================================================
+    // PART E: "SHARE MY LOCATION" IN DELIVERY DETAILS
+    // ========================================================
+    let capturedLocation = null;
+
+    async function handleShareLocation() {
+      const btn = document.getElementById('btnShareLocation');
+      const detailsRow = document.getElementById('locationDetailsRow');
+      const errorBox = document.getElementById('locationErrorBox');
+      const accuracyText = document.getElementById('locationAccuracyText');
+      const t = I18N[currentLang] || {};
+
+      if (!navigator.geolocation) {
+        if (errorBox) {
+          errorBox.innerText = t.locErrUnsupported || "Geolocation is not supported by your browser.";
+          errorBox.style.display = 'block';
+        }
+        return;
+      }
+
+      // Detect in-app browsers
+      const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+      const isInApp = /(FBAN|FBAV|Instagram|WhatsApp|Line|TikTok|MicroMessenger|musical_ly|Twitter|Snapchat)/i.test(ua);
+      if (isInApp && errorBox) {
+        errorBox.innerHTML = `⚠️ ${t.locErrInApp || "In-app browser may block GPS. Tap top-right menu ⋮ → Open in Chrome."}`;
+        errorBox.style.display = 'block';
+      }
+
+      // Check permissions early if available
+      if (navigator.permissions && navigator.permissions.query) {
+        try {
+          const perm = await navigator.permissions.query({ name: 'geolocation' });
+          if (perm.state === 'denied') {
+            if (errorBox) {
+              errorBox.innerText = t.locErrDenied || "Location permission denied. Tap the lock icon (🔒) in your address bar → Permissions → Location → Allow, then retry.";
+              errorBox.style.display = 'block';
+            }
+            return;
+          }
+        } catch(e) {}
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳</span> <span>${t.gettingLocation || "Getting location…"}</span>`;
+      if (errorBox) errorBox.style.display = 'none';
+
+      function onPosSuccess(pos) {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const accuracy = Math.round(pos.coords.accuracy);
+
+        capturedLocation = { lat, lng, accuracy };
+
+        btn.disabled = false;
+        btn.innerHTML = `<span>📍</span> <span>${t.updateLocationBtn || "Update location"}</span>`;
+
+        if (detailsRow) detailsRow.style.display = 'block';
+        if (accuracyText) {
+          if (accuracy > 100) {
+            accuracyText.innerHTML = `⚠️ ${t.locationApprox?.replace('{acc}', accuracy) || `Location saved (approximate: ~${accuracy}m)`} <button type="button" id="btnRetryLocation" style="background:none; border:none; color:#2563EB; font-weight:700; cursor:pointer; text-decoration:underline; font-size:11px;">${t.tryAgain || "Try again"}</button>`;
+            document.getElementById('btnRetryLocation')?.addEventListener('click', handleShareLocation);
+          } else {
+            accuracyText.innerText = `✅ ${t.locationSaved?.replace('{acc}', accuracy) || `Location saved (~${accuracy}m accuracy)`}`;
+          }
+        }
+      }
+
+      function onPosError(err, didRetry = false) {
+        if (!didRetry && (err.code === 3 || err.code === 2)) {
+          navigator.geolocation.getCurrentPosition(
+            onPosSuccess,
+            err2 => onPosError(err2, true),
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
+          );
+          return;
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = `<span>📍</span> <span>${t.shareLocationBtn || "Share my location"}</span>`;
+
+        let errMsg = "";
+        if (err.code === 1) { // PERMISSION_DENIED
+          errMsg = t.locErrDenied || "Location permission denied. Tap the lock icon (🔒) in your address bar → Permissions → Location → Allow, then retry.";
+        } else if (err.code === 2) { // POSITION_UNAVAILABLE
+          errMsg = t.locErrUnavailable || "Position unavailable. Please ensure your device GPS/Location is turned ON and try again.";
+        } else if (err.code === 3) { // TIMEOUT
+          errMsg = t.locErrTimeout || "Location request timed out. Please move near a window or outdoors and retry.";
+        } else {
+          errMsg = err.message || "Failed to capture location.";
+        }
+
+        if (errorBox) {
+          errorBox.innerText = errMsg;
+          errorBox.style.display = 'block';
+        }
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        onPosSuccess,
+        err => onPosError(err, false),
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    }
+
+    document.getElementById('btnShareLocation')?.addEventListener('click', handleShareLocation);
+
+    document.getElementById('btnCheckMap')?.addEventListener('click', () => {
+      if (capturedLocation) {
+        window.open(`https://www.google.com/maps?q=${capturedLocation.lat},${capturedLocation.lng}`, '_blank');
+      }
+    });
+
+    document.getElementById('btnRemoveLocation')?.addEventListener('click', () => {
+      capturedLocation = null;
+      const detailsRow = document.getElementById('locationDetailsRow');
+      if (detailsRow) detailsRow.style.display = 'none';
+      const btn = document.getElementById('btnShareLocation');
+      if (btn) btn.innerHTML = `<span>📍</span> <span>${I18N[currentLang]?.shareLocationBtn || "Share my location"}</span>`;
+    });
+
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
