@@ -362,7 +362,7 @@
       }
     }
   
-        /* Bottom Navigation (Blinkit style) - visible on mobile and inside 480px appWrapper */
+    /* Bottom Navigation (Blinkit style) - visible on mobile and inside 480px appWrapper */
     .mobile-bottom-nav {
       display: flex;
       position: fixed;
@@ -377,13 +377,108 @@
       align-items: center;
       padding-bottom: env(safe-area-inset-bottom, 0px);
       box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+      user-select: none;
+      -webkit-user-select: none;
     }
+
+    .bottom-nav-item {
+      flex: 1;
+      height: 100%;
+      background: none;
+      border: none;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      color: #6B7280;
+      text-decoration: none;
+      transition: transform 120ms ease, color 0.15s ease;
+      touch-action: manipulation;
+      padding: 4px 0 2px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* CHANGE 3: Brief 120ms scale (0.92) press feedback on tap */
+    .bottom-nav-item:active {
+      transform: scale(0.92);
+    }
+
+    /* CHANGE 3: Small 3px green indicator bar above active icon */
+    .bottom-nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%) scaleX(0);
+      width: 24px;
+      height: 3px;
+      background-color: var(--primary, #0C831F);
+      border-radius: 0 0 3px 3px;
+      transition: transform 0.15s ease;
+    }
+
+    .bottom-nav-item.active::before {
+      transform: translateX(-50%) scaleX(1);
+    }
+
+    .bottom-nav-item.active {
+      color: var(--primary, #0C831F);
+    }
+
+    .bnav-icon-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+
+    .bnav-icon {
+      width: 24px;
+      height: 24px;
+      display: block;
+      transition: transform 0.15s ease;
+    }
+
+    /* CHANGE 3: Inactive outline icon visible, filled hidden */
+    .bottom-nav-item .bnav-icon-outline {
+      display: block;
+    }
+    .bottom-nav-item .bnav-icon-filled {
+      display: none;
+    }
+
+    /* CHANGE 3: Active filled icon visible, outline hidden */
+    .bottom-nav-item.active .bnav-icon-outline {
+      display: none;
+    }
+    .bottom-nav-item.active .bnav-icon-filled {
+      display: block;
+    }
+
+    .bnav-label {
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1;
+      transition: font-weight 0.15s ease, color 0.15s ease;
+    }
+
+    .bottom-nav-item.active .bnav-label {
+      font-weight: 700;
+      color: var(--primary, #0C831F);
+    }
+
+    /* CHANGE 3: Cart count badge positioned on top of the cart icon */
     .bnav-badge {
       position: absolute;
-      top: 4px;
-      right: calc(50% - 18px);
-      background: var(--primary);
-      color: white;
+      top: -5px;
+      right: -8px;
+      background: var(--primary, #0C831F);
+      color: #FFFFFF;
       font-size: 10px;
       font-weight: 800;
       min-width: 16px;
@@ -395,49 +490,71 @@
       justify-content: center;
       line-height: 1;
       border: 1.5px solid #FFFFFF;
+      pointer-events: none;
     }
 
-    /* CHANGE 2: Fixed bottom bar & floating action transitions during Sign In */
+    /* CHANGE 1: Fixed bottom bar, sticky cart bar, & floating action transitions during Overlays */
     .mobile-bottom-nav,
     .bottom-bar,
     #unifiedHelpFab,
-    #floatingContactWrap {
-      transition: transform 220ms ease, visibility 220ms ease, opacity 220ms ease;
+    #floatingContactWrap,
+    .floating-contact-wrap {
+      transition: transform 220ms ease, opacity 220ms ease, visibility 0s;
+      visibility: visible;
       will-change: transform;
     }
 
+    body.overlay-open .mobile-bottom-nav,
+    body.overlay-open .bottom-bar,
     body.signin-open .mobile-bottom-nav,
     body.signin-open .bottom-bar {
-      transform: translateY(calc(100% + env(safe-area-inset-bottom, 20px) + 30px)) !important;
+      transform: translateY(calc(100% + env(safe-area-inset-bottom, 0px) + 20px)) !important;
       pointer-events: none !important;
-      visibility: hidden;
-      opacity: 0;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      transition: transform 220ms ease, opacity 220ms ease, visibility 0s linear 0.22s !important;
     }
 
     @media (min-width: 481px) {
+      body.overlay-open .mobile-bottom-nav,
+      body.overlay-open .bottom-bar,
       body.signin-open .mobile-bottom-nav,
       body.signin-open .bottom-bar {
-        transform: translate(-50%, calc(100% + env(safe-area-inset-bottom, 20px) + 30px)) !important;
+        transform: translate(-50%, calc(100% + env(safe-area-inset-bottom, 0px) + 20px)) !important;
         pointer-events: none !important;
-        visibility: hidden;
-        opacity: 0;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        transition: transform 220ms ease, opacity 220ms ease, visibility 0s linear 0.22s !important;
       }
     }
 
+    body.overlay-open #unifiedHelpFab,
+    body.overlay-open #floatingContactWrap,
+    body.overlay-open .floating-contact-wrap,
     body.signin-open #unifiedHelpFab,
-    body.signin-open #floatingContactWrap {
+    body.signin-open #floatingContactWrap,
+    body.signin-open .floating-contact-wrap {
       transform: translateY(140px) !important;
       pointer-events: none !important;
-      visibility: hidden;
-      opacity: 0;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      transition: transform 220ms ease, opacity 220ms ease, visibility 0s linear 0.22s !important;
     }
 
-    /* Change 2: Sign In modal scrolling at 360px width with virtual keyboard */
-    #loginModal .modal {
-      max-height: 85dvh;
+    /* CHANGE 1: Modals stack above bottom nav (z-index: 400 > 300) and scroll comfortably */
+    .modal-overlay {
+      z-index: 400 !important;
+    }
+
+    .modal {
+      max-height: 88dvh;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
+    }
+
+    #cartDrawerFooter {
+      padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     }
 
     .address-tag-badge {
@@ -461,34 +578,7 @@
       border-color: var(--primary);
       background: #F0FDF4;
     }
-    .bottom-nav-item {
-      flex: 1;
-      height: 100%;
-      background: none;
-      border: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      cursor: pointer;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.15s ease;
-      touch-action: manipulation;
-    }
-    .bottom-nav-item.active {
-      color: var(--primary);
-    }
-    .bnav-icon {
-      font-size: 18px;
-      line-height: 1;
-    }
-    .bnav-label {
-      font-size: 10px;
-      font-weight: 700;
-      line-height: 1;
-    }
+    /* Cleaned up duplicate bottom-nav-item definitions */
 
     @media (max-width: 768px) {
       .mobile-bottom-nav {
@@ -867,23 +957,51 @@
     </div>
   </div>
 
-<!-- Blinkit-style Mobile Bottom Navigation -->
+<!-- Blinkit-style Mobile Bottom Navigation with Inline SVGs -->
   <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Bottom Navigation">
-    <button class="bottom-nav-item active" id="bnavHomeBtn" data-tab="home" aria-label="Home">
-      <span class="bnav-icon">🏠</span>
+    <button class="bottom-nav-item active" id="bnavHomeBtn" data-tab="home" aria-label="Home" aria-current="page">
+      <span class="bnav-icon-wrap">
+        <svg class="bnav-icon bnav-icon-outline" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H4a1 1 0 0 1-1-1V9.5z"/>
+        </svg>
+        <svg class="bnav-icon bnav-icon-filled" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+          <path d="M12 2.5a1 1 0 0 0-.6.2l-8 5.8A1 1 0 0 0 3 9.3V20a2 2 0 0 0 2 2h4a1 1 0 0 0 1-1v-5h4v5a1 1 0 0 0 1 1h4a2 2 0 0 0 2-2V9.3a1 1 0 0 0-.4-.8l-8-5.8a1 1 0 0 0-.6-.2z"/>
+        </svg>
+      </span>
       <span class="bnav-label" id="tBnavHome">Home</span>
     </button>
-    <button class="bottom-nav-item" id="bnavCartBtn" data-tab="cart" aria-label="Cart" style="position: relative;">
-      <span class="bnav-icon">🛒</span>
+    <button class="bottom-nav-item" id="bnavCartBtn" data-tab="cart" aria-label="Cart">
+      <span class="bnav-icon-wrap">
+        <svg class="bnav-icon bnav-icon-outline" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M1 2h3.5l2.6 12.8A1.5 1.5 0 0 0 8.6 16h9.8a1.5 1.5 0 0 0 1.5-1.2L22 7H5.2"/>
+        </svg>
+        <svg class="bnav-icon bnav-icon-filled" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+          <circle cx="9" cy="20" r="1.75"/><circle cx="18" cy="20" r="1.75"/><path d="M1 2.5a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 .73.59L5.3 4h16.2a.75.75 0 0 1 .73.93l-2.2 8.8a2.25 2.25 0 0 1-2.18 1.7H8.5a2.25 2.25 0 0 1-2.2-1.78L4.1 3.5H1.75A.75.75 0 0 1 1 2.5z"/>
+        </svg>
+        <span id="bnavCartBadge" class="bnav-badge" style="display: none;">0</span>
+      </span>
       <span class="bnav-label" id="tBnavCart">Cart</span>
-      <span id="bnavCartBadge" class="bnav-badge" style="display: none;">0</span>
     </button>
     <button class="bottom-nav-item" id="bnavOrdersBtn" data-tab="orders" aria-label="Orders">
-      <span class="bnav-icon">📦</span>
+      <span class="bnav-icon-wrap">
+        <svg class="bnav-icon bnav-icon-outline" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <svg class="bnav-icon bnav-icon-filled" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M6 2a1 1 0 0 0-.8.4L2.4 6.2A1 1 0 0 0 2 6.8V20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6.8a1 1 0 0 0-.4-.6L18.8 2.4A1 1 0 0 0 18 2H6zm2 9a4 4 0 1 0 8 0h-2a2 2 0 1 1-4 0H8z"/>
+        </svg>
+      </span>
       <span class="bnav-label" id="tBnavOrders">Orders</span>
     </button>
     <button class="bottom-nav-item" id="bnavAccountBtn" data-tab="account" aria-label="Account">
-      <span class="bnav-icon">👤</span>
+      <span class="bnav-icon-wrap">
+        <svg class="bnav-icon bnav-icon-outline" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        <svg class="bnav-icon bnav-icon-filled" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+          <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm-7 8c0-3.3 2.7-6 7-6s7 2.7 7 6v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-1z"/>
+        </svg>
+      </span>
       <span class="bnav-label" id="tBnavAccount">Account</span>
     </button>
   </nav>
@@ -1205,7 +1323,8 @@
 
   <!-- Order Success Modal -->
   <div class="modal-overlay" id="successModal" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
-    <div class="modal" style="text-align: center;">
+    <div class="modal" style="text-align: center; position: relative;">
+      <button class="modal-close-btn action-continue-shopping" data-modal="successModal" aria-label="Close order success modal" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted);">✕</button>
       <span style="font-size: 40px;">🎉</span>
       <h3 style="font-size: 18px; font-weight: 700; margin: 10px 0 6px;" id="successModalTitle">Order Placed Successfully!</h3>
       <p style="font-size: 13px; color: var(--muted); margin-bottom: 14px;" id="successOrderIdText">Order #</p>
@@ -1216,7 +1335,7 @@
         <a id="successWhatsappLink" target="_blank" class="btn" style="background: #25D366; color: #fff; text-decoration: none; min-height: 44px;" aria-label="Send order summary on WhatsApp">
           💬 Send Order Summary on WhatsApp
         </a>
-        <button class="btn btn-outline modal-close-btn" data-modal="successModal" aria-label="Continue shopping" style="min-height: 44px;">Continue Shopping</button>
+        <button type="button" class="btn btn-outline modal-close-btn action-continue-shopping" id="successContinueShopBtn" data-modal="successModal" aria-label="Continue shopping" style="min-height: 44px;">Continue Shopping</button>
       </div>
     </div>
   </div>
@@ -1741,6 +1860,16 @@
       document.getElementById('tScheduledDeliveryTitle').innerText = t.scheduledSlotHeading;
       document.getElementById('tScheduledDeliveryDesc').innerText = t.scheduledSlotSub;
       document.getElementById('ordersModalTitle').innerText = (lang === 'te' ? 'నా ఆర్డర్లు & లైవ్ ట్రాకింగ్' : 'My Orders & Live Tracking');
+
+      // Update Bottom Navigation labels & aria-labels
+      if (document.getElementById('tBnavHome')) document.getElementById('tBnavHome').innerText = t.bnavHome || (lang === 'te' ? 'హోమ్' : 'Home');
+      if (document.getElementById('tBnavCart')) document.getElementById('tBnavCart').innerText = t.bnavCart || (lang === 'te' ? 'కార్ట్' : 'Cart');
+      if (document.getElementById('tBnavOrders')) document.getElementById('tBnavOrders').innerText = t.bnavOrders || (lang === 'te' ? 'ఆర్డర్లు' : 'Orders');
+      if (document.getElementById('tBnavAccount')) document.getElementById('tBnavAccount').innerText = t.bnavAccount || (lang === 'te' ? 'ఖాతా' : 'Account');
+      if (document.getElementById('bnavHomeBtn')) document.getElementById('bnavHomeBtn').setAttribute('aria-label', t.bnavHome || (lang === 'te' ? 'హోమ్' : 'Home'));
+      if (document.getElementById('bnavCartBtn')) document.getElementById('bnavCartBtn').setAttribute('aria-label', t.bnavCart || (lang === 'te' ? 'కార్ట్' : 'Cart'));
+      if (document.getElementById('bnavOrdersBtn')) document.getElementById('bnavOrdersBtn').setAttribute('aria-label', t.bnavOrders || (lang === 'te' ? 'ఆర్డర్లు' : 'Orders'));
+      if (document.getElementById('bnavAccountBtn')) document.getElementById('bnavAccountBtn').setAttribute('aria-label', t.bnavAccount || (lang === 'te' ? 'ఖాతా' : 'Account'));
 
       checkStoreHours();
       renderCategoryChips();
@@ -2806,7 +2935,7 @@
             <div class="empty-icon">🛒</div>
             <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">${I18N[currentLang].emptyCartMsg}</h4>
             <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">${I18N[currentLang].emptyCartSub}</p>
-            <button class="btn btn-primary modal-close-btn" data-modal="cartDrawerModal" style="padding: 8px 18px; min-height: 44px;">${I18N[currentLang].startShopping}</button>
+            <button type="button" class="btn btn-primary modal-close-btn action-start-shopping" id="emptyCartShopBtn" data-modal="cartDrawerModal" style="padding: 8px 18px; min-height: 44px;">${I18N[currentLang].startShopping}</button>
           </div>
         `;
         return;
@@ -3683,12 +3812,14 @@
       if (el) {
         el.style.display = 'flex';
         document.body.classList.add('modal-open');
+        document.body.classList.add('overlay-open');
         if (id === 'loginModal') {
           document.body.classList.add('signin-open');
         }
         try {
           history.pushState({ modalId: id }, '');
         } catch (e) {}
+        syncBottomBar();
       }
     }
 
@@ -3702,15 +3833,28 @@
         ordersRef.off();
         ordersRef = null;
       }
+      if (id === 'successModal') {
+        navigateToHomeTop();
+        return;
+      }
+      if (id === 'cartDrawerModal' || id === 'ordersModal') {
+        if (currentNavTab === 'cart' || currentNavTab === 'orders') {
+          setActiveNavTab(previousNavTab || 'home', false);
+        }
+      }
       const anyOpen = Array.from(document.querySelectorAll('.modal-overlay')).some(m => m.style.display === 'flex' || m.style.display === 'block');
       if (!anyOpen) {
         document.body.classList.remove('modal-open');
+        if (currentNavTab === 'cart' || currentNavTab === 'orders') {
+          setActiveNavTab(previousNavTab || 'home', false);
+        }
       }
       if (!fromPopState && history.state && history.state.modalId === id) {
         try {
           history.back();
         } catch (e) {}
       }
+      syncBottomBar();
     }
 
     window.addEventListener('popstate', (e) => {
@@ -3719,6 +3863,7 @@
         const topModal = openModals[openModals.length - 1];
         closeModal(topModal.id, true);
       }
+      syncBottomBar();
     });
 
     document.querySelectorAll('.modal-close-btn').forEach(btn => {
@@ -3742,6 +3887,7 @@
         if (openModals.length > 0) {
           closeModal(openModals[openModals.length - 1].id);
         }
+        syncBottomBar();
       }
     });
 
@@ -3813,35 +3959,75 @@
       }
       currentNavTab = tab;
       document.querySelectorAll('.bottom-nav-item').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+        const isActive = (btn.getAttribute('data-tab') === tab);
+        btn.classList.toggle('active', isActive);
+        if (isActive) {
+          btn.setAttribute('aria-current', 'page');
+        } else {
+          btn.removeAttribute('aria-current');
+        }
       });
+    }
+
+    // CHANGE 2: Unified navigateToHomeTop (used by Home Tab, Start Shopping & Continue Shopping)
+    function navigateToHomeTop() {
+      // Close all overlays/modals
+      ['cartDrawerModal', 'checkoutModal', 'ordersModal', 'addressModal', 'loginModal', 'successModal', 'imageZoomModal'].forEach(m => {
+        const el = document.getElementById(m);
+        if (el && (el.style.display === 'flex' || el.style.display === 'block')) {
+          el.style.display = 'none';
+        }
+      });
+      document.body.classList.remove('modal-open');
+      document.body.classList.remove('overlay-open');
+      document.body.classList.remove('signin-open');
+
+      // Switch to Home view
+      const accountView = document.getElementById('accountView');
+      const homeView = document.getElementById('homeView');
+      if (accountView) accountView.style.display = 'none';
+      if (homeView) homeView.style.display = 'block';
+
+      // Highlight Home tab green
+      setActiveNavTab('home');
+
+      // Reset saved home scroll position
+      homeScrollY = 0;
+
+      // Smooth scroll to top of Home so first categories are visible
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const chipsBar = document.getElementById('categoryChipsBar');
+      if (chipsBar) chipsBar.scrollTo({ left: 0, behavior: 'smooth' });
+
+      syncBottomBar();
     }
 
     // Home Tab
     document.getElementById('bnavHomeBtn')?.addEventListener('click', () => {
       if (currentNavTab !== 'home') {
-        // Close any open overlays/modals
-        ['cartDrawerModal', 'ordersModal', 'addressModal', 'loginModal'].forEach(m => {
-          const el = document.getElementById(m);
-          if (el && (el.style.display === 'flex' || el.style.display === 'block')) {
-            closeModal(m);
-          }
-        });
-
-        // Switch to Home view
-        document.getElementById('accountView').style.display = 'none';
-        document.getElementById('homeView').style.display = 'block';
-        setActiveNavTab('home');
-
-        // Restore Home scroll position instantly
-        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-        window.scrollTo({ top: Math.min(homeScrollY, maxScroll), behavior: 'auto' });
+        navigateToHomeTop();
       } else {
         // Already on Home: smooth-scroll to top so first categories are in view & reset chips
         window.scrollTo({ top: 0, behavior: 'smooth' });
         const chipsBar = document.getElementById('categoryChipsBar');
         if (chipsBar) chipsBar.scrollTo({ left: 0, behavior: 'smooth' });
         homeScrollY = 0;
+      }
+    });
+
+    // CHANGE 2: Delegated clicks for Start Shopping & Continue Shopping
+    document.addEventListener('click', (e) => {
+      const startShop = e.target.closest('#emptyCartShopBtn, .action-start-shopping');
+      if (startShop) {
+        e.preventDefault();
+        navigateToHomeTop();
+        return;
+      }
+      const continueShop = e.target.closest('#successContinueShopBtn, .action-continue-shopping');
+      if (continueShop) {
+        e.preventDefault();
+        navigateToHomeTop();
+        return;
       }
     });
 
@@ -4580,22 +4766,94 @@
     });
 
 
-        // CHANGE 2: Failsafe MutationObserver ensuring bottom bar pops in whenever Sign In modal is not visible
-    const loginModalElement = document.getElementById('loginModal');
-    if (loginModalElement) {
-      const syncSigninState = () => {
-        const isVisible = (loginModalElement.style.display === 'flex' || loginModalElement.style.display === 'block');
-        if (isVisible) {
+    // ========================================================
+    // CHANGE 1: OVERLAY BOTTOM BAR SYNCHRONIZATION (SINGLE SOURCE OF TRUTH)
+    // ========================================================
+    let syncBottomBarRaf = null;
+
+    function isOverlayOpen(el) {
+      if (!el) return false;
+      if (el.hidden || el.getAttribute('aria-hidden') === 'true') return false;
+      if (el.style.display === 'none') return false;
+      if (el.classList.contains('hidden')) return false;
+      try {
+        const comp = window.getComputedStyle(el);
+        if (comp.display === 'none' || comp.visibility === 'hidden' || comp.opacity === '0') return false;
+      } catch (e) {}
+      return true;
+    }
+
+    function syncBottomBar() {
+      if (syncBottomBarRaf) {
+        cancelAnimationFrame(syncBottomBarRaf);
+      }
+      syncBottomBarRaf = requestAnimationFrame(() => {
+        syncBottomBarRaf = null;
+        const overlays = document.querySelectorAll(
+          '#cartDrawerModal, #checkoutModal, #addressModal, #successModal, #ordersModal, #loginModal, #imageZoomModal, .modal-overlay'
+        );
+        let anyOpen = false;
+        for (let i = 0; i < overlays.length; i++) {
+          if (isOverlayOpen(overlays[i])) {
+            anyOpen = true;
+            break;
+          }
+        }
+        if (anyOpen) {
+          document.body.classList.add('overlay-open');
           document.body.classList.add('signin-open');
         } else {
+          document.body.classList.remove('overlay-open');
           document.body.classList.remove('signin-open');
         }
-      };
-      const modalObserver = new MutationObserver(syncSigninState);
-      modalObserver.observe(loginModalElement, { attributes: true, attributeFilter: ['style', 'class'] });
+      });
     }
-    // Failsafe on page load
+
+    // Observe style, class, hidden, aria-hidden across all overlays
+    const overlayObserver = new MutationObserver(() => {
+      syncBottomBar();
+    });
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      overlayObserver.observe(el, {
+        attributes: true,
+        attributeFilter: ['style', 'class', 'hidden', 'aria-hidden']
+      });
+    });
+
+    // Observe body for dynamically created overlays
+    const bodyOverlayObserver = new MutationObserver((mutations) => {
+      let shouldSync = false;
+      mutations.forEach(m => {
+        if (m.type === 'childList') {
+          m.addedNodes.forEach(n => {
+            if (n.nodeType === 1) {
+              if (n.classList?.contains('modal-overlay')) {
+                overlayObserver.observe(n, { attributes: true, attributeFilter: ['style', 'class', 'hidden', 'aria-hidden'] });
+                shouldSync = true;
+              } else if (n.querySelector?.('.modal-overlay')) {
+                n.querySelectorAll('.modal-overlay').forEach(o => {
+                  overlayObserver.observe(o, { attributes: true, attributeFilter: ['style', 'class', 'hidden', 'aria-hidden'] });
+                });
+                shouldSync = true;
+              }
+            }
+          });
+        }
+      });
+      if (shouldSync) syncBottomBar();
+    });
+    bodyOverlayObserver.observe(document.body, { childList: true, subtree: true });
+
+    // Failsafe listeners: bar visible on page load & re-synced on visibility, popstate, pageshow
+    window.addEventListener('pageshow', () => syncBottomBar());
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) syncBottomBar(); });
+    window.addEventListener('popstate', () => syncBottomBar());
+    window.addEventListener('resize', () => syncBottomBar());
+
+    // Page load initialization
+    document.body.classList.remove('overlay-open');
     document.body.classList.remove('signin-open');
+    syncBottomBar();
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
