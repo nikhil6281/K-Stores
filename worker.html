@@ -477,6 +477,10 @@
     <div class="brand-wrap">
       <span class="brand-title">RA Store</span>
       <span class="brand-badge">STAFF</span>
+      <span id="connectionStatusPill" style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 6px; border-radius: 999px; background: #DCFCE7; color: #16A34A; font-weight: 700;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: #16A34A; display: inline-block;"></span>
+        <span id="connectionStatusText">Live</span>
+      </span>
     </div>
     <div class="top-controls">
       <button class="control-btn" id="wakeLockBtn" title="Keep Screen On">⚡ Screen Off</button>
@@ -809,6 +813,27 @@
     window.addEventListener('offline', () => {
       document.getElementById('offlineBar').style.display = 'block';
       updateDebugPanel();
+    });
+
+    // Realtime Database connection monitoring
+    db.ref('.info/connected').on('value', (snap) => {
+      const isConnected = snap.val() === true;
+      const pill = document.getElementById('connectionStatusPill');
+      const text = document.getElementById('connectionStatusText');
+      const dot = pill?.querySelector('span:first-child');
+      if (isConnected) {
+        if (pill) { pill.style.background = '#DCFCE7'; pill.style.color = '#16A34A'; }
+        if (dot) dot.style.background = '#16A34A';
+        if (text) text.innerText = 'Live';
+        document.getElementById('offlineBar').style.display = 'none';
+      } else {
+        if (pill) { pill.style.background = '#FEF3C7'; pill.style.color = '#B45309'; }
+        if (dot) dot.style.background = '#F59E0B';
+        if (text) text.innerText = 'Reconnecting...';
+        if (!navigator.onLine) {
+          document.getElementById('offlineBar').style.display = 'block';
+        }
+      }
     });
 
     // Web Audio Chime + Loop Alert
