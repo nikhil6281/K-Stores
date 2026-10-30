@@ -396,6 +396,50 @@
       line-height: 1;
       border: 1.5px solid #FFFFFF;
     }
+
+    /* CHANGE 2: Fixed bottom bar & floating action transitions during Sign In */
+    .mobile-bottom-nav,
+    .bottom-bar,
+    #unifiedHelpFab,
+    #floatingContactWrap {
+      transition: transform 220ms ease, visibility 220ms ease, opacity 220ms ease;
+      will-change: transform;
+    }
+
+    body.signin-open .mobile-bottom-nav,
+    body.signin-open .bottom-bar {
+      transform: translateY(calc(100% + env(safe-area-inset-bottom, 20px) + 30px)) !important;
+      pointer-events: none !important;
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    @media (min-width: 481px) {
+      body.signin-open .mobile-bottom-nav,
+      body.signin-open .bottom-bar {
+        transform: translate(-50%, calc(100% + env(safe-area-inset-bottom, 20px) + 30px)) !important;
+        pointer-events: none !important;
+        visibility: hidden;
+        opacity: 0;
+      }
+    }
+
+    body.signin-open #unifiedHelpFab,
+    body.signin-open #floatingContactWrap {
+      transform: translateY(140px) !important;
+      pointer-events: none !important;
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    /* Change 2: Sign In modal scrolling at 360px width with virtual keyboard */
+    #loginModal .modal {
+      max-height: 85dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
     .address-tag-badge {
       font-size: 10px;
       font-weight: 700;
@@ -1500,6 +1544,9 @@
         defaultBadge: "Default",
         setDefaultBtn: "Set Default",
         deleteAddrConfirm: "Delete this address?",
+        couldNotLoadItems: "Couldn't load items",
+        retryBtn: "Retry",
+        noItemsAvailable: "No items available right now",
       },
       te: {
         toggleText: "English",
@@ -1631,7 +1678,10 @@
         locErrInApp: "ఇన్-యాప్ బ్రౌజర్‌లో జీపీఎస్ బ్లాక్ కావచ్చు. పైన ⋮ మెనూ నొక్కి 'Open in Chrome' ఎంచుకోండి.",
         defaultBadge: "డిఫాల్ట్",
         setDefaultBtn: "డిఫాల్ట్‌గా ఉంచు",
-        deleteAddrConfirm: "ఈ చిరునామాను తొలగించాలనుకుంటున్నారా?"
+        deleteAddrConfirm: "ఈ చిరునామాను తొలగించాలనుకుంటున్నారా?",
+        couldNotLoadItems: "వస్తువులను లోడ్ చేయడం సాధ్యపడలేదు",
+        retryBtn: "మళ్ళీ ప్రయత్నించండి",
+        noItemsAvailable: "ప్రస్తుతం ఏ వస్తువులు అందుబాటులో లేవు"
       }
     };
 
@@ -1787,6 +1837,7 @@
     let phoneConfirmationResult = null;
     let resendTimerInterval = null;
     let pendingCheckoutAfterLogin = false;
+    let pendingOrdersAfterLogin = false;
 
     function sanitizeIndianPhone(raw) {
       if (!raw) return null;
@@ -1960,11 +2011,8 @@
 
     document.getElementById('loginBtn').addEventListener('click', openLoginModal);
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      auth.signOut().then(() => {
-        showToast("Signed out successfully");
-      });
-    });
+    // Header logout moved to Account tab view (#accountLogoutBtn)
+    document.getElementById('logoutBtn')?.addEventListener('click', () => { auth.signOut(); });
 
     auth.getRedirectResult().catch(() => {});
     auth.onAuthStateChanged(user => {
@@ -2003,6 +2051,10 @@
           pendingCheckoutAfterLogin = false;
           closeModal('loginModal');
           openCheckout();
+        } else if (pendingOrdersAfterLogin) {
+          pendingOrdersAfterLogin = false;
+          closeModal('loginModal');
+          openOrdersModal();
         }
       } else {
         if (loginBtn) {
@@ -2031,6 +2083,9 @@
           if (pendingCheckoutAfterLogin) {
             pendingCheckoutAfterLogin = false;
             openCheckout();
+          } else if (pendingOrdersAfterLogin) {
+            pendingOrdersAfterLogin = false;
+            openOrdersModal();
           }
         }
       } catch (err) {
@@ -2038,7 +2093,8 @@
       }
     }
 
-    document.getElementById('loginGoogleSecondaryBtn').addEventListener('click', loginGoogle);
+    document.getElementById('loginGoogleSecondaryBtn')?.addEventListener('click', loginGoogle);
+    document.getElementById('loginGoogleBtn')?.addEventListener('click', loginGoogle);
 
     db.ref('categories').on('value', snap => {
       categoriesCatalog = snap.val() || {};
@@ -2372,9 +2428,125 @@
     }
 
     // Render products: category sections in admin order (or flat search results)
+    // CHANGE 1: Safe Product Rendering & Catalog Timeout
+    let productsLoaded = false;
+    const SKELETON_CARDS_HTML = `
+      <div class="card skeleton-card" aria-hidden="true">
+        <div class="skeleton-box skeleton-img"></div>
+        <div class="skeleton-box" style="width: 80%; height: 13px; margin-top: 8px;"></div>
+        <div class="skeleton-box" style="width: 45%; height: 11px; margin-top: 6px;"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <div class="skeleton-box" style="width: 35px; height: 16px;"></div>
+          <div class="skeleton-box" style="width: 55px; height: 38px; border-radius: 8px;"></div>
+        </div>
+      </div>
+      <div class="card skeleton-card" aria-hidden="true">
+        <div class="skeleton-box skeleton-img"></div>
+        <div class="skeleton-box" style="width: 75%; height: 13px; margin-top: 8px;"></div>
+        <div class="skeleton-box" style="width: 50%; height: 11px; margin-top: 6px;"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <div class="skeleton-box" style="width: 35px; height: 16px;"></div>
+          <div class="skeleton-box" style="width: 55px; height: 38px; border-radius: 8px;"></div>
+        </div>
+      </div>
+      <div class="card skeleton-card" aria-hidden="true">
+        <div class="skeleton-box skeleton-img"></div>
+        <div class="skeleton-box" style="width: 85%; height: 13px; margin-top: 8px;"></div>
+        <div class="skeleton-box" style="width: 40%; height: 11px; margin-top: 6px;"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <div class="skeleton-box" style="width: 35px; height: 16px;"></div>
+          <div class="skeleton-box" style="width: 55px; height: 38px; border-radius: 8px;"></div>
+        </div>
+      </div>
+      <div class="card skeleton-card" aria-hidden="true">
+        <div class="skeleton-box skeleton-img"></div>
+        <div class="skeleton-box" style="width: 70%; height: 13px; margin-top: 8px;"></div>
+        <div class="skeleton-box" style="width: 55%; height: 11px; margin-top: 6px;"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <div class="skeleton-box" style="width: 35px; height: 16px;"></div>
+          <div class="skeleton-box" style="width: 55px; height: 38px; border-radius: 8px;"></div>
+        </div>
+      </div>
+    `;
+
+    let catalogTimeoutTimer = setTimeout(() => {
+      if (!productsLoaded) {
+        showCatalogLoadError();
+      }
+    }, 8000);
+
+    function showCatalogLoadError() {
+      const gridContainer = document.getElementById('productsGrid');
+      if (!gridContainer || productsLoaded) return;
+      const t = I18N[currentLang] || I18N.en;
+      gridContainer.className = 'grid';
+      gridContainer.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1; padding: 40px 16px; text-align: center;">
+          <div style="font-size: 36px; margin-bottom: 10px;">⚠️</div>
+          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">${escapeHtml(t.couldNotLoadItems || "Couldn't load items")}</h3>
+          <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Please check your connection and retry.</p>
+          <button type="button" class="btn btn-primary" id="retryCatalogLoadBtn" style="min-height: 42px; padding: 8px 20px; font-weight: 700;">
+            🔄 ${escapeHtml(t.retryBtn || "Retry")}
+          </button>
+        </div>
+      `;
+      document.getElementById('retryCatalogLoadBtn')?.addEventListener('click', () => {
+        gridContainer.innerHTML = SKELETON_CARDS_HTML;
+        clearTimeout(catalogTimeoutTimer);
+        catalogTimeoutTimer = setTimeout(() => {
+          if (!productsLoaded) showCatalogLoadError();
+        }, 8000);
+        db.ref('products').once('value').then(snap => {
+          if (snap.exists()) {
+            productsCatalog = snap.val() || {};
+            productsLoaded = true;
+            clearTimeout(catalogTimeoutTimer);
+            renderProducts();
+            updateCartUI();
+          } else {
+            productsLoaded = true;
+            clearTimeout(catalogTimeoutTimer);
+            renderProducts();
+          }
+        }).catch(err => {
+          console.error("Manual catalog fetch failed:", err);
+          showCatalogLoadError();
+        });
+      });
+    }
+
     function renderProducts() {
       const gridContainer = document.getElementById('productsGrid');
-      let allKeys = Object.keys(productsCatalog);
+      if (!gridContainer) return;
+
+      // Filter out invalid/malformed product entries safely
+      let allKeys = Object.keys(productsCatalog).filter(id => {
+        const p = productsCatalog[id];
+        if (!p || typeof p !== 'object') {
+          console.warn('[RA Store] Skipping invalid product object:', id);
+          return false;
+        }
+        const price = Number(p.price);
+        if (isNaN(price) || price < 0) {
+          console.warn('[RA Store] Skipping product with invalid price:', id, p);
+          return false;
+        }
+        return true;
+      });
+
+      // True empty catalog handling
+      if (allKeys.length === 0 && !searchQuery) {
+        const t = I18N[currentLang] || I18N.en;
+        gridContainer.className = 'grid';
+        gridContainer.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1; padding: 40px 16px; text-align: center;">
+            <div style="font-size: 36px; margin-bottom: 10px;">📦</div>
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">${escapeHtml(t.noItemsAvailable || "No items available right now")}</h3>
+            <p style="font-size: 12px; color: var(--muted);">Please check back in a few minutes.</p>
+          </div>
+        `;
+        return;
+      }
 
       if (searchQuery) {
         // Flat search results
@@ -2438,7 +2610,7 @@
         if (!catProducts.length) return;
 
         catProducts.forEach(id => categorizedProductIds.add(id));
-        const name = (currentLang === 'te' && cat.nameTe) ? cat.nameTe : cat.name;
+        const name = (currentLang === 'te' && cat.nameTe) ? cat.nameTe : (cat.name || 'Category');
 
         sectionsHtml += `
           <section id="cat-${escapeHtml(k)}" class="category-section" data-cat-id="${escapeHtml(k)}">
@@ -2471,7 +2643,8 @@
 
       if (!sectionsHtml) {
         gridContainer.className = 'grid';
-        gridContainer.innerHTML = `<p style="padding: 20px; color: var(--muted); text-align: center; grid-column: 1 / -1;">No products available right now.</p>`;
+        const t = I18N[currentLang] || I18N.en;
+        gridContainer.innerHTML = `<p style="padding: 20px; color: var(--muted); text-align: center; grid-column: 1 / -1;">${escapeHtml(t.noItemsAvailable || "No items available right now")}</p>`;
         return;
       }
 
@@ -3156,9 +3329,9 @@
     }
 
     // Phase 3: Order History & Status Timeline Stepper
-    document.getElementById('ordersNavBtn')?.addEventListener('click', () => {
+    function openOrdersModal() {
       if (!currentUser) {
-        pendingCheckoutAfterLogin = false;
+        pendingOrdersAfterLogin = true;
         openLoginModal();
         return;
       }
@@ -3349,7 +3522,8 @@
           `;
         }).join('');
       });
-    });
+    }
+    document.getElementById('ordersNavBtn')?.addEventListener('click', openOrdersModal);
 
     document.getElementById('customerOrdersList').addEventListener('click', async (e) => {
       // Reorder button on past orders
@@ -3509,6 +3683,9 @@
       if (el) {
         el.style.display = 'flex';
         document.body.classList.add('modal-open');
+        if (id === 'loginModal') {
+          document.body.classList.add('signin-open');
+        }
         try {
           history.pushState({ modalId: id }, '');
         } catch (e) {}
@@ -3518,6 +3695,9 @@
     function closeModal(id, fromPopState = false) {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
+      if (id === 'loginModal') {
+        document.body.classList.remove('signin-open');
+      }
       if (id === 'ordersModal' && ordersRef) {
         ordersRef.off();
         ordersRef = null;
@@ -4399,6 +4579,23 @@
       if (btn) btn.innerHTML = `<span>📍</span> <span>${I18N[currentLang]?.shareLocationBtn || "Share my location"}</span>`;
     });
 
+
+        // CHANGE 2: Failsafe MutationObserver ensuring bottom bar pops in whenever Sign In modal is not visible
+    const loginModalElement = document.getElementById('loginModal');
+    if (loginModalElement) {
+      const syncSigninState = () => {
+        const isVisible = (loginModalElement.style.display === 'flex' || loginModalElement.style.display === 'block');
+        if (isVisible) {
+          document.body.classList.add('signin-open');
+        } else {
+          document.body.classList.remove('signin-open');
+        }
+      };
+      const modalObserver = new MutationObserver(syncSigninState);
+      modalObserver.observe(loginModalElement, { attributes: true, attributeFilter: ['style', 'class'] });
+    }
+    // Failsafe on page load
+    document.body.classList.remove('signin-open');
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
