@@ -299,7 +299,13 @@
 <body>
 
   <div class="header">
-    <h1>RA Store <span>OWNER PORTAL</span></h1>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <h1 style="margin-bottom: 0;">RA Store <span>OWNER PORTAL</span></h1>
+      <span id="adminConnectionPill" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #DCFCE7; color: #16A34A; font-weight: 700;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: #16A34A; display: inline-block;"></span>
+        <span id="adminConnectionText">Live</span>
+      </span>
+    </div>
     <div id="authActions" style="display: none; align-items: center; gap: 12px;">
       <span id="userBadge" style="font-size: 13px; color: #9CA3AF;"></span>
       <button class="btn btn-outline" id="logoutBtn">Logout</button>
@@ -2685,20 +2691,33 @@
     });
 
     // Tab Navigation
-    document.querySelector('.tabs').addEventListener('click', (e) => {
-      if (e.target.classList.contains('tab-btn')) {
-        const t = e.target.getAttribute('data-tab');
+    document.querySelector('.tabs')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tab-btn');
+      if (btn) {
+        const t = btn.getAttribute('data-tab');
         ['alerts', 'orders', 'products', 'categories', 'customers', 'reports', 'misses', 'settings', 'staff'].forEach(tab => {
-          document.getElementById(tab + 'Tab').style.display = tab === t ? 'block' : 'none';
+          const el = document.getElementById(tab + 'Tab');
+          if (el) el.style.display = tab === t ? 'block' : 'none';
         });
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tab') === t));
       }
     });
 
-    document.querySelectorAll('.modal-close-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.getElementById(btn.getAttribute('data-modal')).style.display = 'none';
-      });
+    // Realtime Database connection listener
+    db.ref('.info/connected').on('value', (snap) => {
+      const isConnected = snap.val() === true;
+      const pill = document.getElementById('adminConnectionPill');
+      const text = document.getElementById('adminConnectionText');
+      const dot = pill?.querySelector('span:first-child');
+      if (isConnected) {
+        if (pill) { pill.style.background = '#DCFCE7'; pill.style.color = '#16A34A'; }
+        if (dot) dot.style.background = '#16A34A';
+        if (text) text.innerText = 'Live';
+      } else {
+        if (pill) { pill.style.background = '#FEF3C7'; pill.style.color = '#B45309'; }
+        if (dot) dot.style.background = '#F59E0B';
+        if (text) text.innerText = 'Reconnecting...';
+      }
     });
 
     function showToast(msg, allowUndo = false) {
