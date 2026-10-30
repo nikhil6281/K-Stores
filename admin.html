@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://checkout.razorpay.com https://accounts.google.com https://www.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https: wss: https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://ra-store-api.chowdarynikhil095.workers.dev https://api.razorpay.com; frame-src 'self' https://accounts.google.com https://*.firebaseapp.com https://api.razorpay.com https://www.google.com; img-src 'self' https: data: blob:;">
   <script src="config.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -268,6 +269,32 @@
       #printableSlip { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; font-family: monospace; }
     }
   </style>
+
+  <style id="adminMobileStyles">
+    @media (max-width: 640px) {
+      .tabs {
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+        position: sticky;
+        top: 0;
+        background: #F3F4F6;
+        z-index: 100;
+      }
+      .tab-btn {
+        padding: 10px 14px !important;
+        font-size: 13px !important;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+      }
+      .order-card {
+        padding: 12px !important;
+      }
+    }
+  </style>
+
 </head>
 <body>
 
@@ -555,6 +582,19 @@
             <label style="font-size: 12px; font-weight: 600;">Announcement Banner Text (Optional)</label>
             <input type="text" id="settingAnnouncement" placeholder="e.g. Fresh farm milk arrived today in Anantapur!">
           </div>
+          
+          <div style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="font-size: 12px; font-weight: 600;">Store Latitude</label>
+              <input type="text" id="settingStoreLat" placeholder="14.6819">
+            </div>
+            <div>
+              <label style="font-size: 12px; font-weight: 600;">Store Longitude</label>
+              <input type="text" id="settingStoreLng" placeholder="77.6006">
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline btn-small" id="btnUseCurrentStoreLocation" style="margin-bottom: 12px;">📍 Use My Current Location for Store</button>
+
           <button class="btn btn-primary" id="saveSettingsBtn">Save All Settings</button>
         </div>
       </div>
@@ -1034,6 +1074,7 @@
       const ordersLiveRef = db.ref('orders').limitToLast(200);
 
       ordersLiveRef.on('value', snap => {
+        document.getElementById('ordersList').classList.remove('loading');
         const val = snap.val() || {};
         allOrders = val;
 
@@ -2594,7 +2635,7 @@
       }
     });
 
-    document.getElementById('migrateCategoriesBtn').addEventListener('click', async () => {
+    document.getElementById('migrateCategoriesBtn')?.addEventListener('click', async () => {
       const defaultCatId = 'cat_general';
       await db.ref(`categories/${defaultCatId}`).set({ name: 'General', nameTe: 'ఇతరాలు', icon: '🛒', order: 1, active: true });
       for (const pId of Object.keys(allProducts)) {
@@ -2606,7 +2647,7 @@
     // =========================================================
     // SETTINGS SAVING (with safe 0 values for free delivery)
     // =========================================================
-    document.getElementById('btnUseCurrentStoreLocation').addEventListener('click', () => {
+    document.getElementById('btnUseCurrentStoreLocation')?.addEventListener('click', () => {
       if (!navigator.geolocation) {
         alert('Geolocation not supported in this browser');
         return;
