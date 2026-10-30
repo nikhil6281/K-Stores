@@ -1511,6 +1511,66 @@
 
     const WORKER_API = "https://ra-store-api.chowdarynikhil095.workers.dev";
 
+    // ========================================================
+    // STEP 2: HIDDEN DEBUG PANEL (Active only with ?debug=1 in URL)
+    // ========================================================
+    const isDebugMode = (new URLSearchParams(window.location.search)).get('debug') === '1';
+    let debugHudEl = null;
+    const debugState = {
+      firebaseInit: 'OK (firebase-compat 9.23.0)',
+      databaseURL: firebaseConfig.databaseURL,
+      authState: 'Initializing...',
+      readStarted: 'No',
+      rowsReceived: 0,
+      rowsAfterFilter: 0,
+      cardsAppended: 0,
+      firstCardHeight: '0px',
+      errorCode: 'None',
+      errorMessage: 'None'
+    };
+
+    function updateDebugHud() {
+      if (!isDebugMode) return;
+      if (!debugHudEl) {
+        debugHudEl = document.createElement('div');
+        debugHudEl.id = 'debugHud';
+        debugHudEl.style.cssText = 'position:fixed;top:64px;right:8px;z-index:99999;background:rgba(17,24,39,0.95);color:#E5E7EB;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;line-height:1.4;padding:10px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 10px 25px -5px rgba(0,0,0,0.5);max-width:320px;max-height:55vh;overflow-y:auto;pointer-events:auto;';
+        document.body.appendChild(debugHudEl);
+      }
+      debugHudEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #374151;padding-bottom:4px;margin-bottom:6px;">
+          <strong style="color:#10B981;font-size:11px;">🛠️ RA Store Debug Panel</strong>
+          <button onclick="document.getElementById('debugHud').remove()" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:12px;">✕</button>
+        </div>
+        <div><strong>Firebase Init:</strong> <span style="color:#34D399;">${escapeHtml(debugState.firebaseInit)}</span></div>
+        <div style="word-break:break-all;"><strong>databaseURL:</strong> <span style="color:#60A5FA;">${escapeHtml(debugState.databaseURL)}</span></div>
+        <div><strong>Auth State:</strong> <span style="color:#FBBF24;">${escapeHtml(debugState.authState)}</span></div>
+        <div><strong>Read Started:</strong> ${escapeHtml(debugState.readStarted)}</div>
+        <div><strong>Rows Received:</strong> <strong style="color:#34D399;">${debugState.rowsReceived}</strong></div>
+        <div><strong>Rows After Filter:</strong> <strong style="color:#34D399;">${debugState.rowsAfterFilter}</strong></div>
+        <div><strong>Cards Appended:</strong> ${debugState.cardsAppended}</div>
+        <div><strong>First Card Height:</strong> <strong style="color:#A78BFA;">${debugState.firstCardHeight}</strong></div>
+        ${debugState.errorCode !== 'None' ? `
+          <div style="margin-top:6px;padding:4px 6px;background:rgba(220,38,38,0.2);border-left:3px solid #EF4444;color:#FCA5A5;">
+            <strong>Error:</strong> [${escapeHtml(debugState.errorCode)}] ${escapeHtml(debugState.errorMessage)}
+          </div>
+        ` : '<div style="color:#9CA3AF;"><strong>Errors:</strong> None</div>'}
+      `;
+    }
+
+    function debugLog(key, value, isError = false) {
+      if (key in debugState) {
+        debugState[key] = value;
+      }
+      if (isError) {
+        console.error('[RA Store Debug - ' + key + ']', value);
+      } else {
+        console.log('[RA Store Debug - ' + key + ']', value);
+      }
+      updateDebugHud();
+    }
+    if (isDebugMode) updateDebugHud();
+
     let cart = JSON.parse(localStorage.getItem('ra_store_cart') || '{}');
     let productsCatalog = {};
     let categoriesCatalog = {};
@@ -2146,6 +2206,13 @@
     auth.getRedirectResult().catch(() => {});
     auth.onAuthStateChanged(user => {
       currentUser = user;
+      debugLog('authState', user ? (user.isAnonymous ? 'Anonymous' : (user.phoneNumber || user.email || user.uid)) : 'Signed out');
+
+      // Re-trigger catalog listeners if previously blocked by unauthenticated rules
+      if (!productsLoaded || Object.keys(productsCatalog).length === 0) {
+        initCatalogListeners();
+      }
+
       const loginBtn = document.getElementById('loginBtn');
       const headerCustName = document.getElementById('headerCustomerName');
 
@@ -2225,35 +2292,136 @@
     document.getElementById('loginGoogleSecondaryBtn')?.addEventListener('click', loginGoogle);
     document.getElementById('loginGoogleBtn')?.addEventListener('click', loginGoogle);
 
-    db.ref('categories').on('value', snap => {
-      categoriesCatalog = snap.val() || {};
-      renderCategoryChips();
-      renderProducts();
-    });
+    // ========================================================
+    // STEP 3: CATALOG PERSISTENCE, CACHE-FIRST HYDRATION & RTDB LISTENERS
+    // ========================================================
+    const CATALOG_CACHE_KEY = 'ra_store_catalog_cache';
+    const CATEGORIES_CACHE_KEY = 'ra_store_categories_cache';
+    let productsLoaded = false;
+    let catalogTimeoutTimer = null;
+    let productsListenerRef = null;
+    let categoriesListenerRef = null;
 
-    // Cart persistence & auto-revalidation against live products
-    db.ref('products').on('value', snap => {
-      productsCatalog = snap.val() || {};
-      let cartChanged = false;
-      Object.keys(cart).forEach(id => {
-        if (!productsCatalog[id]) {
-          delete cart[id];
-          cartChanged = true;
-        } else if (productsCatalog[id].inStock === false) {
-          delete cart[id];
-          cartChanged = true;
-          showToast(`"${productsCatalog[id].name || 'An item'}" went out of stock and was removed from cart.`);
+    // STEP 3: Cache-First Hydration - render instantly in 0ms if previous catalog is cached in localStorage
+    try {
+      const cachedCatalogStr = localStorage.getItem(CATALOG_CACHE_KEY);
+      if (cachedCatalogStr) {
+        const parsedCatalog = JSON.parse(cachedCatalogStr);
+        if (parsedCatalog && typeof parsedCatalog === 'object' && Object.keys(parsedCatalog).length > 0) {
+          productsCatalog = parsedCatalog;
+          debugLog('rowsReceived', Object.keys(parsedCatalog).length + ' (from localStorage cache)');
+        }
+      }
+      const cachedCategoriesStr = localStorage.getItem(CATEGORIES_CACHE_KEY);
+      if (cachedCategoriesStr) {
+        const parsedCats = JSON.parse(cachedCategoriesStr);
+        if (parsedCats && typeof parsedCats === 'object' && Object.keys(parsedCats).length > 0) {
+          categoriesCatalog = parsedCats;
+        }
+      }
+      if (Object.keys(productsCatalog).length > 0) {
+        renderCategoryChips();
+        renderProducts();
+      }
+    } catch (e) {
+      console.warn('[RA Store] Error reading catalog cache:', e);
+    }
+
+    // Set 8s failsafe timeout
+    catalogTimeoutTimer = setTimeout(() => {
+      if (!productsLoaded) {
+        debugLog('errorCode', 'TIMEOUT_8S', true);
+        debugLog('errorMessage', '8 seconds elapsed without live database response', true);
+        if (Object.keys(productsCatalog).length === 0) {
+          showCatalogLoadError();
+        }
+      }
+    }, 8000);
+
+    function initCatalogListeners() {
+      debugLog('readStarted', 'Yes (' + new Date().toLocaleTimeString() + ')');
+
+      // 1. Categories listener with error callback
+      if (categoriesListenerRef) categoriesListenerRef.off();
+      categoriesListenerRef = db.ref('categories');
+      categoriesListenerRef.on('value', snap => {
+        const val = snap.val() || {};
+        categoriesCatalog = val;
+        try { localStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify(val)); } catch (e) {}
+        renderCategoryChips();
+        renderProducts();
+      }, err => {
+        console.error('[RA Store] Categories listener error:', err);
+        debugLog('errorCode', err.code || 'CAT_ERR', true);
+        debugLog('errorMessage', err.message || 'Categories permission/network failure', true);
+      });
+
+      // 2. Products listener with error callback
+      if (productsListenerRef) productsListenerRef.off();
+      productsListenerRef = db.ref('products');
+      productsListenerRef.on('value', snap => {
+        const val = snap.val();
+        const count = (val && typeof val === 'object') ? Object.keys(val).length : 0;
+        debugLog('rowsReceived', count);
+        debugLog('errorCode', 'None');
+        debugLog('errorMessage', 'None');
+
+        if (val && typeof val === 'object') {
+          productsCatalog = val;
+          productsLoaded = true;
+          if (catalogTimeoutTimer) clearTimeout(catalogTimeoutTimer);
+
+          // Cache last good catalog in localStorage inside try/catch
+          try {
+            localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify(val));
+          } catch (e) {
+            console.warn('[RA Store] Error caching catalog:', e);
+          }
+        } else {
+          productsCatalog = {};
+          productsLoaded = true;
+          if (catalogTimeoutTimer) clearTimeout(catalogTimeoutTimer);
+        }
+
+        // Cart auto-revalidation against live products
+        let cartChanged = false;
+        Object.keys(cart).forEach(id => {
+          if (!productsCatalog[id]) {
+            delete cart[id];
+            cartChanged = true;
+          } else if (productsCatalog[id].inStock === false) {
+            delete cart[id];
+            cartChanged = true;
+            showToast(`"${productsCatalog[id].name || 'An item'}" went out of stock and was removed from cart.`);
+          }
+        });
+        if (cartChanged) saveCart();
+
+        renderCategoryChips();
+        renderProducts();
+        updateCartUI();
+        const drawer = document.getElementById('cartDrawerModal');
+        if (drawer && drawer.style.display === 'flex') {
+          renderCartDrawerItems();
+        }
+      }, err => {
+        console.error('[RA Store] Products listener error:', err);
+        debugLog('errorCode', err.code || 'PERMISSION_DENIED', true);
+        debugLog('errorMessage', err.message || 'Catalog read failed. Check Firebase Realtime Database rules.', true);
+        if (!productsLoaded && Object.keys(productsCatalog).length === 0) {
+          showCatalogLoadError(err.message);
         }
       });
-      if (cartChanged) saveCart();
+    }
 
-      renderCategoryChips();
-      renderProducts();
-      updateCartUI();
-      const drawer = document.getElementById('cartDrawerModal');
-      if (drawer && drawer.style.display === 'flex') {
-        renderCartDrawerItems();
-      }
+    // Initialize live listeners immediately
+    initCatalogListeners();
+
+    // Re-sync catalog automatically when network returns after being offline
+    window.addEventListener('online', () => {
+      debugLog('readStarted', 'Reloading (network online event)...');
+      showToast('Back online! Refreshing items...');
+      initCatalogListeners();
     });
 
     const lastOrder = JSON.parse(localStorage.getItem('ra_last_order') || 'null');
@@ -2556,9 +2724,7 @@
       `;
     }
 
-    // Render products: category sections in admin order (or flat search results)
-    // CHANGE 1: Safe Product Rendering & Catalog Timeout
-    let productsLoaded = false;
+    // SKELETON PLACEHOLDERS DURING INITIAL LOAD
     const SKELETON_CARDS_HTML = `
       <div class="card skeleton-card" aria-hidden="true">
         <div class="skeleton-box skeleton-img"></div>
@@ -2598,50 +2764,38 @@
       </div>
     `;
 
-    let catalogTimeoutTimer = setTimeout(() => {
-      if (!productsLoaded) {
-        showCatalogLoadError();
-      }
-    }, 8000);
-
-    function showCatalogLoadError() {
+    function showCatalogLoadError(customMsg) {
       const gridContainer = document.getElementById('productsGrid');
-      if (!gridContainer || productsLoaded) return;
+      if (!gridContainer) return;
+      // If we already have cached products rendered, do not destroy them
+      if (Object.keys(productsCatalog).length > 0) return;
+
       const t = I18N[currentLang] || I18N.en;
       gridContainer.className = 'grid';
       gridContainer.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1; padding: 40px 16px; text-align: center;">
           <div style="font-size: 36px; margin-bottom: 10px;">⚠️</div>
           <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">${escapeHtml(t.couldNotLoadItems || "Couldn't load items")}</h3>
-          <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Please check your connection and retry.</p>
+          <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">${customMsg ? escapeHtml(customMsg) : 'Please check your connection and retry.'}</p>
           <button type="button" class="btn btn-primary" id="retryCatalogLoadBtn" style="min-height: 42px; padding: 8px 20px; font-weight: 700;">
             🔄 ${escapeHtml(t.retryBtn || "Retry")}
           </button>
         </div>
       `;
-      document.getElementById('retryCatalogLoadBtn')?.addEventListener('click', () => {
+      document.getElementById('retryCatalogLoadBtn')?.addEventListener('click', retryCatalogFetch);
+    }
+
+    function retryCatalogFetch() {
+      const gridContainer = document.getElementById('productsGrid');
+      if (gridContainer && Object.keys(productsCatalog).length === 0) {
         gridContainer.innerHTML = SKELETON_CARDS_HTML;
-        clearTimeout(catalogTimeoutTimer);
-        catalogTimeoutTimer = setTimeout(() => {
-          if (!productsLoaded) showCatalogLoadError();
-        }, 8000);
-        db.ref('products').once('value').then(snap => {
-          if (snap.exists()) {
-            productsCatalog = snap.val() || {};
-            productsLoaded = true;
-            clearTimeout(catalogTimeoutTimer);
-            renderProducts();
-            updateCartUI();
-          } else {
-            productsLoaded = true;
-            clearTimeout(catalogTimeoutTimer);
-            renderProducts();
-          }
-        }).catch(err => {
-          console.error("Manual catalog fetch failed:", err);
-          showCatalogLoadError();
-        });
-      });
+      }
+      productsLoaded = false;
+      if (catalogTimeoutTimer) clearTimeout(catalogTimeoutTimer);
+      catalogTimeoutTimer = setTimeout(() => {
+        if (!productsLoaded && Object.keys(productsCatalog).length === 0) showCatalogLoadError();
+      }, 8000);
+      initCatalogListeners();
     }
 
     function renderProducts() {
@@ -2649,7 +2803,8 @@
       if (!gridContainer) return;
 
       // Filter out invalid/malformed product entries safely
-      let allKeys = Object.keys(productsCatalog).filter(id => {
+      const rawKeys = Object.keys(productsCatalog);
+      let allKeys = rawKeys.filter(id => {
         const p = productsCatalog[id];
         if (!p || typeof p !== 'object') {
           console.warn('[RA Store] Skipping invalid product object:', id);
@@ -2663,8 +2818,14 @@
         return true;
       });
 
+      debugLog('rowsAfterFilter', allKeys.length);
+
       // True empty catalog handling
       if (allKeys.length === 0 && !searchQuery) {
+        if (!productsLoaded) {
+          // Still waiting for initial response and no cache yet
+          return;
+        }
         const t = I18N[currentLang] || I18N.en;
         gridContainer.className = 'grid';
         gridContainer.innerHTML = `
@@ -2674,6 +2835,7 @@
             <p style="font-size: 12px; color: var(--muted);">Please check back in a few minutes.</p>
           </div>
         `;
+        debugLog('cardsAppended', '0 (Empty catalog)');
         return;
       }
 
@@ -2779,6 +2941,15 @@
 
       gridContainer.innerHTML = sectionsHtml;
       observeLazyImages();
+
+      // Debug panel metrics update
+      const totalCards = gridContainer.querySelectorAll('.card:not(.skeleton-card)').length;
+      debugLog('cardsAppended', totalCards + ' cards rendered');
+      requestAnimationFrame(() => {
+        const firstCard = gridContainer.querySelector('.card:not(.skeleton-card)');
+        const cardH = firstCard ? Math.round(firstCard.getBoundingClientRect().height) : 0;
+        debugLog('firstCardHeight', cardH + 'px');
+      });
     }
 
     // Tap to Zoom Image Handler
@@ -3905,23 +4076,7 @@
     document.getElementById('retryCatalogBtn')?.addEventListener('click', () => {
       const errBanner = document.getElementById('catalogErrorBanner');
       if (errBanner) errBanner.style.display = 'none';
-      const grid = document.getElementById('productsGrid');
-      if (grid) grid.innerHTML = `
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-      `;
-      db.ref('products').once('value').then(snap => {
-        allProducts = snap.val() || {};
-        try { localStorage.setItem('ra_store_catalog_cache', JSON.stringify(allProducts)); } catch(e){}
-        renderProducts();
-      }).catch(err => {
-        if (errBanner) {
-          document.getElementById('catalogErrorMessage').innerText = 'Connection error: ' + err.message;
-          errBanner.style.display = 'block';
-        }
-      });
+      retryCatalogFetch();
     });
 
     // Help FAB toggle
