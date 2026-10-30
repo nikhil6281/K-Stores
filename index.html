@@ -4,7 +4,7 @@
   <script src="config.js?v=20260418v6"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://checkout.razorpay.com https://accounts.google.com https://www.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https: wss: https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://ra-store-api.chowdarynikhil095.workers.dev https://api.razorpay.com; frame-src 'self' https://accounts.google.com https://*.firebaseapp.com https://api.razorpay.com https://www.google.com; img-src 'self' https: data: blob:;">
   
   <!-- SEO & Social Meta -->
   <title>RA Store — Fresh Groceries Delivered in Anantapur</title>
@@ -424,8 +424,79 @@
     }
 
   </style>
+
+  <style id="mobileFirstLayoutStyles">
+    /* Mobile-first 480px Centered Desktop Container (Step 3) */
+    @media (min-width: 481px) {
+      body {
+        background-color: #E2E8F0 !important;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        margin: 0;
+      }
+      #appWrapper {
+        width: 100%;
+        max-width: 480px;
+        min-height: 100vh;
+        background-color: #FFFFFF;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        position: relative;
+        margin: 0 auto;
+        overflow-x: hidden;
+      }
+      .bottom-nav, .cart-bar-sticky, #catalogErrorBanner, #offlineBanner {
+        max-width: 480px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+      }
+      .modal-overlay {
+        position: fixed;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        max-width: 480px !important;
+        width: 100% !important;
+      }
+      #unifiedHelpFab {
+        right: calc(50% - 225px) !important;
+      }
+    }
+
+    /* 2-Column Product Grid for Mobile */
+    .products-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 10px !important;
+      padding: 10px !important;
+    }
+    .product-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #fff;
+      touch-action: manipulation;
+    }
+    .product-card img {
+      width: 100%;
+      height: 110px;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+    .action-add-cart, .action-qty {
+      min-height: 44px !important;
+      min-width: 44px !important;
+      font-size: 14px !important;
+      font-weight: 700;
+    }
+  </style>
+
 </head>
 <body>
+  <div id="appWrapper">
 
   <div id="inAppBrowserBanner" class="inapp-banner">
     ⚠️ Using WhatsApp / Instagram? If Google Login doesn't open, tap <strong>⋮</strong> (top right) → <strong>Open in Chrome</strong>.
@@ -2061,12 +2132,14 @@
         return;
       }
 
-      if (e.target.classList.contains('action-add-cart')) {
+      const addBtn = e.target.closest('.action-add-cart');
+      if (addBtn) { const e = { target: addBtn };
         const id = e.target.getAttribute('data-id');
         cart[id] = 1;
         saveCart(id);
       }
-      if (e.target.classList.contains('action-qty')) {
+      const qtyBtn = e.target.closest('.action-qty');
+      if (qtyBtn) { const e = { target: qtyBtn };
         const id = e.target.getAttribute('data-id');
         const delta = parseInt(e.target.getAttribute('data-delta')) || 0;
         const currentQty = cart[id] || 0;
@@ -3105,8 +3178,6 @@
         }
       }
     });
-      }
-    });
 
     function showToast(msg) {
       const t = document.getElementById('toastMsg');
@@ -3118,9 +3189,66 @@
     if (currentLang !== 'en') applyLanguage(currentLang);
     else updateCartUI();
 
+    
+    document.getElementById('retryCatalogBtn')?.addEventListener('click', () => {
+      const errBanner = document.getElementById('catalogErrorBanner');
+      if (errBanner) errBanner.style.display = 'none';
+      const grid = document.getElementById('productsGrid');
+      if (grid) grid.innerHTML = `
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      `;
+      db.ref('products').once('value').then(snap => {
+        allProducts = snap.val() || {};
+        try { localStorage.setItem('ra_store_catalog_cache', JSON.stringify(allProducts)); } catch(e){}
+        renderProducts();
+      }).catch(err => {
+        if (errBanner) {
+          document.getElementById('catalogErrorMessage').innerText = 'Connection error: ' + err.message;
+          errBanner.style.display = 'block';
+        }
+      });
+    });
+
+    // Help FAB toggle
+    document.getElementById('helpFabTrigger')?.addEventListener('click', () => {
+      const menu = document.getElementById('helpFabMenu');
+      if (menu) menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#unifiedHelpFab')) {
+        const menu = document.getElementById('helpFabMenu');
+        if (menu) menu.style.display = 'none';
+      }
+    });
+
+    // Firebase .info/connected listener
+    db.ref('.info/connected').on('value', snap => {
+      const isOnline = !!snap.val();
+      const offlineBanner = document.getElementById('offlineNotice');
+      if (offlineBanner) {
+        offlineBanner.style.display = isOnline ? 'none' : 'block';
+      }
+    });
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
   </script>
+  </div>
+
+    <!-- Unified Help FAB (Call + WhatsApp - Non-blocking) -->
+    <div id="unifiedHelpFab" style="position: fixed; bottom: 74px; right: 14px; z-index: 990;">
+      <button id="helpFabTrigger" aria-label="Customer Support Help" style="border-radius: 50px; background: #0C831F; color: #fff; border: none; padding: 10px 16px; font-weight: 700; font-size: 13px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 6px; cursor: pointer; min-height: 44px;">
+        <span>💬 Help</span>
+      </button>
+      <div id="helpFabMenu" style="display: none; position: absolute; bottom: 52px; right: 0; background: #fff; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.18); padding: 8px; border: 1px solid var(--border); width: 170px; flex-direction: column; gap: 8px;">
+        <a id="helpCallLink" href="tel:6281730144" style="color: #1D4ED8; text-decoration: none; font-size: 13px; font-weight: 600; padding: 6px 8px; display: flex; align-items: center; gap: 6px; border-radius: 6px; background: #EFF6FF;">📞 Call Shop</a>
+        <a id="helpWaLink" href="https://wa.me/916281730144?text=Hello%20RA%20Store%2C%20I%20need%20help%20with%20my%20order." target="_blank" style="background: #25D366; color: #fff; text-decoration: none; font-size: 13px; font-weight: 600; padding: 6px 8px; display: flex; align-items: center; gap: 6px; border-radius: 6px;">💬 WhatsApp</a>
+      </div>
+    </div>
+
 </body>
 </html>
