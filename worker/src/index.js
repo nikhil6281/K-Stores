@@ -345,7 +345,7 @@ export default {
       }
 
       // 3b. POST /api/razorpay-callback (Redirect mode for in-app browsers)
-      if (pathname === '/api/razorpay-callback' && request.method === 'POST') {
+      if (pathname === '/api/razorpay-callback' && (request.method === 'POST' || request.method === 'GET')) {
         return await handleRazorpayCallback(request, env, cors);
       }
 
@@ -365,6 +365,10 @@ export default {
       }
 
       // 7. POST /api/admin/reconcile-order
+      if (pathname === '/api/admin/refund-mismatch' && request.method === 'POST') {
+        return await handleAdminRefundMismatch(request, env, cors);
+      }
+
       if (pathname === '/api/admin/reconcile-order' && request.method === 'POST') {
         return await handleAdminReconcileOrder(request, env, cors);
       }
@@ -517,6 +521,7 @@ async function handleCreateOrder(request, env, cors) {
     const amountPaise = Math.round(total * 100);
     const rzpOrder = await createRazorpayOrder(amountPaise, humanOrderId, env);
 
+    orderRecord.status = 'payment_pending';
     orderRecord.paymentStatus = 'pending';
     orderRecord.razorpayOrderId = rzpOrder.id;
     orderRecord.expiresAt = new Date(now.getTime() + 15 * 60 * 1000).toISOString();
@@ -1395,5 +1400,158 @@ async function handlePurgeOldDeliveryGeo(env) {
     }
   } catch (err) {
     console.warn('[DPDP Retention] Error purging old GPS coordinates:', err);
+  }
+}
+
+/**
+ * POST / GET /api/razorpay-callback
+ * Handles in-app browser redirect flow when external UPI apps switch.
+ */
+async function handleRazorpayCallback(request, env, cors) {
+  let razorpay_payment_id = '';
+  let razorpay_order_id = '';
+  let razorpay_signature = '';
+  let errorCode = '';
+
+  const contentType = request.headers.get('content-type') || '';
+  if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
+    try {
+      const formData = await request.formData();
+      razorpay_payment_id = formData.get('razorpay_payment_id') || '';
+      razorpay_order_id = formData.get('razorpay_order_id') || '';
+      razorpay_signature = formData.get('razorpay_signature') || '';
+      errorCode = formData.get('error[code]') || formData.get('error_code') || '';
+    } catch (_) {}
+  } else if (request.method === 'POST') {
+    try {
+      const json = await request.json();
+      razorpay_payment_id = json.razorpay_payment_id || '';
+      razorpay_order_id = json.razorpay_order_id || '';
+      razorpay_signature = json.razorpay_signature || '';
+      errorCode = json.error?.code || '';
+    } catch (_) {}
+  } else {
+    const url = new URL(request.url);
+    razorpay_payment_id = url.searchParams.get('razorpay_payment_id') || '';
+    razorpay_order_id = url.searchParams.get('razorpay_order_id') || '';
+    razorpay_signature = url.searchParams.get('razorpay_signature') || '';
+    errorCode = url.searchParams.get('error[code]') || '';
+  }
+
+  const clientBase = 'https://nikhil6281.github.io/K-Stores';
+
+  if (errorCode || (!razorpay_payment_id && !razorpay_order_id)) {
+    return Response.redirect(`${clientBase}/?payment_status=failed&reason=${encodeURIComponent(errorCode || 'cancelled')}`, 302);
+  }
+
+  // Signature check
+  const msg = `${razorpay_order_id}|${razorpay_payment_id}`;
+  const isValidSig = await verifyHmacSha256(env.RAZORPAY_KEY_SECRET, msg, razorpay_signature);
+
+  // Locate order in RTDB
+  const orders = await rtdbFetch(env, 'orders', 'GET') || {};
+  let targetKey = null;
+  let orderData = null;
+
+  for (const [k, ord] of Object.entries(orders)) {
+    if (ord.razorpayOrderId === razorpay_order_id) {
+      targetKey = k;
+      orderData = ord;
+      break;
+    }
+  }
+
+  if (!isValidSig) {
+    if (targetKey) {
+      await rtdbFetch(env, `orders/${targetKey}`, 'PATCH', {
+        paymentStatus: 'failed',
+        paymentMismatchNote: 'Callback signature mismatch',
+        updatedAt: new Date().toISOString()
+      });
+    }
+    return Response.redirect(`${clientBase}/?payment_status=invalid_signature`, 302);
+  }
+
+  const nowIso = new Date().toISOString();
+  if (targetKey && orderData) {
+    await rtdbFetch(env, `orders/${targetKey}`, 'PATCH', {
+      status: 'placed',
+      paymentStatus: 'paid',
+      paidAt: nowIso,
+      razorpayPaymentId: razorpay_payment_id,
+      updatedAt: nowIso
+    });
+    return Response.redirect(`${clientBase}/?order_success=${encodeURIComponent(orderData.id || targetKey)}&paid=1`, 302);
+  } else {
+    await rtdbFetch(env, `paymentMismatches/${razorpay_payment_id}`, 'PUT', {
+      paymentId: razorpay_payment_id,
+      razorpayOrderId: razorpay_order_id,
+      capturedAt: nowIso,
+      status: 'callback_unmatched',
+      resolved: false
+    });
+    return Response.redirect(`${clientBase}/?payment_status=pending_verification&payment_id=${encodeURIComponent(razorpay_payment_id)}`, 302);
+  }
+}
+
+/**
+ * POST /api/admin/refund-mismatch
+ * Admin 1-tap instant refund for orphaned / mismatched payments.
+ */
+async function handleAdminRefundMismatch(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearers+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) {
+    return jsonError('Unauthorized: valid Firebase login required', 'UNAUTHORIZED', 401, cors);
+  }
+
+  const admin = await isUserAdmin(user.uid, env);
+  if (!admin) {
+    return jsonError('Forbidden: owner/admin privilege required', 'FORBIDDEN', 403, cors);
+  }
+
+  const body = await request.json();
+  const { paymentId, mismatchKey, reason = 'Owner refunded mismatch' } = body;
+
+  if (!paymentId) {
+    return jsonError('Payment ID is required', 'INVALID_PARAMS', 400, cors);
+  }
+
+  try {
+    const refundRes = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}/refund`, {
+      method: 'POST',
+      headers: {
+        'Authorization': getRazorpayAuthHeader(env),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        notes: { reason, refundedBy: user.email || user.uid }
+      })
+    });
+
+    const refundData = await refundRes.json();
+    if (refundData.error) {
+      return jsonError(refundData.error.description || 'Razorpay refund failed', 'REFUND_FAILED', 400, cors);
+    }
+
+    const nowIso = new Date().toISOString();
+    const targetKey = mismatchKey || paymentId;
+    await rtdbFetch(env, `paymentMismatches/${targetKey}`, 'PATCH', {
+      resolved: true,
+      refundId: refundData.id,
+      refundStatus: 'processed',
+      refundedAt: nowIso,
+      updatedAt: nowIso
+    });
+
+    return jsonResponse({
+      success: true,
+      refundId: refundData.id,
+      paymentId: paymentId,
+      message: 'Refund initiated successfully via Razorpay'
+    }, 200, cors);
+  } catch (err) {
+    return jsonError(err.message || 'Refund error', 'SERVER_ERROR', 500, cors);
   }
 }

@@ -75,7 +75,7 @@
       ],
       ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true || query.orderByChild === 'uid' && query.equalTo === auth.uid)",
       "$orderId": {
-        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true || data.child('uid').val() === auth.uid)",
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('staff').child(auth.uid).child('active').val() === true && data.child('status').val() != 'delivered') || data.child('uid').val() === auth.uid)",
         ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('staff').child(auth.uid).child('active').val() === true && data.exists() && newData.exists() && newData.child('status').val() != 'cancelled' && newData.child('status').val() != 'delivered' && data.child('status').val() != 'cancelled'))",
         "packingChecks": {
           ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true)"
@@ -131,6 +131,12 @@
       "$missId": {
         ".write": "!data.exists() && newData.exists()",
         ".validate": "newData.hasChildren(['term', 'timestamp']) && newData.child('term').isString() && newData.child('term').val().length <= 60"
+      }
+    },
+    "paymentMismatches": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$paymentId": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
       }
     }
   }

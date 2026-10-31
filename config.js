@@ -22,27 +22,28 @@ const APP_CONFIG = {
     "Subhash Road",
     "Saptagiri Circle",
     "Rudrampeta",
-    "Kamalanagar"
+    "Kamalanagar",
+    "Old Town"
   ],
   landmarksTelugu: [
     "టవర్ క్లాక్",
     "సుభాష్ రోడ్డు",
     "సప్తగిరి సర్కిల్",
     "రుద్రంపేట",
-    "కమలానగర్"
+    "కమలానగర్",
+    "ఓల్డ్ టౌన్"
   ],
-  // Shop address placeholder until owner confirms exact storefront location
-  address: "Shop Address, Anantapur, Andhra Pradesh (Update in Store Settings)",
-  addressTelugu: "షాప్ చిరునామా, అనంతపురం, ఆంధ్రప్రదేశ్",
+  address: "Sri Sai General Store, Old Town, Anantapur, Andhra Pradesh - 515001",
+  addressTelugu: "శ్రీ సాయి జనరల్ స్టోర్, ఓల్డ్ టౌన్, అనంతపురం, ఆంధ్రప్రదేశ్ - 515001",
   phone: "6281730144",
   formattedPhone: "+91 62817 30144",
   whatsappNumber: "916281730144",
   supportEmail: "support@rastore.in",
   grievanceOfficer: {
-    name: "Store Manager",
+    name: "Somala Pandu Ranga Naidu",
     email: "grievance@rastore.in",
     phone: "+91 62817 30144",
-    address: "Anantapur, Andhra Pradesh - 515001"
+    address: "Sri Sai General Store, Old Town, Anantapur, Andhra Pradesh - 515001"
   },
   hours: "7:00 AM - 9:00 PM IST",
   hoursTelugu: "ఉదయం 7:00 AM నుండి రాత్రి 9:00 PM IST",
@@ -65,4 +66,3 @@ if (typeof window !== 'undefined') {
 if (typeof globalThis !== 'undefined') {
   globalThis.APP_CONFIG = APP_CONFIG;
 }
-
