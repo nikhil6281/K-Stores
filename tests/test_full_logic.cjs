@@ -1274,6 +1274,87 @@ it('M5.6: Safe CSV export sanitization & filename', () => {
   assert(!filename.includes('Sri_Sai'), 'Filename must not contain old brand');
 });
 
+
+// ========================================================
+// PWA & PWABUILDER AUDIT VERIFICATION
+// ========================================================
+
+it('PWA.1: Manifest JSON has all required Google Play Store & PWABuilder fields', () => {
+  const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+  assert.strictEqual(manifest.id, '/K-Stores/');
+  assert.strictEqual(manifest.start_url, '/K-Stores/index.html');
+  assert.strictEqual(manifest.scope, '/K-Stores/');
+  assert.strictEqual(manifest.display, 'standalone');
+  assert.strictEqual(manifest.orientation, 'portrait');
+  assert.strictEqual(manifest.theme_color, '#15803d');
+  assert.strictEqual(manifest.background_color, '#ffffff');
+  assert.strictEqual(manifest.lang, 'en-IN');
+  assert.strictEqual(manifest.dir, 'ltr');
+  assert.deepStrictEqual(manifest.categories, ['shopping', 'food', 'lifestyle']);
+  assert.strictEqual(manifest.prefer_related_applications, false);
+  assert.deepStrictEqual(manifest.display_override, ['window-controls-overlay', 'standalone', 'minimal-ui']);
+  assert.strictEqual(manifest.launch_handler.client_mode, 'navigate-existing');
+  assert.strictEqual(manifest.edge_side_panel.preferred_width, 400);
+
+  // Check icons
+  assert(Array.isArray(manifest.icons) && manifest.icons.length >= 3);
+  const icon192 = manifest.icons.find(i => i.sizes === '192x192' && i.purpose === 'any');
+  const icon512Any = manifest.icons.find(i => i.sizes === '512x512' && i.purpose === 'any');
+  const icon512Mask = manifest.icons.find(i => i.sizes === '512x512' && i.purpose === 'maskable');
+  assert(icon192, 'Missing 192x192 any icon');
+  assert(icon512Any, 'Missing 512x512 any icon');
+  assert(icon512Mask, 'Missing 512x512 maskable icon');
+
+  // Check screenshots
+  assert(Array.isArray(manifest.screenshots) && manifest.screenshots.length >= 2);
+  const narrow = manifest.screenshots.find(s => s.form_factor === 'narrow');
+  const wide = manifest.screenshots.find(s => s.form_factor === 'wide');
+  assert(narrow && narrow.sizes === '1080x1920', 'Missing 1080x1920 narrow screenshot');
+  assert(wide && wide.sizes === '1920x1080', 'Missing 1920x1080 wide screenshot');
+
+  // Check shortcuts
+  assert(Array.isArray(manifest.shortcuts) && manifest.shortcuts.length >= 2);
+});
+
+it('PWA.2: Real binary PNG icon and screenshot files exist with exact dimensions', () => {
+  const checks = [
+    { file: 'icon-192.png', w: 192, h: 192 },
+    { file: 'icon-512.png', w: 512, h: 512 },
+    { file: 'screenshot-narrow.png', w: 1080, h: 1920 },
+    { file: 'screenshot-wide.png', w: 1920, h: 1080 }
+  ];
+
+  for (const c of checks) {
+    assert(fs.existsSync(c.file), 'Missing file: ' + c.file);
+    const buf = fs.readFileSync(c.file);
+    const sig = buf.subarray(0, 8).toString('hex');
+    assert.strictEqual(sig, '89504e470d0a1a0a', c.file + ' must be valid PNG');
+    const w = buf.readUInt32BE(16);
+    const h = buf.readUInt32BE(20);
+    assert.strictEqual(w, c.w, c.file + ' width mismatch');
+    assert.strictEqual(h, c.h, c.file + ' height mismatch');
+  }
+});
+
+it('PWA.3: sw.js registers install, fetch, sync, periodicsync, push, and notificationclick', () => {
+  const swCode = fs.readFileSync('sw.js', 'utf8');
+  assert(swCode.includes("'install'"), 'sw.js missing install listener');
+  assert(swCode.includes("'fetch'"), 'sw.js missing fetch listener');
+  assert(swCode.includes("'sync'"), 'sw.js missing background sync listener');
+  assert(swCode.includes("'periodicsync'"), 'sw.js missing periodic sync listener');
+  assert(swCode.includes("'push'"), 'sw.js missing push listener');
+  assert(swCode.includes("'notificationclick'"), 'sw.js missing notificationclick listener');
+  assert(swCode.includes('./icon-192.png'), 'sw.js missing pre-cached icon-192.png');
+  assert(swCode.includes('./icon-512.png'), 'sw.js missing pre-cached icon-512.png');
+});
+
+it('PWA.4: index.html has manifest, apple-touch-icon, and theme-color links', () => {
+  const indexHtml = fs.readFileSync('index.html', 'utf8');
+  assert(indexHtml.includes('<link rel="manifest" href="./manifest.json">'));
+  assert(indexHtml.includes('<link rel="apple-touch-icon" href="./icon-192.png">'));
+  assert(indexHtml.includes('<meta name="theme-color" content="#15803d">'));
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');
