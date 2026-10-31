@@ -1,23 +1,95 @@
 {
-  "name": "RA Store — Anantapur",
+  "id": "/K-Stores/",
+  "name": "RA Store - Fresh Grocery Delivery",
   "short_name": "RA Store",
   "description": "Daily fresh grocery delivery in Anantapur, Andhra Pradesh",
-  "start_url": "./index.html",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "start_url": "/K-Stores/index.html",
+  "scope": "/K-Stores/",
   "display": "standalone",
-  "background_color": "#F8F9FA",
-  "theme_color": "#0C831F",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#15803d",
+  "categories": [
+    "shopping",
+    "food",
+    "lifestyle"
+  ],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%230C831F' rx='30'/%3E%3Ctext x='96' y='115' font-family='sans-serif' font-size='60' font-weight='bold' fill='%23F8CB46' text-anchor='middle'%3ERA%3C/text%3E%3C/svg%3E",
+      "src": "./icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230C831F' rx='80'/%3E%3Ctext x='256' y='300' font-family='sans-serif' font-size='160' font-weight='bold' fill='%23F8CB46' text-anchor='middle'%3ERA%3C/text%3E%3C/svg%3E",
+      "src": "./icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./screenshot-narrow.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "RA Store Mobile"
+    },
+    {
+      "src": "./screenshot-wide.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "RA Store Storefront"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Products",
+      "short_name": "Products",
+      "description": "View daily fresh vegetables, fruits and groceries",
+      "url": "/K-Stores/index.html",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "My Orders",
+      "short_name": "Orders",
+      "description": "Check order status and tracking",
+      "url": "/K-Stores/index.html#orders",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
