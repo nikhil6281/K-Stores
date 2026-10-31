@@ -1355,6 +1355,34 @@ it('PWA.4: index.html has manifest, apple-touch-icon, and theme-color links', ()
   assert(indexHtml.includes('<meta name="theme-color" content="#15803d">'));
 });
 
+
+// ========================================================
+// PHASE 1: STORE PROFILE & PAYMENT FLOW TESTS
+// ========================================================
+
+it('P1.1: Store profile has real Anantapur address and Grievance Officer name', () => {
+  const config = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  require('../config.js');
+  const cfg = globalThis.APP_CONFIG;
+  assert(cfg.address.includes('Sri Sai General Store, Old Town, Anantapur'), 'Address must contain Sri Sai General Store, Old Town');
+  assert.strictEqual(cfg.grievanceOfficer.name, 'Somala Pandu Ranga Naidu');
+  assert.strictEqual(cfg.hours, '7:00 AM - 9:00 PM IST');
+});
+
+it('P1.2: Database rules enforce staff read isolation on delivered orders', () => {
+  const rules = JSON.parse(fs.readFileSync('database.rules.json', 'utf8'));
+  const orderRead = rules.rules.orders["$orderId"][".read"];
+  assert(orderRead.includes("data.child('status').val() != 'delivered'"), 'Staff must lose read access once order is delivered');
+  assert(rules.rules.paymentMismatches, 'Must have paymentMismatches security rule');
+});
+
+it('P1.3: Worker backend contains callback handler and refund-mismatch endpoint', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('handleRazorpayCallback'), 'worker must implement handleRazorpayCallback');
+  assert(workerCode.includes('handleAdminRefundMismatch'), 'worker must implement handleAdminRefundMismatch');
+  assert(workerCode.includes("status = 'payment_pending'"), 'worker must set status: payment_pending on online order creation');
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');

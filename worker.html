@@ -775,7 +775,10 @@
     }
 
     function updateDebugPanel(info = {}) {
-      if (!window.location.search.includes('debug=1')) return;
+      if (!window.location.search.includes('debug=1') || !currentUser) {
+        document.getElementById('debugPanel').style.display = 'none';
+        return;
+      }
       document.getElementById('debugPanel').style.display = 'block';
       if (info.authState) document.getElementById('dbgAuthState').innerText = info.authState;
       if (info.user) document.getElementById('dbgUser').innerText = info.user;
