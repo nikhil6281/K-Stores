@@ -1,0 +1,224 @@
+{
+  "version": 20261101,
+  "store": "RA Store",
+  "city": "Anantapur",
+  "settings": {
+    "deliveryFee": 25,
+    "freeDeliveryThreshold": 299,
+    "minOrderValue": 50,
+    "storeHours": {
+      "mode": "auto",
+      "open": "07:00",
+      "close": "21:00"
+    }
+  },
+  "categories": {
+    "cat_veg": {
+      "id": "cat_veg",
+      "name": "Vegetables & Fruits",
+      "nameTe": "కూరగాయలు & పండ్లు"
+    },
+    "cat_dairy": {
+      "id": "cat_dairy",
+      "name": "Dairy & Breakfast",
+      "nameTe": "పాలు & అల్పాహారం"
+    },
+    "cat_staples": {
+      "id": "cat_staples",
+      "name": "Rice, Atta & Dals",
+      "nameTe": "బియ్యం, పిండి & పప్పులు"
+    },
+    "cat_oils": {
+      "id": "cat_oils",
+      "name": "Oils & Masalas",
+      "nameTe": "నూనెలు & మసాలాలు"
+    },
+    "cat_snacks": {
+      "id": "cat_snacks",
+      "name": "Snacks & Drinks",
+      "nameTe": "స్నాక్స్ & పానీయాలు"
+    }
+  },
+  "products": {
+    "prod_tomatoes": {
+      "id": "prod_tomatoes",
+      "name": "Hybrid Fresh Tomatoes",
+      "nameTe": "తాజా టమోటాలు",
+      "price": 38,
+      "mrp": 50,
+      "unit": "1 kg",
+      "category": "cat_veg",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_onions": {
+      "id": "prod_onions",
+      "name": "Fresh Red Onions",
+      "nameTe": "ఎర్ర ఉల్లిపాయలు",
+      "price": 35,
+      "mrp": 45,
+      "unit": "1 kg",
+      "category": "cat_veg",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_potatoes": {
+      "id": "prod_potatoes",
+      "name": "Fresh Potatoes (Bangaladumpa)",
+      "nameTe": "బంగాళాదుంపలు",
+      "price": 32,
+      "mrp": 40,
+      "unit": "1 kg",
+      "category": "cat_veg",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_chillies": {
+      "id": "prod_chillies",
+      "name": "Fresh Green Chillies",
+      "nameTe": "పచ్చిమిరపకాయలు",
+      "price": 20,
+      "mrp": 30,
+      "unit": "250 g",
+      "category": "cat_veg",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_bananas": {
+      "id": "prod_bananas",
+      "name": "Robusta Fresh Bananas",
+      "nameTe": "తాజా అరటిపండ్లు",
+      "price": 60,
+      "mrp": 70,
+      "unit": "1 dozen",
+      "category": "cat_veg",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_spinach": {
+      "id": "prod_spinach",
+      "name": "Farm Fresh Spinach (Palak)",
+      "nameTe": "పాలకూర కట్ట",
+      "price": 20,
+      "mrp": 25,
+      "unit": "1 bunch",
+      "category": "cat_veg",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_milk": {
+      "id": "prod_milk",
+      "name": "Toned Fresh Milk",
+      "nameTe": "తాజా పాలు",
+      "price": 34,
+      "mrp": 36,
+      "unit": "500 ml",
+      "category": "cat_dairy",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_curd": {
+      "id": "prod_curd",
+      "name": "Fresh Pouch Curd (Perugu)",
+      "nameTe": "తాజా పెరుగు",
+      "price": 35,
+      "mrp": 38,
+      "unit": "450 g",
+      "category": "cat_dairy",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_paneer": {
+      "id": "prod_paneer",
+      "name": "Malai Fresh Paneer",
+      "nameTe": "మలై పనీర్",
+      "price": 95,
+      "mrp": 110,
+      "unit": "200 g",
+      "category": "cat_dairy",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_eggs": {
+      "id": "prod_eggs",
+      "name": "Farm Fresh White Eggs",
+      "nameTe": "కోడిగుడ్లు",
+      "price": 42,
+      "mrp": 48,
+      "unit": "6 pcs",
+      "category": "cat_dairy",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_rice_5kg": {
+      "id": "prod_rice_5kg",
+      "name": "Premium Sona Masoori Rice",
+      "nameTe": "సోనా మసూరి బియ్యం",
+      "price": 340,
+      "mrp": 390,
+      "unit": "5 kg",
+      "category": "cat_staples",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_atta_5kg": {
+      "id": "prod_atta_5kg",
+      "name": "Aashirvaad Shudh Chakki Atta",
+      "nameTe": "గోధుమ పిండి",
+      "price": 245,
+      "mrp": 275,
+      "unit": "5 kg",
+      "category": "cat_staples",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_toor_dal": {
+      "id": "prod_toor_dal",
+      "name": "Premium Unpolished Toor Dal (Kandi Pappu)",
+      "nameTe": "కందిపప్పు",
+      "price": 165,
+      "mrp": 190,
+      "unit": "1 kg",
+      "category": "cat_staples",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_oil_1l": {
+      "id": "prod_oil_1l",
+      "name": "Freedom Refined Sunflower Oil",
+      "nameTe": "సన్‌ఫ్లవర్ నూనె",
+      "price": 138,
+      "mrp": 155,
+      "unit": "1 L pouch",
+      "category": "cat_oils",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    },
+    "prod_tea": {
+      "id": "prod_tea",
+      "name": "Red Label Strong Tea",
+      "nameTe": "రెడ్ లేబుల్ టీ పొడి",
+      "price": 130,
+      "mrp": 150,
+      "unit": "250 g",
+      "category": "cat_snacks",
+      "inStock": true,
+      "image": "",
+      "hasImage": false
+    }
+  }
+}

@@ -1037,7 +1037,7 @@
       <!-- Free Delivery Progress Bar -->
       <div class="delivery-progress-wrap" id="cartFreeDeliveryBarWrap">
         <div class="delivery-progress-label">
-          <span id="cartFreeDeliveryMsg">Add ₹299 more for Free Delivery</span>
+          <span id="cartFreeDeliveryMsg">Add items to qualify for Free Delivery</span>
           <span id="cartFreeDeliveryPercent" style="font-weight: 700;">0%</span>
         </div>
         <div class="delivery-progress-track">
@@ -1059,7 +1059,7 @@
           </div>
           <div class="bill-row">
             <span style="color: var(--muted);" id="tDrawerDeliveryFee">Delivery Fee</span>
-            <span id="cartDrawerDeliveryFee" style="font-weight: 600;">₹25</span>
+            <span id="cartDrawerDeliveryFee" style="font-weight: 600;">—</span>
           </div>
           <div class="bill-row bill-row-total">
             <span id="tDrawerTotal">Total Amount</span>
@@ -1261,7 +1261,7 @@
           </div>
           <div class="bill-row">
             <span style="color: var(--muted);" id="tCheckoutDelivery">Delivery Fee</span>
-            <span id="modalDelivery" style="font-weight: 600;">₹25</span>
+            <span id="modalDelivery" style="font-weight: 600;">—</span>
           </div>
           <div class="bill-row bill-row-total">
             <span id="tCheckoutTotal">Total to Pay</span>
@@ -2310,6 +2310,18 @@
     let categoriesListenerRef = null;
 
     // STEP 3: Cache-First Hydration - render instantly in 0ms if previous catalog is cached in localStorage
+    if (!localStorage.getItem(CATALOG_CACHE_KEY)) {
+      fetch('./catalog.json').then(r => r.json()).then(data => {
+        if (data && data.products && Object.keys(productsCatalog).length === 0) {
+          productsCatalog = data.products;
+          if (data.categories) categoriesCatalog = data.categories;
+          if (data.settings) storeSettings = { ...storeSettings, ...data.settings };
+          productsLoaded = true;
+          renderCategoryChips();
+          renderProducts();
+        }
+      }).catch(() => {});
+    }
     try {
       const cachedCatalogStr = localStorage.getItem(CATALOG_CACHE_KEY);
       if (cachedCatalogStr) {

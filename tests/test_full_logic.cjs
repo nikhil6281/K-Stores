@@ -1383,6 +1383,36 @@ it('P1.3: Worker backend contains callback handler and refund-mismatch endpoint'
   assert(workerCode.includes("status = 'payment_pending'"), 'worker must set status: payment_pending on online order creation');
 });
 
+
+// ========================================================
+// PHASE 2: CATALOG CACHING & PERFORMANCE TESTS
+// ========================================================
+
+it('P2.1: Static catalog.json exists with valid products and settings', () => {
+  assert(fs.existsSync('catalog.json'), 'catalog.json must exist in root');
+  assert(fs.existsSync('public/catalog.json'), 'public/catalog.json must exist');
+  const cat = JSON.parse(fs.readFileSync('catalog.json', 'utf8'));
+  assert(cat.products && Object.keys(cat.products).length >= 10, 'Must have at least 10 products');
+  assert(cat.settings && cat.settings.deliveryFee === 25, 'Settings must specify deliveryFee');
+});
+
+it('P2.2: Empty cart delivery fee in HTML is not hardcoded to Rs 25', () => {
+  const html = fs.readFileSync('index.html', 'utf8');
+  assert(html.includes('<span id="cartDrawerDeliveryFee" style="font-weight: 600;">—</span>'), 'Empty drawer fee must be —');
+  assert(html.includes('<span id="modalDelivery" style="font-weight: 600;">—</span>'), 'Empty modal fee must be —');
+});
+
+it('P2.3: Worker backend implements handleGetCatalog and /api/catalog', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('handleGetCatalog'), 'worker must implement handleGetCatalog');
+  assert(workerCode.includes('/api/catalog'), 'worker must route /api/catalog');
+});
+
+it('P2.4: Service worker pre-caches catalog.json', () => {
+  const swCode = fs.readFileSync('sw.js', 'utf8');
+  assert(swCode.includes('./catalog.json'), 'sw.js must pre-cache ./catalog.json');
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');
