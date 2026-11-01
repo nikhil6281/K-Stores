@@ -23,3 +23,4 @@ if (fs.existsSync(root404)) {
 }
 
 console.log('✅ Build output ready in dist/');
+

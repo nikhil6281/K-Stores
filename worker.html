@@ -703,9 +703,10 @@
       authDomain: "k-store-ae9dd.firebaseapp.com",
       databaseURL: "https://k-store-ae9dd-default-rtdb.firebaseio.com",
       projectId: "k-store-ae9dd",
-      storageBucket: "k-store-ae9dd.appspot.com",
-      messagingSenderId: "117073811544",
-      appId: "1:117073811544:web:8669ae4eb8b80fc28d3e6e"
+      storageBucket: "k-store-ae9dd.firebasestorage.app",
+      messagingSenderId: "836118831556",
+      appId: "1:836118831556:web:252f2b36309ef7ed220491",
+      measurementId: "G-XER98BP06Y"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -1174,7 +1175,7 @@
       if (typeof isCompleted === 'undefined') isCompleted = false;
       const isCod = o.paymentMethod === 'cod';
       const isPaid = o.paymentStatus === 'paid';
-      const isMorning = !!o.scheduledSlot;
+      const isMorning = !!(o.scheduledSlot || (o.customer && o.customer.scheduledSlot));
       const isCancelled = o.status === 'cancelled';
 
       const items = Array.isArray(o.items) ? o.items : [];

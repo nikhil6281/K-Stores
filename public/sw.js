@@ -6,10 +6,15 @@
  * - Background Sync (sync)
  * - Periodic Background Sync (periodicsync)
  * - Web Push (push) & Notification Click (notificationclick)
- * CRITICAL RULE: Only cache same-origin GET requests. Never cache /worker, /admin.html, Firebase, Auth, Razorpay, or API requests.
+ *
+ * CRITICAL EXCLUSION RULES:
+ * - Completely excludes /admin, /worker, /staff, admin.html, and worker.html.
+ * - Completely excludes all Firebase, Firestore, Google Auth, Razorpay, and API requests.
+ * - Uses Network-First caching strategy for all HTML and JS files so updates are immediately visible.
+ * - Automatically purges any previous cache versions.
  */
 
-const CACHE_NAME = 'ra-store-shell-v9';
+const CACHE_NAME = 'ra-store-shell-v10';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -20,7 +25,7 @@ const SHELL_ASSETS = [
   './offline.html'
 ];
 
-// 1. Install Event: Pre-cache essential shell assets
+// 1. Install Event: Pre-cache essential shell assets & skip waiting
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -32,12 +37,17 @@ self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 
-// 2. Activate Event: Clean old cache versions and claim clients
+// 2. Activate Event: Automatically delete ALL old cache versions and claim clients
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log('[SW] Purging outdated cache:', key);
+            return caches.delete(key);
+          }
+        })
       );
     })
   );
@@ -51,7 +61,7 @@ self.addEventListener('message', (e) => {
   }
 });
 
-// 4. Fetch Event
+// 4. Fetch Event: Network-First for HTML/JS, complete bypass for Admin/Staff/APIs
 self.addEventListener('fetch', (e) => {
   // Only handle GET requests
   if (e.request.method !== 'GET') return;
@@ -61,34 +71,63 @@ self.addEventListener('fetch', (e) => {
   // ONLY handle same-origin requests
   if (url.origin !== self.location.origin) return;
 
-  // NEVER cache Staff, Admin, or API endpoints
+  const host = url.hostname.toLowerCase();
+  const path = url.pathname.toLowerCase();
+
+  // Completely exclude all Firebase, Firestore, Google Auth, Razorpay, or Worker API requests
   if (
-    url.pathname.includes('/worker') ||
-    url.pathname.includes('/admin') ||
-    url.pathname.includes('/api/') ||
-    url.pathname.includes('catalog.json')
+    host.includes('firebase') ||
+    host.includes('googleapis') ||
+    host.includes('razorpay') ||
+    host.includes('workers.dev') ||
+    host.includes('gstatic')
   ) {
-    return; // Pass directly to network
+    return; // Pass through to network
   }
 
-  // Navigation / HTML requests: Network-first with offline fallback
-  if (e.request.mode === 'navigate' || e.request.destination === 'document') {
+  // COMPLETELY EXCLUDE admin.html, worker.html, /worker, /admin, /staff, catalog.json, and /api/
+  // They must open directly in standard browser tabs without any Service Worker caching or navigation fallback
+  if (
+    path.includes('admin') ||
+    path.includes('worker') ||
+    path.includes('staff') ||
+    path.includes('/api/') ||
+    path.includes('catalog.json')
+  ) {
+    return; // Direct network passthrough
+  }
+
+  const isHtmlOrJs =
+    e.request.mode === 'navigate' ||
+    e.request.destination === 'document' ||
+    e.request.destination === 'script' ||
+    path.endsWith('.html') ||
+    path.endsWith('.js') ||
+    path === '/' ||
+    path.endsWith('/k-stores/') ||
+    path.endsWith('/k-stores');
+
+  // Network-First Strategy for all HTML & JavaScript files
+  if (isHtmlOrJs) {
     e.respondWith(
       fetch(e.request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
           }
-          return response;
+          return networkResponse;
         })
         .catch(async () => {
+          // Fall back to cache only when offline
           const cached = await caches.match(e.request);
           if (cached) return cached;
-          const fallback = await caches.match('./offline.html');
-          if (fallback) return fallback;
-          const indexFallback = await caches.match('./index.html');
-          if (indexFallback) return indexFallback;
+          if (e.request.mode === 'navigate' || e.request.destination === 'document') {
+            const offlinePage = await caches.match('./offline.html');
+            if (offlinePage) return offlinePage;
+            const indexFallback = await caches.match('./index.html');
+            if (indexFallback) return indexFallback;
+          }
           return new Response(
             '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>RA Store - Offline</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:sans-serif;text-align:center;padding:48px 20px;background:#f8fafc;color:#1e293b}h1{color:#15803d;margin-bottom:12px}p{color:#64748b;margin-bottom:24px}button{background:#15803d;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:600}</style></head><body><h1>You are Offline</h1><p>RA Store needs an active internet connection to show fresh stock and process orders.</p><button onclick="window.location.reload()">Retry Connection</button></body></html>',
             { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
@@ -98,7 +137,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Static Assets (CSS, JS, Fonts, Images): Stale-while-revalidate
+  // Static Assets (Images, Icons, Fonts): Stale-while-revalidate
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const fetchPromise = fetch(e.request)
@@ -151,16 +190,16 @@ self.addEventListener('push', (e) => {
 // 8. Notification Click
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
-  const targetUrl = (e.notification.data && e.notification.data.url) ? e.notification.data.url : './';
+  const urlToOpen = (e.notification.data && e.notification.data.url) || './';
   e.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url === targetUrl && 'focus' in client) {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (let client of windowClients) {
+        if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
+        return clients.openWindow(urlToOpen);
       }
     })
   );
