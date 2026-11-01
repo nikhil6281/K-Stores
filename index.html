@@ -2281,7 +2281,15 @@
         if (isInApp) {
           await auth.signInWithRedirect(provider);
         } else {
-          await auth.signInWithPopup(provider);
+          try {
+            await auth.signInWithPopup(provider);
+          } catch (popupErr) {
+            if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
+              await auth.signInWithRedirect(provider);
+              return;
+            }
+            throw popupErr;
+          }
           closeModal('loginModal');
           if (pendingCheckoutAfterLogin) {
             pendingCheckoutAfterLogin = false;
