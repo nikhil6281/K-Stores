@@ -557,7 +557,7 @@
             </div>
             <div>
               <label style="font-size: 12px; font-weight: 600;">Closing Time (IST)</label>
-              <input type="time" id="settingCloseTime" value="19:00">
+              <input type="time" id="settingCloseTime" value="21:00">
             </div>
           </div>
           <div style="margin-bottom: 12px;">
@@ -771,10 +771,10 @@
           <label>Google Account Email</label>
           <input type="email" id="staffEmail" required placeholder="staff.member@gmail.com">
         </div>
-        <div class="form-group">
-          <label>Google Account UID</label>
-          <input type="text" id="staffUid" required placeholder="Firebase UID of Google Account">
-          <small style="font-size: 11px; color: var(--muted); display: block; margin-top: 2px;">Find this in Firebase Authentication Console for this user.</small>
+        <div class="form-group" id="staffUidGroup">
+          <label>Google Account UID <span style="font-weight: normal; color: var(--muted);">(Optional - auto-links on staff sign-in via email/phone)</span></label>
+          <input type="text" id="staffUid" placeholder="Auto-generated if left blank">
+          <small style="font-size: 11px; color: var(--muted); display: block; margin-top: 2px;">Leave blank: staff will automatically link when they sign in with their email or phone.</small>
         </div>
         <div class="form-group">
           <label>Phone Number (Optional)</label>
@@ -1052,14 +1052,22 @@
 
     document.getElementById('staffForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const uid = document.getElementById('staffUid').value.trim();
+      let uid = document.getElementById('editStaffUid').value.trim() || document.getElementById('staffUid').value.trim();
       const name = document.getElementById('staffName').value.trim();
       const email = document.getElementById('staffEmail').value.trim();
       const phone = document.getElementById('staffPhone').value.trim();
       const role = document.getElementById('staffRole').value;
       const active = document.getElementById('staffActive').checked;
 
-      if (!uid) { alert("UID is required"); return; }
+      if (!email && !phone && !uid) {
+        alert("Please enter either an Email or Phone Number for the staff member.");
+        return;
+      }
+
+      if (!uid) {
+        const cleanIdent = (email || phone).replace(/[^a-zA-Z0-9]/g, '_');
+        uid = 'staff_inv_' + cleanIdent;
+      }
 
       await db.ref(`staff/${uid}`).set({
         name,
@@ -1172,7 +1180,7 @@
       db.ref('settings').once('value', snap => {
         const s = snap.val() || {};
         document.getElementById('settingOpenTime').value = s.storeHours?.open || '07:00';
-        document.getElementById('settingCloseTime').value = s.storeHours?.close || '19:00';
+        document.getElementById('settingCloseTime').value = s.storeHours?.close || '21:00';
         // Bug fix: use ?? instead of || so 0 is preserved
         document.getElementById('settingMinOrder').value = s.minOrderValue ?? 0;
         document.getElementById('settingDeliveryFee').value = s.deliveryFee ?? 25;
