@@ -33,6 +33,7 @@ import { STORE_OWNER_DISPLAY_PHONE, STORE_OWNER_PHONE, getWhatsAppSupportUrl } f
 export const AppContent: React.FC = () => {
   const {
     isOwnerMode,
+    setIsOwnerMode,
     products,
     selectedCategory,
     searchQuery,
@@ -44,6 +45,24 @@ export const AppContent: React.FC = () => {
     language,
     t
   } = useStore();
+
+  // HashRouter & Subpath Route Listener (#/admin, #/staff, #/worker)
+  React.useEffect(() => {
+    const handleRoute = () => {
+      const hash = (window.location.hash || '').toLowerCase();
+      const path = (window.location.pathname || '').toLowerCase();
+      if (hash === '#/admin' || hash === '#admin' || hash === '#/owner' || path.endsWith('/admin') || path.endsWith('/admin/')) {
+        setIsOwnerMode(true);
+      } else if (hash === '#/staff' || hash === '#staff' || hash === '#/worker' || hash === '#worker' || path.endsWith('/staff') || path.endsWith('/worker')) {
+        if (!window.location.pathname.endsWith('worker.html')) {
+          window.location.href = window.location.pathname.replace(/\/([^\/]*)$/, '/worker.html');
+        }
+      }
+    };
+    handleRoute();
+    window.addEventListener('hashchange', handleRoute);
+    return () => window.removeEventListener('hashchange', handleRoute);
+  }, [setIsOwnerMode]);
 
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high' | 'discount'>('featured');
 
@@ -93,10 +112,6 @@ export const AppContent: React.FC = () => {
 
   // If in Store Owner mode, render the Admin Portal
   if (isOwnerMode) {
-  React.useEffect(() => {
-    return () => {
-    };
-  }, []);
 
     return (
       <div className="min-h-screen bg-slate-900">

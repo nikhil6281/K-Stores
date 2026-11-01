@@ -5,6 +5,7 @@ import { initialProducts } from '../data/initialProducts';
 import { translations } from '../i18n/translations';
 import { sounds } from '../utils/sound';
 import { fetchCloudStoreData, addOrderToCloud, updateCloudOrderStatus, onBroadcastOrderUpdate } from '../services/cloudSync';
+import { pushOrderToCloud, auth } from '../services/firebaseSync';
 
 interface StoreContextType {
   language: Language;
@@ -558,8 +559,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const orderId = `MK-${Math.floor(100000 + Math.random() * 900000)}`;
     const resolvedPaymentMethod = paymentMethod || (deliveryType === 'store_pickup' ? 'pay_on_pickup' : 'cash_on_delivery');
     
+    const currentUid = user?.id || auth.currentUser?.uid || 'guest';
     const newOrder: Order = {
       id: orderId,
+      uid: currentUid,
       items: [...cart],
       customerName,
       customerPhone,
@@ -599,14 +602,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     sounds.playOrderSuccess();
 
-    // 3. Push to shared central Cloud Database so ALL devices see it!
+    // 3. Push to Firebase Realtime Database and Cloud Sync
     try {
+      await pushOrderToCloud(newOrder);
       const updatedList = await addOrderToCloud(newOrder);
       if (updatedList && updatedList.length > 0) {
         setOrders(updatedList);
       }
-    } catch (err) {
-      console.error('Background cloud sync error:', err);
+    } catch (err: any) {
+      console.error('[StoreContext] Order placement error:', err);
+      // Surface immediately on mobile to diagnose permissions or network disconnects
+      alert('Order Placement Notice: ' + (err?.message || 'Database connection error.'));
+      throw err;
     }
 
     return newOrder;

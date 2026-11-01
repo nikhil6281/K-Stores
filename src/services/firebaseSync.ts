@@ -1,4 +1,4 @@
-﻿import { initializeApp } from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import { 
   getDatabase, 
   ref, 
@@ -8,8 +8,13 @@ import {
 } from 'firebase/database';
 import { 
   getAuth, 
+  initializeAuth,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
   GoogleAuthProvider, 
   signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut 
 } from 'firebase/auth';
 import type { Order, OrderStatus, CartItem } from '../types';
@@ -26,21 +31,66 @@ export const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+// Initialize Auth with IndexedDB + Browser Local Persistence for mobile WebView resilience
+let authInstance;
+try {
+  authInstance = initializeAuth(app, {
+    persistence: [indexedDBLocalPersistence, browserLocalPersistence]
+  });
+} catch {
+  authInstance = getAuth(app);
+}
+export const auth = authInstance;
+
 export const googleProvider = new GoogleAuthProvider();
 export const db = getDatabase(app);
 
 export async function signInWithGoogleReal() {
   googleProvider.setCustomParameters({ prompt: 'select_account' });
-  const result = await signInWithPopup(auth, googleProvider);
-  const user = result.user;
-  return {
-    id: user.uid,
-    name: user.displayName || 'Customer',
-    email: user.email || '',
-    phone: user.phoneNumber?.replace(/\D/g, '') || '',
-    photoURL: user.photoURL || ''
-  };
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    return {
+      id: user.uid,
+      name: user.displayName || 'Customer',
+      email: user.email || '',
+      phone: user.phoneNumber?.replace(/\D/g, '') || '',
+      photoURL: user.photoURL || ''
+    };
+  } catch (popupErr: any) {
+    console.warn('[Firebase Auth] Popup error, falling back to signInWithRedirect:', popupErr);
+    // In mobile WebViews / Capacitor, popups are frequently blocked or unsupported
+    if (
+      popupErr?.code === 'auth/popup-blocked' ||
+      popupErr?.code === 'auth/popup-closed-by-user' ||
+      popupErr?.code === 'auth/cancelled-popup-request' ||
+      popupErr?.code === 'auth/operation-not-supported-in-this-environment'
+    ) {
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    }
+    throw popupErr;
+  }
+}
+
+export async function checkRedirectResult() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      const user = result.user;
+      return {
+        id: user.uid,
+        name: user.displayName || 'Customer',
+        email: user.email || '',
+        phone: user.phoneNumber?.replace(/\D/g, '') || '',
+        photoURL: user.photoURL || ''
+      };
+    }
+  } catch (err) {
+    console.warn('[Firebase Auth] Redirect result notice:', err);
+  }
+  return null;
 }
 
 export async function signOutReal() {
@@ -114,8 +164,9 @@ export async function pushOrderToCloud(newOrder: Order): Promise<void> {
   try {
     const orderRef = ref(db, `orders/${newOrder.id}`);
     await set(orderRef, newOrder);
-  } catch (err) {
-    console.warn('[Firebase] Order push error:', err);
+  } catch (err: any) {
+    console.error('[Firebase] Order push error:', err);
+    throw new Error(err?.message || 'Failed to save order to Firebase database');
   }
 }
 

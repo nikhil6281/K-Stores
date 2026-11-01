@@ -55,7 +55,10 @@ function getCorsHeaders(request) {
   const origin = request.headers.get('Origin') || '';
   const isAllowed = origin === 'https://nikhil6281.github.io' ||
                     origin.startsWith('http://localhost:') ||
-                    origin.startsWith('http://127.0.0.1:');
+                    origin.startsWith('http://127.0.0.1:') ||
+                    origin === 'capacitor://localhost' ||
+                    origin === 'http://localhost' ||
+                    origin.startsWith('https://localhost');
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin : 'https://nikhil6281.github.io',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',

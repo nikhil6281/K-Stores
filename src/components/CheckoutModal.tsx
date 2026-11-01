@@ -209,6 +209,9 @@ export const CheckoutModal: React.FC = () => {
         notes: notes.trim() || undefined,
         paymentMethod: deliveryType === 'store_pickup' ? 'pay_on_pickup' : 'cash_on_delivery',
       });
+    } catch (err: any) {
+      alert('Order Placement Error: ' + (err?.message || err));
+      showToast('error', 'Order Error', err?.message || 'Failed to place order');
     } finally {
       setIsSubmitting(false);
     }

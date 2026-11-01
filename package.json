@@ -2,10 +2,13 @@
   "name": "mana-kirana",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://nikhil6281.github.io/K-Stores",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build --base=/K-Stores/",
+    "build:mobile": "tsc -b && vite build --base=./ --mode mobile",
+    "deploy": "npm run build && node scripts/deploy-gh-pages.cjs",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "node tests/test_full_logic.cjs"
