@@ -1555,3 +1555,56 @@ async function handleAdminRefundMismatch(request, env, cors) {
     return jsonError(err.message || 'Refund error', 'SERVER_ERROR', 500, cors);
   }
 }
+
+/**
+ * GET /api/catalog
+ * Serves edge-cached catalog and settings with Cache-Control headers.
+ */
+async function handleGetCatalog(request, env, cors) {
+  try {
+    const [products, categories, settings] = await Promise.all([
+      rtdbFetch(env, 'products', 'GET') || {},
+      rtdbFetch(env, 'categories', 'GET') || {},
+      rtdbFetch(env, 'settings', 'GET') || {}
+    ]);
+
+    const cleanCatalog = {};
+    for (const [id, p] of Object.entries(products || {})) {
+      if (!p || typeof p !== 'object') continue;
+      cleanCatalog[id] = {
+        id,
+        name: p.name || '',
+        nameTe: p.nameTe || '',
+        price: Number(p.price) || 0,
+        mrp: Number(p.mrp) || Number(p.price) || 0,
+        unit: p.unit || '',
+        category: p.category || '',
+        inStock: p.inStock !== false,
+        image: p.image || '',
+        hasImage: p.hasImage === true,
+        imageVersion: p.imageVersion || 1
+      };
+    }
+
+    return new Response(JSON.stringify({
+      version: Date.now(),
+      products: cleanCatalog,
+      categories: categories || {},
+      settings: {
+        deliveryFee: settings?.deliveryFee ?? 25,
+        freeDeliveryThreshold: settings?.freeDeliveryThreshold ?? 299,
+        minOrderValue: settings?.minOrderValue ?? 50,
+        storeHours: settings?.storeHours || { mode: 'auto', open: '07:00', close: '21:00' }
+      }
+    }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600',
+        ...cors
+      }
+    });
+  } catch(err) {
+    return jsonError(err.message || 'Failed to fetch catalog', 'CATALOG_ERROR', 500, cors);
+  }
+}

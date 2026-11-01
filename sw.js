@@ -9,14 +9,15 @@
  * CRITICAL RULE: Never cache API, Firebase, Google Auth, Cloudinary, or Razorpay calls.
  */
 
-const CACHE_NAME = 'ra-store-shell-v7';
+const CACHE_NAME = 'ra-store-shell-v8';
 const SHELL_ASSETS = [
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
   './worker.html',
-  './config.js'
+  './config.js',
+  './catalog.json'
 ];
 
 // 1. Install Event: Pre-cache essential assets
