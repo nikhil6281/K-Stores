@@ -616,12 +616,16 @@ async function handleVerifyPayment(request, env, cors) {
 
   // Update order in RTDB
   const nowIso = new Date().toISOString();
-  await rtdbFetch(env, `orders/${targetKey}`, 'PATCH', {
+  const patchData = {
     paymentStatus: 'paid',
     paidAt: nowIso,
     razorpayPaymentId: razorpay_payment_id,
     updatedAt: nowIso
-  });
+  };
+  if (orderData.status === 'payment_pending') {
+    patchData.status = 'placed';
+  }
+  await rtdbFetch(env, `orders/${targetKey}`, 'PATCH', patchData);
 
   return jsonResponse({ success: true, orderId: orderData.id }, 200, cors);
 }
@@ -652,19 +656,23 @@ async function handleRazorpayWebhook(request, env, cors) {
   const orders = await rtdbFetch(env, 'orders', 'GET') || {};
   const nowIso = new Date().toISOString();
 
-  if (eventType === 'payment.captured') {
-    const payment = payload.payment.entity;
-    const rzpOrderId = payment.order_id;
+  if (eventType === 'payment.captured' || eventType === 'order.paid') {
+    const payment = payload.payment ? payload.payment.entity : null;
+    const rzpOrderId = payment ? payment.order_id : (payload.order ? payload.order.entity.id : null);
 
     for (const [k, ord] of Object.entries(orders)) {
       if (ord.razorpayOrderId === rzpOrderId) {
         if (ord.paymentStatus !== 'paid') {
-          await rtdbFetch(env, `orders/${k}`, 'PATCH', {
+          const patchData = {
             paymentStatus: 'paid',
             paidAt: nowIso,
-            razorpayPaymentId: payment.id,
+            razorpayPaymentId: payment ? payment.id : (ord.razorpayPaymentId || ''),
             updatedAt: nowIso
-          });
+          };
+          if (ord.status === 'payment_pending') {
+            patchData.status = 'placed';
+          }
+          await rtdbFetch(env, `orders/${k}`, 'PATCH', patchData);
         }
         break;
       }
@@ -920,12 +928,16 @@ async function handleAdminReconcileOrder(request, env, cors) {
 
   const nowIso = new Date().toISOString();
   if (capturedPayment) {
-    await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', {
+    const patchData = {
       paymentStatus: 'paid',
       paidAt: nowIso,
       razorpayPaymentId: capturedPayment.id,
       updatedAt: nowIso
-    });
+    };
+    if (orderData.status === 'payment_pending') {
+      patchData.status = 'placed';
+    }
+    await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', patchData);
 
     await rtdbFetch(env, `audit/audit_${Date.now()}`, 'PUT', {
       adminUid: user.uid,
@@ -970,11 +982,15 @@ async function handleScheduledOrderExpiry(env) {
           }
 
           if (isCaptured) {
-            await rtdbFetch(env, `orders/${k}`, 'PATCH', {
+            const patchData = {
               paymentStatus: 'paid',
               paidAt: nowIso,
               updatedAt: nowIso
-            });
+            };
+            if (ord.status === 'payment_pending') {
+              patchData.status = 'placed';
+            }
+            await rtdbFetch(env, `orders/${k}`, 'PATCH', patchData);
           } else {
             await rtdbFetch(env, `orders/${k}`, 'PATCH', {
               status: 'cancelled',

@@ -2,11 +2,11 @@
   "id": "/K-Stores/",
   "name": "RA Store - Fresh Grocery Delivery",
   "short_name": "RA Store",
-  "description": "Daily fresh grocery delivery in Anantapur, Andhra Pradesh",
+  "description": "Daily fresh grocery delivery in Anantapur, Andhra Pradesh (PIN 515001-515005)",
   "lang": "en-IN",
   "dir": "ltr",
-  "start_url": "/K-Stores/index.html",
-  "scope": "/K-Stores/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "display_override": [
     "window-controls-overlay",
@@ -69,7 +69,7 @@
       "name": "Browse Products",
       "short_name": "Products",
       "description": "View daily fresh vegetables, fruits and groceries",
-      "url": "/K-Stores/index.html",
+      "url": "./",
       "icons": [
         {
           "src": "./icon-192.png",
@@ -82,7 +82,7 @@
       "name": "My Orders",
       "short_name": "Orders",
       "description": "Check order status and tracking",
-      "url": "/K-Stores/index.html#orders",
+      "url": "./#orders",
       "icons": [
         {
           "src": "./icon-192.png",
