@@ -1515,6 +1515,9 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+    if (auth.setPersistence && firebase.auth.Auth && firebase.auth.Auth.Persistence) {
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e => console.warn('[Auth] Persistence setup:', e));
+    }
 
     const WORKER_API = "https://ra-store-api.chowdarynikhil095.workers.dev";
 
@@ -3684,6 +3687,7 @@
           showOrderSuccess(data.orderId, customer, data.total);
         }
       } catch (err) {
+        alert('Order Placement Error: ' + (err.message || 'Network error connecting to store server. Please try again.'));
         showCheckoutNotice('Network error connecting to store server. Please try again.', 'danger');
         submitBtn.disabled = false;
         submitBtn.innerText = isStoreCurrentlyOpen ? I18N[currentLang].confirmOrderBtn : I18N[currentLang].scheduleForMorning;

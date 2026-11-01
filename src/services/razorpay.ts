@@ -71,7 +71,7 @@ export async function createRazorpayOrder(amountRupees: number): Promise<Razorpa
 
   // Attempt backend API call if running locally
   try {
-    const res = await fetch('http://localhost:5000/api/create-order', {
+    const res = await fetch('https://ra-store-api.chowdarynikhil095.workers.dev/api/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -180,7 +180,7 @@ export async function verifyRazorpayPayment(
   signature: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const res = await fetch('http://localhost:5000/api/verify-payment', {
+    const res = await fetch('https://ra-store-api.chowdarynikhil095.workers.dev/api/verify-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -56,6 +56,7 @@ export interface DeliveryAddress {
 }
 
 export interface Order {
+  uid?: string;
   id: string;
   items: CartItem[];
   customerName: string;

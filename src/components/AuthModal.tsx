@@ -29,6 +29,10 @@ export const AuthModal: React.FC = () => {
     setIsLoadingGoogle(true);
     try {
       const gUser = await signInWithGoogleReal();
+      if (!gUser) {
+        // Redirect was initiated for mobile webview fallback
+        return;
+      }
       
       const loggedUser: CustomerUser = {
         id: gUser.id,

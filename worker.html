@@ -711,6 +711,9 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+    if (auth.setPersistence && firebase.auth.Auth && firebase.auth.Auth.Persistence) {
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e => console.warn('[Auth] Persistence setup:', e));
+    }
 
     const WORKER_API = "https://ra-store-api.chowdarynikhil095.workers.dev";
 
