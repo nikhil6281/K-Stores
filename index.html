@@ -2643,6 +2643,34 @@
       searchClearBtn.style.display = 'block';
     }
 
+    // Handle redirect return from Razorpay callback (WhatsApp / UPI apps)
+    if (urlParams.get('order_success')) {
+      const successOrderId = urlParams.get('order_success');
+      cart = {};
+      saveCart();
+      updateCartUI();
+      setTimeout(() => {
+        showToast(`Payment received! Order #${successOrderId} confirmed.`);
+      }, 500);
+      try {
+        history.replaceState(null, '', window.location.pathname);
+      } catch (e) {}
+    } else if (urlParams.get('payment_status')) {
+      const pStatus = urlParams.get('payment_status');
+      if (pStatus === 'failed' || pStatus === 'invalid_signature') {
+        setTimeout(() => {
+          showToast('Payment was not completed. You can retry from Your Orders.', 'danger');
+        }, 500);
+      } else if (pStatus === 'pending_verification') {
+        setTimeout(() => {
+          showToast('Payment verification in progress. Please check Your Orders in a moment.');
+        }, 500);
+      }
+      try {
+        history.replaceState(null, '', window.location.pathname);
+      } catch (e) {}
+    }
+
     // Shared Lazy Image IntersectionObserver
     let sharedLazyObserver = null;
     function observeLazyImages() {
