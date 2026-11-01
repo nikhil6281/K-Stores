@@ -1,26 +1,26 @@
 /**
  * RA Store - Service Worker (PWA Shell Caching & Offline Support)
  * Meets all PWABuilder and Google Play TWA requirements:
- * - Pre-caching core shell assets (HTML, manifest, icons)
+ * - Pre-caching core shell assets (HTML, manifest, icons, offline fallback)
  * - Navigation offline fallback
  * - Background Sync (sync)
  * - Periodic Background Sync (periodicsync)
  * - Web Push (push) & Notification Click (notificationclick)
- * CRITICAL RULE: Never cache API, Firebase, Google Auth, Cloudinary, or Razorpay calls.
+ * CRITICAL RULE: Only cache same-origin GET requests. Never cache /worker, /admin.html, Firebase, Auth, Razorpay, or API requests.
  */
 
-const CACHE_NAME = 'ra-store-shell-v8';
+const CACHE_NAME = 'ra-store-shell-v9';
 const SHELL_ASSETS = [
+  './',
   './index.html',
   './manifest.json',
+  './config.js',
   './icon-192.png',
   './icon-512.png',
-  './worker.html',
-  './config.js',
-  './catalog.json'
+  './offline.html'
 ];
 
-// 1. Install Event: Pre-cache essential assets
+// 1. Install Event: Pre-cache essential shell assets
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -44,22 +44,34 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// 3. Fetch Event: Network-first for navigation with offline fallback; stale-while-revalidate for local static assets
-self.addEventListener('fetch', (e) => {
-  const url = e.request.url;
+// 3. Message Event: Allow clients to trigger skipWaiting
+self.addEventListener('message', (e) => {
+  if (e.data && (e.data.type === 'SKIP_WAITING' || e.data === 'skipWaiting')) {
+    self.skipWaiting();
+  }
+});
 
-  // NEVER cache API requests, Firebase, Razorpay, or Cloudinary
+// 4. Fetch Event
+self.addEventListener('fetch', (e) => {
+  // Only handle GET requests
+  if (e.request.method !== 'GET') return;
+
+  const url = new URL(e.request.url);
+
+  // ONLY handle same-origin requests
+  if (url.origin !== self.location.origin) return;
+
+  // NEVER cache Staff, Admin, or API endpoints
   if (
-    url.includes('/api/') ||
-    url.includes('firebaseio.com') ||
-    url.includes('googleapis.com/identitytoolkit') ||
-    url.includes('razorpay.com') ||
-    url.includes('cloudinary.com')
+    url.pathname.includes('/worker') ||
+    url.pathname.includes('/admin') ||
+    url.pathname.includes('/api/') ||
+    url.pathname.includes('catalog.json')
   ) {
     return; // Pass directly to network
   }
 
-  // Navigation / HTML requests
+  // Navigation / HTML requests: Network-first with offline fallback
   if (e.request.mode === 'navigate' || e.request.destination === 'document') {
     e.respondWith(
       fetch(e.request)
@@ -70,28 +82,28 @@ self.addEventListener('fetch', (e) => {
           }
           return response;
         })
-        .catch(() => {
-          return caches.match(e.request).then((cached) => {
-            if (cached) return cached;
-            return caches.match('./index.html').then((fallback) => {
-              if (fallback) return fallback;
-              return new Response(
-                '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>RA Store - Offline</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:sans-serif;text-align:center;padding:48px 20px;background:#f8fafc;color:#1e293b}h1{color:#15803d;margin-bottom:12px}p{color:#64748b;margin-bottom:24px}button{background:#15803d;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:600}</style></head><body><h1>You are Offline</h1><p>RA Store needs an active internet connection to show fresh stock and process orders.</p><button onclick="window.location.reload()">Retry Connection</button></body></html>',
-                { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-              );
-            });
-          });
+        .catch(async () => {
+          const cached = await caches.match(e.request);
+          if (cached) return cached;
+          const fallback = await caches.match('./offline.html');
+          if (fallback) return fallback;
+          const indexFallback = await caches.match('./index.html');
+          if (indexFallback) return indexFallback;
+          return new Response(
+            '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>RA Store - Offline</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:sans-serif;text-align:center;padding:48px 20px;background:#f8fafc;color:#1e293b}h1{color:#15803d;margin-bottom:12px}p{color:#64748b;margin-bottom:24px}button{background:#15803d;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:600}</style></head><body><h1>You are Offline</h1><p>RA Store needs an active internet connection to show fresh stock and process orders.</p><button onclick="window.location.reload()">Retry Connection</button></body></html>',
+            { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+          );
         })
     );
     return;
   }
 
-  // Static Assets (CSS, JS, Fonts, Images)
+  // Static Assets (CSS, JS, Fonts, Images): Stale-while-revalidate
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const fetchPromise = fetch(e.request)
         .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200 && e.request.method === 'GET') {
+          if (networkResponse && networkResponse.status === 200) {
             const clone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
           }
@@ -104,58 +116,46 @@ self.addEventListener('fetch', (e) => {
   );
 });
 
-// 4. Background Sync: Enables offline order queued syncing
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-orders') {
-    event.waitUntil(
-      Promise.resolve().then(() => {
-        console.log('[SW] Background sync triggered for tag:', event.tag);
-      })
-    );
+// 5. Background Sync
+self.addEventListener('sync', (e) => {
+  if (e.tag === 'sync-orders') {
+    e.waitUntil(Promise.resolve());
   }
 });
 
-// 5. Periodic Background Sync: Allows periodic catalog and deals refresh
-self.addEventListener('periodicsync', (event) => {
-  if (event.tag === 'update-catalog') {
-    event.waitUntil(
-      Promise.resolve().then(() => {
-        console.log('[SW] Periodic background sync triggered for catalog update');
-      })
-    );
+// 6. Periodic Background Sync
+self.addEventListener('periodicsync', (e) => {
+  if (e.tag === 'update-catalog') {
+    e.waitUntil(Promise.resolve());
   }
 });
 
-// 6. Push Notifications: Handles incoming marketing or order tracking push events
-self.addEventListener('push', (event) => {
-  let payload = { title: 'RA Store', body: 'Fresh grocery deals are live in Anantapur!' };
+// 7. Web Push Notifications
+self.addEventListener('push', (e) => {
+  let data = { title: 'RA Store', body: 'New update from RA Store!' };
   try {
-    if (event.data) {
-      payload = event.data.json();
-    }
-  } catch (_) {
-    if (event.data) payload.body = event.data.text();
+    if (e.data) data = e.data.json();
+  } catch (err) {
+    if (e.data) data.body = e.data.text();
   }
-
-  event.waitUntil(
-    self.registration.showNotification(payload.title || 'RA Store', {
-      body: payload.body || 'Your daily essentials delivered fresh in Anantapur.',
-      icon: './icon-192.png',
-      badge: './icon-192.png',
-      data: { url: payload.url || './index.html' }
-    })
-  );
+  const options = {
+    body: data.body,
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    vibrate: [100, 50, 100],
+    data: { url: data.url || './' }
+  };
+  e.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// 7. Notification Click: Deep links into the app when user taps notification
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) || './index.html';
-
-  event.waitUntil(
+// 8. Notification Click
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const targetUrl = (e.notification.data && e.notification.data.url) ? e.notification.data.url : './';
+  e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url.includes('index.html') && 'focus' in client) {
+        if (client.url === targetUrl && 'focus' in client) {
           return client.focus();
         }
       }

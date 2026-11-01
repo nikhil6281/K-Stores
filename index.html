@@ -2550,6 +2550,17 @@
 
     function renderCategoryChips() {
       const bar = document.getElementById('categoryChipsBar');
+      if (!bar) return;
+
+      // Unknown category fallback: if requested cat doesn't exist, gracefully fall back to 'all'
+      if (currentCategory && currentCategory !== 'all' && Object.keys(categoriesCatalog).length > 0) {
+        if (!categoriesCatalog[currentCategory]) {
+          console.warn('[RA Store] Unknown category:', currentCategory, 'falling back to all items');
+          currentCategory = 'all';
+          syncUrlParams();
+        }
+      }
+
       const catKeys = Object.keys(categoriesCatalog).sort((a,b) => (categoriesCatalog[a].order || 0) - (categoriesCatalog[b].order || 0));
       
       const totalCount = Object.keys(productsCatalog).length;
@@ -2573,6 +2584,9 @@
       });
 
       bar.innerHTML = html;
+      if (currentCategory && currentCategory !== 'all' && categoriesCatalog[currentCategory]) {
+        setTimeout(() => scrollToCategorySection(currentCategory, false), 150);
+      }
     }
 
     document.getElementById('categoryChipsBar').addEventListener('click', (e) => {
@@ -5032,7 +5046,43 @@
     syncBottomBar();
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
+      navigator.serviceWorker.register('./sw.js', { scope: './' }).then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                showAppUpdateToast(newWorker);
+              }
+            });
+          }
+        });
+      }).catch(() => {});
+
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+    }
+
+    function showAppUpdateToast(worker) {
+      if (document.getElementById('swUpdateToast')) return;
+      const toast = document.createElement('div');
+      toast.id = 'swUpdateToast';
+      toast.setAttribute('role', 'alert');
+      toast.style.cssText = 'position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:#15803d;color:#fff;padding:10px 18px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.28);z-index:9999;display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600;max-width:92%;';
+      toast.innerHTML = '<span>⚡ New update available!</span><button id="swRefreshBtn" style="background:#fff;color:#15803d;border:none;padding:6px 14px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">Update</button>';
+      document.body.appendChild(toast);
+
+      document.getElementById('swRefreshBtn')?.addEventListener('click', () => {
+        if (worker) {
+          worker.postMessage({ type: 'SKIP_WAITING' });
+        }
+        toast.remove();
+      });
     }
   </script>
   </div>

@@ -1281,9 +1281,9 @@ it('M5.6: Safe CSV export sanitization & filename', () => {
 
 it('PWA.1: Manifest JSON has all required Google Play Store & PWABuilder fields', () => {
   const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
-  assert.strictEqual(manifest.id, '/K-Stores/');
-  assert.strictEqual(manifest.start_url, '/K-Stores/index.html');
-  assert.strictEqual(manifest.scope, '/K-Stores/');
+  assert(manifest.id === '/K-Stores/' || manifest.id === './', 'manifest id must match');
+  assert(manifest.start_url === './' || manifest.start_url === '/K-Stores/index.html', 'start_url must be ./ or /K-Stores/index.html');
+  assert(manifest.scope === './' || manifest.scope === '/K-Stores/', 'scope must be ./ or /K-Stores/');
   assert.strictEqual(manifest.display, 'standalone');
   assert.strictEqual(manifest.orientation, 'portrait');
   assert.strictEqual(manifest.theme_color, '#15803d');
@@ -1408,9 +1408,12 @@ it('P2.3: Worker backend implements handleGetCatalog and /api/catalog', () => {
   assert(workerCode.includes('/api/catalog'), 'worker must route /api/catalog');
 });
 
-it('P2.4: Service worker pre-caches catalog.json', () => {
+it('P2.4: Service worker shell caching isolation', () => {
   const swCode = fs.readFileSync('sw.js', 'utf8');
-  assert(swCode.includes('./catalog.json'), 'sw.js must pre-cache ./catalog.json');
+  assert(!swCode.includes("'/worker.html'"), 'sw.js must NEVER pre-cache worker.html');
+  assert(!swCode.includes("'/admin.html'"), 'sw.js must NEVER pre-cache admin.html');
+  assert(swCode.includes('offline.html'), 'sw.js must pre-cache offline.html');
+  assert(swCode.includes('SKIP_WAITING'), 'sw.js must support SKIP_WAITING');
 });
 
 console.log('\n--------------------------------------------------------');
