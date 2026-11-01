@@ -894,7 +894,7 @@
       </h3>
       <div style="font-size: 12px; line-height: 1.6; color: var(--text);">
         <div>🚚 <strong id="tDeliverySlotLabel">Morning Delivery Slot:</strong> 7:00 AM – 9:00 AM IST (Daily)</div>
-        <div>⏰ <strong id="tStoreHoursLabel">Store Operating Hours:</strong> <span id="accountStoreHoursText">07:00 AM – 07:00 PM</span></div>
+        <div>⏰ <strong id="tStoreHoursLabel">Store Operating Hours:</strong> <span id="accountStoreHoursText">07:00 AM – 09:00 PM</span></div>
         <div style="color: var(--muted); font-size: 11px; margin-top: 4px;">Serving all areas in Anantapur (515001 - 515005).</div>
       </div>
     </div>
@@ -1592,7 +1592,7 @@
       deliveryFee: 25,
       freeDeliveryThreshold: 299,
       whatsappNumber: '916281730144',
-      storeHours: { open: "07:00", close: "19:00", mode: "auto" }
+      storeHours: { open: "07:00", close: "21:00", mode: "auto" }
     };
     let isStoreCurrentlyOpen = true;
 
@@ -4418,7 +4418,7 @@
       const storeHoursText = document.getElementById('accountStoreHoursText');
 
       if (storeHoursText && storeSettings.storeHours) {
-        storeHoursText.innerText = `${storeSettings.storeHours.open || '07:00'} - ${storeSettings.storeHours.close || '19:00'} IST`;
+        storeHoursText.innerText = `${storeSettings.storeHours.open || '07:00'} - ${storeSettings.storeHours.close || '21:00'} IST`;
       }
 
       if (currentUser) {
