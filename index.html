@@ -4,7 +4,7 @@
   <script src="config.js?v=20260418v6"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://checkout.razorpay.com https://accounts.google.com https://www.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https: wss: https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://ra-store-api.chowdarynikhil095.workers.dev https://api.razorpay.com; frame-src 'self' https://accounts.google.com https://*.firebaseapp.com https://api.razorpay.com https://www.google.com; img-src 'self' https: data: blob:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://checkout.razorpay.com https://accounts.google.com https://www.google.com https://*.firebaseio.com https://*.firebaseapp.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https: wss: https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://ra-store-api.chowdarynikhil095.workers.dev https://api.razorpay.com; frame-src 'self' https://accounts.google.com https://*.firebaseapp.com https://*.firebaseio.com https://api.razorpay.com https://www.google.com; img-src 'self' https: data: blob:;">
   
   <!-- SEO & Social Meta -->
   <title>RA Store — Fresh Groceries Delivered in Anantapur</title>
@@ -197,7 +197,7 @@
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .skeleton-img { width: 100%; aspect-ratio: 1 / 1; border-radius: 6px; }
 
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: space-between; align-items: center; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.06); }
+    .bottom-bar { position: fixed; bottom: calc(56px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 350; box-shadow: 0 -4px 12px rgba(0,0,0,0.1); }
     .bottom-bar-info { cursor: pointer; flex: 1; padding-right: 12px; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
@@ -1036,7 +1036,7 @@
 
     <!-- 10. Small Footer Line with App Version -->
     <div style="text-align: center; font-size: 11px; color: var(--muted); padding: 10px 0 20px;">
-      RA Store v2.1.0 • Anantapur, Andhra Pradesh
+      RA Store v2.1.1 • Anantapur, Andhra Pradesh
     </div>
   </div>
 
@@ -1543,7 +1543,15 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
+    const APP_VERSION = "v2.1.1";
     const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ERA Store%3C/text%3E%3C/svg%3E";
+
+    function handleProductImgError(el) {
+      if (el) {
+        el.onerror = null;
+        el.src = SVG_PLACEHOLDER;
+      }
+    }
 
     function safeImage(url) {
       if (!url || typeof url !== 'string') return SVG_PLACEHOLDER;
@@ -1645,16 +1653,14 @@
     const isDebugMode = (new URLSearchParams(window.location.search)).get('debug') === '1';
     let debugHudEl = null;
     const debugState = {
-      firebaseInit: 'OK (firebase-compat 9.23.0)',
-      databaseURL: firebaseConfig.databaseURL,
+      appVersion: APP_VERSION,
+      backendConnected: 'Checking...',
       authState: 'Initializing...',
-      readStarted: 'No',
-      rowsReceived: 0,
-      rowsAfterFilter: 0,
-      cardsAppended: 0,
-      firstCardHeight: '0px',
-      errorCode: 'None',
-      errorMessage: 'None'
+      productCount: 0,
+      categoryCount: 0,
+      swState: ('serviceWorker' in navigator) ? 'Supported' : 'Unsupported',
+      notifPerm: ('Notification' in window) ? Notification.permission : 'Unsupported',
+      lastError: 'None'
     };
 
     function updateDebugHud() {
@@ -1662,27 +1668,28 @@
       if (!debugHudEl) {
         debugHudEl = document.createElement('div');
         debugHudEl.id = 'debugHud';
-        debugHudEl.style.cssText = 'position:fixed;top:64px;right:8px;z-index:99999;background:rgba(17,24,39,0.95);color:#E5E7EB;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:10px;line-height:1.4;padding:10px 12px;border-radius:8px;border:1px solid #374151;box-shadow:0 10px 25px -5px rgba(0,0,0,0.5);max-width:320px;max-height:55vh;overflow-y:auto;pointer-events:auto;';
+        debugHudEl.style.cssText = 'position:fixed;top:64px;right:8px;z-index:99999;background:rgba(17,24,39,0.96);color:#E5E7EB;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px;line-height:1.45;padding:12px 14px;border-radius:10px;border:1px solid #374151;box-shadow:0 12px 28px rgba(0,0,0,0.5);max-width:320px;max-height:60vh;overflow-y:auto;pointer-events:auto;';
         document.body.appendChild(debugHudEl);
       }
+      const isOnline = navigator.onLine ? 'Online' : 'Offline';
       debugHudEl.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #374151;padding-bottom:4px;margin-bottom:6px;">
-          <strong style="color:#10B981;font-size:11px;">🛠️ RA Store Debug Panel</strong>
-          <button onclick="document.getElementById('debugHud').remove()" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:12px;">✕</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #374151;padding-bottom:6px;margin-bottom:8px;">
+          <strong style="color:#10B981;font-size:12px;">🛠️ RA STORE DIAGNOSTICS</strong>
+          <button onclick="document.getElementById('debugHud').remove()" style="background:none;border:none;color:#9CA3AF;cursor:pointer;font-size:14px;line-height:1;">✕</button>
         </div>
-        <div><strong>Firebase Init:</strong> <span style="color:#34D399;">${escapeHtml(debugState.firebaseInit)}</span></div>
-        <div style="word-break:break-all;"><strong>databaseURL:</strong> <span style="color:#60A5FA;">${escapeHtml(debugState.databaseURL)}</span></div>
+        <div><strong>App Version:</strong> <span style="color:#60A5FA;">${escapeHtml(debugState.appVersion)}</span></div>
+        <div><strong>Backend:</strong> <span style="color:${debugState.backendConnected.includes('Connected') ? '#34D399' : '#EF4444'};">${escapeHtml(debugState.backendConnected)}</span> (${isOnline})</div>
         <div><strong>Auth State:</strong> <span style="color:#FBBF24;">${escapeHtml(debugState.authState)}</span></div>
-        <div><strong>Read Started:</strong> ${escapeHtml(debugState.readStarted)}</div>
-        <div><strong>Rows Received:</strong> <strong style="color:#34D399;">${debugState.rowsReceived}</strong></div>
-        <div><strong>Rows After Filter:</strong> <strong style="color:#34D399;">${debugState.rowsAfterFilter}</strong></div>
-        <div><strong>Cards Appended:</strong> ${debugState.cardsAppended}</div>
-        <div><strong>First Card Height:</strong> <strong style="color:#A78BFA;">${debugState.firstCardHeight}</strong></div>
-        ${debugState.errorCode !== 'None' ? `
-          <div style="margin-top:6px;padding:4px 6px;background:rgba(220,38,38,0.2);border-left:3px solid #EF4444;color:#FCA5A5;">
-            <strong>Error:</strong> [${escapeHtml(debugState.errorCode)}] ${escapeHtml(debugState.errorMessage)}
-          </div>
-        ` : '<div style="color:#9CA3AF;"><strong>Errors:</strong> None</div>'}
+        <div><strong>Catalog Counts:</strong> <span style="color:#A78BFA;">${debugState.productCount} products • ${debugState.categoryCount} categories</span></div>
+        <div><strong>Service Worker:</strong> <span style="color:#38BDF8;">${escapeHtml(debugState.swState)}</span></div>
+        <div><strong>Notifications:</strong> <span style="color:#F472B6;">${escapeHtml(debugState.notifPerm)}</span></div>
+        <div style="margin-top:6px;padding-top:6px;border-top:1px solid #374151;">
+          ${debugState.lastError !== 'None' ? `
+            <div style="padding:4px 6px;background:rgba(220,38,38,0.25);border-left:3px solid #EF4444;color:#FCA5A5;word-break:break-word;">
+              <strong>Last Error:</strong> ${escapeHtml(debugState.lastError)}
+            </div>
+          ` : '<div style="color:#9CA3AF;"><strong>Last Error:</strong> None</div>'}
+        </div>
       `;
     }
 
@@ -1724,6 +1731,7 @@
         toggleText: "తెలుగు",
         searchPlaceholder: "Search fresh groceries (e.g. Milk, Tomato, పాలు)...",
         allCategory: "All Items",
+        categoryFallbackMsg: "Category not found or empty. Showing all items.",
         catalogHeading: "Fresh Groceries & daily staples",
         refundTitle: "100% Refund if you cancel before order is out for delivery",
         refundDesc: "Automated full refund to your original payment method (UPI / Card / Bank) in 5-7 working days.",
@@ -1798,6 +1806,7 @@
         validNameErr: "Please enter your full name (at least 2 characters).",
         validPhoneErr: "Please enter a valid 10-digit mobile number starting with 6-9.",
         validAddressErr: "Please enter your detailed delivery address in Anantapur (at least 10 characters).",
+        invalidPinErr: "Delivery is currently available only in Anantapur city (PIN codes 515001 - 515005). The entered PIN code is outside our service area.",
         priceUpdatedMsg: "Prices were updated. Server total is ₹{serverTotal} (was ₹{clientTotal}). Please review and tap Confirm again.",
         orderHeldNotice: "Payment not completed — your order is held for 15 minutes.",
         payNowBtn: "Pay Now ⚡",
@@ -1871,6 +1880,7 @@
         toggleText: "English",
         searchPlaceholder: "తాజా సరుకులు వెతకండి (ఉదా: పాలు, టమోటా, నూనె)...",
         allCategory: "అన్ని వస్తువులు",
+        categoryFallbackMsg: "వర్గం కనుగొనబడలేదు లేదా ఖాళీగా ఉంది. అన్ని వస్తువులను చూపుతున్నాము.",
         catalogHeading: "తాజా కూరగాయలు & కిరాణా సరుకులు",
         refundTitle: "డెలివరీ బయలుదేరే ముందు రద్దు చేస్తే 100% వాపసు",
         refundDesc: "మీ అసలు చెల్లింపు విధానానికే (UPI/బ్యాంక్) 5-7 రోజుల్లో పూర్తి రీఫండ్ అందుతుంది.",
@@ -1945,6 +1955,7 @@
         validNameErr: "దయచేసి మీ పూర్తి పేరు నమోదు చేయండి (కనీసం 2 అక్షరాలు).",
         validPhoneErr: "దయచేసి 6, 7, 8 లేదా 9 తో మొదలయ్యే 10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి.",
         validAddressErr: "దయచేసి అనంతపురంలోని మీ ఇంటి చిరునామా నమోదు చేయండి (కనీసం 10 అక్షరాలు).",
+        invalidPinErr: "ప్రస్తుతం అనంతపురం నగర పరిధిలోనే (పిన్‌కోడ్‌లు 515001 నుండి 515005) డెలివరీ అందుబాటులో ఉంది. నమోదు చేసిన పిన్‌కోడ్ సర్వీస్ పరిధిలో లేదు.",
         priceUpdatedMsg: "ధరలు మారాయి. మొత్తం బిల్లు ₹{serverTotal} (గతంలో ₹{clientTotal}). దయచేసి మళ్ళీ ధృవీకరించండి.",
         orderHeldNotice: "చెల్లింపు పూర్తి కాలేదు — మీ ఆర్డర్ 15 నిమిషాల పాటు భద్రపరచబడింది.",
         payNowBtn: "ఇప్పుడే చెల్లించండి ⚡",
@@ -2095,6 +2106,25 @@
     document.getElementById('langToggleBtn').addEventListener('click', () => {
       applyLanguage(currentLang === 'en' ? 'te' : 'en');
     });
+
+    
+    function renderLandmarkChips() {
+      const container = document.getElementById('landmarkChipsContainer');
+      const addrContainer = document.getElementById('addrLandmarkChips');
+      const cfg = window.APP_CONFIG || {};
+      const enList = cfg.landmarks || ["Tower Clock", "Subhash Road", "Saptagiri Circle", "Rudrampeta", "Kamalanagar", "Old Town"];
+      const teList = cfg.landmarksTelugu || ["టవర్ క్లాక్", "సుభాష్ రోడ్డు", "సప్తగిరి సర్కిల్", "రుద్రంపేట", "కమలానగర్", "ఓల్డ్ టౌన్"];
+      const isTe = currentLang === 'te';
+
+      const generateHtml = () => enList.map((en, idx) => {
+        const label = (isTe && teList[idx]) ? teList[idx] : en;
+        const val = `${en}, Anantapur`;
+        return `<button type="button" class="landmark-chip" data-val="${escapeHtml(val)}">${escapeHtml(label)}</button>`;
+      }).join('');
+
+      if (container) container.innerHTML = generateHtml();
+      if (addrContainer) addrContainer.innerHTML = generateHtml();
+    }
 
     function parseHourToDecimal(val, defaultVal) {
       if (!val) return defaultVal;
@@ -2360,7 +2390,7 @@
     auth.getRedirectResult().catch(() => {});
     auth.onAuthStateChanged(user => {
       currentUser = user;
-      debugLog('authState', user ? (user.isAnonymous ? 'Anonymous' : (user.phoneNumber || user.email || user.uid)) : 'Signed out');
+      debugLog('authState', user ? (user.isAnonymous ? 'Signed In (Guest)' : 'Signed In (Customer)') : 'Signed Out');
 
       // Re-trigger catalog listeners if previously blocked by unauthenticated rules
       if (!productsLoaded || Object.keys(productsCatalog).length === 0) {
@@ -2493,8 +2523,7 @@
     // Set 8s failsafe timeout
     catalogTimeoutTimer = setTimeout(() => {
       if (!productsLoaded) {
-        debugLog('errorCode', 'TIMEOUT_8S', true);
-        debugLog('errorMessage', '8 seconds elapsed without live database response', true);
+        debugLog('lastError', 'TIMEOUT_8S: 8s elapsed without live database response', true);
         if (Object.keys(productsCatalog).length === 0) {
           showCatalogLoadError();
         }
@@ -2510,13 +2539,13 @@
       categoriesListenerRef.on('value', snap => {
         const val = snap.val() || {};
         categoriesCatalog = val;
+        debugLog('categoryCount', Object.keys(val).length);
         try { localStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify(val)); } catch (e) {}
         renderCategoryChips();
         renderProducts();
       }, err => {
         console.error('[RA Store] Categories listener error:', err);
-        debugLog('errorCode', err.code || 'CAT_ERR', true);
-        debugLog('errorMessage', err.message || 'Categories permission/network failure', true);
+        debugLog('lastError', (err.code || 'CAT_ERR') + ': ' + (err.message || 'Categories fetch error'), true);
       });
 
       // 2. Products listener with error callback
@@ -2532,6 +2561,7 @@
         if (val && typeof val === 'object') {
           productsCatalog = val;
           productsLoaded = true;
+          debugLog('productCount', Object.keys(val).length);
           if (catalogTimeoutTimer) clearTimeout(catalogTimeoutTimer);
 
           // Cache last good catalog in localStorage inside try/catch
@@ -2569,8 +2599,7 @@
         }
       }, err => {
         console.error('[RA Store] Products listener error:', err);
-        debugLog('errorCode', err.code || 'PERMISSION_DENIED', true);
-        debugLog('errorMessage', err.message || 'Catalog read failed. Check Firebase Realtime Database rules.', true);
+        debugLog('lastError', (err.code || 'ERR') + ': ' + (err.message || 'Catalog read failed'), true);
         if (!productsLoaded && Object.keys(productsCatalog).length === 0) {
           showCatalogLoadError(err.message);
         }
@@ -2907,7 +2936,7 @@
         <div class="card" id="card-${escapeHtml(id)}" style="${isOutOfStock ? 'opacity: 0.75;' : ''}">
           ${isOutOfStock ? `<span class="out-of-stock-badge">${I18N[currentLang].outOfStock}</span>` : discountHtml}
           <div class="product-img-wrap" data-action="zoom-image" data-id="${escapeHtml(id)}" title="Tap to zoom">
-            <img class="product-img product-img-${escapeHtml(id)}" ${needsLazyLoad ? `data-img-lazy="true" data-img-id="${escapeHtml(id)}" data-img-v="${escapeHtml(p.imageVersion || '')}"` : ''} loading="lazy" width="140" height="140" src="${displayImg}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null; this.src='${SVG_PLACEHOLDER}';">
+            <img class="product-img product-img-${escapeHtml(id)}" ${needsLazyLoad ? `data-img-lazy="true" data-img-id="${escapeHtml(id)}" data-img-v="${escapeHtml(p.imageVersion || '')}"` : ''} loading="lazy" width="140" height="140" src="${displayImg}" alt="${escapeHtml(displayName)}" onerror="handleProductImgError(this);">
           </div>
           <div class="product-info">
             <div class="product-title">${escapeHtml(displayName)}</div>
@@ -3355,7 +3384,7 @@
 
         return `
           <div class="cart-item-row">
-            <img class="cart-item-img product-img-${escapeHtml(id)}" src="${displayImg}" alt="${escapeHtml(displayName)}" onerror="this.onerror=null; this.src='${SVG_PLACEHOLDER}';">
+            <img class="cart-item-img product-img-${escapeHtml(id)}" src="${displayImg}" alt="${escapeHtml(displayName)}" onerror="handleProductImgError(this);">
             <div class="cart-item-details">
               <div class="cart-item-title">${escapeHtml(displayName)}</div>
               <div class="cart-item-unit">${escapeHtml(p.unit || '')} • ₹${escapeHtml(p.price)}</div>
@@ -3429,7 +3458,8 @@
     });
 
     document.getElementById('cartDrawerCheckoutBtn').addEventListener('click', () => {
-      closeModal('cartDrawerModal');
+      const drawer = document.getElementById('cartDrawerModal');
+      if (drawer) drawer.style.display = 'none';
       openCheckout();
     });
 
@@ -3520,17 +3550,24 @@
     payCardCod.addEventListener('click', () => selectPaymentMethod('cod'));
 
     // Quick landmark chips click
-    document.querySelectorAll('.landmark-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
+    
+    document.getElementById('landmarkChipsContainer')?.addEventListener('click', (e) => {
+      const chip = e.target.closest('.landmark-chip');
+      if (chip) {
         const val = chip.getAttribute('data-val');
-        const addr = document.getElementById('custAddress');
-        if (!addr.value.trim()) {
-          addr.value = val;
-        } else if (!addr.value.includes(val)) {
-          addr.value = addr.value.trim() + ', ' + val;
+        const input = document.getElementById('custAddress');
+        if (input && val) {
+          if (!input.value.trim()) {
+            input.value = val;
+          } else if (!input.value.includes(val)) {
+            input.value += ', ' + val;
+          }
+          input.focus();
         }
-      });
+      }
     });
+
+
 
     let checkoutSessionRequestId = null;
 
@@ -3628,6 +3665,17 @@
       if (custAddress.length < 10) {
         showCheckoutNotice(I18N[currentLang]?.validAddressErr || 'Please enter a complete delivery address with landmark in Anantapur (min 10 characters).', 'danger');
         return;
+      }
+
+      // Check 6-digit PIN code if present in address
+      const pinMatch = custAddress.match(/\\b(\\d{6})\\b/);
+      if (pinMatch) {
+        const pin = pinMatch[1];
+        const validPins = ['515001', '515002', '515003', '515004', '515005'];
+        if (!validPins.includes(pin)) {
+          showCheckoutNotice(I18N[currentLang]?.invalidPinErr || ('Delivery is currently available only in Anantapur city (515001 - 515005). PIN ' + pin + ' is outside our service area.'), 'danger');
+          return;
+        }
       }
 
       submitBtn.disabled = true;
@@ -4190,6 +4238,9 @@
 
         list.innerHTML = fullHtml;
       });
+    }
+
+    document.getElementById('ordersNavBtn')?.addEventListener('click', openOrdersModal);
 
     document.getElementById('customerOrdersList').addEventListener('click', async (e) => {
       // Reorder button on past orders
@@ -4449,6 +4500,8 @@
 
     // Firebase .info/connected listener
     db.ref('.info/connected').on('value', snap => {
+      const isConn = !!snap.val();
+      debugLog('backendConnected', isConn ? 'Connected' : 'Disconnected');
       const isOnline = !!snap.val();
       const offlineBanner = document.getElementById('offlineNotice');
       if (offlineBanner) {
@@ -5413,6 +5466,11 @@
     syncBottomBar();
 
     if ('serviceWorker' in navigator) {
+      if (navigator.serviceWorker.controller) {
+        debugLog('swState', 'Active (controlling page)');
+      } else {
+        debugLog('swState', 'Registering...');
+      }
       navigator.serviceWorker.register('./sw.js', { scope: './' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
@@ -5561,6 +5619,9 @@
     }
 
     function updateNotificationUI() {
+      if ('Notification' in window) {
+        debugLog('notifPerm', Notification.permission);
+      }
       const badge = document.getElementById('notifPermissionStatusBadge');
       const enableBtn = document.getElementById('btnEnableNotificationsPrompt');
       const orderToggle = document.getElementById('toggleNotifOrderUpdates');

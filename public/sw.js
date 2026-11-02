@@ -14,7 +14,7 @@
  * - Automatically purges any previous cache versions.
  */
 
-const CACHE_NAME = 'ra-store-shell-v10';
+const CACHE_NAME = 'ra-store-shell-v11';
 const SHELL_ASSETS = [
   './',
   './index.html',
