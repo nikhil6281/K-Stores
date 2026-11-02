@@ -1541,6 +1541,7 @@
         }
 
         await db.ref('orders/' + pushKey).update(updatePayload);
+        fetch((window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/notify-order-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId: pushKey, status: nextStatus }) }).catch(() => {});
         showToast('Order #' + (order.id || pushKey) + ' marked ' + nextStatus.toUpperCase());
       } catch (err) {
         console.error('Update order failed:', err);
@@ -1563,6 +1564,7 @@
           codCollectedBy: (currentUser && currentUser.email) || 'staff',
           updatedAt: new Date().toISOString()
         });
+        fetch((window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/notify-order-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId: pushKey, status: 'delivered' }) }).catch(() => {});
 
         document.getElementById('codModal').style.display = 'none';
         pendingCodOrderId = null;

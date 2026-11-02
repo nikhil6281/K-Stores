@@ -1714,10 +1714,12 @@
           });
           await writeAudit('ORDER_DELIVERED_COD_COLLECTED', key, { total: ord.total });
           showToast(`Order #${ord.id} delivered and cash collected.`);
+          fetch(`${WORKER_API}/api/notify-order-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId: key, status: 'delivered' }) }).catch(() => {});
         } else {
           await db.ref(`orders/${key}/status`).set(targetStatus);
           await writeAudit(`ORDER_STATUS_${targetStatus.toUpperCase()}`, key);
           showToast(`Order #${ord.id} updated to ${targetStatus}.`);
+          fetch(`${WORKER_API}/api/notify-order-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId: key, status: targetStatus }) }).catch(() => {});
         }
         return;
       }
