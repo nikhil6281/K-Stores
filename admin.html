@@ -268,6 +268,27 @@
       #printableSlip, #printableSlip * { visibility: visible; }
       #printableSlip { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; font-family: monospace; }
     }
+  
+    /* Toggle switch for Notifications card */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #CBD5E1; transition: .25s ease; border-radius: 24px;
+    }
+    .switch .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: .25s ease; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .switch input:checked + .slider { background-color: var(--primary, #0C831F); }
+    .switch input:checked + .slider:before { transform: translateX(20px); }
+
   </style>
 
   <style id="adminMobileStyles">
@@ -602,6 +623,67 @@
           <button type="button" class="btn btn-outline btn-small" id="btnUseCurrentStoreLocation" style="margin-bottom: 12px;">📍 Use My Current Location for Store</button>
 
           <button class="btn btn-primary" id="saveSettingsBtn">Save All Settings</button>
+        </div>
+
+        <!-- Notifications & Marketing Offers Card (Step 3.e) -->
+        <div class="card" style="max-width: 600px; margin-top: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="font-size: 16px; margin: 0; display: flex; align-items: center; gap: 6px;">
+              <span>🔔</span> Customer Push Notifications & Offers
+            </h3>
+            <span id="notifOptedInCountBadge" class="badge" style="background: #ECFDF5; color: #065F46; font-size: 11px;">0 Opted-in</span>
+          </div>
+          <p style="font-size: 12px; color: var(--muted); margin-bottom: 14px;">
+            Manage automated sales triggers (reorder reminders, back-in-stock alerts, 21-day win-back) and send targeted broadcast offers to opted-in customers.
+          </p>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 13px; font-weight: 700;">Automatic Sales Offers</div>
+              <div style="font-size: 11px; color: var(--muted);">Hourly reorder reminders, back-in-stock alerts, & 21-day win-back offers (max 3/week, 8 AM - 8 PM IST)</div>
+            </div>
+            <label class="switch" aria-label="Toggle Automatic Sales Offers">
+              <input type="checkbox" id="settingAutoOffersEnabled" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div style="border-top: 1px solid var(--border); padding-top: 14px;">
+            <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 10px;">Send Broadcast Offer</h4>
+            
+            <div style="margin-bottom: 10px;">
+              <label style="font-size: 12px; font-weight: 600;">Offer Title</label>
+              <input type="text" id="offerTitleInput" placeholder="e.g. Weekend Fresh Arrivals at RA Store!">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+              <label style="font-size: 12px; font-weight: 600;">Offer Message</label>
+              <textarea id="offerMessageInput" rows="2" style="width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 13px; font-family: inherit;" placeholder="e.g. Fresh local vegetables and fruits just arrived in Old Town. Tap to browse."></textarea>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+              <label style="font-size: 12px; font-weight: 600;">Optional Deep Link Category</label>
+              <select id="offerCategorySelect">
+                <option value="">Home Catalog</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+              <label style="font-size: 12px; font-weight: 600;">Target Audience</label>
+              <select id="offerAudienceSelect">
+                <option value="all">All Opted-In Customers</option>
+                <option value="active14">Ordered in last 14 days</option>
+                <option value="inactive14">No order in last 14+ days</option>
+              </select>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
+                Estimated recipients: <strong id="offerRecipientCount" style="color: var(--primary);">0</strong> customers
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="btnSendBroadcastOffer" style="min-height: 40px;">
+              🚀 Send Offer to Customers
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1195,6 +1277,8 @@
         document.getElementById('settingWhatsapp').value = s.whatsappNumber || '916281730144';
         document.getElementById('settingStoreMode').value = s.storeHours?.mode || 'auto';
         document.getElementById('settingAnnouncement').value = s.announcement || '';
+        document.getElementById('settingAutoOffersEnabled').checked = (s.automaticOffersEnabled !== false);
+        updateOfferAudienceEstimates();
           if (document.getElementById('settingAddress')) document.getElementById('settingAddress').value = s.address || (window.APP_CONFIG ? window.APP_CONFIG.address : '');
           if (document.getElementById('settingLandmarks')) document.getElementById('settingLandmarks').value = (s.landmarks && s.landmarks.join) ? s.landmarks.join(', ') : (window.APP_CONFIG ? window.APP_CONFIG.landmarks.join(', ') : '');
           if (document.getElementById('settingPinCodes')) document.getElementById('settingPinCodes').value = (s.pinCodes && s.pinCodes.join) ? s.pinCodes.join(', ') : (window.APP_CONFIG ? window.APP_CONFIG.pinCodes.join(', ') : '');
