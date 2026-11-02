@@ -376,9 +376,44 @@ export default {
         return await handleAdminReconcileOrder(request, env, cors);
       }
 
-      // 8. POST /api/worker/verify-staff
+            // 8. POST /api/worker/verify-staff
       if (pathname === '/api/worker/verify-staff' && request.method === 'POST') {
         return await handleWorkerVerifyStaff(request, env, cors);
+      }
+
+      // 9. GET /api/catalog
+      if (pathname === '/api/catalog' && request.method === 'GET') {
+        return await handleGetCatalog(request, env, cors);
+      }
+
+      // 10. POST /api/verify-delivery-otp
+      if (pathname === '/api/verify-delivery-otp' && request.method === 'POST') {
+        return await handleVerifyDeliveryOtp(request, env, cors);
+      }
+
+      // 11. POST /api/admin/reissue-delivery-otp
+      if (pathname === '/api/admin/reissue-delivery-otp' && request.method === 'POST') {
+        return await handleAdminReissueDeliveryOtp(request, env, cors);
+      }
+
+      // 12. POST /api/admin/deliver-without-otp
+      if (pathname === '/api/admin/deliver-without-otp' && request.method === 'POST') {
+        return await handleAdminDeliverWithoutOtp(request, env, cors);
+      }
+
+      // 13. POST /api/admin/send-offer
+      if (pathname === '/api/admin/send-offer' && request.method === 'POST') {
+        return await handleAdminSendOffer(request, env, cors);
+      }
+
+      // 14. POST /api/record-offer-open
+      if (pathname === '/api/record-offer-open' && request.method === 'POST') {
+        return await handleRecordOfferOpen(request, env, cors);
+      }
+
+      // 15. POST /api/notify-order-status
+      if (pathname === '/api/notify-order-status' && request.method === 'POST') {
+        return await handleNotifyOrderStatus(request, env, cors);
       }
 
       return jsonError('Route not found', 'NOT_FOUND', 404, cors);
@@ -881,6 +916,7 @@ async function handleAdminUpdateOrder(request, env, cors) {
   }
 
   await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', updates);
+  await sendOrderStatusNotification(env, orderData, newStatus);
 
   await rtdbFetch(env, `audit/audit_${Date.now()}`, 'PUT', {
     adminUid: user.uid,
@@ -1898,4 +1934,112 @@ async function handleScheduledOffers(env) {
   } catch (e) {
     console.warn('Scheduled offers error:', e);
   }
+}
+
+
+// ==========================================
+// ORDER STATUS NOTIFICATIONS (Bilingual EN/TE)
+// ==========================================
+
+async function sendOrderStatusNotification(env, order, newStatus) {
+  if (!order || !order.uid || !newStatus) return;
+  try {
+    const user = await rtdbFetch(env, `users/${order.uid}`, 'GET');
+    if (!user) return;
+
+    // Check user preference
+    const prefs = user.notificationPreferences || {};
+    if (prefs.orderUpdates === false) return; // User opted out of order updates
+
+    const tokens = Object.values(user.fcmTokens || {}).map(v => (typeof v === 'string' ? v : v.token)).filter(Boolean);
+    if (!tokens.length) return;
+
+    // Detect user lang (default 'te')
+    const lang = (user.profile && user.profile.lang) || 'te';
+    const orderId = order.id || order.orderId || 'Order';
+
+    const msgs = {
+      en: {
+        placedTitle: 'Order placed ✅',
+        placedBody: `We've received order #${orderId} (₹${order.total || ''}).`,
+        acceptedTitle: 'Order confirmed 👍',
+        acceptedBody: `RA Store accepted order #${orderId}. Packing starts soon.`,
+        packedTitle: 'Order packed 📦',
+        packedBody: `Order #${orderId} is packed and ready for the rider.`,
+        out_for_deliveryTitle: 'On the way 🛵',
+        out_for_deliveryBody: `Order #${orderId} is out for delivery. Keep your 4-digit delivery code ready.`,
+        deliveredTitle: 'Delivered ✅',
+        deliveredBody: `Order #${orderId} delivered. Thank you for shopping with RA Store!`,
+        cancelledTitle: 'Order cancelled',
+        cancelledBody: `Order #${orderId} was cancelled.`
+      },
+      te: {
+        placedTitle: 'ఆర్డర్ పూర్తయింది ✅',
+        placedBody: `మేము మీ ఆర్డర్ #${orderId} (₹${order.total || ''}) ను స్వీకరించాము.`,
+        acceptedTitle: 'ఆర్డర్ నిర్ధారించబడింది 👍',
+        acceptedBody: `RA స్టోర్ ఆర్డర్ #${orderId} ను అంగీకరించింది. త్వరలో ప్యాకింగ్ ప్రారంభమవుతుంది.`,
+        packedTitle: 'ఆర్డర్ ప్యాక్ చేయబడింది 📦',
+        packedBody: `ఆర్డర్ #${orderId} ప్యాక్ చేయబడింది మరియు రైడర్ కోసం సిద్ధంగా ఉంది.`,
+        out_for_deliveryTitle: 'డెలివరీ బయలుదేరింది 🛵',
+        out_for_deliveryBody: `ఆర్డర్ #${orderId} డెలివరీ కోసం బయలుదేరింది. మీ 4 అంకెల డెలివరీ కోడ్ సిద్ధంగా ఉంచుకోండి.`,
+        deliveredTitle: 'డెలివరీ చేయబడింది ✅',
+        deliveredBody: `ఆర్డర్ #${orderId} విజయవంతంగా డెలివరీ చేయబడింది. RA స్టోర్‌లో కొనుగోలు చేసినందుకు ధన్యవాదాలు!`,
+        cancelledTitle: 'ఆర్డర్ రద్దు చేయబడింది',
+        cancelledBody: `ఆర్డర్ #${orderId} రద్దు చేయబడింది.`
+      }
+    };
+
+    const dict = msgs[lang] || msgs['te'];
+    const title = dict[`${newStatus}Title`] || `Order Update: #${orderId}`;
+    const body = dict[`${newStatus}Body`] || `Order #${orderId} status is now ${newStatus}`;
+
+    const targetUrl = `./?order=${encodeURIComponent(orderId)}#orders`;
+
+    for (const fcmToken of tokens) {
+      try {
+        await sendFcmMessageHttpV1(env, fcmToken, {
+          title: title,
+          body: body,
+          url: targetUrl,
+          orderId: orderId,
+          tag: `ra-order-${orderId}`,
+          type: 'order_status_update'
+        });
+      } catch (err) {
+        console.warn('[FCM] Push token send error:', err);
+      }
+    }
+  } catch (e) {
+    console.warn('[FCM] sendOrderStatusNotification error:', e);
+  }
+}
+
+async function handleNotifyOrderStatus(request, env, cors) {
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return jsonError('Invalid JSON', 'INVALID_JSON', 400, cors);
+  }
+
+  const { orderId, status } = body;
+  if (!orderId || !status) {
+    return jsonError('orderId and status required', 'MISSING_FIELDS', 400, cors);
+  }
+
+  let order = await rtdbFetch(env, `orders/${orderId}`, 'GET');
+  if (!order) {
+    const allOrders = await rtdbFetch(env, 'orders', 'GET');
+    if (allOrders) {
+      const matchKey = Object.keys(allOrders).find(k => k === orderId || allOrders[k].id === orderId);
+      if (matchKey) order = allOrders[matchKey];
+    }
+  }
+
+  if (!order) {
+    return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+  }
+
+  await sendOrderStatusNotification(env, order, status);
+  return jsonResponse({ success: true, orderId: order.id || orderId, status }, 200, cors);
 }

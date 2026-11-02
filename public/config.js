@@ -54,7 +54,8 @@ const APP_CONFIG = {
   storeLat: 14.6819,
   storeLng: 77.6006,
   deliveryRadiusKm: 5,
-  requireLocation: false
+  requireLocation: false,
+  fcmVapidKey: "BA8LXygemNcWjiGlSvjbVigw72mi4EgEdHYE-h-5UaPO8X4lL4AwSgr2Zk_mSrUEsbsRpCF_B7F-NfHP4kFaRYY"
 };
 
 if (typeof module !== 'undefined' && module.exports) {
