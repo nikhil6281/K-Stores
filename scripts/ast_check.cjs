@@ -14,3 +14,4 @@ diagnostics.forEach(diag => {
     console.log(ts.flattenDiagnosticMessageText(diag.messageText, '\n'));
   }
 });
+

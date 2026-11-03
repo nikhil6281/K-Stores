@@ -35,3 +35,4 @@ const { chromium } = require('playwright');
   console.log('PIN validation test result:', result);
   await browser.close();
 })();
+

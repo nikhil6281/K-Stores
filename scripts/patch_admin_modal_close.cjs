@@ -31,3 +31,4 @@ if (!html.includes(target)) {
 html = html.replace(target, replacement);
 fs.writeFileSync('admin.html', html, 'utf8');
 console.log('✅ Successfully added modal close handlers to admin.html!');
+

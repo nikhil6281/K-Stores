@@ -217,3 +217,4 @@ content = content.replace(
 
 fs.writeFileSync(indexPath, content, 'utf8');
 console.log('🎉 Successfully patched index.html with all hardening features!');
+

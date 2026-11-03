@@ -17,3 +17,4 @@ console.log(addMatches.slice(0, 10));
 // Search for any unquoted http in attributes
 const httpMatches = content.match(/=[^'"]*http[^\s>]+/gi) || [];
 console.log('Unquoted http attributes:', httpMatches);
+

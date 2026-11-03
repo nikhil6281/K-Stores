@@ -18,3 +18,4 @@ while ((match = regex.exec(content)) !== null) {
 
 console.log('Total direct addEventListener calls:', allDirect.length);
 console.log('Missing IDs with direct addEventListener:', missing);
+
