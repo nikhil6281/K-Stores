@@ -4,7 +4,8 @@ const { chromium } = require('playwright');
   console.log('=== STARTING PLAYWRIGHT CATEGORIES SCREEN AUDIT ===');
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   const context = await browser.newContext({
-    viewport: { width: 360, height: 740 } // 360px mobile viewport
+    viewport: { width: 360, height: 740 }, // 360px mobile viewport
+    serviceWorkers: 'block'
   });
   const page = await context.newPage();
 
