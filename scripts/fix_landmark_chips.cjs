@@ -55,3 +55,4 @@ if (!content.includes("document.getElementById('landmarkChipsContainer')?.addEve
 
 fs.writeFileSync(indexPath, content, 'utf8');
 console.log('🎉 Landmark chips successfully patched!');
+

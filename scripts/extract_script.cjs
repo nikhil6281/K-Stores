@@ -6,3 +6,4 @@ const script7 = scripts[6].replace(/^<script\b[^>]*>/i, '').replace(/<\/script>$
 
 fs.writeFileSync('scripts/temp_script.js', script7, 'utf8');
 console.log('Saved scripts/temp_script.js');
+

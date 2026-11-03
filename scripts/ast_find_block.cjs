@@ -12,3 +12,4 @@ sf.statements.forEach(stmt => {
     console.log(`Line ${start.line + 1} to ${end.line + 1}: ${ts.SyntaxKind[stmt.kind]} - ${text}`);
   }
 });
+

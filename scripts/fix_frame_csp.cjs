@@ -10,3 +10,4 @@ const fs = require('fs');
     console.log(`✅ Updated frame-src in ${file}`);
   }
 });
+

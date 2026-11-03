@@ -106,3 +106,4 @@ if (normContent.includes(normTarget)) {
 } else {
   console.error('❌ Could not find normTarget');
 }
+

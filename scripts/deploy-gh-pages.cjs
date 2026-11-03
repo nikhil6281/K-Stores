@@ -22,5 +22,15 @@ if (fs.existsSync(root404)) {
   console.log('✅ 404.html copied to dist');
 }
 
-console.log('✅ Build output ready in dist/');
+// 4. Ensure .well-known/assetlinks.json exists in dist
+const assetlinksSrc = path.resolve(__dirname, '..', '.well-known', 'assetlinks.json');
+const assetlinksDestDir = path.join(distPath, '.well-known');
+if (fs.existsSync(assetlinksSrc)) {
+  if (!fs.existsSync(assetlinksDestDir)) {
+    fs.mkdirSync(assetlinksDestDir, { recursive: true });
+  }
+  fs.copyFileSync(assetlinksSrc, path.join(assetlinksDestDir, 'assetlinks.json'));
+  console.log('✅ .well-known/assetlinks.json copied to dist');
+}
 
+console.log('✅ Build output ready in dist/');

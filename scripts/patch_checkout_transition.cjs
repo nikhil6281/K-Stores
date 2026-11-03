@@ -12,3 +12,4 @@ if (!html.includes(target)) {
 html = html.replace(target, replacement);
 fs.writeFileSync('index.html', html, 'utf8');
 console.log('✅ Successfully patched cartDrawerCheckoutBtn transition in index.html!');
+

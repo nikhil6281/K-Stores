@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.rastore.app",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:7F:0E:52:91:7E:EA:5D:86:14:4E:00:A6:6E:A5:C0:C2:CE:2B:9E:09:1A:87:49:96:DF:3F:8B:02:CE"
+      ]
+    }
+  }
+]

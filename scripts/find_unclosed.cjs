@@ -104,3 +104,4 @@ while ((match = scriptRegex.exec(content)) !== null) {
     }
   }
 }
+

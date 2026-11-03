@@ -14,3 +14,4 @@ if (content.includes(target)) {
 } else {
   console.error('❌ Target string not found in index.html');
 }
+

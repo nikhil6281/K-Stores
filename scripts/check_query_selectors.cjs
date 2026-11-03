@@ -12,3 +12,4 @@ while ((match = regex.exec(content)) !== null) {
 }
 
 console.log('Total direct document.querySelector.addEventListener calls:', allDirect);
+

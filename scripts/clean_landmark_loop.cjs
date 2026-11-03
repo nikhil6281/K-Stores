@@ -26,3 +26,4 @@ if (content.includes(targetOld)) {
 } else {
   console.log('Target not found');
 }
+
