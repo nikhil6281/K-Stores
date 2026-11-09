@@ -1077,6 +1077,9 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email })
           });
+          if (!resp.ok) {
+            throw new Error('Fallback to worker');
+          }
         } catch (e) {
           resp = await fetch(fallbackUrl, {
             method: 'POST',
@@ -1149,6 +1152,9 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: staffPendingEmail, otp: code })
           });
+          if (!resp.ok) {
+            throw new Error('Fallback to worker');
+          }
         } catch (e) {
           resp = await fetch(fallbackUrl, {
             method: 'POST',

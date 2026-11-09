@@ -1,7 +1,36 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
+const http = require('http');
+const path = require('path');
 
 async function runMobileE2ETests() {
+  const server = http.createServer((req, res) => {
+    let reqPath = req.url.split('?')[0];
+    if (reqPath.startsWith('/K-Stores/')) {
+      reqPath = reqPath.replace('/K-Stores/', '/');
+    }
+    const filePath = path.join(process.cwd(), reqPath === '/' ? 'index.html' : reqPath);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeTypes = {
+        '.html': 'text/html',
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+        '.json': 'application/json',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.svg': 'image/svg+xml'
+      };
+      res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
+      fs.createReadStream(filePath).pipe(res);
+    } else {
+      res.writeHead(404);
+      res.end('Not found');
+    }
+  });
+
+  await new Promise((resolve) => server.listen(8080, resolve));
+
   const browser = await chromium.launch({
     channel: 'msedge',
     headless: true
@@ -216,6 +245,7 @@ async function runMobileE2ETests() {
   }
 
   await browser.close();
+  server.close();
 
   console.log(`\n======================================================`);
   console.log(`🎉 ALL MOBILE E2E TESTS COMPLETED: ${passedTests}/${totalTests} PASSED!`);
