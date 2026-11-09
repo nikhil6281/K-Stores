@@ -87,3 +87,4 @@ if (fs.existsSync(rootAssetlinks)) {
     console.log('Updated scripts/deploy-gh-pages.cjs to deploy assetlinks.json to dist.');
   }
 }
+

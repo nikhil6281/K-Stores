@@ -1,7 +1,7 @@
 {
   "id": "/K-Stores/",
-  "name": "RA Store - Fresh Grocery Delivery",
-  "short_name": "RA Store",
+  "name": "Sri Sai - Fresh Grocery Delivery",
+  "short_name": "Sri Sai",
   "description": "Daily fresh grocery delivery in Anantapur, Andhra Pradesh (PIN 515001-515005)",
   "lang": "en-IN",
   "dir": "ltr",
@@ -30,25 +30,25 @@
   },
   "icons": [
     {
-      "src": "./icon-192.png",
+      "src": "./assets/logo/app-icon-192.png?v=2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icon-192.png",
+      "src": "./assets/logo/app-icon-192.png?v=2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "./icon-512.png",
+      "src": "./assets/logo/app-icon-512.png?v=2",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icon-512.png",
+      "src": "./assets/logo/app-icon-512.png?v=2",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -60,14 +60,14 @@
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "RA Store Mobile"
+      "label": "Sri Sai Mobile"
     },
     {
       "src": "./screenshot-wide.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "RA Store Storefront"
+      "label": "Sri Sai Storefront"
     }
   ],
   "shortcuts": [
@@ -78,7 +78,7 @@
       "url": "./",
       "icons": [
         {
-          "src": "./icon-192.png",
+          "src": "./assets/logo/app-icon-192.png?v=2",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -91,7 +91,7 @@
       "url": "./#orders",
       "icons": [
         {
-          "src": "./icon-192.png",
+          "src": "./assets/logo/app-icon-192.png?v=2",
           "sizes": "192x192",
           "type": "image/png"
         }

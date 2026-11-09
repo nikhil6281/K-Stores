@@ -21,7 +21,7 @@ function isValidIndiaGeo(lat, lng) {
 }
 
 /**
- * Cloudflare Worker for RA Store (Anantapur, AP)
+ * Cloudflare Worker for Sri Sai (Anantapur, AP)
  * Contract implementation for Order creation, Payment verification, Webhooks,
  * Cancellations/Refunds, Admin reconciliation, and Scheduled unpaid order expiry.
  */
@@ -334,7 +334,7 @@ export default {
     try {
       // 1. Health check
       if (pathname === '/' || pathname === '/health') {
-        return jsonResponse({ status: 'ok', store: 'RA Store', city: 'Anantapur' }, 200, cors);
+        return jsonResponse({ status: 'ok', store: 'Sri Sai', city: 'Anantapur' }, 200, cors);
       }
 
       // 2. POST /api/create-order
@@ -2002,7 +2002,7 @@ async function sendOrderStatusNotification(env, order, newStatus) {
           body: body,
           url: targetUrl,
           orderId: orderId,
-          tag: `ra-order-${orderId}`,
+          tag: `sri-sai-order-${orderId}`,
           type: 'order_status_update'
         });
       } catch (err) {

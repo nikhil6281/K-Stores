@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build --base=/K-Stores/",
+    "build": "tsc -b && vite build --base=/K-Stores/ && node scripts/deploy-gh-pages.cjs",
     "build:mobile": "tsc -b && vite build --base=./ --mode mobile",
     "deploy": "npm run build && node scripts/deploy-gh-pages.cjs",
     "lint": "oxlint",

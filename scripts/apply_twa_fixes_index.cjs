@@ -109,3 +109,4 @@ html = replaceStrict(html, popstate2Target, popstate2Replacement, 'Popstate 2 do
 
 fs.writeFileSync('index.html', html, 'utf8');
 console.log('TWA enhancements (Offline banner + Popstate polish) applied to index.html successfully!');
+

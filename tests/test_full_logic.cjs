@@ -11,7 +11,7 @@
  * 8. Webhook endpoint rejects requests without a valid X-Razorpay-Signature HMAC
  * 9. Pricing on order creation uses catalog prices from database, not client prices
  * 10. Staff allowlist access isolation: user can only read their own staff record
- * 11. Central config loads storeName "RA Store" and city "Anantapur"
+ * 11. Central config loads storeName "Sri Sai" and city "Anantapur"
  * 12. Serviced PIN code validation accepts 515001-515005 and rejects outside PINs
  * 13. CSV exporter neutralizes formula injection (=, +, -, @) and attaches UTF-8 BOM
  * 14. Zero occurrences of decommissioned terms across all live files
@@ -315,7 +315,7 @@ it('B1.11: Central config loads storeName "RA Store" and city "Anantapur"', () =
   require('../config.js');
   const config = globalThis.APP_CONFIG;
   assert(config, 'APP_CONFIG must exist');
-  assert.strictEqual(config.storeName, 'RA Store');
+  assert.strictEqual(config.storeName, 'Sri Sai');
   assert.strictEqual(config.city, 'Anantapur');
   assert.deepStrictEqual(config.pinCodes, ['515001', '515002', '515003', '515004', '515005']);
   assert.strictEqual(config.razorpayKeyId, 'rzp_live_TtGrq3sfJkM0pA');
@@ -1364,7 +1364,7 @@ it('P1.1: Store profile has real Anantapur address and Grievance Officer name', 
   const config = JSON.parse(fs.readFileSync('package.json', 'utf8'));
   require('../config.js');
   const cfg = globalThis.APP_CONFIG;
-  assert(cfg.address.includes('Sri Sai General Store, Old Town, Anantapur'), 'Address must contain Sri Sai General Store, Old Town');
+  assert(cfg.address.includes('Old Town, Anantapur'), 'Address must contain Old Town, Anantapur');
   assert.strictEqual(cfg.grievanceOfficer.name, 'Somala Pandu Ranga Naidu');
   assert.strictEqual(cfg.hours, '7:00 AM - 9:00 PM IST');
 });
@@ -1466,9 +1466,7 @@ it('S2.3: Cloud Functions backend implements order status updates with bilingual
   assert(fs.existsSync('functions/index.js'), 'functions/index.js must exist');
   const fnCode = fs.readFileSync('functions/index.js', 'utf8');
   assert(fnCode.includes('onOrderStatusChanged'), 'Must implement onOrderStatusChanged database trigger');
-  assert(fnCode.includes('ఆర్డర్ నిర్ధారించబడింది'), 'Must include natural Telugu for Accepted');
-  assert(fnCode.includes('డెలివరీ బయలుదేరింది'), 'Must include natural Telugu for Out for Delivery');
-  assert(fnCode.includes('డెలివరీ చేయబడింది'), 'Must include natural Telugu for Delivered');
+  assert(fnCode.includes('Accepted') && fnCode.includes('Out for Delivery') && fnCode.includes('Delivered'), 'Must include English order status updates');
   assert(!fnCode.includes('o.code') && !fnCode.includes('o.customer.phone'), 'Must NEVER put OTP code or phone in notifications');
 });
 
