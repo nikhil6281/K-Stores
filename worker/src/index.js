@@ -21,7 +21,7 @@ function isValidIndiaGeo(lat, lng) {
 }
 
 /**
- * Cloudflare Worker for RA Store (Anantapur, AP)
+ * Cloudflare Worker for Sri Sai (Anantapur, AP)
  * Contract implementation for Order creation, Payment verification, Webhooks,
  * Cancellations/Refunds, Admin reconciliation, and Scheduled unpaid order expiry.
  */
@@ -334,7 +334,7 @@ export default {
     try {
       // 1. Health check
       if (pathname === '/' || pathname === '/health') {
-        return jsonResponse({ status: 'ok', store: 'RA Store', city: 'Anantapur' }, 200, cors);
+        return jsonResponse({ status: 'ok', store: 'Sri Sai', city: 'Anantapur' }, 200, cors);
       }
 
       // 2. POST /api/create-order
@@ -414,6 +414,16 @@ export default {
       // 15. POST /api/notify-order-status
       if (pathname === '/api/notify-order-status' && request.method === 'POST') {
         return await handleNotifyOrderStatus(request, env, cors);
+      }
+
+      // 16. POST /api/send-email-otp
+      if (pathname === '/api/send-email-otp' && request.method === 'POST') {
+        return await handleSendEmailOtp(request, env, cors);
+      }
+
+      // 17. POST /api/verify-email-otp
+      if (pathname === '/api/verify-email-otp' && request.method === 'POST') {
+        return await handleVerifyEmailOtp(request, env, cors);
       }
 
       return jsonError('Route not found', 'NOT_FOUND', 404, cors);
@@ -2002,7 +2012,7 @@ async function sendOrderStatusNotification(env, order, newStatus) {
           body: body,
           url: targetUrl,
           orderId: orderId,
-          tag: `ra-order-${orderId}`,
+          tag: `sri-sai-order-${orderId}`,
           type: 'order_status_update'
         });
       } catch (err) {
@@ -2042,4 +2052,305 @@ async function handleNotifyOrderStatus(request, env, cors) {
 
   await sendOrderStatusNotification(env, order, status);
   return jsonResponse({ success: true, orderId: order.id || orderId, status }, 200, cors);
+}
+
+// ==========================================
+// Item 6: Server-side Email OTP Authentication
+// ==========================================
+
+async function sha256Hex(str) {
+  const enc = new TextEncoder();
+  const digest = await crypto.subtle.digest('SHA-256', enc.encode(str));
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hmacSha256Hex(secret, str) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sigBuffer = await crypto.subtle.sign('HMAC', key, enc.encode(str));
+  return Array.from(new Uint8Array(sigBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function createFirebaseCustomToken(uid, email, env) {
+  if (!env.FIREBASE_CLIENT_EMAIL || !env.FIREBASE_PRIVATE_KEY) {
+    throw new Error('Service account not configured');
+  }
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const payload = {
+    iss: env.FIREBASE_CLIENT_EMAIL,
+    sub: env.FIREBASE_CLIENT_EMAIL,
+    aud: 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+    iat: now,
+    exp: now + 3600,
+    uid: uid,
+    claims: {
+      email: email,
+      email_verified: true
+    }
+  };
+
+  const b64Header = b64UrlEncode(JSON.stringify(header));
+  const b64Payload = b64UrlEncode(JSON.stringify(payload));
+  const signInput = `${b64Header}.${b64Payload}`;
+
+  const cleanKey = env.FIREBASE_PRIVATE_KEY
+    .replace(/\\n/g, '\n')
+    .replace(/-----BEGIN PRIVATE KEY-----/, '')
+    .replace(/-----END PRIVATE KEY-----/, '')
+    .replace(/\s+/g, '');
+
+  const binaryDer = Uint8Array.from(atob(cleanKey), c => c.charCodeAt(0));
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    binaryDer.buffer,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const sig = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    cryptoKey,
+    new TextEncoder().encode(signInput)
+  );
+
+  return `${signInput}.${b64UrlEncode(sig)}`;
+}
+
+async function getOrCreateFirebaseUser(email, env) {
+  const normalizedEmail = email.trim().toLowerCase();
+  try {
+    const token = await getGoogleServiceAccessToken(env);
+    if (token) {
+      // 1. Try lookup
+      const lookupRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: [normalizedEmail] })
+      });
+      if (lookupRes.ok) {
+        const data = await lookupRes.json();
+        if (data.users && data.users.length > 0 && data.users[0].localId) {
+          return data.users[0].localId;
+        }
+      }
+
+      // 2. Try create user
+      const createRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          emailVerified: true
+        })
+      });
+      if (createRes.ok) {
+        const data = await createRes.json();
+        if (data.localId) return data.localId;
+      }
+    }
+  } catch (err) {
+    console.warn('[Identity Toolkit lookup/create error]', err);
+  }
+
+  // 3. Fallback to deterministic UID
+  const emailHash = await sha256Hex(normalizedEmail);
+  return 'usr_' + emailHash.substring(0, 24);
+}
+
+async function sendEmailViaResend(toEmail, otpCode, apiKey) {
+  const subject = `Your Sri Sai Login Code: ${otpCode}`;
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px; background: #ffffff;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #15803d; margin: 0 0 6px 0; font-size: 24px; font-weight: 800;">Sri Sai</h2>
+        <p style="color: #6b7280; margin: 0; font-size: 13px;">Daily Fresh Grocery Delivery in Anantapur</p>
+      </div>
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
+        <p style="color: #166534; font-size: 14px; margin: 0 0 10px 0; font-weight: 600;">Your 6-Digit Verification Code</p>
+        <div style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #15803d; font-family: monospace;">${otpCode}</div>
+      </div>
+      <p style="color: #4b5563; font-size: 13px; line-height: 1.5; margin: 0 0 16px 0;">This code is valid for <strong>10 minutes</strong> and can only be used once. Do not share this code with anyone.</p>
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+      <p style="color: #9ca3af; font-size: 11px; margin: 0; text-align: center;">Sri Sai • Old Town, Anantapur, Andhra Pradesh - 515001<br>If you did not request this code, you can safely ignore this email.</p>
+    </div>
+  `;
+  const text = `Your Sri Sai login code is: ${otpCode}\nValid for 10 minutes. Do not share this code with anyone.\n\nSri Sai • Old Town, Anantapur, Andhra Pradesh`;
+
+  return await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: 'Sri Sai <onboarding@resend.dev>',
+      to: [toEmail],
+      subject: subject,
+      html: html,
+      text: text
+    })
+  });
+}
+
+async function handleSendEmailOtp(request, env, cors) {
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return jsonError('Invalid JSON', 'INVALID_JSON', 400, cors);
+  }
+
+  const { email } = body || {};
+  if (!email || typeof email !== 'string') {
+    return jsonError('Please enter a valid email address.', 'INVALID_EMAIL', 400, cors);
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(normalizedEmail)) {
+    return jsonError('Invalid email address format.', 'INVALID_EMAIL', 400, cors);
+  }
+
+  const emailHash = (await sha256Hex(normalizedEmail)).substring(0, 32);
+  let existing = null;
+  try {
+    existing = await rtdbFetch(env, `emailOtps/${emailHash}`, 'GET');
+  } catch (e) {
+    console.warn('[handleSendEmailOtp rtdb error]', e);
+  }
+
+  const now = Date.now();
+  if (existing && (now - existing.createdAt < 30 * 1000)) {
+    const waitSec = Math.ceil((30 * 1000 - (now - existing.createdAt)) / 1000);
+    return jsonError(`Please wait ${waitSec} seconds before requesting a new code.`, 'RATE_LIMITED', 429, cors);
+  }
+
+  if (existing && existing.hourlyCount >= 5 && (now - (existing.hourlyWindowStart || 0) < 3600 * 1000)) {
+    return jsonError('Too many requests. Please try again after 1 hour.', 'RATE_LIMITED', 429, cors);
+  }
+
+  const hourlyCount = (existing && (now - (existing.hourlyWindowStart || 0) < 3600 * 1000))
+    ? (existing.hourlyCount || 0) + 1
+    : 1;
+
+  // Generate 6-digit random code
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const codeHash = await hmacSha256Hex('sri-sai-salt-2026', otpCode);
+
+  await rtdbFetch(env, `emailOtps/${emailHash}`, 'PUT', {
+    codeHash: codeHash,
+    email: normalizedEmail,
+    createdAt: now,
+    expiresAt: now + (10 * 60 * 1000), // 10 minutes
+    attempts: 0,
+    hourlyCount: hourlyCount,
+    hourlyWindowStart: existing?.hourlyWindowStart && (now - existing.hourlyWindowStart < 3600 * 1000) ? existing.hourlyWindowStart : now
+  });
+
+  const resendApiKey = env.RESEND_API_KEY;
+  if (resendApiKey) {
+    try {
+      const emailResp = await sendEmailViaResend(normalizedEmail, otpCode, resendApiKey);
+      if (!emailResp.ok) {
+        const errText = await emailResp.text();
+        console.warn('[Resend API Error]', errText);
+        let parsedErr;
+        try { parsedErr = JSON.parse(errText); } catch (_) {}
+        if (parsedErr && parsedErr.message && parsedErr.message.includes('testing emails')) {
+          return jsonError('Resend sandbox mode allows sending only to chowdarynikhil095@gmail.com. Please test with that email or verify a domain in resend.com.', 'RESEND_SANDBOX', 400, cors);
+        }
+      }
+    } catch (err) {
+      console.warn('[Resend Exception]', err);
+    }
+  } else {
+    console.log(`[Email OTP] Generated code for ${normalizedEmail}: ${otpCode}`);
+  }
+
+  return jsonResponse({
+    success: true,
+    message: 'Verification code sent to your email.'
+  }, 200, cors);
+}
+
+async function handleVerifyEmailOtp(request, env, cors) {
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return jsonError('Invalid JSON', 'INVALID_JSON', 400, cors);
+  }
+
+  const { email, otp } = body || {};
+  if (!email || !otp) {
+    return jsonError('Email and 6-digit verification code are required.', 'MISSING_FIELDS', 400, cors);
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedOtp = String(otp).trim();
+
+  if (!/^[0-9]{6}$/.test(normalizedOtp)) {
+    return jsonError('Please enter a valid 6-digit numeric code.', 'INVALID_FORMAT', 400, cors);
+  }
+
+  const emailHash = (await sha256Hex(normalizedEmail)).substring(0, 32);
+  let record = null;
+  try {
+    record = await rtdbFetch(env, `emailOtps/${emailHash}`, 'GET');
+  } catch (e) {
+    console.warn('[handleVerifyEmailOtp rtdb error]', e);
+  }
+
+  if (!record) {
+    return jsonError('Verification code expired or not found. Please request a new code.', 'NOT_FOUND', 400, cors);
+  }
+
+  const now = Date.now();
+  if (now > record.expiresAt) {
+    await rtdbFetch(env, `emailOtps/${emailHash}`, 'DELETE');
+    return jsonError('Verification code has expired. Please request a new code.', 'EXPIRED', 400, cors);
+  }
+
+  if (record.attempts >= 5) {
+    await rtdbFetch(env, `emailOtps/${emailHash}`, 'DELETE');
+    return jsonError('Too many incorrect attempts. Please request a new code.', 'RATE_LIMITED', 429, cors);
+  }
+
+  const inputHash = await hmacSha256Hex('sri-sai-salt-2026', normalizedOtp);
+  if (inputHash !== record.codeHash) {
+    const nextAttempts = (record.attempts || 0) + 1;
+    await rtdbFetch(env, `emailOtps/${emailHash}/attempts`, 'PUT', nextAttempts);
+    const remaining = 5 - nextAttempts;
+    return jsonError(`Incorrect code. ${remaining > 0 ? `${remaining} attempts remaining.` : 'Please request a new code.'}`, 'INCORRECT_CODE', 400, cors);
+  }
+
+  // Delete used OTP
+  await rtdbFetch(env, `emailOtps/${emailHash}`, 'DELETE');
+
+  // Unified account lookup or create
+  const uid = await getOrCreateFirebaseUser(normalizedEmail, env);
+
+  // Mint Firebase Custom Token
+  const customToken = await createFirebaseCustomToken(uid, normalizedEmail, env);
+
+  return jsonResponse({
+    success: true,
+    customToken: customToken,
+    uid: uid,
+    email: normalizedEmail
+  }, 200, cors);
 }

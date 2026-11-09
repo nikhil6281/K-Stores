@@ -1,12 +1,12 @@
 /**
- * Central Configuration for RA Store (Anantapur, AP)
+ * Central Configuration for Sri Sai (Anantapur, AP)
  * Single source of truth for store branding, location, PIN codes, landmarks, and contact details.
  * Usable in browser (window.APP_CONFIG) and Node.js (module.exports / globalThis).
  */
 const APP_CONFIG = {
-  storeName: "RA Store",
-  storeNameTelugu: "RA స్టోర్",
-  businessLegalName: "RA Store",
+  storeName: "Sri Sai",
+  storeNameTelugu: "శ్రీ సాయి",
+  businessLegalName: "Sri Sai",
   tagline: "Fresh Groceries Delivered in Anantapur",
   taglineTelugu: "అనంతపురంలో తాజా కిరాణా సరుకుల డెలివరీ",
   city: "Anantapur",
@@ -33,17 +33,17 @@ const APP_CONFIG = {
     "కమలానగర్",
     "ఓల్డ్ టౌన్"
   ],
-  address: "Sri Sai General Store, Old Town, Anantapur, Andhra Pradesh - 515001",
-  addressTelugu: "శ్రీ సాయి జనరల్ స్టోర్, ఓల్డ్ టౌన్, అనంతపురం, ఆంధ్రప్రదేశ్ - 515001",
+  address: "Sri Sai • Old Town, Anantapur, Andhra Pradesh - 515001",
+  addressTelugu: "శ్రీ సాయి • ఓల్డ్ టౌన్, అనంతపురం, ఆంధ్రప్రదేశ్ - 515001",
   phone: "6281730144",
   formattedPhone: "+91 62817 30144",
   whatsappNumber: "916281730144",
-  supportEmail: "support@rastore.in",
+  supportEmail: "support@srisai.in",
   grievanceOfficer: {
     name: "Somala Pandu Ranga Naidu",
-    email: "grievance@rastore.in",
+    email: "grievance@srisai.in",
     phone: "+91 62817 30144",
-    address: "Sri Sai General Store, Old Town, Anantapur, Andhra Pradesh - 515001"
+    address: "Sri Sai • Old Town, Anantapur, Andhra Pradesh - 515001"
   },
   hours: "7:00 AM - 9:00 PM IST",
   hoursTelugu: "ఉదయం 7:00 AM నుండి రాత్రి 9:00 PM IST",

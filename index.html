@@ -7,28 +7,30 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://checkout.razorpay.com https://accounts.google.com https://www.google.com https://*.firebaseio.com https://*.firebaseapp.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https: wss: https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://ra-store-api.chowdarynikhil095.workers.dev https://api.razorpay.com; frame-src 'self' https://accounts.google.com https://*.firebaseapp.com https://*.firebaseio.com https://api.razorpay.com https://www.google.com; img-src 'self' https: data: blob:;">
   
   <!-- SEO & Social Meta -->
-  <title>RA Store — Fresh Groceries Delivered in Anantapur</title>
+  <title>Sri Sai — Fresh Groceries Delivered in Anantapur</title>
   <meta name="description" content="Order fresh vegetables, milk, and daily groceries online in Anantapur. 100% refund guarantee before dispatch. Fast doorstep delivery.">
   <link rel="canonical" href="https://nikhil6281.github.io/K-Stores/">
-  <meta property="og:title" content="RA Store — Fresh Groceries Delivered in Anantapur">
+  <meta property="og:title" content="Sri Sai — Fresh Groceries Delivered in Anantapur">
   <meta property="og:description" content="Local grocery delivery for Anantapur, Andhra Pradesh. Browse fresh items, order online, or choose Cash on Delivery.">
   <meta property="og:url" content="https://nikhil6281.github.io/K-Stores/">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#15803d">
   
-  <!-- PWA Manifest -->
+  <!-- PWA Manifest & Sri Sai Icons -->
   <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" sizes="48x48" href="./assets/logo/favicon-48.png?v=2">
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/logo/apple-touch-icon-180.png?v=2">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/logo/app-icon-192.png?v=2">
+  <link rel="icon" type="image/png" sizes="512x512" href="./assets/logo/app-icon-512.png?v=2">
 
   <!-- Schema.org JSON-LD for Anantapur -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "GroceryStore",
-    "name": "RA Store",
-    "alternateName": ["Ananthapur RA Store", "Anantapuramu RA Store", "RA General Store"],
+    "name": "Sri Sai",
+    "alternateName": ["Sri Sai Store", "Sri Sai General Store", "Sri Sai Anantapur"],
     "telephone": "+916281730144",
     "address": {
       "@type": "PostalAddress",
@@ -550,31 +552,38 @@
       will-change: transform;
     }
 
-    /* Persistent Bottom Navigation: Keep visible on Cart & Orders, hide only floating cart bar & during checkout/signin */
-    .mobile-bottom-nav {
+    /* Requirement 3: Bottom Bar Pop-Out (Hide) & Pop-In (Show) with single state variable */
+    .mobile-bottom-nav,
+    .bottom-bar,
+    .cart-bar-sticky {
       z-index: 450 !important;
+      transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1), opacity 240ms ease !important;
+      will-change: transform, opacity;
     }
+
+    body.bnav-hidden .mobile-bottom-nav,
+    body.bnav-hidden .bottom-bar,
+    body.bnav-hidden .cart-bar-sticky,
+    body.overlay-open .mobile-bottom-nav,
     body.overlay-open .bottom-bar,
-    body.signin-open .bottom-bar,
-    body.signin-open .mobile-bottom-nav,
-    body.checkout-open .mobile-bottom-nav {
-      transform: translateY(calc(100% + env(safe-area-inset-bottom, 0px) + 20px)) !important;
+    body.overlay-open .cart-bar-sticky {
+      transform: translateY(calc(100% + env(safe-area-inset-bottom, 0px) + 24px)) !important;
       pointer-events: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
-      transition: transform 220ms ease, opacity 220ms ease, visibility 0s linear 0.22s !important;
     }
 
     @media (min-width: 481px) {
+      body.bnav-hidden .mobile-bottom-nav,
+      body.bnav-hidden .bottom-bar,
+      body.bnav-hidden .cart-bar-sticky,
+      body.overlay-open .mobile-bottom-nav,
       body.overlay-open .bottom-bar,
-      body.signin-open .bottom-bar,
-      body.signin-open .mobile-bottom-nav,
-      body.checkout-open .mobile-bottom-nav {
-        transform: translate(-50%, calc(100% + env(safe-area-inset-bottom, 0px) + 20px)) !important;
+      body.overlay-open .cart-bar-sticky {
+        transform: translate(-50%, calc(100% + env(safe-area-inset-bottom, 0px) + 24px)) !important;
         pointer-events: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
-        transition: transform 220ms ease, opacity 220ms ease, visibility 0s linear 0.22s !important;
       }
     }
 
@@ -592,6 +601,9 @@
     /* CHANGE 1: Modals stack above bottom nav (z-index: 400 > 300) and scroll comfortably */
     .modal-overlay {
       z-index: 400 !important;
+    }
+    #loginModal {
+      z-index: 600 !important;
     }
 
     .modal {
@@ -838,8 +850,9 @@
   </div>
 
   <header class="navbar">
-    <div class="brand">
-      <span class="brand-title" id="navbarBrandTitle">RA Store</span> <span class="brand-badge">ANANTAPUR</span>
+    <div class="brand" style="display: flex; align-items: center; gap: 8px;">
+      <img src="./assets/logo/sri-sai-logo.png?v=2" alt="Sri Sai" style="height: 36px; width: auto; object-fit: contain;">
+      <span class="brand-title" id="navbarBrandTitle">Sri Sai</span> <span class="brand-badge">ANANTAPUR</span>
     </div>
     <div class="nav-actions">
       <button class="btn-lang" id="langToggleBtn" aria-label="Change Language">తెలుగు</button>
@@ -944,12 +957,12 @@
       <a href="./refund-policy.html">Cancellation & Refund</a>
       <a href="./shipping-policy.html">Shipping & Delivery</a>
     </div>
-    <div><strong>RA Store</strong> • <span id="footerAddressText">Sri Sai General Store, Old Town, Anantapur, Andhra Pradesh</span></div>
+    <div><strong>Sri Sai</strong> • <span id="footerAddressText">Old Town, Anantapur, Andhra Pradesh</span></div>
     <div style="margin-top: 6px;">
       Helpline / WhatsApp: <a href="tel:+916281730144" style="color: #E5E7EB; text-decoration: underline;">+91 62817 30144</a> • 
       <a href="https://wa.me/916281730144" target="_blank" style="color: #25D366; text-decoration: underline;">Chat on WhatsApp</a>
     </div>
-    <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">© 2026 RA Store. All rights reserved. Fast doorstep grocery delivery in Anantapur.</div>
+    <div style="margin-top: 10px; font-size: 11px; color: #6B7280;">© 2026 Sri Sai. All rights reserved. Fast doorstep grocery delivery in Anantapur.</div>
   </footer>
 
   <!-- Phase 3: Floating Call & WhatsApp Buttons (Does not cover cart bar) -->
@@ -1076,7 +1089,7 @@
     <div id="accountSignedOutWrap" style="display: block;">
       <div class="card" style="margin-bottom: 14px; padding: 24px 16px; background: #FFFFFF; border-radius: 12px; border: 1px solid var(--border); text-align: center;">
         <div style="font-size: 40px; margin-bottom: 10px;">🛍️</div>
-        <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 6px;" id="tAccountWelcomeTitle">Welcome to RA Store</h3>
+        <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 6px;" id="tAccountWelcomeTitle">Welcome to Sri Sai</h3>
         <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.4;" id="tAccountWelcomeSub">Sign in with your mobile number or Google account to view your saved addresses, track deliveries, and manage your profile.</p>
         <button type="button" class="btn btn-primary" id="accountSignInBtn" style="width: 100%; justify-content: center; min-height: 44px; font-weight: 700;">Sign In</button>
       </div>
@@ -1134,9 +1147,9 @@
       </div>
     </div>
 
-    <!-- 7. Share RA Store -->
+    <!-- 7. Share Sri Sai -->
     <button type="button" class="btn btn-outline" id="btnShareStore" style="width: 100%; margin-bottom: 14px; justify-content: center; gap: 8px; font-size: 13px; font-weight: 700; color: #1D4ED8; border-color: #93C5FD; background: #EFF6FF; min-height: 42px;">
-      <span>🔗</span> <span id="tShareStoreBtn">Share RA Store with Friends & Family</span>
+      <span>🔗</span> <span id="tShareStoreBtn">Share Sri Sai with Friends & Family</span>
     </button>
 
     <!-- 8. LOG OUT Button (Signed-in only) -->
@@ -1155,7 +1168,7 @@
 
     <!-- 10. Small Footer Line with App Version -->
     <div id="accountAppVersion" style="text-align: center; font-size: 11px; color: var(--muted); padding: 10px 0 20px;">
-      RA Store v2.1.2 • Anantapur, Andhra Pradesh
+      Sri Sai v2.2.0 • Anantapur, Andhra Pradesh
     </div>
   </div>
 
@@ -1291,68 +1304,68 @@
     </div>
   </div>
 
-  <!-- Phone OTP & Google Login Modal -->
+  <!-- Email OTP & Google Login Modal -->
   <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
-    <div class="modal">
+    <div class="modal" style="max-width: 400px;">
       <div class="drawer-drag-handle"></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="font-size: 16px; font-weight: 700;" id="loginModalTitle">Sign In to RA Store</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700;" id="loginModalTitle">Sign In to Sri Sai</h3>
         <button class="modal-close-btn" data-modal="loginModal" aria-label="Close login modal" style="background: none; border: none; font-size: 18px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">✕</button>
       </div>
 
-      <!-- Step 1: Mobile Number Input -->
-      <div id="phoneInputStep">
-        <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;" id="tPhoneLoginSub">Enter your 10-digit mobile number for fast grocery delivery and order tracking in Anantapur.</p>
-        
-        <div class="phone-input-group">
-          <span class="phone-prefix">🇮🇳 +91</span>
-          <input type="tel" id="loginPhoneInput" class="phone-input-field" placeholder="10-digit mobile number" pattern="[0-9]{10}" inputmode="numeric" maxlength="10" autocomplete="tel-national">
-        </div>
+      <img src="./assets/logo/sri-sai-logo.png?v=2" alt="Sri Sai" style="height: 48px; margin: 0 auto 10px; display: block; object-fit: contain;">
 
-        <button type="button" id="sendOtpBtn" class="btn btn-primary" style="width: 100%; min-height: 46px; font-size: 14px; margin-top: 10px;">
-          Send OTP via SMS
-        </button>
-      </div>
-
-      <!-- Step 2: OTP Verification Input -->
-      <div id="otpInputStep" style="display: none;">
-        <div style="background: #F3F4F6; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-          <div style="font-size: 12px;">
-            <span style="color: var(--muted);" id="tOtpSentTo">OTP sent to: </span>
-            <strong id="otpPhoneDisplay">+91</strong>
-          </div>
-          <button type="button" id="changePhoneBtn" style="background: none; border: none; color: var(--primary); font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: underline;">Change</button>
-        </div>
-
-        <div class="form-group" style="text-align: center;">
-          <label for="otpCodeInput" style="font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block;" id="tEnterOtpLabel">Enter 6-Digit Verification Code</label>
-          <input type="tel" id="otpCodeInput" class="otp-input-field" placeholder="• • • • • •" pattern="[0-9]{6}" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
-        </div>
-
-        <button type="button" id="verifyOtpBtn" class="btn btn-primary" style="width: 100%; min-height: 46px; font-size: 14px; margin-top: 8px;">
-          Verify & Sign In
-        </button>
-
-        <div style="text-align: center; margin-top: 12px;">
-          <button type="button" id="resendOtpBtn" style="background: none; border: none; font-size: 12px; color: var(--muted); cursor: pointer;" disabled>
-            Resend OTP <span id="resendTimer">(30s)</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Divider -->
-      <div class="auth-divider">
-        <span id="tOrDivider">OR</span>
-      </div>
-
-      <!-- Google Sign In Secondary Option -->
-      <button type="button" class="btn btn-outline" id="loginGoogleSecondaryBtn" style="width: 100%; min-height: 44px; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-        <span id="tSignInWithGoogle">Sign in with Google</span>
+      <!-- Option 1: Continue with Google -->
+      <button type="button" class="btn btn-outline" id="loginGoogleBtn" style="width: 100%; min-height: 46px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 8px; font-weight: 600; border: 1.5px solid var(--border); background: #FFFFFF; margin-bottom: 14px;">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        <span id="tSignInWithGoogle">Continue with Google</span>
       </button>
 
-      <!-- Invisible reCAPTCHA container -->
-      <div id="recaptcha-container"></div>
+      <!-- Divider -->
+      <div style="position: relative; margin: 14px 0; text-align: center;">
+        <span style="background: white; padding: 0 10px; font-size: 11px; color: var(--muted); position: relative; z-index: 1;">OR WITH EMAIL OTP</span>
+        <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border);"></div>
+      </div>
+
+      <!-- Option 2: Email OTP Input Container -->
+      <div id="emailLoginWrap">
+        <!-- Step 1: Email Input -->
+        <div id="emailInputStep">
+          <p style="font-size: 12px; color: var(--muted); margin-bottom: 10px;" id="tEmailLoginSub">Enter your email address to receive a 6-digit verification code.</p>
+          <input type="email" id="loginEmailInput" placeholder="name@example.com" autocomplete="email" inputmode="email" style="width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 15px; margin-bottom: 10px;">
+          <button type="button" id="sendEmailOtpBtn" class="btn btn-primary" style="width: 100%; min-height: 46px; font-size: 14px; border-radius: 8px;">
+            Send 6-Digit Code
+          </button>
+        </div>
+
+        <!-- Step 2: 6-Digit Verification Code -->
+        <div id="emailOtpStep" style="display: none;">
+          <div style="background: #F3F4F6; padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 12px;">
+              <span style="color: var(--muted);">Code sent to: </span>
+              <strong id="otpEmailDisplay" style="color: #111827;"></strong>
+            </div>
+            <button type="button" id="changeEmailBtn" style="background: none; border: none; color: var(--primary); font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: underline;">Change</button>
+          </div>
+
+          <div class="form-group" style="text-align: center;">
+            <label for="emailOtpInput" style="font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block;">Enter 6-Digit Verification Code</label>
+            <input type="tel" id="emailOtpInput" class="otp-input-field" placeholder="• • • • • •" pattern="[0-9]{6}" inputmode="numeric" maxlength="6" autocomplete="one-time-code" style="width: 100%; text-align: center; letter-spacing: 6px; font-size: 20px; font-weight: 700; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border);">
+          </div>
+
+          <button type="button" id="verifyEmailOtpBtn" class="btn btn-primary" style="width: 100%; min-height: 46px; font-size: 14px; margin-top: 8px; border-radius: 8px;">
+            Verify & Sign In
+          </button>
+
+          <div style="text-align: center; margin-top: 12px;">
+            <button type="button" id="resendEmailOtpBtn" style="background: none; border: none; font-size: 12px; color: var(--muted); cursor: pointer;" disabled>
+              Resend Code <span id="emailResendTimer">(30s)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="loginErrorBox" style="display: none; margin-top: 12px; padding: 10px; background: #FEE2E2; color: #DC2626; border-radius: 6px; font-size: 12px; text-align: left; font-weight: 600;"></div>
     </div>
   </div>
 
@@ -1565,7 +1578,7 @@
 
       <div id="successInAppBrowserHint" style="display: none; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 12px; margin-bottom: 16px; text-align: left; font-size: 12px; color: #92400E;">
         📲 <strong>Want live updates on this order?</strong><br>
-        <span style="font-size: 11px; line-height: 1.4;">In-app browsers (WhatsApp / Instagram) block push notifications. Open RA Store in Chrome to get instant delivery alerts.</span>
+        <span style="font-size: 11px; line-height: 1.4;">In-app browsers (WhatsApp / Instagram) block push notifications. Open Sri Sai in Chrome to get instant delivery alerts.</span>
       </div>
 
       <div style="background: #FEF3C7; border-left: 4px solid var(--accent); padding: 8px 12px; border-radius: 6px; font-size: 12px; color: #92400E; margin-bottom: 16px; text-align: left;">
@@ -1662,8 +1675,8 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    const APP_VERSION = "v2.1.2";
-    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ERA Store%3C/text%3E%3C/svg%3E";
+    const APP_VERSION = "v2.2.0";
+    const SVG_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='110' viewBox='0 0 140 110'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-size='12' fill='%239ca3af' text-anchor='middle' dy='.3em'%3ESri Sai%3C/text%3E%3C/svg%3E";
 
     function handleProductImgError(el) {
       if (el) {
@@ -1817,9 +1830,9 @@
         debugState[key] = value;
       }
       if (isError) {
-        console.error('[RA Store Debug - ' + key + ']', value);
+        console.error('[Sri Sai Debug - ' + key + ']', value);
       } else {
-        console.log('[RA Store Debug - ' + key + ']', value);
+        console.log('[Sri Sai Debug - ' + key + ']', value);
       }
       updateDebugHud();
     }
@@ -1890,7 +1903,7 @@
         moreForFree: "Add ₹{val} more for Free Delivery",
         reorder: "🔁 Reorder Last",
         viewCartText: "View Cart ⌃",
-        phoneLoginTitle: "Sign In to RA Store",
+        phoneLoginTitle: "Sign In to Sri Sai",
         phoneLoginSub: "Enter your 10-digit mobile number for instant Anantapur grocery delivery and tracking.",
         sendOtpBtn: "Send OTP via SMS",
         sendingOtp: "Sending OTP...",
@@ -1948,8 +1961,8 @@
         bnavCart: "Cart",
         bnavOrders: "Orders",
         bnavAccount: "Account",
-        accountWelcomeTitle: "Welcome to RA Store",
-        accountWelcomeSub: "Sign in with your mobile number or Google account to view your saved addresses, track deliveries, and manage your profile.",
+        accountWelcomeTitle: "Welcome to Sri Sai",
+        accountWelcomeSub: "Sign in with your email or Google account to view your saved addresses, track deliveries, and manage your profile.",
         statOrdersPlaced: "Orders Placed",
         statLastOrder: "Last Order",
         noneYet: "None yet",
@@ -1969,9 +1982,9 @@
         privacyLink: "Privacy Policy",
         refundPolicyLink: "Cancellation & Refund Policy",
         shippingPolicyLink: "Shipping & Delivery Policy",
-        shareStoreBtn: "Share RA Store with Friends & Family",
+        shareStoreBtn: "Share Sri Sai with Friends & Family",
         logoutBtnText: "🚪 Log Out",
-        logoutConfirm: "Log out of RA Store?",
+        logoutConfirm: "Log out of Sri Sai?",
         loggedOutToast: "Logged out successfully",
         deleteAccountLink: "Delete my account",
         deleteAccountConfirm: "Are you sure you want to delete your profile and saved addresses? Your past orders will remain in the store records.",
@@ -2039,18 +2052,18 @@
         moreForFree: "ఉచిత డెలివరీ కోసం ఇంకో ₹{val} జోడించండి",
         reorder: "🔁 మళ్ళీ ఆర్డర్",
         viewCartText: "కార్ట్ చూడండి ⌃",
-        phoneLoginTitle: "RA స్టోర్‌కు లాగిన్ అవ్వండి",
-        phoneLoginSub: "కిరాణా డెలివరీ మరియు ఆర్డర్ ట్రాకింగ్ కోసం మీ 10 అంకెల మొబైల్ నంబర్ నమోదు చేయండి.",
-        sendOtpBtn: "SMS ద్వారా OTP పంపండి",
-        sendingOtp: "OTP పంపుతున్నాం...",
-        otpSentTo: "OTP పంపబడిన నంబర్: ",
+        phoneLoginTitle: "శ్రీ సాయి కి లాగిన్ అవ్వండి",
+        phoneLoginSub: "కిరాణా డెలివరీ మరియు ఆర్డర్ ట్రాకింగ్ కోసం మీ ఈమెయిల్ నమోదు చేయండి.",
+        sendOtpBtn: "కోడ్ పంపండి",
+        sendingOtp: "కోడ్ పంపుతున్నాం...",
+        otpSentTo: "కోడ్ పంపబడిన ఈమెయిల్: ",
         changeNumber: "మార్చండి",
         enterOtpLabel: "6 అంకెల ధృవీకరణ కోడ్ నమోదు చేయండి",
         verifyOtpBtn: "ధృవీకరించి లాగిన్ అవ్వండి",
         verifyingOtp: "ధృవీకరిస్తున్నాం...",
-        resendOtp: "మళ్ళీ OTP పంపండి",
+        resendOtp: "మళ్ళీ కోడ్ పంపండి",
         orDivider: "లేదా",
-        signInWithGoogle: "Google తో లాగిన్ అవ్వండి",
+        signInWithGoogle: "Google తో కొనసాగండి",
         deliveryAreaTitle: "అనంతపురం డెలివరీ జోన్",
         deliveryAreaDesc: "అనంతపురం నగర పరిధిలోని అన్ని ప్రాంతాలకు డెలివరీ (515001 - 515005)",
         quickLandmarks: "ముఖ్యమైన గుర్తులు:",
@@ -2097,8 +2110,8 @@
         bnavCart: "కార్ట్",
         bnavOrders: "ఆర్డర్లు",
         bnavAccount: "ఖాతా",
-        accountWelcomeTitle: "RA స్టోర్‌కు స్వాగతం",
-        accountWelcomeSub: "మీ భద్రపరిచిన చిరునామాలు, డెలివరీలు మరియు ప్రొఫైల్ కోసం మీ మొబైల్ నంబర్ లేదా Google తో లాగిన్ అవ్వండి.",
+        accountWelcomeTitle: "శ్రీ సాయి స్టోర్‌కు స్వాగతం",
+        accountWelcomeSub: "మీ భద్రపరిచిన చిరునామాలు, డెలివరీలు మరియు ప్రొఫైల్ కోసం మీ ఈమెయిల్ లేదా Google తో లాగిన్ అవ్వండి.",
         statOrdersPlaced: "చేసిన ఆర్డర్లు",
         statLastOrder: "చివరి ఆర్డర్",
         noneYet: "ఇంకా లేవు",
@@ -2120,7 +2133,7 @@
         shippingPolicyLink: "షిప్పింగ్ & డెలివరీ విధానం",
         shareStoreBtn: "స్నేహితులు & కుటుంబ సభ్యులతో షేర్ చేయండి",
         logoutBtnText: "🚪 లాగ్ అవుట్",
-        logoutConfirm: "RA స్టోర్ నుండి లాగ్ అవుట్ అవ్వాలా?",
+        logoutConfirm: "శ్రీ సాయి నుండి లాగ్ అవుట్ అవ్వాలా?",
         loggedOutToast: "లాగ్ అవుట్ అయ్యారు",
         deleteAccountLink: "నా ఖాతాను తొలగించండి",
         deleteAccountConfirm: "మీ ప్రొఫైల్ మరియు భద్రపరిచిన చిరునామాలను తొలగించాలనుకుంటున్నారా? మీ గత ఆర్డర్ల రికార్డులు స్టోర్ వద్ద ఉంటాయి.",
@@ -2158,7 +2171,7 @@
       document.getElementById('tCatalogHeading').innerText = t.catalogHeading;
       
       const brandTitleEl = document.getElementById('navbarBrandTitle');
-      if (brandTitleEl) brandTitleEl.innerText = (lang === 'te' ? 'RA స్టోర్' : 'RA Store');
+      if (brandTitleEl) brandTitleEl.innerText = (lang === 'te' ? (window.APP_CONFIG?.storeNameTelugu || 'శ్రీ సాయి') : (window.APP_CONFIG?.storeName || 'Sri Sai'));
       
       const ordersFull = document.querySelector('.nav-orders-text-full');
       const ordersShort = document.querySelector('.nav-orders-text-short');
@@ -2179,16 +2192,17 @@
       if (!currentUser) document.getElementById('loginBtn').innerText = t.signIn;
       document.getElementById('reorderLastBtn').innerText = t.reorder;
 
-      // Translations for Phone Login & Checkout
-      document.getElementById('loginModalTitle').innerText = t.phoneLoginTitle;
-      document.getElementById('tPhoneLoginSub').innerText = t.phoneLoginSub;
-      document.getElementById('sendOtpBtn').innerText = t.sendOtpBtn;
-      document.getElementById('tOtpSentTo').innerText = t.otpSentTo;
-      document.getElementById('changePhoneBtn').innerText = t.changeNumber;
-      document.getElementById('tEnterOtpLabel').innerText = t.enterOtpLabel;
-      document.getElementById('verifyOtpBtn').innerText = t.verifyOtpBtn;
-      document.getElementById('tOrDivider').innerText = t.orDivider;
-      document.getElementById('tSignInWithGoogle').innerText = t.signInWithGoogle;
+      // Translations for Email Login & Checkout (Safe setters)
+      const lTitle = document.getElementById('loginModalTitle');
+      if (lTitle) lTitle.innerText = (lang === 'te' ? 'శ్రీ సాయి కి లాగిన్ అవ్వండి' : 'Sign In to Sri Sai');
+      const lSub = document.getElementById('tEmailLoginSub');
+      if (lSub) lSub.innerText = (lang === 'te' ? 'ధృవీకరణ కోడ్ కోసం మీ ఈమెయిల్ నమోదు చేయండి.' : 'Enter your email address to receive a 6-digit verification code.');
+      const lSendBtn = document.getElementById('sendEmailOtpBtn');
+      if (lSendBtn) lSendBtn.innerText = (lang === 'te' ? 'కోడ్ పంపండి' : 'Send 6-Digit Code');
+      const lVerifyBtn = document.getElementById('verifyEmailOtpBtn');
+      if (lVerifyBtn) lVerifyBtn.innerText = (lang === 'te' ? 'ధృవీకరించి లాగిన్ అవ్వండి' : 'Verify & Sign In');
+      const lGoogleBtnText = document.getElementById('tSignInWithGoogle');
+      if (lGoogleBtnText) lGoogleBtnText.innerText = (lang === 'te' ? 'Google తో కొనసాగండి' : 'Continue with Google');
       document.getElementById('tDeliveryAreaTitle').innerText = t.deliveryAreaTitle;
       document.getElementById('tDeliveryAreaDesc').innerText = t.deliveryAreaDesc;
       document.getElementById('tQuickLandmarks').innerText = t.quickLandmarks;
@@ -2333,173 +2347,212 @@
     let pendingCheckoutAfterLogin = false;
     let pendingOrdersAfterLogin = false;
 
-    function sanitizeIndianPhone(raw) {
-      if (!raw) return null;
-      let digits = String(raw).replace(/\D/g, '');
-      if (digits.length === 12 && digits.startsWith('91')) {
-        digits = digits.substring(2);
-      } else if (digits.length === 11 && digits.startsWith('0')) {
-        digits = digits.substring(1);
-      }
-      if (digits.length === 10 && /^[6-9]/.test(digits)) {
-        return '+91' + digits;
-      }
-      return null;
-    }
+    // Email OTP Authentication (Requirement 6)
+    let emailResendInterval = null;
+    let pendingLoginEmail = '';
 
-    function getRecaptchaVerifier() {
-      if (!window.recaptchaVerifier) {
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-          size: 'invisible',
-          callback: function () {
-            // reCAPTCHA solved
-          },
-          'expired-callback': function () {
-            if (window.recaptchaVerifier) {
-              try { window.recaptchaVerifier.clear(); } catch(e){}
-              window.recaptchaVerifier = null;
-            }
-          }
-        });
-      }
-      return window.recaptchaVerifier;
-    }
-
-    async function sendPhoneOtp(rawPhone) {
-      const formattedPhone = sanitizeIndianPhone(rawPhone);
-      if (!formattedPhone) {
-        showToast("Please enter a valid 10-digit mobile number");
-        return;
-      }
-
-      const sendBtn = document.getElementById('sendOtpBtn');
-      sendBtn.disabled = true;
-      sendBtn.innerText = I18N[currentLang].sendingOtp;
-
-      try {
-        const verifier = getRecaptchaVerifier();
-        phoneConfirmationResult = await auth.signInWithPhoneNumber(formattedPhone, verifier);
-        
-        document.getElementById('phoneInputStep').style.display = 'none';
-        document.getElementById('otpInputStep').style.display = 'block';
-        document.getElementById('otpPhoneDisplay').innerText = formattedPhone;
-        document.getElementById('otpCodeInput').value = '';
-        document.getElementById('otpCodeInput').focus();
-        
-        startResendCountdown();
-        showToast("OTP sent to " + formattedPhone);
-      } catch (err) {
-        console.error("Phone Auth Error:", err);
-        if (window.recaptchaVerifier) {
-          try { window.recaptchaVerifier.clear(); } catch(e){}
-          window.recaptchaVerifier = null;
-        }
-        alert("Could not send OTP: " + (err.message || "Please check number and try again."));
-      } finally {
-        sendBtn.disabled = false;
-        sendBtn.innerText = I18N[currentLang].sendOtpBtn;
-      }
-    }
-
-    async function verifyPhoneOtp(code) {
-      if (!phoneConfirmationResult) {
-        showToast("Session expired. Please request OTP again.");
-        return;
-      }
-      const cleanCode = (code || '').trim();
-      if (cleanCode.length !== 6) {
-        showToast("Please enter the 6-digit OTP code");
-        return;
-      }
-
-      const verifyBtn = document.getElementById('verifyOtpBtn');
-      verifyBtn.disabled = true;
-      verifyBtn.innerText = I18N[currentLang].verifyingOtp;
-
-      try {
-        await phoneConfirmationResult.confirm(cleanCode);
-        showToast("Signed in successfully!");
-        closeModal('loginModal');
-      } catch (err) {
-        console.error("OTP Verification Error:", err);
-        alert("Invalid OTP code: " + (err.message || "Please check the code and try again."));
-      } finally {
-        verifyBtn.disabled = false;
-        verifyBtn.innerText = I18N[currentLang].verifyOtpBtn;
-      }
-    }
-
-    function startResendCountdown() {
+    function startEmailResendCountdown() {
       let seconds = 30;
-      const resendBtn = document.getElementById('resendOtpBtn');
-      const timerSpan = document.getElementById('resendTimer');
+      const resendBtn = document.getElementById('resendEmailOtpBtn');
+      const timerSpan = document.getElementById('emailResendTimer');
+      if (!resendBtn) return;
       resendBtn.disabled = true;
-      timerSpan.innerText = `(${seconds}s)`;
+      if (timerSpan) timerSpan.innerText = `(${seconds}s)`;
       
-      if (resendTimerInterval) clearInterval(resendTimerInterval);
-      resendTimerInterval = setInterval(() => {
+      if (emailResendInterval) clearInterval(emailResendInterval);
+      emailResendInterval = setInterval(() => {
         seconds--;
         if (seconds <= 0) {
-          clearInterval(resendTimerInterval);
+          clearInterval(emailResendInterval);
           resendBtn.disabled = false;
-          timerSpan.innerText = '';
+          if (timerSpan) timerSpan.innerText = '';
         } else {
-          timerSpan.innerText = `(${seconds}s)`;
+          if (timerSpan) timerSpan.innerText = `(${seconds}s)`;
         }
       }, 1000);
     }
 
-    document.getElementById('sendOtpBtn').addEventListener('click', () => {
-      const phone = document.getElementById('loginPhoneInput').value.trim();
-      sendPhoneOtp(phone);
+    async function sendCustomerEmailOtp(email) {
+      const errBox = document.getElementById('loginErrorBox');
+      if (errBox) errBox.style.display = 'none';
+      const sendBtn = document.getElementById('sendEmailOtpBtn');
+      if (sendBtn) { sendBtn.disabled = true; sendBtn.innerText = 'Sending 6-digit code...'; }
+
+      try {
+        const fnUrl = 'https://asia-south1-k-store-ae9dd.cloudfunctions.net/sendEmailOtp';
+        const fallbackUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/send-email-otp';
+
+        let resp;
+        try {
+          resp = await fetch(fnUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+          });
+          if (!resp.ok) {
+            throw new Error('Fallback to worker');
+          }
+        } catch (e) {
+          resp = await fetch(fallbackUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+          });
+        }
+
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data.success) {
+          throw new Error(data.error || 'Failed to send verification code. Please check email address.');
+        }
+
+        pendingLoginEmail = email;
+        document.getElementById('emailInputStep').style.display = 'none';
+        document.getElementById('emailOtpStep').style.display = 'block';
+        document.getElementById('otpEmailDisplay').innerText = email;
+        const otpInput = document.getElementById('emailOtpInput');
+        if (otpInput) { otpInput.value = ''; otpInput.focus(); }
+        startEmailResendCountdown();
+        showToast('6-digit code sent to ' + email);
+      } catch (err) {
+        console.error('sendCustomerEmailOtp error:', err);
+        if (errBox) {
+          errBox.innerText = err.message;
+          errBox.style.display = 'block';
+        }
+      } finally {
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerText = 'Send 6-Digit Code'; }
+      }
+    }
+
+    async function verifyCustomerEmailOtp(code) {
+      const errBox = document.getElementById('loginErrorBox');
+      if (errBox) errBox.style.display = 'none';
+      const cleanCode = (code || '').trim();
+
+      if (cleanCode.length !== 6) {
+        if (errBox) {
+          errBox.innerText = 'Please enter the 6-digit verification code.';
+          errBox.style.display = 'block';
+        }
+        return;
+      }
+
+      const verifyBtn = document.getElementById('verifyEmailOtpBtn');
+      if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.innerText = 'Verifying & Signing In...'; }
+
+      try {
+        const fnUrl = 'https://asia-south1-k-store-ae9dd.cloudfunctions.net/verifyEmailOtp';
+        const fallbackUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/verify-email-otp';
+
+        let resp;
+        try {
+          resp = await fetch(fnUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: pendingLoginEmail, otp: cleanCode })
+          });
+          if (!resp.ok) {
+            throw new Error('Fallback to worker');
+          }
+        } catch (e) {
+          resp = await fetch(fallbackUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: pendingLoginEmail, otp: cleanCode })
+          });
+        }
+
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data.success || !data.customToken) {
+          throw new Error(data.error || 'Invalid verification code. Please check and try again.');
+        }
+
+        await auth.signInWithCustomToken(data.customToken);
+        showToast('Signed in successfully!');
+        closeModal('loginModal');
+
+        if (pendingCheckoutAfterLogin) {
+          pendingCheckoutAfterLogin = false;
+          openCheckout();
+        } else if (pendingOrdersAfterLogin) {
+          pendingOrdersAfterLogin = false;
+          openOrdersModal();
+        }
+      } catch (err) {
+        console.error('verifyCustomerEmailOtp error:', err);
+        if (errBox) {
+          errBox.innerText = err.message;
+          errBox.style.display = 'block';
+        }
+      } finally {
+        if (verifyBtn) { verifyBtn.disabled = false; verifyBtn.innerText = 'Verify & Sign In'; }
+      }
+    }
+
+    document.getElementById('sendEmailOtpBtn')?.addEventListener('click', () => {
+      const email = document.getElementById('loginEmailInput').value.trim();
+      if (!email || !email.includes('@')) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+      sendCustomerEmailOtp(email);
     });
 
-    document.getElementById('loginPhoneInput').addEventListener('keydown', (e) => {
+    document.getElementById('loginEmailInput')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('sendOtpBtn').click();
+        document.getElementById('sendEmailOtpBtn')?.click();
       }
     });
 
-    document.getElementById('verifyOtpBtn').addEventListener('click', () => {
-      const code = document.getElementById('otpCodeInput').value.trim();
-      verifyPhoneOtp(code);
+    document.getElementById('verifyEmailOtpBtn')?.addEventListener('click', () => {
+      const code = document.getElementById('emailOtpInput')?.value.trim();
+      verifyCustomerEmailOtp(code);
     });
 
-    document.getElementById('otpCodeInput').addEventListener('input', (e) => {
+    document.getElementById('emailOtpInput')?.addEventListener('input', (e) => {
       if (e.target.value.length === 6) {
-        verifyPhoneOtp(e.target.value);
+        verifyCustomerEmailOtp(e.target.value);
       }
     });
 
-    document.getElementById('otpCodeInput').addEventListener('keydown', (e) => {
+    document.getElementById('emailOtpInput')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('verifyOtpBtn').click();
+        document.getElementById('verifyEmailOtpBtn')?.click();
       }
     });
 
-    document.getElementById('resendOtpBtn').addEventListener('click', () => {
-      const phone = document.getElementById('loginPhoneInput').value.trim();
-      sendPhoneOtp(phone);
+    document.getElementById('resendEmailOtpBtn')?.addEventListener('click', () => {
+      if (pendingLoginEmail) sendCustomerEmailOtp(pendingLoginEmail);
     });
 
-    document.getElementById('changePhoneBtn').addEventListener('click', () => {
-      if (resendTimerInterval) clearInterval(resendTimerInterval);
-      document.getElementById('otpInputStep').style.display = 'none';
-      document.getElementById('phoneInputStep').style.display = 'block';
-      document.getElementById('loginPhoneInput').focus();
+    document.getElementById('changeEmailBtn')?.addEventListener('click', () => {
+      if (emailResendInterval) clearInterval(emailResendInterval);
+      document.getElementById('emailOtpStep').style.display = 'none';
+      document.getElementById('emailInputStep').style.display = 'block';
+      const errBox = document.getElementById('loginErrorBox');
+      if (errBox) errBox.style.display = 'none';
+      document.getElementById('loginEmailInput')?.focus();
     });
 
     function openLoginModal() {
-      document.getElementById('phoneInputStep').style.display = 'block';
-      document.getElementById('otpInputStep').style.display = 'none';
-      document.getElementById('loginPhoneInput').value = '';
-      document.getElementById('otpCodeInput').value = '';
-      if (resendTimerInterval) clearInterval(resendTimerInterval);
+      const ordersEl = document.getElementById('ordersModal');
+      if (ordersEl && ordersEl.style.display === 'flex') {
+        ordersEl.style.display = 'none';
+      }
+      document.getElementById('emailInputStep').style.display = 'block';
+      document.getElementById('emailOtpStep').style.display = 'none';
+      const emailInput = document.getElementById('loginEmailInput');
+      if (emailInput) emailInput.value = '';
+      const otpInput = document.getElementById('emailOtpInput');
+      if (otpInput) otpInput.value = '';
+      const errBox = document.getElementById('loginErrorBox');
+      if (errBox) errBox.style.display = 'none';
+      if (emailResendInterval) clearInterval(emailResendInterval);
       openModal('loginModal');
       setTimeout(() => {
-        document.getElementById('loginPhoneInput').focus();
+        emailInput?.focus();
       }, 200);
     }
 
@@ -2638,7 +2691,7 @@
         renderProducts();
       }
     } catch (e) {
-      console.warn('[RA Store] Error reading catalog cache:', e);
+      console.warn('[Sri Sai] Error reading catalog cache:', e);
     }
 
     // Set 8s failsafe timeout
@@ -2665,7 +2718,7 @@
 
         if (currentCategory && currentCategory !== 'all') {
           if (!categoriesCatalog[currentCategory]) {
-            console.warn('[RA Store] Unknown category:', currentCategory, 'falling back to all items');
+            console.warn('[Sri Sai] Unknown category:', currentCategory, 'falling back to all items');
             currentCategory = 'all';
             syncUrlParams();
             showToast(currentLang === 'te' 
@@ -2678,7 +2731,7 @@
         renderCategoriesScreen();
         renderProducts();
       }, err => {
-        console.error('[RA Store] Categories listener error:', err);
+        console.error('[Sri Sai] Categories listener error:', err);
         debugLog('lastError', (err.code || 'CAT_ERR') + ': ' + (err.message || 'Categories fetch error'), true);
       });
 
@@ -2702,7 +2755,7 @@
           try {
             localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify(val));
           } catch (e) {
-            console.warn('[RA Store] Error caching catalog:', e);
+            console.warn('[Sri Sai] Error caching catalog:', e);
           }
         } else {
           productsCatalog = {};
@@ -2739,7 +2792,7 @@
           renderCartDrawerItems();
         }
       }, err => {
-        console.error('[RA Store] Products listener error:', err);
+        console.error('[Sri Sai] Products listener error:', err);
         debugLog('lastError', (err.code || 'ERR') + ': ' + (err.message || 'Catalog read failed'), true);
         if (!productsLoaded && Object.keys(productsCatalog).length === 0) {
           showCatalogLoadError(err.message);
@@ -2886,7 +2939,7 @@
       // Unknown category fallback: if requested cat doesn't exist, gracefully fall back to 'all'
       if (currentCategory && currentCategory !== 'all' && Object.keys(categoriesCatalog).length > 0) {
         if (!categoriesCatalog[currentCategory]) {
-          console.warn('[RA Store] Unknown category:', currentCategory, 'falling back to all items');
+          console.warn('[Sri Sai] Unknown category:', currentCategory, 'falling back to all items');
           currentCategory = 'all';
           syncUrlParams();
           showToast(currentLang === 'te' 
@@ -3202,12 +3255,12 @@
       let allKeys = rawKeys.filter(id => {
         const p = productsCatalog[id];
         if (!p || typeof p !== 'object') {
-          console.warn('[RA Store] Skipping invalid product object:', id);
+          console.warn('[Sri Sai] Skipping invalid product object:', id);
           return false;
         }
         const price = Number(p.price);
         if (isNaN(price) || price < 0) {
-          console.warn('[RA Store] Skipping product with invalid price:', id, p);
+          console.warn('[Sri Sai] Skipping product with invalid price:', id, p);
           return false;
         }
         return true;
@@ -3261,7 +3314,7 @@
             }).catch(() => {});
           }
 
-          const askMsg = encodeURIComponent(`Hello RA Store! Do you have "${searchQuery}" in stock in Anantapur?`);
+          const askMsg = encodeURIComponent(`Hello Sri Sai! Do you have "${searchQuery}" in stock in Anantapur?`);
           gridContainer.className = 'grid';
           gridContainer.innerHTML = `
             <div class="empty-state" style="grid-column: 1 / -1;">
@@ -3928,7 +3981,7 @@
             orderCreatedOnServer = true;
           } else {
             const errJson = await res.json().catch(() => ({}));
-            console.warn('[RA Store] Worker API rejected order:', errJson);
+            console.warn('[Sri Sai] Worker API rejected order:', errJson);
             if (errJson.code === 'OUT_OF_STOCK' || errJson.code === 'MIN_ORDER_NOT_MET' || errJson.code === 'PIN_NOT_SERVICED') {
               showCheckoutNotice(errJson.error || 'Server rejected order.', 'danger');
               submitBtn.disabled = false;
@@ -3937,7 +3990,7 @@
             }
           }
         } catch (netErr) {
-          console.warn('[RA Store] Worker API network error, falling back to RTDB:', netErr);
+          console.warn('[Sri Sai] Worker API network error, falling back to RTDB:', netErr);
         }
 
         // 2. Handle Server Success
@@ -3951,7 +4004,7 @@
               key: serverData.razorpayKeyId,
               amount: serverData.amount,
               currency: 'INR',
-              name: 'RA Store Anantapur',
+              name: 'Sri Sai Anantapur',
               description: `Order #${serverData.orderId}`,
               callback_url: `${WORKER_API}/api/razorpay-callback`,
               redirect: true,
@@ -4098,7 +4151,7 @@
           return;
         }
       } catch (err) {
-        console.error('[RA Store] Order submission error:', err);
+        console.error('[Sri Sai] Order submission error:', err);
         alert('Order Placement Notice: ' + (err.message || 'Network error processing order. Please try again.'));
         showCheckoutNotice('Network error connecting to store server. Please try again.', 'danger');
         submitBtn.disabled = false;
@@ -4146,28 +4199,71 @@
       checkoutSessionRequestId = null;
       document.getElementById('successOrderIdText').innerText = `Order #${escapeHtml(orderId)}`;
       const slotNote = customer.scheduledSlot ? `\nScheduled Delivery: ${customer.scheduledSlot}` : '';
-      const msg = encodeURIComponent(`Hello RA Store! I placed order #${orderId} for ₹${total}.${slotNote}\nName: ${customer.name}\nAddress: ${customer.address}`);
+      const msg = encodeURIComponent(`Hello Sri Sai! I placed order #${orderId} for ₹${total}.${slotNote}\nName: ${customer.name}\nAddress: ${customer.address}`);
       document.getElementById('successWhatsappLink').href = `https://wa.me/${storeSettings.whatsappNumber}?text=${msg}`;
       openModal('successModal');
     }
 
-    // Phase 3: Order History & Status Timeline Stepper
+    // Phase 3: Order History & Status Timeline Stepper with 10s timeout, error callback & signed-out view (Requirement 1 & 2)
+    let customerOrdersLoadTimeout = null;
+
+    function getOrderTimestamp(o) {
+      if (!o) return 0;
+      const raw = o.createdAt || o.created_at || o.timestamp || o.date;
+      if (!raw) return 0;
+      if (typeof raw === 'number') return raw;
+      const parsed = new Date(raw).getTime();
+      return isNaN(parsed) ? 0 : parsed;
+    }
+
     function openOrdersModal() {
+      openModal('ordersModal');
+      setActiveNavTab('orders');
+
+      const list = document.getElementById('customerOrdersList');
       if (!currentUser) {
-        pendingOrdersAfterLogin = true;
-        openLoginModal();
+        if (list) {
+          list.innerHTML = `
+            <div style="text-align: center; padding: 36px 16px;">
+              <div style="font-size: 44px; margin-bottom: 12px;">🛍️</div>
+              <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Sign in to see your orders</h4>
+              <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5;">Please sign in with your email or Google account to track your orders in real time.</p>
+              <button type="button" class="btn btn-primary" id="ordersSignInPromptBtn" style="padding: 10px 24px; font-size: 14px; border-radius: 8px;">Sign In</button>
+            </div>`;
+          document.getElementById('ordersSignInPromptBtn')?.addEventListener('click', () => {
+            pendingOrdersAfterLogin = true;
+            openLoginModal();
+          });
+        }
         return;
       }
-      openModal('ordersModal');
-      
+
+      if (list) {
+        list.innerHTML = "<div style='text-align: center; padding: 30px 16px;'><p style='color: var(--muted); font-size: 14px;'>Loading orders...</p></div>";
+      }
+
+      if (customerOrdersLoadTimeout) clearTimeout(customerOrdersLoadTimeout);
+      customerOrdersLoadTimeout = setTimeout(() => {
+        const el = document.getElementById('customerOrdersList');
+        if (el && el.innerHTML.includes('Loading orders...')) {
+          el.innerHTML = `
+            <div style="text-align: center; padding: 32px 16px;">
+              <p style="color: var(--danger); font-size: 14px; margin-bottom: 12px; font-weight: 600;">Could not load orders. Please check your connection.</p>
+              <button type="button" class="btn btn-outline" id="retryOrdersBtn" style="padding: 8px 18px; font-size: 13px;">Retry</button>
+            </div>`;
+          document.getElementById('retryOrdersBtn')?.addEventListener('click', () => openOrdersModal());
+        }
+      }, 10000);
+
       if (ordersRef) ordersRef.off();
       ordersRef = db.ref('orders').orderByChild('uid').equalTo(currentUser.uid);
-      
+
       ordersRef.on('value', snap => {
+        if (customerOrdersLoadTimeout) clearTimeout(customerOrdersLoadTimeout);
         const list = document.getElementById('customerOrdersList');
         const orders = snap.val();
-        if (!orders) {
-          list.innerHTML = "<p style='color: var(--muted); padding: 15px;'>No orders found.</p>";
+        if (!orders || Object.keys(orders).length === 0) {
+          list.innerHTML = "<div style='text-align: center; padding: 36px 16px;'><div style='font-size: 42px; margin-bottom: 12px;'>📦</div><p style='color: var(--muted); font-size: 14px; font-weight: 600;'>No orders yet</p><p style='font-size: 12px; color: var(--muted); margin-top: 4px;'>Your placed orders will appear here.</p></div>";
           return;
         }
 
@@ -4196,13 +4292,9 @@
           }
         });
 
-        // 1. Sort all orders strictly newest first -> oldest by creation timestamp (STEP 1.1)
+        // 1. Sort all orders strictly newest first -> oldest by creation timestamp (Requirement 2)
         const orderEntries = Object.entries(orders);
-        orderEntries.sort((a, b) => {
-          const timeA = a[1].createdAt ? new Date(a[1].createdAt).getTime() : 0;
-          const timeB = b[1].createdAt ? new Date(b[1].createdAt).getTime() : 0;
-          return timeB - timeA;
-        });
+        orderEntries.sort((a, b) => getOrderTimestamp(b[1]) - getOrderTimestamp(a[1]));
 
         // 2. Keep the most recent order updated for "Reorder Last"
         const mostRecentValidOrder = orderEntries.find(([_, o]) => Array.isArray(o.items) && o.items.length > 0)?.[1];
@@ -4398,6 +4490,18 @@
         }
 
         list.innerHTML = fullHtml;
+      }, (err) => {
+        if (customerOrdersLoadTimeout) clearTimeout(customerOrdersLoadTimeout);
+        console.error('Customer orders listener error:', err);
+        const list = document.getElementById('customerOrdersList');
+        if (list) {
+          list.innerHTML = `
+            <div style="text-align: center; padding: 32px 16px;">
+              <p style="color: var(--danger); font-size: 14px; margin-bottom: 12px; font-weight: 600;">Could not load orders: ${escapeHtml(err.message || 'Permission denied')}</p>
+              <button type="button" class="btn btn-outline" id="retryOrdersBtn" style="padding: 8px 18px; font-size: 13px;">Retry</button>
+            </div>`;
+          document.getElementById('retryOrdersBtn')?.addEventListener('click', () => openOrdersModal());
+        }
       });
     }
 
@@ -4451,7 +4555,7 @@
           key: storeSettings.razorpayKeyId || 'rzp_live_TtGrq3sfJkM0pA',
           amount: Math.round(Number(total) * 100),
           currency: 'INR',
-          name: 'RA Store Anantapur',
+          name: 'Sri Sai Anantapur',
           description: `Order #${orderId}`,
           order_id: rzpOrderId,
           handler: async function (response) {
@@ -4581,9 +4685,15 @@
       if (id === 'loginModal') {
         document.body.classList.remove('signin-open');
       }
-      if (id === 'ordersModal' && ordersRef) {
-        ordersRef.off();
-        ordersRef = null;
+      if (id === 'ordersModal') {
+        if (customerOrdersLoadTimeout) {
+          clearTimeout(customerOrdersLoadTimeout);
+          customerOrdersLoadTimeout = null;
+        }
+        if (ordersRef) {
+          ordersRef.off();
+          ordersRef = null;
+        }
       }
       if (id === 'successModal') {
         navigateToHomeTop();
@@ -5003,7 +5113,7 @@
       openCartDrawer();
     });
 
-    // Orders Tab
+    // Orders Tab (Directly opens orders modal with signed-in/out check inside)
     document.getElementById('bnavOrdersBtn')?.addEventListener('click', () => {
       if (currentNavTab === 'home') {
         homeScrollY = window.scrollY || window.pageYOffset || 0;
@@ -5013,14 +5123,7 @@
         const el = document.getElementById(m);
         if (el && el.style.display === 'flex') closeModal(m);
       });
-      setActiveNavTab('orders');
-
-      if (!currentUser) {
-        pendingOrdersAfterLogin = true;
-        openModal('loginModal');
-      } else {
-        openOrdersModal();
-      }
+      openOrdersModal();
     });
 
     // Account Tab
@@ -5197,7 +5300,7 @@
 
         // Profile card
         const localProf = JSON.parse(localStorage.getItem('ra_customer_profile_' + currentUser.uid) || localStorage.getItem('ra_customer_profile') || '{}');
-        const name = localProf.name || currentUser.displayName || 'RA Customer';
+        const name = localProf.name || currentUser.displayName || 'Sri Sai Customer';
         const initial = name.charAt(0).toUpperCase() || 'U';
 
         let contactStr = '';
@@ -5545,11 +5648,11 @@
       showToast('Address pre-filled from ' + (addr.tag || 'saved address'));
     }
 
-    // Share RA Store
+    // Share Sri Sai
     document.getElementById('btnShareStore')?.addEventListener('click', async () => {
       const shareData = {
-        title: 'RA Store — Anantapur Grocery Delivery',
-        text: 'Order fresh groceries in Anantapur with fast doorstep delivery from RA Store!',
+        title: 'Sri Sai — Anantapur Grocery Delivery',
+        text: 'Order fresh groceries in Anantapur with fast doorstep delivery from Sri Sai!',
         url: window.location.origin + '/K-Stores/'
       };
       if (navigator.share) {
@@ -5566,7 +5669,7 @@
 
     // Logout Button in Account view
     document.getElementById('accountLogoutBtn')?.addEventListener('click', async () => {
-      const confirmMsg = I18N[currentLang]?.logoutConfirm || 'Log out of RA Store?';
+      const confirmMsg = I18N[currentLang]?.logoutConfirm || 'Log out of Sri Sai?';
       if (!confirm(confirmMsg)) return;
 
       try {
@@ -5780,30 +5883,55 @@
       return true;
     }
 
+    let isBottomNavHidden = false;
+
+    function syncUnderlyingTab() {
+      const accountView = document.getElementById('accountView');
+      const categoriesView = document.getElementById('categoriesView');
+      if (accountView && accountView.style.display === 'block') {
+        setActiveNavTab('account', false);
+      } else if (categoriesView && categoriesView.style.display === 'block') {
+        setActiveNavTab('categories', false);
+      } else {
+        setActiveNavTab('home', false);
+      }
+    }
+
     function syncBottomBar() {
       if (syncBottomBarRaf) {
         cancelAnimationFrame(syncBottomBarRaf);
       }
       syncBottomBarRaf = requestAnimationFrame(() => {
         syncBottomBarRaf = null;
-        const overlays = document.querySelectorAll(
-          '#cartDrawerModal, #checkoutModal, #addressModal, #successModal, #ordersModal, #loginModal, #imageZoomModal, .modal-overlay'
-        );
-        let anyOpen = false;
-        for (let i = 0; i < overlays.length; i++) {
-          if (isOverlayOpen(overlays[i])) {
-            anyOpen = true;
-            break;
-          }
-        }
-        if (anyOpen) {
+        const cartModal = document.getElementById('cartDrawerModal');
+        const ordersModal = document.getElementById('ordersModal');
+        const checkoutModal = document.getElementById('checkoutModal');
+        const loginModal = document.getElementById('loginModal');
+        const successModal = document.getElementById('successModal');
+        const addressModal = document.getElementById('addressModal');
+
+        const isCart = isOverlayOpen(cartModal);
+        const isOrders = isOverlayOpen(ordersModal);
+        const isCheckout = isOverlayOpen(checkoutModal);
+        const isLogin = isOverlayOpen(loginModal);
+        const isSuccess = isOverlayOpen(successModal);
+        const isAddress = isOverlayOpen(addressModal);
+
+        const shouldHide = isCart || isOrders || isCheckout || isLogin || isSuccess || isAddress;
+        isBottomNavHidden = shouldHide;
+
+        if (shouldHide) {
+          document.body.classList.add('bnav-hidden');
           document.body.classList.add('overlay-open');
         } else {
+          document.body.classList.remove('bnav-hidden');
           document.body.classList.remove('overlay-open');
+          document.body.classList.remove('signin-open');
+          document.body.classList.remove('checkout-open');
+          syncUnderlyingTab();
         }
-        const loginEl = document.getElementById('loginModal');
-        const isLoginOpen = loginEl && isOverlayOpen(loginEl);
-        if (isLoginOpen) {
+
+        if (isLogin) {
           document.body.classList.add('signin-open');
         } else {
           document.body.classList.remove('signin-open');
@@ -5918,7 +6046,7 @@
     if (fcmMessaging) {
       fcmMessaging.onMessage((payload) => {
         console.log('[FCM] Foreground message received:', payload);
-        const title = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || 'RA Store';
+        const title = (payload.notification && payload.notification.title) || (payload.data && payload.data.title) || 'Sri Sai';
         const body = (payload.notification && payload.notification.body) || (payload.data && payload.data.body) || '';
         showToast(`${title}: ${body}`);
         

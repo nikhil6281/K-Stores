@@ -1,5 +1,5 @@
 /**
- * RA Store - Service Worker (PWA Shell Caching & Offline Support)
+ * Sri Sai - Service Worker (PWA Shell Caching & Offline Support)
  * Meets all PWABuilder and Google Play TWA requirements:
  * - Pre-caching core shell assets (HTML, manifest, icons, offline fallback)
  * - Navigation offline fallback
@@ -14,12 +14,18 @@
  * - Automatically purges any previous cache versions.
  */
 
-const CACHE_NAME = 'ra-store-shell-v12';
+const CACHE_NAME = 'sri-sai-shell-v13';
 const SHELL_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './config.js',
+  './assets/logo/sri-sai-logo.png?v=2',
+  './assets/logo/app-icon-192.png?v=2',
+  './assets/logo/app-icon-512.png?v=2',
+  './assets/logo/apple-touch-icon-180.png?v=2',
+  './assets/logo/favicon-48.png?v=2',
+  './assets/logo/badge-96.png?v=2',
   './icon-192.png',
   './icon-512.png',
   './offline.html'
@@ -129,7 +135,7 @@ self.addEventListener('fetch', (e) => {
             if (indexFallback) return indexFallback;
           }
           return new Response(
-            '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>RA Store - Offline</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:sans-serif;text-align:center;padding:48px 20px;background:#f8fafc;color:#1e293b}h1{color:#15803d;margin-bottom:12px}p{color:#64748b;margin-bottom:24px}button{background:#15803d;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:600}</style></head><body><h1>You are Offline</h1><p>RA Store needs an active internet connection to show fresh stock and process orders.</p><button onclick="window.location.reload()">Retry Connection</button></body></html>',
+            '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Sri Sai - Offline</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:sans-serif;text-align:center;padding:48px 20px;background:#f8fafc;color:#1e293b}h1{color:#15803d;margin-bottom:12px}p{color:#64748b;margin-bottom:24px}button{background:#15803d;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:600}</style></head><body><h1>You are Offline</h1><p>Sri Sai needs an active internet connection to show fresh stock and process orders.</p><button onclick="window.location.reload()">Retry Connection</button></body></html>',
             { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
           );
         })
@@ -169,9 +175,9 @@ self.addEventListener('periodicsync', (e) => {
   }
 });
 
-// 7. Web Push Notifications (FCM & Web Push compliant)
+// 7. Web Push Notifications (All in English)
 self.addEventListener('push', (e) => {
-  let payload = { title: 'RA Store', body: 'New update from RA Store!' };
+  let payload = { title: 'Sri Sai', body: 'New update from Sri Sai!' };
   let customData = {};
 
   try {
@@ -192,13 +198,13 @@ self.addEventListener('push', (e) => {
 
   const orderId = customData.orderId || '';
   const offerId = customData.offerId || '';
-  const notifTag = customData.tag || (orderId ? `ra-order-${orderId}` : (offerId ? `ra-offer-${offerId}` : 'ra-store-notif'));
+  const notifTag = customData.tag || (orderId ? `sri-sai-order-${orderId}` : (offerId ? `sri-sai-offer-${offerId}` : 'sri-sai-notif')); // ra-order- fallback
   const targetUrl = customData.url || (orderId ? `./?order=${encodeURIComponent(orderId)}#orders` : (offerId ? `./?n=${encodeURIComponent(offerId)}` : './'));
 
   const options = {
     body: payload.body,
-    icon: './icon-192.png',
-    badge: './icon-192.png',
+    icon: './assets/logo/app-icon-192.png?v=2',
+    badge: './assets/logo/badge-96.png?v=2',
     vibrate: [100, 50, 100],
     tag: notifTag,
     renotify: true,

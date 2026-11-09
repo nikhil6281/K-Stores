@@ -1,72 +1,48 @@
 /**
- * Cloud Functions for RA Store (Anantapur, Andhra Pradesh)
+ * Cloud Functions for Sri Sai (Anantapur, Andhra Pradesh)
  * Region: asia-south1 (Mumbai) / default
  * Realtime Database triggers for Push Notifications & Scheduled Marketing Automation
+ * Server-side Email OTP Authentication & Token Issuance
  */
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const crypto = require('crypto');
 
 admin.initializeApp();
 const db = admin.database();
 
 // ============================================================================
-// I18N MESSAGES (ENGLISH & TELUGU)
+// I18N MESSAGES (ALL IN ENGLISH AS PER REQUIREMENT 5)
 // ============================================================================
 
 const NOTIF_MESSAGES = {
-  en: {
-    placedTitle: 'Order placed ✅',
-    placedBody: (id, total, slot) => `We've received order #${id} (₹${total}).${slot ? ` Delivery scheduled: ${slot}.` : ''}`,
-    acceptedTitle: 'Order confirmed 👍',
-    acceptedBody: (id) => `RA Store accepted order #${id}. Packing starts soon.`,
-    packedTitle: 'Order packed 📦',
-    packedBody: (id) => `Order #${id} is packed and ready for the rider.`,
-    outForDeliveryTitle: 'On the way 🛵',
-    outForDeliveryBody: (id) => `Order #${id} is out for delivery. Keep your 4-digit delivery code ready.`,
-    deliveredTitle: 'Delivered ✅',
-    deliveredBody: (id) => `Order #${id} delivered. Thank you for shopping with RA Store! Tap to reorder anytime.`,
-    cancelledTitle: 'Order cancelled',
-    cancelledBody: (id, isPaid) => `Order #${id} was cancelled.${isPaid ? ' Refund reaches your original payment method in 5-7 working days.' : ''}`,
-    
-    // Marketing offers
-    reorderReminderTitle: 'Running low? 🛒',
-    reorderReminderBody: 'Reorder your last grocery items from RA Store in one tap.',
-    backInStockTitle: 'Back in Stock! 🥦',
-    backInStockBody: (name) => `${name} is back in stock at RA Store! Order now for fresh delivery.`,
-    priceDropTitle: 'Price Drop Alert! 🏷️',
-    priceDropBody: (name, price) => `Price dropped on ${name}! Now only ₹${price} at RA Store.`,
-    winBackTitle: 'We miss you at RA Store! 🛍️',
-    winBackBody: 'Enjoy fast doorstep grocery delivery in Anantapur. Tap to browse fresh items.'
-  },
-  te: {
-    placedTitle: 'ఆర్డర్ పూర్తయింది ✅',
-    placedBody: (id, total, slot) => `మేము మీ ఆర్డర్ #${id} (₹${total}) ను స్వీకరించాము.${slot ? ` డెలివరీ సమయం: ${slot}.` : ''}`,
-    acceptedTitle: 'ఆర్డర్ నిర్ధారించబడింది 👍',
-    acceptedBody: (id) => `RA స్టోర్ ఆర్డర్ #${id} ను అంగీకరించింది. త్వరలో ప్యాకింగ్ ప్రారంభమవుతుంది.`,
-    packedTitle: 'ఆర్డర్ ప్యాక్ చేయబడింది 📦',
-    packedBody: (id) => `ఆర్డర్ #${id} ప్యాక్ చేయబడింది మరియు రైడర్ కోసం సిద్ధంగా ఉంది.`,
-    outForDeliveryTitle: 'డెలివరీ బయలుదేరింది 🛵',
-    outForDeliveryBody: (id) => `ఆర్డర్ #${id} డెలివరీ కోసం బయలుదేరింది. మీ 4 అంకెల డెలివరీ కోడ్ సిద్ధంగా ఉంచుకోండి.`,
-    deliveredTitle: 'డెలివరీ చేయబడింది ✅',
-    deliveredBody: (id) => `ఆర్డర్ #${id} విజయవంతంగా డెలివరీ చేయబడింది. RA స్టోర్‌లో కొనుగోలు చేసినందుకు ధన్యవాదాలు! ఎప్పుడైనా మళ్లీ ఆర్డర్ చేయవచ్చు.`,
-    cancelledTitle: 'ఆర్డర్ రద్దు చేయబడింది',
-    cancelledBody: (id, isPaid) => `ఆర్డర్ #${id} రద్దు చేయబడింది.${isPaid ? ' వాపసు మొత్తం 5-7 పని దినాలలో మీ ఖాతాకు చేరుతుంది.' : ''}`,
-    
-    // Marketing offers
-    reorderReminderTitle: 'సరుకులు అయిపోతున్నాయా? 🛒',
-    reorderReminderBody: 'మీ చివరి ఆర్డర్‌ను RA స్టోర్‌లో ఒక్క ట్యాప్‌తో మళ్లీ ఆర్డర్ చేయండి.',
-    backInStockTitle: 'తిరిగి స్టాక్‌లోకి వచ్చింది! 🥦',
-    backInStockBody: (name) => `RA స్టోర్‌లో ${name} తిరిగి అందుబాటులోకి వచ్చింది! తాజా డెలివరీ కోసం ఇప్పుడే ఆర్డర్ చేయండి.`,
-    priceDropTitle: 'ధర తగ్గింది! 🏷️',
-    priceDropBody: (name, price) => `${name} పై ధర తగ్గింది! ఇప్పుడు కేవలం ₹${price} మాత్రమే.`,
-    winBackTitle: 'మిమ్మల్ని RA స్టోర్‌లో మిస్ అవుతున్నాము! 🛍️',
-    winBackBody: 'అనంతపురంలో తాజా కిరాణా సరుకులను మీ ఇంటి వద్దే పొందండి. షాపింగ్ చేయడానికి ట్యాప్ చేయండి.'
-  }
+  placedTitle: 'Order Placed ✅',
+  placedBody: (id, total, slot) => `Order #${id} Placed (₹${total}).${slot ? ` Scheduled: ${slot}.` : ''}`,
+  acceptedTitle: 'Order Accepted 👍',
+  acceptedBody: (id) => `Order #${id} Accepted. Packing starts soon at Sri Sai.`,
+  packedTitle: 'Order Packed 📦',
+  packedBody: (id) => `Order #${id} Packed and ready for the rider.`,
+  outForDeliveryTitle: 'Order Out for Delivery 🛵',
+  outForDeliveryBody: (id) => `Order #${id} Out for Delivery. Rider will ask for your 4-digit code.`,
+  deliveredTitle: 'Order Delivered ✅',
+  deliveredBody: (id) => `Order #${id} Delivered. Thank you for shopping with Sri Sai!`,
+  cancelledTitle: 'Order Cancelled ❌',
+  cancelledBody: (id, isPaid) => `Order #${id} Cancelled.${isPaid ? ' Refund reaches your original payment method in 5-7 working days.' : ''}`,
+  
+  // Marketing offers (All in English)
+  reorderReminderTitle: 'Running low? 🛒',
+  reorderReminderBody: 'Reorder your last grocery items from Sri Sai in one tap.',
+  backInStockTitle: 'Back in Stock! 🥦',
+  backInStockBody: (name) => `${name} is back in stock at Sri Sai! Order now for fresh delivery.`,
+  priceDropTitle: 'Price Drop Alert! 🏷️',
+  priceDropBody: (name, price) => `Price dropped on ${name}! Now only ₹${price} at Sri Sai.`,
+  winBackTitle: 'We miss you at Sri Sai! 🛍️',
+  winBackBody: 'Enjoy fast doorstep grocery delivery in Anantapur. Tap to browse fresh items.'
 };
 
 // ============================================================================
-// HELPER: SEND PUSH NOTIFICATION VIA FCM
+// HELPER: SEND PUSH NOTIFICATION VIA FCM (ALL IN ENGLISH)
 // ============================================================================
 
 async function sendFcmToUser(uid, payload, options = {}) {
@@ -91,7 +67,7 @@ async function sendFcmToUser(uid, payload, options = {}) {
         url: payload.url || './',
         orderId: payload.orderId ? String(payload.orderId) : '',
         offerId: payload.offerId ? String(payload.offerId) : '',
-        tag: options.tag || (payload.orderId ? `ra-order-${payload.orderId}` : 'ra-store-notif'),
+        tag: options.tag || (payload.orderId ? `sri-sai-order-${payload.orderId}` : 'sri-sai-notif'),
         type: payload.type || 'order_update'
       },
       webpush: {
@@ -101,9 +77,9 @@ async function sendFcmToUser(uid, payload, options = {}) {
         notification: {
           title: payload.title,
           body: payload.body,
-          icon: './icon-192.png',
-          badge: './icon-192.png',
-          tag: options.tag || (payload.orderId ? `ra-order-${payload.orderId}` : 'ra-store-notif'),
+          icon: './assets/logo/app-icon-192.png?v=2',
+          badge: './assets/logo/badge-96.png?v=2',
+          tag: options.tag || (payload.orderId ? `sri-sai-order-${payload.orderId}` : 'sri-sai-notif'),
           renotify: true,
           requireInteraction: false
         }
@@ -144,7 +120,7 @@ async function sendFcmToUser(uid, payload, options = {}) {
 }
 
 // ============================================================================
-// STEP 2: ORDER STATUS CHANGE TRIGGER
+// ORDER STATUS CHANGE TRIGGER
 // ============================================================================
 
 exports.onOrderStatusChanged = functions.database.ref('/orders/{orderKey}')
@@ -160,7 +136,6 @@ exports.onOrderStatusChanged = functions.database.ref('/orders/{orderKey}')
     const oldPayStatus = before.paymentStatus;
     const newPayStatus = after.paymentStatus;
 
-    // Don't send if status & payment status haven't changed
     const statusChanged = oldStatus !== newStatus;
     const paymentConfirmed = (after.paymentMethod === 'online_razorpay' && oldPayStatus !== 'paid' && newPayStatus === 'paid');
     
@@ -168,12 +143,10 @@ exports.onOrderStatusChanged = functions.database.ref('/orders/{orderKey}')
       return null;
     }
 
-    // Guard against premature online placed notifications
     if (newStatus === 'placed' && after.paymentMethod === 'online_razorpay' && newPayStatus !== 'paid') {
       return null; // Awaiting online payment confirmation
     }
 
-    // Idempotency: avoid sending duplicate notification if already sent for this status
     if (after.lastNotifiedStatus === newStatus && !paymentConfirmed) {
       return null;
     }
@@ -181,19 +154,14 @@ exports.onOrderStatusChanged = functions.database.ref('/orders/{orderKey}')
     const customerUid = after.uid;
     if (!customerUid) return null;
 
-    // Check customer notification preferences
     const prefsSnap = await db.ref(`users/${customerUid}/notificationPreferences`).once('value');
     const prefs = prefsSnap.val() || {};
     if (prefs.orderUpdates === false) {
-      return null; // Opted out of order updates
+      return null;
     }
 
-    // Determine customer language (default: te)
-    let userLang = 'te';
-    const profileSnap = await db.ref(`users/${customerUid}/profile/lang`).once('value');
-    if (profileSnap.val() === 'en') userLang = 'en';
-
-    const t = NOTIF_MESSAGES[userLang] || NOTIF_MESSAGES.te;
+    // All notifications in English as per Requirement 5
+    const t = NOTIF_MESSAGES;
     const orderId = after.id || orderKey;
     const total = after.total || 0;
     const scheduledSlot = (after.customer && after.customer.scheduledSlot) || after.scheduledSlot || '';
@@ -231,186 +199,97 @@ exports.onOrderStatusChanged = functions.database.ref('/orders/{orderKey}')
         return null;
     }
 
-    // Dispatch FCM notification with order tagging
-    const targetUrl = `./?order=${encodeURIComponent(orderId)}#orders`;
-    await sendFcmToUser(customerUid, {
+    const payload = {
       title,
       body,
-      url: targetUrl,
-      orderId: orderId,
-      type: 'order_status_' + newStatus
-    }, {
-      tag: `ra-order-${orderId}`
-    });
+      orderId,
+      url: `./?order=${encodeURIComponent(orderId)}#orders`,
+      type: 'order_status'
+    };
 
-    // Mark as notified in the database idempotently
+    const result = await sendFcmToUser(customerUid, payload, { tag: `sri-sai-order-${orderId}` });
+
     await db.ref(`orders/${orderKey}`).update({
       lastNotifiedStatus: newStatus,
       lastNotifiedAt: new Date().toISOString()
     });
 
-    return null;
+    return result;
   });
 
 // ============================================================================
-// STEP 3: ANTI-ANNOYANCE RULES ENGINE & SALES NOTIFICATIONS
+// AUTOMATED MARKETING OFFERS (SCHEDULED: 8:00 AM - 8:00 PM IST)
 // ============================================================================
 
-/**
- * Checks all anti-annoyance rules for a customer before sending ANY marketing offer.
- * Rules enforced:
- * 1. Opted-in ("offersAndReminders" !== false) and has valid token.
- * 2. Time: 8:00 AM to 8:00 PM IST only (UTC + 5:30).
- * 3. Max 1 offer per day, max 3 offers per 7 days across all types.
- * 4. No active orders (placed, accepted, packed, out_for_delivery).
- * 5. Not within 24 hours after a delivery.
- * 6. After 4 offers in a row unopened, paused for 30 days.
- */
-function evaluateAntiAnnoyanceRules(customerUid, userRecord, customerOrders, nowMs = Date.now()) {
-  // 1. Opted in check
-  const prefs = userRecord.notificationPreferences || {};
-  if (prefs.offersAndReminders === false) {
-    return { allowed: false, reason: 'opted_out' };
-  }
-
-  // 2. Active tokens check
-  const tokens = userRecord.fcmTokens || {};
-  if (Object.keys(tokens).length === 0) {
-    return { allowed: false, reason: 'no_tokens' };
-  }
-
-  // 3. Time check: 8:00 AM - 8:00 PM IST (UTC + 5.5 hours)
+function isWithinMarketingHoursIST() {
+  const nowUtc = new Date();
   const istOffsetMs = 5.5 * 60 * 60 * 1000;
-  const istDate = new Date(nowMs + istOffsetMs);
-  const istHour = istDate.getUTCHours();
+  const nowIst = new Date(nowUtc.getTime() + istOffsetMs);
+  const istHour = nowIst.getUTCHours();
   if (istHour < 8 || istHour >= 20) {
-    return { allowed: false, reason: 'outside_hours_ist' };
+    return false;
+  }
+  return true;
+}
+
+async function sendOfferIfEligible(uid, offerPayload, userRecord, userOrders) {
+  const prefs = (userRecord && userRecord.notificationPreferences) || {};
+  if (prefs.marketingOffers === false) {
+    return { sent: false, reason: 'user_opted_out' };
   }
 
-  // 4. Active order check: none while customer has an active order
-  const orders = Object.values(customerOrders || {});
-  const hasActiveOrder = orders.some(o => 
-    o.status === 'placed' || o.status === 'accepted' || o.status === 'packed' || o.status === 'out_for_delivery'
-  );
-  if (hasActiveOrder) {
-    return { allowed: false, reason: 'has_active_order' };
-  }
+  const now = Date.now();
+  const lastSent = prefs.lastOfferSentAt || 0;
 
-  // 5. Post-delivery cooldown: none within 24 hours after a delivery
-  const twentyFourHoursAgo = nowMs - (24 * 60 * 60 * 1000);
-  const recentDelivery = orders.some(o => {
-    if (o.status !== 'delivered') return false;
-    const deliveredTime = new Date(o.updatedAt || o.deliveredAt || o.createdAt).getTime();
-    return deliveredTime > twentyFourHoursAgo;
-  });
-  if (recentDelivery) {
-    return { allowed: false, reason: 'post_delivery_cooldown' };
-  }
-
-  // 6. Frequency cap: max 1 offer per 24 hours and max 3 offers per 7 days
-  const history = Object.values(userRecord.offerHistory || {});
-  const oneDayAgo = nowMs - (24 * 60 * 60 * 1000);
-  const sevenDaysAgo = nowMs - (7 * 24 * 60 * 60 * 1000);
-
-  const offersLastDay = history.filter(h => new Date(h.sentAt).getTime() > oneDayAgo).length;
+  // Anti-annoyance rules engine (max 1/day, max 3/week, no active orders, no delivery within 24h, 4 unopened pause)
+  const offersLastDay = (userRecord && userRecord.offerHistory ? Object.values(userRecord.offerHistory).filter(h => now - new Date(h.sentAt).getTime() < 24 * 60 * 60 * 1000).length : (now - lastSent < 24 * 60 * 60 * 1000 ? 1 : 0));
   if (offersLastDay >= 1) {
-    return { allowed: false, reason: 'daily_cap_reached' };
+    return { sent: false, reason: 'max_1_per_day' };
   }
-
-  const offersLastWeek = history.filter(h => new Date(h.sentAt).getTime() > sevenDaysAgo).length;
+  const offersLastWeek = userRecord && userRecord.offerHistory ? Object.values(userRecord.offerHistory).filter(h => now - new Date(h.sentAt).getTime() < 7 * 24 * 60 * 60 * 1000).length : 0;
   if (offersLastWeek >= 3) {
-    return { allowed: false, reason: 'weekly_cap_reached' };
+    return { sent: false, reason: 'max_3_per_week' };
   }
-
-  // 7. Unopened streak check: after 4 unopened in a row, pause for 30 days
-  const sortedHistory = [...history].sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
-  let consecutiveUnopened = 0;
-  for (let h of sortedHistory) {
-    if (!h.openedAt) {
-      consecutiveUnopened++;
-    } else {
-      break;
-    }
+  const hasActiveOrder = userOrders.some(o => ['placed', 'accepted', 'packed', 'out_for_delivery'].includes(o.status));
+  if (hasActiveOrder) {
+    return { sent: false, reason: 'has_active_order' };
   }
-
+  const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
+  const recentDelivered = userOrders.some(o => o.status === 'delivered' && new Date(o.createdAt).getTime() > twentyFourHoursAgo);
+  if (recentDelivered) {
+    return { sent: false, reason: 'delivered_within_24h' };
+  }
+  const consecutiveUnopened = prefs.consecutiveUnopenedOffers || 0;
   if (consecutiveUnopened >= 4) {
-    const lastOfferTime = sortedHistory[0] ? new Date(sortedHistory[0].sentAt).getTime() : 0;
-    const thirtyDaysAgo = nowMs - (30 * 24 * 60 * 60 * 1000);
-    if (lastOfferTime > thirtyDaysAgo) {
-      return { allowed: false, reason: 'unopened_streak_paused' };
-    }
+    return { sent: false, reason: 'paused_unopened' };
   }
 
-  return { allowed: true };
-}
-
-/**
- * Dispatch an offer through the anti-annoyance engine and log it
- */
-async function sendOfferIfEligible(customerUid, offerPayload, userRecord, customerOrders) {
-  const check = evaluateAntiAnnoyanceRules(customerUid, userRecord, customerOrders);
-  if (!check.allowed) {
-    return { sent: false, reason: check.reason };
-  }
-
-  const offerId = `off_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-  const deepLink = offerPayload.url ? `${offerPayload.url}${offerPayload.url.includes('?') ? '&' : '?'}n=${offerId}` : `./?n=${offerId}`;
-
-  // Dispatch FCM
-  const res = await sendFcmToUser(customerUid, {
-    title: offerPayload.title,
-    body: offerPayload.body,
-    url: deepLink,
-    offerId: offerId,
-    type: 'sales_offer'
-  }, {
-    tag: `ra-offer-${offerPayload.type || 'deal'}`
-  });
-
-  if (res.sentCount > 0) {
-    const nowIso = new Date().toISOString();
-    // Record in user offer history
-    await db.ref(`users/${customerUid}/offerHistory/${offerId}`).set({
-      offerId: offerId,
-      type: offerPayload.type || 'generic_offer',
-      title: offerPayload.title,
-      sentAt: nowIso
+  const result = await sendFcmToUser(uid, offerPayload, { tag: `sri-sai-offer-${offerPayload.type}` });
+  if (result && result.sentCount > 0) {
+    await db.ref(`users/${uid}/notificationPreferences`).update({
+      lastOfferSentAt: now
     });
-
-    // Record in global audit log
-    await db.ref(`audit/offerLogs/${offerId}`).set({
-      offerId: offerId,
-      customerUid: customerUid,
-      type: offerPayload.type || 'generic_offer',
+    await db.ref(`users/${uid}/offerHistory`).push({
+      type: offerPayload.type,
       title: offerPayload.title,
-      sentAt: nowIso
+      body: offerPayload.body,
+      sentAt: new Date().toISOString()
     });
-
-    return { sent: true, offerId };
+    return { sent: true };
   }
 
-  return { sent: false, reason: 'fcm_failed' };
+  return { sent: false, reason: 'no_tokens_or_failed' };
 }
-
-// ============================================================================
-// SCHEDULED HOURLY MARKETING CRON (8 AM - 8 PM IST)
-// ============================================================================
 
 exports.hourlyOffersJob = functions.pubsub.schedule('every 1 hours')
   .timeZone('Asia/Kolkata')
   .onRun(async (context) => {
-    const now = Date.now();
-    const istHour = new Date(now + 5.5 * 3600 * 1000).getUTCHours();
-    if (istHour < 8 || istHour >= 20) {
-      console.log('Outside IST offer hours (8:00 AM - 8:00 PM). Skipping.');
+    if (!isWithinMarketingHoursIST()) {
       return null;
     }
 
-    // Check master switch in settings
-    const settingsSnap = await db.ref('settings').once('value');
-    const settings = settingsSnap.val() || {};
-    if (settings.automaticOffersEnabled === false) {
-      console.log('Automatic offers master switch disabled by owner. Skipping.');
+    const settingsSnap = await db.ref('settings/marketingAutomationsEnabled').once('value');
+    if (settingsSnap.val() === false) {
       return null;
     }
 
@@ -423,53 +302,57 @@ exports.hourlyOffersJob = functions.pubsub.schedule('every 1 hours')
     const users = usersSnap.val() || {};
     const allOrders = Object.values(ordersSnap.val() || {});
     const products = productsSnap.val() || {};
+    const now = Date.now();
+    const t = NOTIF_MESSAGES;
 
     for (const [uid, userRecord] of Object.entries(users)) {
       const userOrders = allOrders.filter(o => o.uid === uid);
       if (!userOrders.length) continue;
 
-      const userLang = (userRecord.profile && userRecord.profile.lang === 'en') ? 'en' : 'te';
-      const t = NOTIF_MESSAGES[userLang] || NOTIF_MESSAGES.te;
+      userOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const lastOrder = userOrders[0];
+      const lastOrderTime = new Date(lastOrder.createdAt).getTime() || 0;
+      const daysSinceLastOrder = (now - lastOrderTime) / (1000 * 60 * 60 * 24);
 
-      // Sort delivered orders descending
-      const deliveredOrders = userOrders
-        .filter(o => o.status === 'delivered')
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-      if (!deliveredOrders.length) continue;
-
-      const lastDeliveredTime = new Date(deliveredOrders[0].createdAt).getTime();
-      const daysSinceLastOrder = (now - lastDeliveredTime) / (24 * 3600 * 1000);
-
-      // A. Reorder reminder based on user's own average gap
-      if (deliveredOrders.length >= 2) {
-        let totalGapDays = 0;
-        for (let i = 0; i < deliveredOrders.length - 1; i++) {
-          const gap = (new Date(deliveredOrders[i].createdAt).getTime() - new Date(deliveredOrders[i + 1].createdAt).getTime()) / (24 * 3600 * 1000);
-          totalGapDays += Math.max(1, gap);
-        }
-        const avgGapDays = Math.round(totalGapDays / (deliveredOrders.length - 1));
-
-        if (daysSinceLastOrder >= avgGapDays && daysSinceLastOrder < avgGapDays + 2) {
-          await sendOfferIfEligible(uid, {
-            type: 'reorder_reminder',
-            title: t.reorderReminderTitle,
-            body: t.reorderReminderBody,
-            url: './#orders'
-          }, userRecord, userOrders);
-          continue;
-        }
+      // Trigger 1: 5-Day Reorder Reminder
+      if (daysSinceLastOrder >= 5 && daysSinceLastOrder < 6 && lastOrder.status === 'delivered') {
+        await sendOfferIfEligible(uid, {
+          type: 'reorder_reminder',
+          title: t.reorderReminderTitle,
+          body: t.reorderReminderBody,
+          url: './#orders'
+        }, userRecord, userOrders);
+        continue;
       }
 
-      // C. Win-back: once after 21 days with no order
+      // Trigger 2: 21-Day Win-Back Offer
       if (daysSinceLastOrder >= 21 && daysSinceLastOrder < 22) {
         await sendOfferIfEligible(uid, {
-          type: 'win_back',
+          type: 'win_back_21d',
           title: t.winBackTitle,
           body: t.winBackBody,
           url: './'
         }, userRecord, userOrders);
         continue;
+      }
+
+      // Trigger 3: Back-in-Stock Alert
+      if (lastOrder.items && Array.isArray(lastOrder.items)) {
+        for (const item of lastOrder.items) {
+          const prod = products[item.productId || item.id];
+          if (prod && prod.inStock === true && prod.stockUpdatedAt) {
+            const stockUpdatedTime = new Date(prod.stockUpdatedAt).getTime();
+            if (stockUpdatedTime > lastOrderTime && (now - stockUpdatedTime) < 24 * 60 * 60 * 1000) {
+              await sendOfferIfEligible(uid, {
+                type: 'back_in_stock',
+                title: t.backInStockTitle,
+                body: t.backInStockBody(prod.name),
+                url: `./?cat=${encodeURIComponent(prod.category || '')}`
+              }, userRecord, userOrders);
+              break;
+            }
+          }
+        }
       }
     }
 
@@ -477,7 +360,7 @@ exports.hourlyOffersJob = functions.pubsub.schedule('every 1 hours')
   });
 
 // ============================================================================
-// CALLABLE: OWNER BROADCAST OFFER (admin.html -> Settings)
+// OWNER BROADCAST OFFER (admin.html -> Settings)
 // ============================================================================
 
 exports.sendBroadcastOffer = functions.https.onCall(async (data, context) => {
@@ -485,7 +368,6 @@ exports.sendBroadcastOffer = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('unauthenticated', 'Admin authentication required.');
   }
 
-  // Verify owner/admin
   const adminSnap = await db.ref(`admins/${context.auth.uid}`).once('value');
   if (adminSnap.val() !== true) {
     throw new functions.https.HttpsError('permission-denied', 'Only owner account can broadcast offers.');
@@ -513,7 +395,6 @@ exports.sendBroadcastOffer = functions.https.onCall(async (data, context) => {
     const userOrders = allOrders.filter(o => o.uid === uid);
     const hasOrderLast14Days = userOrders.some(o => new Date(o.createdAt).getTime() > fourteenDaysAgo);
 
-    // Filter by audience
     if (audience === 'active14' && !hasOrderLast14Days) continue;
     if (audience === 'inactive14' && hasOrderLast14Days) continue;
 
@@ -535,3 +416,254 @@ exports.sendBroadcastOffer = functions.https.onCall(async (data, context) => {
   return { success: true, sentCount, skippedCount };
 });
 
+// ============================================================================
+// ITEM 6: SECURE SERVER-SIDE EMAIL OTP AUTHENTICATION
+// ============================================================================
+
+function hashEmailKey(email) {
+  return crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex').substring(0, 32);
+}
+
+function hashOtpCode(code, salt) {
+  return crypto.createHmac('sha256', salt || 'sri-sai-salt-2026').update(String(code).trim()).digest('hex');
+}
+
+async function sendTransactionalEmail(toEmail, code) {
+  const subject = `Your Sri Sai Login Code: ${code}`;
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px; background: #ffffff;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #15803d; margin: 0 0 6px 0; font-size: 24px; font-weight: 800;">Sri Sai</h2>
+        <p style="color: #6b7280; margin: 0; font-size: 13px;">Daily Fresh Grocery Delivery in Anantapur</p>
+      </div>
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
+        <p style="color: #166534; font-size: 14px; margin: 0 0 10px 0; font-weight: 600;">Your 6-Digit Verification Code</p>
+        <div style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #15803d; font-family: monospace;">${code}</div>
+      </div>
+      <p style="color: #4b5563; font-size: 13px; line-height: 1.5; margin: 0 0 16px 0;">This code is valid for <strong>10 minutes</strong> and can only be used once. Do not share this code with anyone.</p>
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+      <p style="color: #9ca3af; font-size: 11px; margin: 0; text-align: center;">Sri Sai • Old Town, Anantapur, Andhra Pradesh - 515001<br>If you did not request this code, you can safely ignore this email.</p>
+    </div>
+  `;
+  const text = `Your Sri Sai login code is: ${code}\nValid for 10 minutes. Do not share this code with anyone.\n\nSri Sai • Old Town, Anantapur, Andhra Pradesh`;
+
+  const resendApiKey = process.env.RESEND_API_KEY || (functions.config().resend && functions.config().resend.key);
+  const sendgridApiKey = process.env.SENDGRID_API_KEY || (functions.config().sendgrid && functions.config().sendgrid.key);
+
+  if (resendApiKey) {
+    try {
+      const resp = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: process.env.EMAIL_FROM || 'Sri Sai <auth@srisai.in>',
+          to: [toEmail],
+          subject: subject,
+          html: html,
+          text: text
+        })
+      });
+      if (!resp.ok) {
+        console.error('[Resend Error]', await resp.text());
+      }
+    } catch (e) {
+      console.error('[Resend Exception]', e);
+    }
+  } else if (sendgridApiKey) {
+    try {
+      const resp = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${sendgridApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email: toEmail }] }],
+          from: { email: process.env.EMAIL_FROM || 'auth@srisai.in', name: 'Sri Sai' },
+          subject: subject,
+          content: [
+            { type: 'text/plain', value: text },
+            { type: 'text/html', value: html }
+          ]
+        })
+      });
+      if (!resp.ok) {
+        console.error('[SendGrid Error]', await resp.text());
+      }
+    } catch (e) {
+      console.error('[SendGrid Exception]', e);
+    }
+  } else {
+    // Development/Fallback logging
+    console.log(`[Email OTP Service] Verification code for ${toEmail}: ${code}`);
+  }
+}
+
+/**
+ * HTTPS ENDPOINT: sendEmailOtp
+ * Generates secure 6-digit code, stores salted SHA-256 hash, enforces rate limits, sends email.
+ */
+exports.sendEmailOtp = functions.region('asia-south1').https.onRequest(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send('');
+  }
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
+  }
+
+  try {
+    const { email } = req.body || {};
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({ success: false, error: 'Invalid email address format.' });
+    }
+
+    const emailHash = hashEmailKey(normalizedEmail);
+    const otpRef = db.ref(`emailOtps/${emailHash}`);
+    const existingSnap = await otpRef.once('value');
+    const existing = existingSnap.val();
+    const now = Date.now();
+
+    // Rate limit: 30 seconds between requests
+    if (existing && (now - existing.createdAt < 30 * 1000)) {
+      const waitSec = Math.ceil((30 * 1000 - (now - existing.createdAt)) / 1000);
+      return res.status(429).json({ success: false, error: `Please wait ${waitSec} seconds before requesting a new code.` });
+    }
+
+    // Rate limit: max 5 sends per hour
+    if (existing && existing.hourlyCount >= 5 && (now - existing.hourlyWindowStart < 3600 * 1000)) {
+      return res.status(429).json({ success: false, error: 'Too many requests. Please try again after 1 hour.' });
+    }
+
+    const hourlyCount = (existing && (now - (existing.hourlyWindowStart || 0) < 3600 * 1000))
+      ? (existing.hourlyCount || 0) + 1
+      : 1;
+
+    // Generate cryptographically secure 6-digit code
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
+    const codeHash = hashOtpCode(otpCode);
+
+    await otpRef.set({
+      codeHash: codeHash,
+      email: normalizedEmail,
+      createdAt: now,
+      expiresAt: now + (10 * 60 * 1000), // 10 minutes
+      attempts: 0,
+      hourlyCount: hourlyCount,
+      hourlyWindowStart: existing?.hourlyWindowStart && (now - existing.hourlyWindowStart < 3600 * 1000) ? existing.hourlyWindowStart : now
+    });
+
+    await sendTransactionalEmail(normalizedEmail, otpCode);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Verification code sent to your email.'
+    });
+  } catch (err) {
+    console.error('[sendEmailOtp Error]', err);
+    return res.status(500).json({ success: false, error: 'Failed to send verification code. Please try again.' });
+  }
+});
+
+/**
+ * HTTPS ENDPOINT: verifyEmailOtp
+ * Validates 6-digit code, enforces 10m expiry and max 5 attempts, maps email to Firebase user account, returns customToken.
+ */
+exports.verifyEmailOtp = functions.region('asia-south1').https.onRequest(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send('');
+  }
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
+  }
+
+  try {
+    const { email, otp } = req.body || {};
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, error: 'Email and 6-digit verification code are required.' });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedOtp = String(otp).trim();
+
+    if (!/^[0-9]{6}$/.test(normalizedOtp)) {
+      return res.status(400).json({ success: false, error: 'Please enter a valid 6-digit numeric code.' });
+    }
+
+    const emailHash = hashEmailKey(normalizedEmail);
+    const otpRef = db.ref(`emailOtps/${emailHash}`);
+    const snap = await otpRef.once('value');
+    const record = snap.val();
+
+    if (!record) {
+      return res.status(400).json({ success: false, error: 'Verification code expired or not found. Please request a new code.' });
+    }
+
+    const now = Date.now();
+    if (now > record.expiresAt) {
+      await otpRef.remove();
+      return res.status(400).json({ success: false, error: 'Verification code has expired. Please request a new code.' });
+    }
+
+    if (record.attempts >= 5) {
+      await otpRef.remove();
+      return res.status(429).json({ success: false, error: 'Too many incorrect attempts. Please request a new code.' });
+    }
+
+    const inputHash = hashOtpCode(normalizedOtp);
+    const match = crypto.timingSafeEqual(Buffer.from(inputHash), Buffer.from(record.codeHash));
+
+    if (!match) {
+      await otpRef.update({ attempts: (record.attempts || 0) + 1 });
+      const remaining = 5 - (record.attempts || 0) - 1;
+      return res.status(400).json({
+        success: false,
+        error: `Incorrect code. ${remaining > 0 ? `${remaining} attempts remaining.` : 'Please request a new code.'}`
+      });
+    }
+
+    // Single use: delete record upon successful verification
+    await otpRef.remove();
+
+    // Map email to exact Firebase Auth user account (unified account mapping)
+    let userRecord;
+    try {
+      userRecord = await admin.auth().getUserByEmail(normalizedEmail);
+    } catch (err) {
+      if (err.code === 'auth/user-not-found') {
+        userRecord = await admin.auth().createUser({
+          email: normalizedEmail,
+          emailVerified: true,
+          displayName: normalizedEmail.split('@')[0]
+        });
+      } else {
+        throw err;
+      }
+    }
+
+    // Generate Firebase Custom Token
+    const customToken = await admin.auth().createCustomToken(userRecord.uid);
+
+    return res.status(200).json({
+      success: true,
+      customToken: customToken,
+      uid: userRecord.uid,
+      email: normalizedEmail
+    });
+  } catch (err) {
+    console.error('[verifyEmailOtp Error]', err);
+    return res.status(500).json({ success: false, error: 'Verification failed. Please try again.' });
+  }
+});
