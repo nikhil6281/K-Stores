@@ -506,7 +506,7 @@ async function sendTransactionalEmail(toEmail, code) {
  * HTTPS ENDPOINT: sendEmailOtp
  * Generates secure 6-digit code, stores salted SHA-256 hash, enforces rate limits, sends email.
  */
-exports.sendEmailOtp = functions.https.onRequest(async (req, res) => {
+exports.sendEmailOtp = functions.region('asia-south1').https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
@@ -579,7 +579,7 @@ exports.sendEmailOtp = functions.https.onRequest(async (req, res) => {
  * HTTPS ENDPOINT: verifyEmailOtp
  * Validates 6-digit code, enforces 10m expiry and max 5 attempts, maps email to Firebase user account, returns customToken.
  */
-exports.verifyEmailOtp = functions.https.onRequest(async (req, res) => {
+exports.verifyEmailOtp = functions.region('asia-south1').https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {

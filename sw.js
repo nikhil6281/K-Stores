@@ -198,7 +198,7 @@ self.addEventListener('push', (e) => {
 
   const orderId = customData.orderId || '';
   const offerId = customData.offerId || '';
-  const notifTag = customData.tag || (orderId ? `sri-sai-order-${orderId}` : (offerId ? `sri-sai-offer-${offerId}` : 'sri-sai-notif'));
+  const notifTag = customData.tag || (orderId ? `sri-sai-order-${orderId}` : (offerId ? `sri-sai-offer-${offerId}` : 'sri-sai-notif')); // ra-order- fallback
   const targetUrl = customData.url || (orderId ? `./?order=${encodeURIComponent(orderId)}#orders` : (offerId ? `./?n=${encodeURIComponent(offerId)}` : './'));
 
   const options = {
