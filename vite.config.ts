@@ -4,9 +4,8 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
-  const isMobile = mode === 'mobile' || process.env.BUILD_TARGET === 'mobile';
-  const base = process.env.VITE_BASE || (isMobile ? './' : '/K-Stores/');
+export default defineConfig(() => {
+  const base = process.env.VITE_BASE || './';
 
   return {
     base,

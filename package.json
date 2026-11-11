@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build --base=/K-Stores/ && node scripts/deploy-gh-pages.cjs",
+    "build": "tsc -b && vite build --base=./ && node scripts/deploy-gh-pages.cjs",
     "build:mobile": "tsc -b && vite build --base=./ --mode mobile",
     "deploy": "npm run build && node scripts/deploy-gh-pages.cjs",
     "lint": "oxlint",
@@ -14,6 +14,9 @@
     "test": "node tests/test_full_logic.cjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
     "canvas-confetti": "^1.9.4",
