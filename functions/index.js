@@ -428,6 +428,53 @@ function hashOtpCode(code, salt) {
   return crypto.createHmac('sha256', salt || 'sri-sai-salt-2026').update(String(code).trim()).digest('hex');
 }
 
+let nodemailer;
+try {
+  nodemailer = require('nodemailer');
+} catch (e) {
+  nodemailer = null;
+}
+
+const REVIEWER_EMAILS = [
+  'reviewer@kstores.app',
+  'playreview@kstores.app',
+  'reviewer@srisai.in',
+  'test@kstores.app'
+];
+
+function isReviewerEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  const norm = email.trim().toLowerCase();
+  return REVIEWER_EMAILS.includes(norm) || norm.startsWith('reviewer@') || norm.endsWith('@kstores.app');
+}
+
+async function sendViaGmailSmtp(toEmail, subject, html, text) {
+  if (!nodemailer) return false;
+  const user = process.env.GMAIL_USER || (functions.config().gmail && functions.config().gmail.user) || 'chowdarynikhil095@gmail.com';
+  const pass = process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_PASS || (functions.config().gmail && functions.config().gmail.pass);
+  if (!user || !pass) {
+    return false;
+  }
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user, pass }
+    });
+    await transporter.sendMail({
+      from: `"Sri Sai" <${user}>`,
+      to: toEmail,
+      subject: subject,
+      html: html,
+      text: text
+    });
+    console.log(`[Gmail SMTP Success] Verification email delivered to ${toEmail}`);
+    return true;
+  } catch (err) {
+    console.warn('[Gmail SMTP Error]', err.message);
+    return false;
+  }
+}
+
 async function sendTransactionalEmail(toEmail, code) {
   const subject = `Your Sri Sai Login Code: ${code}`;
   const html = `
@@ -450,6 +497,8 @@ async function sendTransactionalEmail(toEmail, code) {
   const resendApiKey = process.env.RESEND_API_KEY || (functions.config().resend && functions.config().resend.key);
   const sendgridApiKey = process.env.SENDGRID_API_KEY || (functions.config().sendgrid && functions.config().sendgrid.key);
 
+  let delivered = false;
+
   if (resendApiKey) {
     try {
       const resp = await fetch('https://api.resend.com/emails', {
@@ -466,13 +515,24 @@ async function sendTransactionalEmail(toEmail, code) {
           text: text
         })
       });
-      if (!resp.ok) {
-        console.error('[Resend Error]', await resp.text());
+      if (resp.ok) {
+        delivered = true;
+      } else {
+        const errText = await resp.text();
+        console.warn('[Resend API Error/Sandbox]', errText);
       }
     } catch (e) {
-      console.error('[Resend Exception]', e);
+      console.warn('[Resend Exception]', e);
     }
-  } else if (sendgridApiKey) {
+  }
+
+  // Fallback 1: Gmail SMTP via Nodemailer
+  if (!delivered) {
+    delivered = await sendViaGmailSmtp(toEmail, subject, html, text);
+  }
+
+  // Fallback 2: SendGrid if available
+  if (!delivered && sendgridApiKey) {
     try {
       const resp = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
@@ -490,16 +550,15 @@ async function sendTransactionalEmail(toEmail, code) {
           ]
         })
       });
-      if (!resp.ok) {
-        console.error('[SendGrid Error]', await resp.text());
-      }
+      if (resp.ok) delivered = true;
     } catch (e) {
-      console.error('[SendGrid Exception]', e);
+      console.warn('[SendGrid Exception]', e);
     }
-  } else {
-    // Development/Fallback logging
-    console.log(`[Email OTP Service] Verification code for ${toEmail}: ${code}`);
   }
+
+  // Development/Fallback logging
+  console.log(`[Email OTP Service] Verification code for ${toEmail}: ${code} (delivered=${delivered})`);
+  return delivered;
 }
 
 const ALLOWED_CORS_ORIGINS = [
@@ -549,9 +608,29 @@ exports.sendEmailOtp = functions.region('asia-south1').https.onRequest(async (re
 
     const emailHash = hashEmailKey(normalizedEmail);
     const otpRef = db.ref(`emailOtps/${emailHash}`);
+    const now = Date.now();
+
+    // Google Play Reviewer demo bypass
+    if (isReviewerEmail(normalizedEmail)) {
+      const reviewerCode = '123456';
+      await otpRef.set({
+        codeHash: hashOtpCode(reviewerCode),
+        email: normalizedEmail,
+        createdAt: now,
+        expiresAt: now + (24 * 60 * 60 * 1000), // 24 hours
+        attempts: 0,
+        hourlyCount: 1,
+        hourlyWindowStart: now
+      });
+      return res.status(200).json({
+        success: true,
+        isReviewer: true,
+        message: 'Google Play Reviewer OTP is 123456.'
+      });
+    }
+
     const existingSnap = await otpRef.once('value');
     const existing = existingSnap.val();
-    const now = Date.now();
 
     // Rate limit: 30 seconds between requests
     if (existing && (now - existing.createdAt < 30 * 1000)) {
@@ -622,6 +701,33 @@ exports.verifyEmailOtp = functions.region('asia-south1').https.onRequest(async (
 
     const emailHash = hashEmailKey(normalizedEmail);
     const otpRef = db.ref(`emailOtps/${emailHash}`);
+
+    // Google Play Reviewer demo bypass
+    if (isReviewerEmail(normalizedEmail) && normalizedOtp === '123456') {
+      await otpRef.remove().catch(() => {});
+      let userRecord;
+      try {
+        userRecord = await admin.auth().getUserByEmail(normalizedEmail);
+      } catch (err) {
+        if (err.code === 'auth/user-not-found') {
+          userRecord = await admin.auth().createUser({
+            email: normalizedEmail,
+            emailVerified: true,
+            displayName: 'Google Play Reviewer'
+          });
+        } else {
+          throw err;
+        }
+      }
+      const customToken = await admin.auth().createCustomToken(userRecord.uid);
+      return res.status(200).json({
+        success: true,
+        customToken: customToken,
+        uid: userRecord.uid,
+        email: normalizedEmail
+      });
+    }
+
     const snap = await otpRef.once('value');
     const record = snap.val();
 

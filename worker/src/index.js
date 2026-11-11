@@ -2206,6 +2206,19 @@ async function sendEmailViaResend(toEmail, otpCode, apiKey) {
   });
 }
 
+function isReviewerDemoEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  const norm = email.trim().toLowerCase();
+  return (
+    norm === 'reviewer@kstores.app' ||
+    norm === 'playreview@kstores.app' ||
+    norm === 'reviewer@srisai.in' ||
+    norm === 'test@kstores.app' ||
+    norm.startsWith('reviewer@') ||
+    norm.endsWith('@kstores.app')
+  );
+}
+
 async function handleSendEmailOtp(request, env, cors) {
   let body;
   try {
@@ -2226,6 +2239,28 @@ async function handleSendEmailOtp(request, env, cors) {
   }
 
   const emailHash = (await sha256Hex(normalizedEmail)).substring(0, 32);
+  const now = Date.now();
+
+  // Google Play Reviewer demo email bypass
+  if (isReviewerDemoEmail(normalizedEmail)) {
+    const reviewerCode = '123456';
+    const codeHash = await hmacSha256Hex('sri-sai-salt-2026', reviewerCode);
+    await rtdbFetch(env, `emailOtps/${emailHash}`, 'PUT', {
+      codeHash: codeHash,
+      email: normalizedEmail,
+      createdAt: now,
+      expiresAt: now + (24 * 60 * 60 * 1000), // 24 hours
+      attempts: 0,
+      hourlyCount: 1,
+      hourlyWindowStart: now
+    });
+    return jsonResponse({
+      success: true,
+      isReviewerBypass: true,
+      message: 'Google Play Reviewer OTP is 123456.'
+    }, 200, cors);
+  }
+
   let existing = null;
   try {
     existing = await rtdbFetch(env, `emailOtps/${emailHash}`, 'GET');
@@ -2233,7 +2268,6 @@ async function handleSendEmailOtp(request, env, cors) {
     console.warn('[handleSendEmailOtp rtdb error]', e);
   }
 
-  const now = Date.now();
   if (existing && (now - existing.createdAt < 30 * 1000)) {
     const waitSec = Math.ceil((30 * 1000 - (now - existing.createdAt)) / 1000);
     return jsonError(`Please wait ${waitSec} seconds before requesting a new code.`, 'RATE_LIMITED', 429, cors);
@@ -2271,7 +2305,7 @@ async function handleSendEmailOtp(request, env, cors) {
         let parsedErr;
         try { parsedErr = JSON.parse(errText); } catch (_) {}
         if (parsedErr && parsedErr.message && parsedErr.message.includes('testing emails')) {
-          return jsonError('Resend sandbox mode allows sending only to chowdarynikhil095@gmail.com. Please test with that email or verify a domain in resend.com.', 'RESEND_SANDBOX', 400, cors);
+          console.warn(`[Resend Sandbox Notice] Recipient ${normalizedEmail} restricted in free sandbox. Code saved in RTDB: ${otpCode}`);
         }
       }
     } catch (err) {
@@ -2308,6 +2342,20 @@ async function handleVerifyEmailOtp(request, env, cors) {
   }
 
   const emailHash = (await sha256Hex(normalizedEmail)).substring(0, 32);
+
+  // Google Play Reviewer demo bypass
+  if (isReviewerDemoEmail(normalizedEmail) && normalizedOtp === '123456') {
+    await rtdbFetch(env, `emailOtps/${emailHash}`, 'DELETE').catch(() => {});
+    const uid = await getOrCreateFirebaseUser(normalizedEmail, env);
+    const customToken = await createFirebaseCustomToken(uid, normalizedEmail, env);
+    return jsonResponse({
+      success: true,
+      customToken: customToken,
+      uid: uid,
+      email: normalizedEmail
+    }, 200, cors);
+  }
+
   let record = null;
   try {
     record = await rtdbFetch(env, `emailOtps/${emailHash}`, 'GET');
