@@ -2433,21 +2433,21 @@
       const isReviewer = isReviewerDemoEmail(cleanEmail);
 
       try {
+        const primaryUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/send-email-otp';
         const fnUrl = 'https://asia-south1-k-store-ae9dd.cloudfunctions.net/sendEmailOtp';
-        const fallbackUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/send-email-otp';
 
         let resp;
         try {
-          resp = await fetch(fnUrl, {
+          resp = await fetch(primaryUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: cleanEmail })
           });
           if (!resp.ok) {
-            throw new Error('Fallback to worker');
+            throw new Error('Fallback to cloud function');
           }
         } catch (e) {
-          resp = await fetch(fallbackUrl, {
+          resp = await fetch(fnUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: cleanEmail })
@@ -2508,21 +2508,21 @@
       if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.innerText = 'Verifying & Signing In...'; }
 
       try {
+        const primaryUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/verify-email-otp';
         const fnUrl = 'https://asia-south1-k-store-ae9dd.cloudfunctions.net/verifyEmailOtp';
-        const fallbackUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/verify-email-otp';
 
         let resp;
         try {
-          resp = await fetch(fnUrl, {
+          resp = await fetch(primaryUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: pendingLoginEmail, otp: cleanCode })
           });
           if (!resp.ok) {
-            throw new Error('Fallback to worker');
+            throw new Error('Fallback to cloud function');
           }
         } catch (e) {
-          resp = await fetch(fallbackUrl, {
+          resp = await fetch(fnUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: pendingLoginEmail, otp: cleanCode })
