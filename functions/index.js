@@ -459,7 +459,7 @@ async function sendTransactionalEmail(toEmail, code) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'Sri Sai <auth@srisai.in>',
+          from: process.env.EMAIL_FROM || 'Sri Sai <onboarding@resend.dev>',
           to: [toEmail],
           subject: subject,
           html: html,
@@ -502,13 +502,32 @@ async function sendTransactionalEmail(toEmail, code) {
   }
 }
 
+const ALLOWED_CORS_ORIGINS = [
+  'https://nikhil6281.github.io',
+  'https://localhost',
+  'http://localhost',
+  'capacitor://localhost'
+];
+
+function setCorsHeaders(req, res) {
+  const origin = req.headers.origin || '';
+  const isAllowed = ALLOWED_CORS_ORIGINS.includes(origin) ||
+                    origin.startsWith('http://localhost:') ||
+                    origin.startsWith('https://localhost:') ||
+                    origin.startsWith('http://127.0.0.1:') ||
+                    origin.endsWith('.github.io');
+  res.set('Access-Control-Allow-Origin', isAllowed ? origin : (origin || '*'));
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.set('Access-Control-Max-Age', '86400');
+}
+
 /**
  * HTTPS ENDPOINT: sendEmailOtp
  * Generates secure 6-digit code, stores salted SHA-256 hash, enforces rate limits, sends email.
  */
 exports.sendEmailOtp = functions.region('asia-south1').https.onRequest(async (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(req, res);
   if (req.method === 'OPTIONS') {
     return res.status(204).send('');
   }
@@ -580,8 +599,7 @@ exports.sendEmailOtp = functions.region('asia-south1').https.onRequest(async (re
  * Validates 6-digit code, enforces 10m expiry and max 5 attempts, maps email to Firebase user account, returns customToken.
  */
 exports.verifyEmailOtp = functions.region('asia-south1').https.onRequest(async (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(req, res);
   if (req.method === 'OPTIONS') {
     return res.status(204).send('');
   }
