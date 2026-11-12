@@ -979,8 +979,10 @@
         playSynthesizedDing(isSoftRepeat);
       }
 
-      if (!isSoftRepeat && "Notification" in window && Notification.permission === "granted") {
-        new Notification("Sri Sai: New Order Received!", { body: "A new payable grocery order arrived in Anantapur." });
+      if (!isSoftRepeat && typeof window !== 'undefined' && "Notification" in window && window.Notification && window.Notification.permission === "granted") {
+        try {
+          new window.Notification("Sri Sai: New Order Received!", { body: "A new payable grocery order arrived in Anantapur." });
+        } catch (e) {}
       }
     }
 
@@ -1006,8 +1008,10 @@
       } catch (e) {}
     }
 
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
+    if (typeof window !== 'undefined' && "Notification" in window && window.Notification && window.Notification.permission === "default") {
+      try {
+        window.Notification.requestPermission();
+      } catch (e) {}
     }
 
     function isOrderPayable(o) {
