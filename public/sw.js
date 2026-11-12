@@ -14,18 +14,18 @@
  * - Automatically purges any previous cache versions.
  */
 
-const CACHE_NAME = 'sri-sai-shell-v14';
+const CACHE_NAME = 'sri-sai-shell-v15';
 const SHELL_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './config.js',
-  './assets/logo/sri-sai-logo.png?v=2',
-  './assets/logo/app-icon-192.png?v=2',
-  './assets/logo/app-icon-512.png?v=2',
-  './assets/logo/apple-touch-icon-180.png?v=2',
-  './assets/logo/favicon-48.png?v=2',
-  './assets/logo/badge-96.png?v=2',
+  './assets/logo/sri-sai-logo.png',
+  './assets/logo/app-icon-192.png',
+  './assets/logo/app-icon-512.png',
+  './assets/logo/apple-touch-icon-180.png',
+  './assets/logo/favicon-48.png',
+  './assets/logo/badge-96.png',
   './icon-192.png',
   './icon-512.png',
   './offline.html'
@@ -55,9 +55,8 @@ self.addEventListener('activate', (e) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // 3. Message Event: Allow clients to trigger skipWaiting
