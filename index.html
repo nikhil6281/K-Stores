@@ -2734,6 +2734,7 @@
     let catalogTimeoutTimer = null;
     let productsListenerRef = null;
     let categoriesListenerRef = null;
+    let sharedLazyObserver = null;
 
     // STEP 3: Cache-First Hydration from live Firebase local cache (NO mock/dummy static file)
     // Products are fetched strictly live from Firebase Realtime Database collections.
@@ -3126,7 +3127,6 @@
     }
 
     // Shared Lazy Image IntersectionObserver
-    let sharedLazyObserver = null;
     function observeLazyImages() {
       if (window.IntersectionObserver) {
         if (!sharedLazyObserver) {
@@ -6058,7 +6058,7 @@
       } else {
         debugLog('swState', 'Registering...');
       }
-      navigator.serviceWorker.register('./sw.js?v=20261112v15', { scope: './' }).then(reg => {
+      navigator.serviceWorker.register('./sw.js?v=20261112v16', { scope: './' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {
