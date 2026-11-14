@@ -162,46 +162,63 @@ app.post(['/api/auth/whatsapp/send-otp', '/api/send-whatsapp-otp'], async (req, 
     });
 
     const isTestMode = String(process.env.OTP_TEST_MODE || '').toLowerCase() === 'true';
-    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '1490832314108512';
+    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '1407373839132455';
     const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-    const templateName = process.env.WHATSAPP_TEMPLATE_NAME || 'hello_world';
+    const templateName = process.env.WHATSAPP_TEMPLATE_NAME || 'otp_login';
 
     let metaSuccess = false;
     if (accessToken && phoneNumberId && typeof fetch !== 'undefined') {
-      try {
-        const payload = templateName === 'hello_world'
-          ? {
+      if (templateName === 'hello_world') {
+        try {
+          const metaRes = await fetch(`https://graph.facebook.com/v26.0/${phoneNumberId}/messages`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
               messaging_product: 'whatsapp',
               to: normalizedPhone,
               type: 'template',
               template: { name: 'hello_world', language: { code: 'en_US' } }
-            }
-          : {
-              messaging_product: 'whatsapp',
-              recipient_type: 'individual',
-              to: normalizedPhone,
-              type: 'template',
-              template: {
-                name: templateName,
-                language: { code: 'en' },
-                components: [
-                  { type: 'body', parameters: [{ type: 'text', text: otpCode }] },
-                  { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpCode }] }
-                ]
-              }
-            };
+            })
+          });
+          if (metaRes.ok) metaSuccess = true;
+        } catch (err) {
+          console.warn('[Server WhatsApp Meta Error]', err.message);
+        }
+      } else {
+        const langCodes = ['en_US', 'en'];
+        const componentVariations = [
+          [
+            { type: 'body', parameters: [{ type: 'text', text: otpCode }] },
+            { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpCode }] }
+          ],
+          [{ type: 'body', parameters: [{ type: 'text', text: otpCode }] }],
+          [{ type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpCode }] }]
+        ];
 
-        const metaRes = await fetch(`https://graph.facebook.com/v26.0/${phoneNumberId}/messages`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-        if (metaRes.ok) metaSuccess = true;
-      } catch (err) {
-        console.warn('[Server WhatsApp Meta Error]', err.message);
+        for (const lang of langCodes) {
+          for (const components of componentVariations) {
+            try {
+              const metaRes = await fetch(`https://graph.facebook.com/v26.0/${phoneNumberId}/messages`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  messaging_product: 'whatsapp',
+                  recipient_type: 'individual',
+                  to: normalizedPhone,
+                  type: 'template',
+                  template: { name: templateName, language: { code: lang }, components }
+                })
+              });
+              if (metaRes.ok) {
+                metaSuccess = true;
+                break;
+              }
+            } catch (err) {
+              // retry next
+            }
+          }
+          if (metaSuccess) break;
+        }
       }
     }
 
