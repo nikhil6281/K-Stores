@@ -1361,43 +1361,56 @@
 
       <!-- Divider -->
       <div style="position: relative; margin: 14px 0; text-align: center;">
-        <span style="background: white; padding: 0 10px; font-size: 11px; color: var(--muted); position: relative; z-index: 1;">OR WITH EMAIL OTP</span>
+        <span style="background: white; padding: 0 10px; font-size: 11px; color: var(--muted); position: relative; z-index: 1;" id="tLoginDivider">OR WITH WHATSAPP OTP</span>
         <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border);"></div>
       </div>
 
-      <!-- Option 2: Email OTP Input Container -->
-      <div id="emailLoginWrap">
-        <!-- Step 1: Email Input -->
-        <div id="emailInputStep">
-          <p style="font-size: 12px; color: var(--muted); margin-bottom: 10px;" id="tEmailLoginSub">Enter your email address to receive a 6-digit verification code.</p>
-          <input type="email" id="loginEmailInput" aria-label="Email Address" placeholder="name@example.com" autocomplete="email" inputmode="email" style="width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 15px; margin-bottom: 10px;">
-          <button type="button" id="sendEmailOtpBtn" class="btn btn-primary" style="width: 100%; min-height: 46px; font-size: 14px; border-radius: 8px;">
-            Send 6-Digit Code
+      <!-- Option 2: WhatsApp OTP Input Container -->
+      <div id="whatsappLoginWrap">
+        <!-- Step 1: Phone Input -->
+        <div id="phoneInputStep">
+          <p style="font-size: 12px; color: var(--muted); margin-bottom: 10px;" id="tPhoneLoginSub">Enter your WhatsApp mobile number to receive a 6-digit verification code.</p>
+          <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center;">
+            <div style="border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 14px; font-weight: 700; color: #374151; background: #F9FAFB; display: flex; align-items: center; gap: 4px; user-select: none;">
+              <span>🇮🇳</span>
+              <span>+91</span>
+            </div>
+            <input type="tel" id="loginPhoneInput" aria-label="Mobile Number" placeholder="10-digit mobile number" maxlength="10" autocomplete="tel-national" inputmode="numeric" pattern="[0-9]{10}" style="flex: 1; border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 15px;">
+          </div>
+          <button type="button" id="sendWhatsappOtpBtn" class="btn btn-primary" style="width: 100%; min-height: 46px; font-size: 14px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; border-color: #25D366; color: #FFFFFF; font-weight: 600;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.34C9.36 7.34 9.09 7.4 8.87 7.65C8.65 7.89 8.02 8.47 8.02 9.68C8.02 10.88 8.9 12.04 9.02 12.2C9.14 12.37 10.74 14.84 13.2 15.9C13.79 16.15 14.24 16.3 14.6 16.42C15.19 16.61 15.73 16.58 16.15 16.52C16.63 16.45 17.61 15.92 17.81 15.35C18.02 14.78 18.02 14.29 17.96 14.19C17.9 14.09 17.75 14.03 17.53 13.92C17.3 13.81 16.21 13.27 16 13.2C15.8 13.12 15.66 13.08 15.51 13.31C15.36 13.53 14.95 14.03 14.83 14.17C14.7 14.32 14.58 14.34 14.36 14.23C14.14 14.12 13.42 13.88 12.57 13.13C11.91 12.54 11.46 11.82 11.34 11.6C11.21 11.38 11.32 11.26 11.44 11.14C11.53 11.04 11.66 10.89 11.78 10.75C11.89 10.61 11.93 10.5 12 10.35C12.08 10.21 12.04 10.08 11.98 9.97C11.93 9.86 11.48 8.76 11.3 8.31C11.11 7.89 10.93 7.95 10.78 7.94H10.45C10.27 7.94 9.98 7.92 9.74 8.16C9.53 7.34 9.53 7.34 9.53 7.34Z"/></svg>
+            <span id="tSendWhatsappOtpText">Send OTP on WhatsApp</span>
           </button>
         </div>
 
-        <!-- Step 2: 6-Digit Verification Code -->
-        <div id="emailOtpStep" style="display: none;">
-          <div style="background: #F3F4F6; padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-size: 12px;">
-              <span style="color: var(--muted);">Code sent to: </span>
-              <strong id="otpEmailDisplay" style="color: #111827;"></strong>
+        <!-- Step 2: 6-Digit OTP Verification View -->
+        <div id="phoneOtpStep" style="display: none;">
+          <div style="background: #F3F4F6; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 13px;">
+              <span style="color: var(--muted);" id="tOtpSentToText">Code sent to: </span>
+              <strong id="otpPhoneDisplay" style="color: #111827;"></strong>
             </div>
-            <button type="button" id="changeEmailBtn" style="background: none; border: none; color: var(--primary); font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: underline;">Change</button>
+            <button type="button" id="changePhoneBtn" style="background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline;">Change</button>
           </div>
 
-          <div class="form-group" style="text-align: center;">
-            <label for="emailOtpInput" style="font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block;">Enter 6-Digit Verification Code</label>
-            <input type="tel" id="emailOtpInput" class="otp-input-field" placeholder="• • • • • •" pattern="[0-9]{6}" inputmode="numeric" maxlength="6" autocomplete="one-time-code" style="width: 100%; text-align: center; letter-spacing: 6px; font-size: 20px; font-weight: 700; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border);">
+          <!-- Subtle Dev/Test OTP Banner (shown when devOtp is returned in test mode) -->
+          <div id="devOtpBanner" style="display: none; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: #065F46; text-align: center;">
+            <span style="display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; color: #047857; margin-bottom: 2px;">⚡ WhatsApp Test Mode</span>
+            Your Test OTP is: <strong id="devOtpValue" style="font-size: 16px; letter-spacing: 2px; color: #065F46; font-family: monospace;"></strong>
           </div>
 
-          <button type="button" id="verifyEmailOtpBtn" class="btn btn-primary" style="width: 100%; min-height: 46px; font-size: 14px; margin-top: 8px; border-radius: 8px;">
-            Verify & Sign In
+          <div class="form-group" style="text-align: center; margin-bottom: 12px;">
+            <label for="whatsappOtpInput" style="font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block;" id="tEnterOtpLabel">Enter 6-Digit WhatsApp Code</label>
+            <input type="tel" id="whatsappOtpInput" class="otp-input-field" placeholder="• • • • • •" pattern="[0-9]{6}" inputmode="numeric" maxlength="6" autocomplete="one-time-code" style="width: 100%; text-align: center; letter-spacing: 6px; font-size: 22px; font-weight: 700; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border);">
+          </div>
+
+          <button type="button" id="verifyWhatsappOtpBtn" class="btn btn-primary" style="width: 100%; min-height: 46px; font-size: 14px; border-radius: 8px; font-weight: 600;">
+            <span id="tVerifyOtpBtnText">Verify & Login</span>
           </button>
 
-          <div style="text-align: center; margin-top: 12px;">
-            <button type="button" id="resendEmailOtpBtn" style="background: none; border: none; font-size: 12px; color: var(--muted); cursor: pointer;" disabled>
-              Resend Code <span id="emailResendTimer">(30s)</span>
+          <div style="text-align: center; margin-top: 14px;">
+            <button type="button" id="resendWhatsappOtpBtn" style="background: none; border: none; font-size: 13px; color: var(--muted); cursor: pointer;" disabled>
+              <span id="tResendOtpText">Resend OTP</span> <span id="whatsappResendTimer">(30s)</span>
             </button>
           </div>
         </div>
@@ -2230,15 +2243,23 @@
       if (!currentUser) document.getElementById('loginBtn').innerText = t.signIn;
       document.getElementById('reorderLastBtn').innerText = t.reorder;
 
-      // Translations for Email Login & Checkout (Safe setters)
+      // Translations for WhatsApp Login & Checkout (Safe setters)
       const lTitle = document.getElementById('loginModalTitle');
       if (lTitle) lTitle.innerText = (lang === 'te' ? 'శ్రీ సాయి కి లాగిన్ అవ్వండి' : 'Sign In to Sri Sai');
-      const lSub = document.getElementById('tEmailLoginSub');
-      if (lSub) lSub.innerText = (lang === 'te' ? 'ధృవీకరణ కోడ్ కోసం మీ ఈమెయిల్ నమోదు చేయండి.' : 'Enter your email address to receive a 6-digit verification code.');
-      const lSendBtn = document.getElementById('sendEmailOtpBtn');
-      if (lSendBtn) lSendBtn.innerText = (lang === 'te' ? 'కోడ్ పంపండి' : 'Send 6-Digit Code');
-      const lVerifyBtn = document.getElementById('verifyEmailOtpBtn');
-      if (lVerifyBtn) lVerifyBtn.innerText = (lang === 'te' ? 'ధృవీకరించి లాగిన్ అవ్వండి' : 'Verify & Sign In');
+      const lDivider = document.getElementById('tLoginDivider');
+      if (lDivider) lDivider.innerText = (lang === 'te' ? 'లేదా WHATSAPP OTP తో' : 'OR WITH WHATSAPP OTP');
+      const lPhoneSub = document.getElementById('tPhoneLoginSub');
+      if (lPhoneSub) lPhoneSub.innerText = (lang === 'te' ? 'ధృవీకరణ కోడ్ కోసం మీ WhatsApp మొబైల్ నంబర్ నమోదు చేయండి.' : 'Enter your WhatsApp mobile number to receive a 6-digit verification code.');
+      const lSendWhatsappBtn = document.getElementById('tSendWhatsappOtpText');
+      if (lSendWhatsappBtn) lSendWhatsappBtn.innerText = (lang === 'te' ? 'WhatsApp లో OTP పంపండి' : 'Send OTP on WhatsApp');
+      const lVerifyWhatsappBtn = document.getElementById('tVerifyOtpBtnText');
+      if (lVerifyWhatsappBtn) lVerifyWhatsappBtn.innerText = (lang === 'te' ? 'ధృవీకరించి లాగిన్ అవ్వండి' : 'Verify & Login');
+      const lSentTo = document.getElementById('tOtpSentToText');
+      if (lSentTo) lSentTo.innerText = (lang === 'te' ? 'కోడ్ పంపబడింది: ' : 'Code sent to: ');
+      const lEnterOtpLabel = document.getElementById('tEnterOtpLabel');
+      if (lEnterOtpLabel) lEnterOtpLabel.innerText = (lang === 'te' ? '6 అంకెల WhatsApp కోడ్ నమోదు చేయండి' : 'Enter 6-Digit WhatsApp Code');
+      const lResendText = document.getElementById('tResendOtpText');
+      if (lResendText) lResendText.innerText = (lang === 'te' ? 'మళ్లీ కోడ్ పంపండి' : 'Resend OTP');
       const lGoogleBtnText = document.getElementById('tSignInWithGoogle');
       if (lGoogleBtnText) lGoogleBtnText.innerText = (lang === 'te' ? 'Google తో కొనసాగండి' : 'Continue with Google');
       document.getElementById('tDeliveryAreaTitle').innerText = t.deliveryAreaTitle;
@@ -2385,23 +2406,32 @@
     let pendingCheckoutAfterLogin = false;
     let pendingOrdersAfterLogin = false;
 
-    // Email OTP Authentication (Requirement 6)
-    let emailResendInterval = null;
-    let pendingLoginEmail = '';
+    // WhatsApp OTP Authentication (Meta Cloud API v26.0)
+    let whatsappResendInterval = null;
+    let pendingLoginPhone = '';
 
-    function startEmailResendCountdown() {
+    function formatMaskedPhone(rawPhone) {
+      const digits = String(rawPhone || '').replace(/\D/g, '');
+      const last10 = digits.length >= 10 ? digits.slice(-10) : digits;
+      if (last10.length === 10) {
+        return `+91 ${last10.slice(0, 2)}XXX XX${last10.slice(7)}`;
+      }
+      return `+91 ${last10}`;
+    }
+
+    function startWhatsappResendCountdown() {
       let seconds = 30;
-      const resendBtn = document.getElementById('resendEmailOtpBtn');
-      const timerSpan = document.getElementById('emailResendTimer');
+      const resendBtn = document.getElementById('resendWhatsappOtpBtn');
+      const timerSpan = document.getElementById('whatsappResendTimer');
       if (!resendBtn) return;
       resendBtn.disabled = true;
       if (timerSpan) timerSpan.innerText = `(${seconds}s)`;
-      
-      if (emailResendInterval) clearInterval(emailResendInterval);
-      emailResendInterval = setInterval(() => {
+
+      if (whatsappResendInterval) clearInterval(whatsappResendInterval);
+      whatsappResendInterval = setInterval(() => {
         seconds--;
         if (seconds <= 0) {
-          clearInterval(emailResendInterval);
+          clearInterval(whatsappResendInterval);
           resendBtn.disabled = false;
           if (timerSpan) timerSpan.innerText = '';
         } else {
@@ -2410,124 +2440,129 @@
       }, 1000);
     }
 
-    function isReviewerDemoEmail(email) {
-      if (!email || typeof email !== 'string') return false;
-      const norm = email.trim().toLowerCase();
+    function isReviewerDemoPhone(phone) {
+      if (!phone || typeof phone !== 'string') return false;
+      const p = phone.replace(/\D/g, '');
       return (
-        norm === 'reviewer@kstores.app' ||
-        norm === 'playreview@kstores.app' ||
-        norm === 'reviewer@srisai.in' ||
-        norm === 'test@kstores.app' ||
-        norm.startsWith('reviewer@') ||
-        norm.endsWith('@kstores.app')
+        p === '919999999999' ||
+        p === '911234567890' ||
+        p === '919876543210' ||
+        p === '9999999999' ||
+        p === '1234567890' ||
+        p === '9876543210'
       );
     }
 
-    async function sendCustomerEmailOtp(email) {
+    async function sendCustomerWhatsappOtp(phone) {
       const errBox = document.getElementById('loginErrorBox');
       if (errBox) errBox.style.display = 'none';
-      const sendBtn = document.getElementById('sendEmailOtpBtn');
-      if (sendBtn) { sendBtn.disabled = true; sendBtn.innerText = 'Sending 6-digit code...'; }
+      const sendBtn = document.getElementById('sendWhatsappOtpBtn');
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.querySelector('#tSendWhatsappOtpText') ? sendBtn.querySelector('#tSendWhatsappOtpText').innerText = 'Sending OTP on WhatsApp...' : sendBtn.innerText = 'Sending OTP on WhatsApp...';
+      }
 
-      const cleanEmail = (email || '').trim().toLowerCase();
-      const isReviewer = isReviewerDemoEmail(cleanEmail);
+      const cleanDigits = (phone || '').replace(/\D/g, '');
+      const mobile10 = cleanDigits.length >= 10 ? cleanDigits.slice(-10) : cleanDigits;
+
+      if (!/^[6-9]\d{9}$/.test(mobile10)) {
+        if (errBox) {
+          errBox.innerText = 'Please enter a valid 10-digit mobile number.';
+          errBox.style.display = 'block';
+        }
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          const textEl = sendBtn.querySelector('#tSendWhatsappOtpText');
+          if (textEl) textEl.innerText = (currentLang === 'te' ? 'WhatsApp లో OTP పంపండి' : 'Send OTP on WhatsApp');
+        }
+        return;
+      }
+
+      const isReviewer = isReviewerDemoPhone(mobile10);
 
       try {
-        const primaryUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/send-email-otp';
-        const fnUrl = 'https://asia-south1-k-store-ae9dd.cloudfunctions.net/sendEmailOtp';
+        const primaryUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/auth/whatsapp/send-otp';
 
-        let resp;
-        try {
-          resp = await fetch(primaryUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: cleanEmail })
-          });
-          if (!resp.ok) {
-            throw new Error('Fallback to cloud function');
-          }
-        } catch (e) {
-          resp = await fetch(fnUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: cleanEmail })
-          });
-        }
+        const resp = await fetch(primaryUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: mobile10 })
+        });
 
         const data = await resp.json().catch(() => ({}));
         if (!resp.ok || !data.success) {
-          // If Resend sandbox restricts outside recipient, avoid blocking customer / reviewer
-          if (data.error && data.error.includes('Resend sandbox mode')) {
-            console.warn('[Email OTP Sandbox]', data.error);
-          } else {
-            throw new Error(data.error || 'Failed to send verification code. Please check email address.');
-          }
+          throw new Error(data.error || 'Failed to send WhatsApp verification code. Please check number and try again.');
         }
 
-        pendingLoginEmail = cleanEmail;
-        document.getElementById('emailInputStep').style.display = 'none';
-        document.getElementById('emailOtpStep').style.display = 'block';
-        document.getElementById('otpEmailDisplay').innerText = cleanEmail;
-        const otpInput = document.getElementById('emailOtpInput');
+        pendingLoginPhone = mobile10;
+        document.getElementById('phoneInputStep').style.display = 'none';
+        document.getElementById('phoneOtpStep').style.display = 'block';
+        document.getElementById('otpPhoneDisplay').innerText = formatMaskedPhone(mobile10);
+
+        const devOtpBanner = document.getElementById('devOtpBanner');
+        const devOtpValue = document.getElementById('devOtpValue');
+        if (data.devOtp && devOtpBanner && devOtpValue) {
+          devOtpValue.innerText = data.devOtp;
+          devOtpBanner.style.display = 'block';
+        } else if (devOtpBanner) {
+          devOtpBanner.style.display = 'none';
+        }
+
+        const otpInput = document.getElementById('whatsappOtpInput');
         if (otpInput) {
           otpInput.value = isReviewer ? '123456' : '';
           otpInput.focus();
         }
-        startEmailResendCountdown();
+        startWhatsappResendCountdown();
 
         if (isReviewer) {
           showToast('Google Play Reviewer OTP is 123456');
         } else {
-          showToast('6-digit code sent to ' + cleanEmail);
+          showToast('OTP sent on WhatsApp to ' + formatMaskedPhone(mobile10));
         }
       } catch (err) {
-        console.error('sendCustomerEmailOtp error:', err);
+        console.error('sendCustomerWhatsappOtp error:', err);
         if (errBox) {
           errBox.innerText = err.message;
           errBox.style.display = 'block';
         }
       } finally {
-        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerText = 'Send 6-Digit Code'; }
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          const textEl = sendBtn.querySelector('#tSendWhatsappOtpText');
+          if (textEl) textEl.innerText = (currentLang === 'te' ? 'WhatsApp లో OTP పంపండి' : 'Send OTP on WhatsApp');
+        }
       }
     }
 
-    async function verifyCustomerEmailOtp(code) {
+    async function verifyCustomerWhatsappOtp(code) {
       const errBox = document.getElementById('loginErrorBox');
       if (errBox) errBox.style.display = 'none';
       const cleanCode = (code || '').trim();
 
-      if (cleanCode.length !== 6) {
+      if (!/^[0-9]{6}$/.test(cleanCode)) {
         if (errBox) {
-          errBox.innerText = 'Please enter the 6-digit verification code.';
+          errBox.innerText = 'Please enter the 6-digit WhatsApp verification code.';
           errBox.style.display = 'block';
         }
         return;
       }
 
-      const verifyBtn = document.getElementById('verifyEmailOtpBtn');
-      if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.innerText = 'Verifying & Signing In...'; }
+      const verifyBtn = document.getElementById('verifyWhatsappOtpBtn');
+      if (verifyBtn) {
+        verifyBtn.disabled = true;
+        const textEl = verifyBtn.querySelector('#tVerifyOtpBtnText');
+        if (textEl) textEl.innerText = 'Verifying & Logging In...';
+      }
 
       try {
-        const primaryUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/verify-email-otp';
-        const fnUrl = 'https://asia-south1-k-store-ae9dd.cloudfunctions.net/verifyEmailOtp';
+        const primaryUrl = (window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/auth/whatsapp/verify-otp';
 
-        let resp;
-        try {
-          resp = await fetch(primaryUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: pendingLoginEmail, otp: cleanCode })
-          });
-          if (!resp.ok) {
-            throw new Error('Fallback to cloud function');
-          }
-        } catch (e) {
-          resp = await fetch(fnUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: pendingLoginEmail, otp: cleanCode })
-          });
-        }
+        const resp = await fetch(primaryUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: pendingLoginPhone, otp: cleanCode })
+        });
 
         const data = await resp.json().catch(() => ({}));
         if (!resp.ok || !data.success || !data.customToken) {
@@ -2546,61 +2581,63 @@
           openOrdersModal();
         }
       } catch (err) {
-        console.error('verifyCustomerEmailOtp error:', err);
+        console.error('verifyCustomerWhatsappOtp error:', err);
         if (errBox) {
           errBox.innerText = err.message;
           errBox.style.display = 'block';
         }
       } finally {
-        if (verifyBtn) { verifyBtn.disabled = false; verifyBtn.innerText = 'Verify & Sign In'; }
+        if (verifyBtn) {
+          verifyBtn.disabled = false;
+          const textEl = verifyBtn.querySelector('#tVerifyOtpBtnText');
+          if (textEl) textEl.innerText = (currentLang === 'te' ? 'ధృవీకరించి లాగిన్ అవ్వండి' : 'Verify & Login');
+        }
       }
     }
 
-    document.getElementById('sendEmailOtpBtn')?.addEventListener('click', () => {
-      const email = document.getElementById('loginEmailInput').value.trim();
-      if (!email || !email.includes('@')) {
-        alert('Please enter a valid email address.');
-        return;
-      }
-      sendCustomerEmailOtp(email);
+    document.getElementById('sendWhatsappOtpBtn')?.addEventListener('click', () => {
+      const phone = document.getElementById('loginPhoneInput')?.value.trim();
+      sendCustomerWhatsappOtp(phone);
     });
 
-    document.getElementById('loginEmailInput')?.addEventListener('keydown', (e) => {
+    document.getElementById('loginPhoneInput')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('sendEmailOtpBtn')?.click();
+        document.getElementById('sendWhatsappOtpBtn')?.click();
       }
     });
 
-    document.getElementById('verifyEmailOtpBtn')?.addEventListener('click', () => {
-      const code = document.getElementById('emailOtpInput')?.value.trim();
-      verifyCustomerEmailOtp(code);
+    document.getElementById('verifyWhatsappOtpBtn')?.addEventListener('click', () => {
+      const code = document.getElementById('whatsappOtpInput')?.value.trim();
+      verifyCustomerWhatsappOtp(code);
     });
 
-    document.getElementById('emailOtpInput')?.addEventListener('input', (e) => {
+    document.getElementById('whatsappOtpInput')?.addEventListener('input', (e) => {
       if (e.target.value.length === 6) {
-        verifyCustomerEmailOtp(e.target.value);
+        verifyCustomerWhatsappOtp(e.target.value);
       }
     });
 
-    document.getElementById('emailOtpInput')?.addEventListener('keydown', (e) => {
+    document.getElementById('whatsappOtpInput')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        document.getElementById('verifyEmailOtpBtn')?.click();
+        document.getElementById('verifyWhatsappOtpBtn')?.click();
       }
     });
 
-    document.getElementById('resendEmailOtpBtn')?.addEventListener('click', () => {
-      if (pendingLoginEmail) sendCustomerEmailOtp(pendingLoginEmail);
+    document.getElementById('resendWhatsappOtpBtn')?.addEventListener('click', () => {
+      if (pendingLoginPhone) sendCustomerWhatsappOtp(pendingLoginPhone);
     });
 
-    document.getElementById('changeEmailBtn')?.addEventListener('click', () => {
-      if (emailResendInterval) clearInterval(emailResendInterval);
-      document.getElementById('emailOtpStep').style.display = 'none';
-      document.getElementById('emailInputStep').style.display = 'block';
+    document.getElementById('changePhoneBtn')?.addEventListener('click', () => {
+      if (whatsappResendInterval) clearInterval(whatsappResendInterval);
+      document.getElementById('phoneOtpStep').style.display = 'none';
+      document.getElementById('phoneInputStep').style.display = 'block';
+      const devOtpBanner = document.getElementById('devOtpBanner');
+      if (devOtpBanner) devOtpBanner.style.display = 'none';
       const errBox = document.getElementById('loginErrorBox');
       if (errBox) errBox.style.display = 'none';
-      document.getElementById('loginEmailInput')?.focus();
+      document.getElementById('loginPhoneInput')?.focus();
     });
 
     function openLoginModal() {
@@ -2608,18 +2645,20 @@
       if (ordersEl && ordersEl.style.display === 'flex') {
         ordersEl.style.display = 'none';
       }
-      document.getElementById('emailInputStep').style.display = 'block';
-      document.getElementById('emailOtpStep').style.display = 'none';
-      const emailInput = document.getElementById('loginEmailInput');
-      if (emailInput) emailInput.value = '';
-      const otpInput = document.getElementById('emailOtpInput');
+      document.getElementById('phoneInputStep').style.display = 'block';
+      document.getElementById('phoneOtpStep').style.display = 'none';
+      const phoneInput = document.getElementById('loginPhoneInput');
+      if (phoneInput) phoneInput.value = '';
+      const otpInput = document.getElementById('whatsappOtpInput');
       if (otpInput) otpInput.value = '';
+      const devOtpBanner = document.getElementById('devOtpBanner');
+      if (devOtpBanner) devOtpBanner.style.display = 'none';
       const errBox = document.getElementById('loginErrorBox');
       if (errBox) errBox.style.display = 'none';
-      if (emailResendInterval) clearInterval(emailResendInterval);
+      if (whatsappResendInterval) clearInterval(whatsappResendInterval);
       openModal('loginModal');
       setTimeout(() => {
-        emailInput?.focus();
+        phoneInput?.focus();
       }, 200);
     }
 
@@ -6058,7 +6097,7 @@
       } else {
         debugLog('swState', 'Registering...');
       }
-      navigator.serviceWorker.register('./sw.js?v=20261112v16', { scope: './' }).then(reg => {
+      navigator.serviceWorker.register('./sw.js?v=20261114v17', { scope: './' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {

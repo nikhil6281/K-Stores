@@ -36,3 +36,5 @@ server/data
 *.pem
 worker/.wrangler
 worker/setup-secrets.cjs
+worker/.dev.vars
+.dev.vars
