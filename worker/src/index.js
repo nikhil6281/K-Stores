@@ -426,6 +426,16 @@ export default {
         return await handleVerifyEmailOtp(request, env, cors);
       }
 
+      // 18. POST /api/auth/whatsapp/send-otp (and /api/send-whatsapp-otp)
+      if ((pathname === '/api/auth/whatsapp/send-otp' || pathname === '/api/send-whatsapp-otp') && request.method === 'POST') {
+        return await handleSendWhatsappOtp(request, env, cors);
+      }
+
+      // 19. POST /api/auth/whatsapp/verify-otp (and /api/verify-whatsapp-otp)
+      if ((pathname === '/api/auth/whatsapp/verify-otp' || pathname === '/api/verify-whatsapp-otp') && request.method === 'POST') {
+        return await handleVerifyWhatsappOtp(request, env, cors);
+      }
+
       return jsonError('Route not found', 'NOT_FOUND', 404, cors);
     } catch (err) {
       console.error('Unhandled Worker error:', err);
@@ -2077,12 +2087,19 @@ async function hmacSha256Hex(secret, str) {
   return Array.from(new Uint8Array(sigBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function createFirebaseCustomToken(uid, email, env) {
+async function createFirebaseCustomToken(uid, identifier, env, extraClaims = {}) {
   if (!env.FIREBASE_CLIENT_EMAIL || !env.FIREBASE_PRIVATE_KEY) {
     throw new Error('Service account not configured');
   }
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: 'RS256', typ: 'JWT' };
+  const claims = { ...extraClaims };
+  if (identifier && identifier.includes('@')) {
+    claims.email = identifier;
+    claims.email_verified = true;
+  } else if (identifier && (identifier.startsWith('+') || /^\d+$/.test(identifier))) {
+    claims.phone_number = identifier.startsWith('+') ? identifier : `+${identifier}`;
+  }
   const payload = {
     iss: env.FIREBASE_CLIENT_EMAIL,
     sub: env.FIREBASE_CLIENT_EMAIL,
@@ -2090,10 +2107,7 @@ async function createFirebaseCustomToken(uid, email, env) {
     iat: now,
     exp: now + 3600,
     uid: uid,
-    claims: {
-      email: email,
-      email_verified: true
-    }
+    claims: claims
   };
 
   const b64Header = b64UrlEncode(JSON.stringify(header));
@@ -2400,5 +2414,311 @@ async function handleVerifyEmailOtp(request, env, cors) {
     customToken: customToken,
     uid: uid,
     email: normalizedEmail
+  }, 200, cors);
+}
+
+// ==========================================
+// WhatsApp OTP Authentication (Meta Cloud API v26.0)
+// ==========================================
+
+function normalizeWhatsappPhone(phone) {
+  if (!phone || typeof phone !== 'string') return null;
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) {
+    return `91${digits}`;
+  }
+  if (digits.length === 12 && digits.startsWith('91') && /^[6-9]\d{9}$/.test(digits.slice(2))) {
+    return digits;
+  }
+  if (digits.length === 11 && digits.startsWith('0') && /^[6-9]\d{9}$/.test(digits.slice(1))) {
+    return `91${digits.slice(1)}`;
+  }
+  if (digits.length >= 10 && digits.length <= 15) {
+    return digits;
+  }
+  return null;
+}
+
+function isReviewerDemoPhone(phone) {
+  if (!phone || typeof phone !== 'string') return false;
+  const p = phone.replace(/\D/g, '');
+  return (
+    p === '919999999999' ||
+    p === '911234567890' ||
+    p === '919876543210' ||
+    p === '9999999999' ||
+    p === '1234567890' ||
+    p === '9876543210'
+  );
+}
+
+async function sendWhatsappViaMeta(toPhone, otpCode, env) {
+  const phoneNumberId = env.WHATSAPP_PHONE_NUMBER_ID || '1490832314108512';
+  const accessToken = env.WHATSAPP_ACCESS_TOKEN;
+  const templateName = env.WHATSAPP_TEMPLATE_NAME || 'hello_world';
+
+  if (!accessToken || !phoneNumberId) {
+    throw new Error('Meta WhatsApp credentials not configured in environment variables');
+  }
+
+  let payload;
+  if (templateName === 'hello_world') {
+    payload = {
+      messaging_product: 'whatsapp',
+      to: toPhone,
+      type: 'template',
+      template: {
+        name: 'hello_world',
+        language: { code: 'en_US' }
+      }
+    };
+  } else {
+    payload = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: toPhone,
+      type: 'template',
+      template: {
+        name: templateName,
+        language: { code: 'en' },
+        components: [
+          {
+            type: 'body',
+            parameters: [{ type: 'text', text: otpCode }]
+          },
+          {
+            type: 'button',
+            sub_type: 'url',
+            index: '0',
+            parameters: [{ type: 'text', text: otpCode }]
+          }
+        ]
+      }
+    };
+  }
+
+  const res = await fetch(`https://graph.facebook.com/v26.0/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const errMsg = data?.error?.message || `Meta WhatsApp API error: ${res.status}`;
+    console.warn(`[WhatsApp API Error] (${res.status}):`, data);
+    return { success: false, error: errMsg, details: data };
+  }
+  return { success: true, data };
+}
+
+async function handleSendWhatsappOtp(request, env, cors) {
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return jsonError('Invalid JSON', 'INVALID_JSON', 400, cors);
+  }
+
+  const { phone } = body || {};
+  const normalizedPhone = normalizeWhatsappPhone(phone);
+  if (!normalizedPhone) {
+    return jsonError('Please enter a valid 10-digit mobile number.', 'INVALID_PHONE', 400, cors);
+  }
+
+  const phoneHash = (await sha256Hex(normalizedPhone)).substring(0, 32);
+  const now = Date.now();
+  const isTestMode = String(env.OTP_TEST_MODE || '').toLowerCase() === 'true';
+  const isReviewer = isReviewerDemoPhone(normalizedPhone);
+
+  // Reviewer bypass
+  if (isReviewer) {
+    const reviewerCode = '123456';
+    const codeHash = await sha256Hex(reviewerCode);
+    await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'PUT', {
+      codeHash: codeHash,
+      phone: normalizedPhone,
+      createdAt: now,
+      expiresAt: now + (24 * 60 * 60 * 1000), // 24 hours
+      attempts: 0,
+      maxAttempts: 3,
+      requestCount: 1,
+      windowStart: now
+    });
+    return jsonResponse({
+      success: true,
+      message: 'OTP sent successfully on WhatsApp',
+      normalizedPhone: normalizedPhone,
+      devOtp: reviewerCode
+    }, 200, cors);
+  }
+
+  let existing = null;
+  try {
+    existing = await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'GET');
+  } catch (e) {
+    console.warn('[handleSendWhatsappOtp rtdb error]', e);
+  }
+
+  // 30s Cooldown
+  if (existing && existing.createdAt && (now - existing.createdAt < 30 * 1000)) {
+    const waitSec = Math.ceil((30 * 1000 - (now - existing.createdAt)) / 1000);
+    return jsonError(`Please wait ${waitSec} seconds before requesting a new code.`, 'RATE_LIMITED', 429, cors);
+  }
+
+  // 15-minute Rate Limit: max 3 requests per 15 minutes per phone
+  const windowMs = 15 * 60 * 1000;
+  const isInsideWindow = existing?.windowStart && (now - existing.windowStart < windowMs);
+  const windowStart = isInsideWindow ? existing.windowStart : now;
+  const windowCount = isInsideWindow ? (existing.requestCount || 0) : 0;
+
+  if (windowCount >= 3) {
+    const resetMin = Math.ceil((windowMs - (now - windowStart)) / 60000);
+    return jsonError(`Too many OTP requests. Please wait ${resetMin} minutes before trying again.`, 'RATE_LIMITED', 429, cors);
+  }
+
+  // Generate 6-digit random code
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const codeHash = await sha256Hex(otpCode);
+
+  await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'PUT', {
+    codeHash: codeHash,
+    phone: normalizedPhone,
+    createdAt: now,
+    expiresAt: now + (5 * 60 * 1000), // 5 minutes
+    attempts: 0,
+    maxAttempts: 3,
+    requestCount: windowCount + 1,
+    windowStart: windowStart
+  });
+
+  // Call Meta Cloud API
+  let metaResult = { success: false };
+  try {
+    metaResult = await sendWhatsappViaMeta(normalizedPhone, otpCode, env);
+  } catch (err) {
+    console.warn('[handleSendWhatsappOtp Meta exception]', err);
+    metaResult = { success: false, error: err.message };
+  }
+
+  console.log(`[WhatsApp OTP] Generated OTP for ${normalizedPhone}: ${otpCode}`);
+
+  if (!metaResult.success && !isTestMode) {
+    return jsonError(metaResult.error || 'Failed to send WhatsApp message. Please check number and try again.', 'WHATSAPP_SEND_FAILED', 500, cors);
+  }
+
+  const responsePayload = {
+    success: true,
+    message: 'OTP sent successfully on WhatsApp',
+    normalizedPhone: normalizedPhone
+  };
+
+  if (isTestMode) {
+    responsePayload.devOtp = otpCode;
+  }
+
+  return jsonResponse(responsePayload, 200, cors);
+}
+
+async function handleVerifyWhatsappOtp(request, env, cors) {
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return jsonError('Invalid JSON', 'INVALID_JSON', 400, cors);
+  }
+
+  const { phone, otp } = body || {};
+  const normalizedPhone = normalizeWhatsappPhone(phone);
+  if (!normalizedPhone) {
+    return jsonError('Please enter a valid 10-digit mobile number.', 'INVALID_PHONE', 400, cors);
+  }
+
+  const normalizedOtp = String(otp || '').trim();
+  if (!/^[0-9]{6}$/.test(normalizedOtp)) {
+    return jsonError('Please enter a valid 6-digit numeric OTP.', 'INVALID_FORMAT', 400, cors);
+  }
+
+  const phoneHash = (await sha256Hex(normalizedPhone)).substring(0, 32);
+
+  // Reviewer demo bypass
+  if (isReviewerDemoPhone(normalizedPhone) && normalizedOtp === '123456') {
+    await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'DELETE').catch(() => {});
+    const uid = 'usr_p_' + (await sha256Hex(normalizedPhone)).substring(0, 20);
+    const customToken = await createFirebaseCustomToken(uid, `+${normalizedPhone}`, env, { phone_number: `+${normalizedPhone}` });
+    return jsonResponse({
+      success: true,
+      customToken: customToken,
+      uid: uid,
+      phone: `+${normalizedPhone}`
+    }, 200, cors);
+  }
+
+  let record = null;
+  try {
+    record = await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'GET');
+  } catch (e) {
+    console.warn('[handleVerifyWhatsappOtp rtdb error]', e);
+  }
+
+  if (!record) {
+    return jsonError('Verification code expired or not found. Please request a new code.', 'NOT_FOUND', 400, cors);
+  }
+
+  const now = Date.now();
+  if (now > record.expiresAt) {
+    await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'DELETE').catch(() => {});
+    return jsonError('Verification code has expired. Please request a new code.', 'EXPIRED', 400, cors);
+  }
+
+  const maxAttempts = record.maxAttempts || 3;
+  if (record.attempts >= maxAttempts) {
+    await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'DELETE').catch(() => {});
+    return jsonError('Too many invalid attempts. Please request a new OTP.', 'RATE_LIMITED', 429, cors);
+  }
+
+  const inputHash = await sha256Hex(normalizedOtp);
+  if (inputHash !== record.codeHash) {
+    const nextAttempts = (record.attempts || 0) + 1;
+    await rtdbFetch(env, `whatsappOtps/${phoneHash}/attempts`, 'PUT', nextAttempts);
+    const remaining = maxAttempts - nextAttempts;
+    if (remaining <= 0) {
+      await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'DELETE').catch(() => {});
+      return jsonError('Too many invalid attempts. Please request a new OTP.', 'RATE_LIMITED', 429, cors);
+    }
+    return jsonError(`Invalid OTP. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`, 'INCORRECT_CODE', 400, cors);
+  }
+
+  // Delete used OTP challenge
+  await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'DELETE').catch(() => {});
+
+  // Deterministic phone user UID
+  const uid = 'usr_p_' + (await sha256Hex(normalizedPhone)).substring(0, 20);
+
+  // Update or initialize profile in RTDB
+  try {
+    const existingProfile = await rtdbFetch(env, `users/${uid}/profile`, 'GET').catch(() => null);
+    await rtdbFetch(env, `users/${uid}/profile`, 'PUT', {
+      ...(existingProfile || {}),
+      uid: uid,
+      phone: `+${normalizedPhone}`,
+      role: existingProfile?.role || 'customer',
+      updatedAt: new Date().toISOString()
+    });
+  } catch (err) {
+    console.warn('[handleVerifyWhatsappOtp profile error]', err);
+  }
+
+  // Mint Firebase Custom Token with claims
+  const customToken = await createFirebaseCustomToken(uid, `+${normalizedPhone}`, env, { phone_number: `+${normalizedPhone}` });
+
+  return jsonResponse({
+    success: true,
+    customToken: customToken,
+    uid: uid,
+    phone: `+${normalizedPhone}`
   }, 200, cors);
 }

@@ -2,5 +2,10 @@ name = "ra-store-api"
 main = "src/index.js"
 compatibility_date = "2024-04-01"
 
+[vars]
+WHATSAPP_PHONE_NUMBER_ID = "1490832314108512"
+WHATSAPP_TEMPLATE_NAME = "hello_world"
+OTP_TEST_MODE = "true"
+
 [triggers]
 crons = ["*/5 * * * *"]
