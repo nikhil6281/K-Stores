@@ -164,61 +164,42 @@ app.post(['/api/auth/whatsapp/send-otp', '/api/send-whatsapp-otp'], async (req, 
     const isTestMode = String(process.env.OTP_TEST_MODE || '').toLowerCase() === 'true';
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '1407373839132455';
     const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-    const templateName = process.env.WHATSAPP_TEMPLATE_NAME || 'otp_login';
 
     let metaSuccess = false;
-    if (accessToken && phoneNumberId && typeof fetch !== 'undefined') {
-      if (templateName === 'hello_world') {
-        try {
-          const metaRes = await fetch(`https://graph.facebook.com/v26.0/${phoneNumberId}/messages`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              messaging_product: 'whatsapp',
-              to: normalizedPhone,
-              type: 'template',
-              template: { name: 'hello_world', language: { code: 'en_US' } }
-            })
-          });
-          if (metaRes.ok) metaSuccess = true;
-        } catch (err) {
-          console.warn('[Server WhatsApp Meta Error]', err.message);
-        }
-      } else {
-        const langCodes = ['en_US', 'en'];
-        const componentVariations = [
-          [
-            { type: 'body', parameters: [{ type: 'text', text: otpCode }] },
-            { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpCode }] }
-          ],
-          [{ type: 'body', parameters: [{ type: 'text', text: otpCode }] }],
-          [{ type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpCode }] }]
-        ];
+    let metaError = null;
 
-        for (const lang of langCodes) {
-          for (const components of componentVariations) {
-            try {
-              const metaRes = await fetch(`https://graph.facebook.com/v26.0/${phoneNumberId}/messages`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  messaging_product: 'whatsapp',
-                  recipient_type: 'individual',
-                  to: normalizedPhone,
-                  type: 'template',
-                  template: { name: templateName, language: { code: lang }, components }
-                })
-              });
-              if (metaRes.ok) {
-                metaSuccess = true;
-                break;
-              }
-            } catch (err) {
-              // retry next
-            }
+    if (accessToken && phoneNumberId && typeof fetch !== 'undefined') {
+      try {
+        const payload = {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: normalizedPhone,
+          type: 'text',
+          text: {
+            preview_url: false,
+            body: `Your Sri Sai Stores login verification code is: ${otpCode}. Valid for 5 minutes. Do not share this code.`
           }
-          if (metaSuccess) break;
+        };
+
+        const metaRes = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const metaData = await metaRes.json().catch(() => ({}));
+        if (metaRes.ok) {
+          metaSuccess = true;
+        } else {
+          metaError = metaData?.error?.message || `Meta API error ${metaRes.status}`;
+          console.warn('[Server WhatsApp Meta Error]', metaData);
         }
+      } catch (err) {
+        metaError = err.message;
+        console.warn('[Server WhatsApp Exception]', err.message);
       }
     }
 

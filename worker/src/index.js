@@ -2455,102 +2455,39 @@ function isReviewerDemoPhone(phone) {
 async function sendWhatsappViaMeta(toPhone, otpCode, env) {
   const phoneNumberId = env.WHATSAPP_PHONE_NUMBER_ID || '1407373839132455';
   const accessToken = env.WHATSAPP_ACCESS_TOKEN;
-  const templateName = env.WHATSAPP_TEMPLATE_NAME || 'otp_login';
 
   if (!accessToken || !phoneNumberId) {
     throw new Error('Meta WhatsApp credentials not configured in environment variables');
   }
 
-  if (templateName === 'hello_world') {
-    const res = await fetch(`https://graph.facebook.com/v26.0/${phoneNumberId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to: toPhone,
-        type: 'template',
-        template: {
-          name: 'hello_world',
-          language: { code: 'en_US' }
-        }
-      })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      return { success: false, error: data?.error?.message || `Meta API error: ${res.status}`, details: data };
+  // Free-form text message payload for instant OTP delivery (bypasses template restrictions)
+  const payload = {
+    messaging_product: 'whatsapp',
+    recipient_type: 'individual',
+    to: toPhone,
+    type: 'text',
+    text: {
+      preview_url: false,
+      body: `Your Sri Sai Stores login verification code is: ${otpCode}. Valid for 5 minutes. Do not share this code.`
     }
-    return { success: true, data };
+  };
+
+  const res = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const errMsg = data?.error?.message || `Meta WhatsApp API error: ${res.status}`;
+    console.warn(`[WhatsApp API Error] (${res.status}):`, data);
+    return { success: false, error: errMsg, details: data };
   }
-
-  // Attempt template configurations (language codes and component variations)
-  const langCodes = ['en_US', 'en'];
-  const componentVariations = [
-    // 1. Standard Auth template: body parameter + url/copy_code button parameter
-    [
-      { type: 'body', parameters: [{ type: 'text', text: otpCode }] },
-      { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpCode }] }
-    ],
-    // 2. Body parameter only
-    [
-      { type: 'body', parameters: [{ type: 'text', text: otpCode }] }
-    ],
-    // 3. Button parameter only (Meta Auth template with copy_code)
-    [
-      { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpCode }] }
-    ]
-  ];
-
-  let lastError = null;
-  let lastData = null;
-
-  for (const lang of langCodes) {
-    for (const components of componentVariations) {
-      try {
-        const payload = {
-          messaging_product: 'whatsapp',
-          recipient_type: 'individual',
-          to: toPhone,
-          type: 'template',
-          template: {
-            name: templateName,
-            language: { code: lang },
-            components: components
-          }
-        };
-
-        const res = await fetch(`https://graph.facebook.com/v26.0/${phoneNumberId}/messages`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json().catch(() => ({}));
-        if (res.ok) {
-          console.log(`[WhatsApp API Success] Sent template '${templateName}' (${lang}) to ${toPhone}`);
-          return { success: true, data };
-        }
-
-        lastError = data?.error?.message || `Meta WhatsApp API error: ${res.status}`;
-        lastData = data;
-
-        // If error is about recipient (e.g. invalid recipient phone), stop retrying template variations
-        if (data?.error?.code === 131026 || data?.error?.code === 131047) {
-          break;
-        }
-      } catch (err) {
-        lastError = err.message;
-      }
-    }
-  }
-
-  console.warn(`[WhatsApp API Error] (${templateName}):`, lastError, lastData);
-  return { success: false, error: lastError, details: lastData };
+  return { success: true, data };
 }
 
 async function handleSendWhatsappOtp(request, env, cors) {
@@ -2645,7 +2582,11 @@ async function handleSendWhatsappOtp(request, env, cors) {
   console.log(`[WhatsApp OTP] Generated OTP for ${normalizedPhone}: ${otpCode}`);
 
   if (!metaResult.success && !isTestMode) {
-    return jsonError(metaResult.error || 'Failed to send WhatsApp message. Please check number and try again.', 'WHATSAPP_SEND_FAILED', 500, cors);
+    let errMsg = metaResult.error || 'Failed to send WhatsApp message. Please check number and try again.';
+    if (metaResult.details?.error?.code === 131047 || (errMsg && errMsg.includes('24 hours'))) {
+      errMsg = 'First-time user? Please tap "Send Hi on WhatsApp" above to activate messaging with Sri Sai Stores (+91 62817 30144) first.';
+    }
+    return jsonError(errMsg, 'WHATSAPP_SEND_FAILED', 400, cors);
   }
 
   const responsePayload = {
