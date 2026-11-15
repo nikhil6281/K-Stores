@@ -543,27 +543,41 @@
 
     <!-- Dashboard View (Signed In as Staff) -->
     <div id="dashboardView" style="display: none;">
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="active" id="tabActiveBtn">📦 Active (<span id="activeCountBadge">0</span>)</button>
-        <button class="tab-btn" data-tab="completed" id="tabCompletedBtn">✅ Done Today</button>
+      <div class="tabs" style="overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;">
+        <button class="tab-btn active" data-tab="new" id="tabNewBtn">📥 New (<span id="newCountBadge">0</span>)</button>
+        <button class="tab-btn" data-tab="myOrders" id="tabMyOrdersBtn">📦 <span id="myOrdersTabLabel">My Orders</span> (<span id="myCountBadge">0</span>)</button>
+        <button class="tab-btn" data-tab="completed" id="tabCompletedBtn">✅ Done Today (<span id="doneCountBadge">0</span>)</button>
         <button class="tab-btn" data-tab="summary" id="tabSummaryBtn">📊 Summary</button>
+        <button class="tab-btn" data-tab="team" id="tabTeamBtn">👥 Team</button>
       </div>
 
-      <!-- Tab 1: Active Orders -->
-      <div id="activeTab">
-        <div id="activeOrdersList">
-          <p style="text-align: center; color: var(--muted); padding: 32px 0;">Listening for live orders...</p>
+      <!-- Tab 1: New Pool (Unclaimed Confirmed Orders) -->
+      <div id="newTab">
+        <div style="margin-bottom: 12px;">
+          <select id="newAreaFilter" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 600; background: #fff;">
+            <option value="all">📍 All Areas / Landmarks</option>
+          </select>
+        </div>
+        <div id="newOrdersList">
+          <p style="text-align: center; color: var(--muted); padding: 32px 0;">Listening for new orders...</p>
         </div>
       </div>
 
-      <!-- Tab 2: Completed Orders -->
+      <!-- Tab 2: My Orders (Claimed by Current Worker) -->
+      <div id="myOrdersTab" style="display: none;">
+        <div id="myOrdersList">
+          <p style="text-align: center; color: var(--muted); padding: 32px 0;">No claimed orders. Claim from New pool above!</p>
+        </div>
+      </div>
+
+      <!-- Tab 3: Completed Orders -->
       <div id="completedTab" style="display: none;">
         <div id="completedOrdersList">
           <p style="text-align: center; color: var(--muted); padding: 32px 0;">No completed orders yet today.</p>
         </div>
       </div>
 
-      <!-- Tab 3: Summary -->
+      <!-- Tab 4: Summary -->
       <div id="summaryTab" style="display: none;">
         <div class="order-card">
           <h3 style="font-size: 16px; margin-bottom: 16px;" id="tSummaryTitle">Staff Shift Summary</h3>
@@ -581,6 +595,54 @@
             * Please hand over all collected cash to the store cashier at the end of your shift.
           </div>
         </div>
+      </div>
+
+      <!-- Tab 5: Team Live (Read-only) -->
+      <div id="teamTab" style="display: none;">
+        <div id="teamLiveList">
+          <p style="text-align: center; color: var(--muted); padding: 32px 0;">Loading team roster...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Release Order Modal (Feature B) -->
+  <div class="modal-overlay" id="releaseOrderModal" style="display: none;">
+    <div class="modal" style="max-width: 400px; width: 92%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--danger);">↩️ Release Order to Pool</h3>
+        <button type="button" class="btn btn-outline btn-small" id="closeReleaseModalBtn">✕</button>
+      </div>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">Why are you returning this order to the unclaimed pool?</p>
+      <input type="hidden" id="releaseOrderPushKey" value="">
+      <select id="releaseReasonSelect" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; margin-bottom: 14px;">
+        <option value="Too many active orders">Too many active orders</option>
+        <option value="Vehicle / bike issue">Vehicle / bike issue</option>
+        <option value="Items not available in store">Items not available in store</option>
+        <option value="Customer unreachable">Customer unreachable</option>
+        <option value="Shift ending soon">Shift ending soon</option>
+        <option value="Other">Other reason</option>
+      </select>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn btn-outline" id="cancelReleaseBtn" style="flex: 1;">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmReleaseBtn" style="flex: 1; background: var(--danger); border-color: var(--danger);">Release</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Need Help Modal (Feature B) -->
+  <div class="modal-overlay" id="helpModal" style="display: none;">
+    <div class="modal" style="max-width: 400px; width: 92%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: #B45309;">🆘 Need Help from Store Owner</h3>
+        <button type="button" class="btn btn-outline btn-small" id="closeHelpModalBtn">✕</button>
+      </div>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">Describe the issue (owner will receive an alert instantly):</p>
+      <input type="hidden" id="helpOrderPushKey" value="">
+      <textarea id="helpNoteInput" placeholder="e.g. Landmark not found, customer requested different time, item weight discrepancy..." style="width: 100%; height: 80px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; margin-bottom: 14px; resize: none;"></textarea>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn btn-outline" id="cancelHelpBtn" style="flex: 1;">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmHelpBtn" style="flex: 1; background: #B45309; border-color: #B45309;">Send Alert</button>
       </div>
     </div>
   </div>
@@ -732,15 +794,28 @@
     let wakeLock = null;
     let pendingCodOrderId = null;
     let pendingCancelPushKey = null;
+    let pendingDeliveryKey = null;
+    let pendingReleasePushKey = null;
+    let pendingHelpPushKey = null;
     let staffRecordListenerRef = null;
+    let staffRosterListenerRef = null;
+    let staffRoster = {};
+    let heartbeatInterval = null;
+    let lastActivityTime = Date.now();
+    let currentTab = 'new';
     let confirmationResult = null;
 
     const I18N = {
       en: {
         toggleLang: "తెలుగు",
-        activeOrders: "Active Orders",
+        newPool: "New Pool",
+        myOrders: "My Orders",
         completedToday: "Completed Today",
         summaryToday: "Today's Summary",
+        teamRoster: "Team Live Activity",
+        claimOrder: "Claim Order",
+        releaseOrder: "Release Order",
+        needHelp: "Need Help",
         acceptBtn: "Accept Order",
         packedBtn: "Mark Packed 📦",
         outBtn: "Out for Delivery 🛵",
@@ -755,9 +830,14 @@
       },
       te: {
         toggleLang: "English",
-        activeOrders: "ప్రస్తుత ఆర్డర్లు",
+        newPool: "కొత్త ఆర్డర్లు",
+        myOrders: "నా ఆర్డర్లు",
         completedToday: "పూర్తయినవి",
         summaryToday: "నేటి సారాంశం",
+        teamRoster: "టీమ్ లైవ్ కార్యాచరణ",
+        claimOrder: "ఆర్డర్ తీసుకోండి",
+        releaseOrder: "వదిలివేయండి",
+        needHelp: "సహాయం కావాలి",
         acceptBtn: "స్వీకరించండి",
         packedBtn: "ప్యాక్ చేయబడింది 📦",
         outBtn: "బయలుదేరింది 🛵",
@@ -973,11 +1053,22 @@
         errBox.style.display = 'block';
 
       } else {
+        if (currentUser) {
+          try { db.ref('staff/' + currentUser.uid + '/presence/online').set(false); } catch (_) {}
+        }
         currentUser = null;
         currentStaffData = null;
         if (staffRecordListenerRef) {
           staffRecordListenerRef.off();
           staffRecordListenerRef = null;
+        }
+        if (staffRosterListenerRef) {
+          staffRosterListenerRef.off();
+          staffRosterListenerRef = null;
+        }
+        if (heartbeatInterval) {
+          clearInterval(heartbeatInterval);
+          heartbeatInterval = null;
         }
         document.getElementById('loginView').style.display = 'block';
         document.getElementById('dashboardView').style.display = 'none';
@@ -986,9 +1077,34 @@
       }
     });
 
+    async function sendStaffHeartbeat() {
+      if (!currentUser) return;
+      try {
+        const idToken = await currentUser.getIdToken();
+        const myActive = Object.values(ordersCache).filter(o => o.claimedBy && o.claimedBy.uid === currentUser.uid && o.status !== 'delivered' && o.status !== 'cancelled');
+        const currentTask = myActive.length === 0 ? 'idle' : (myActive.some(o => o.status === 'out_for_delivery') ? 'delivering' : 'packing');
+        await fetch(WORKER_API + '/api/staff/heartbeat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + idToken
+          },
+          body: JSON.stringify({ currentTask, activeCount: myActive.length })
+        });
+      } catch (err) {
+        console.warn('Heartbeat error:', err);
+      }
+    }
+
     function grantStaffAccess(user, staffData) {
       currentUser = user;
       currentStaffData = staffData;
+
+      const firstName = (staffData.name || user.displayName || user.email || 'Staff').split(' ')[0];
+      const tabLabel = document.getElementById('myOrdersTabLabel');
+      if (tabLabel) {
+        tabLabel.innerText = (currentLang === 'te') ? (firstName + ' ఆర్డర్లు') : (firstName + "'s Orders");
+      }
 
       document.getElementById('loginView').style.display = 'none';
       document.getElementById('dashboardView').style.display = 'block';
@@ -1009,6 +1125,18 @@
           auth.signOut();
         }
       });
+
+      // Staff roster listener for Team tab
+      staffRosterListenerRef = db.ref('staff');
+      staffRosterListenerRef.on('value', (snap) => {
+        staffRoster = snap.val() || {};
+        renderTeamTab();
+      });
+
+      // Heartbeat every 60s
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      sendStaffHeartbeat();
+      heartbeatInterval = setInterval(sendStaffHeartbeat, 60000);
 
       initLiveOrdersListener();
     }
@@ -1195,21 +1323,44 @@
       renderOrders();
     });
 
-    // Tab Navigation
+    // Tab Navigation & Switching (Feature B)
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-tab') === tab);
+      });
+      document.getElementById('newTab').style.display = tab === 'new' ? 'block' : 'none';
+      document.getElementById('myOrdersTab').style.display = tab === 'myOrders' ? 'block' : 'none';
+      document.getElementById('completedTab').style.display = tab === 'completed' ? 'block' : 'none';
+      document.getElementById('summaryTab').style.display = tab === 'summary' ? 'block' : 'none';
+      document.getElementById('teamTab').style.display = tab === 'team' ? 'block' : 'none';
+      if (tab === 'team') renderTeamTab();
+    }
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.getAttribute('data-tab');
-        document.getElementById('activeTab').style.display = tab === 'active' ? 'block' : 'none';
-        document.getElementById('completedTab').style.display = tab === 'completed' ? 'block' : 'none';
-        document.getElementById('summaryTab').style.display = tab === 'summary' ? 'block' : 'none';
+        switchTab(btn.getAttribute('data-tab'));
       });
     });
 
-    // Realtime Orders Listener with 10s Timeout (Requirement 1)
-    let isInitialLoad = true;
-    let workerOrdersLoadTimeout = null;
+    // Landmark / Area Resolver
+    function getOrderLandmark(o) {
+      if (!o) return 'Other Area';
+      if (o.customer && o.customer.landmark) return o.customer.landmark;
+      if (o.landmark) return o.landmark;
+      const addr = ((o.customer && o.customer.address) || '').toLowerCase();
+      const known = [
+        'Clock Tower', 'Subhash Road', 'Court Road', 'RTC Bus Stand',
+        'Tadipatri Bus Stand', 'Collectorate', 'Sai Nagar', 'Kalyandurg Road',
+        'Arts College', 'Saptagiri Circle', 'Rudrampeta', 'Old Town',
+        'Gooty Road', 'Somnath Nagar', 'Housing Board', 'Maruthi Nagar',
+        'Kamalanagar', 'Anantapur'
+      ];
+      for (const k of known) {
+        if (addr.includes(k.toLowerCase())) return k;
+      }
+      return 'Anantapur Town';
+    }
 
     function getOrderTimestamp(o) {
       if (!o) return 0;
@@ -1220,12 +1371,16 @@
       return isNaN(parsed) ? 0 : parsed;
     }
 
+    // Realtime Orders Listener with 10s Timeout
+    let isInitialLoad = true;
+    let workerOrdersLoadTimeout = null;
+
     function initLiveOrdersListener() {
-      const activeList = document.getElementById('activeOrdersList');
+      const newList = document.getElementById('newOrdersList');
       if (workerOrdersLoadTimeout) clearTimeout(workerOrdersLoadTimeout);
       workerOrdersLoadTimeout = setTimeout(() => {
-        if (activeList && activeList.innerText.includes('Loading active orders...')) {
-          activeList.innerHTML = '<div style="text-align: center; padding: 32px 16px; color: var(--danger); font-size: 14px;"><p style="margin-bottom: 12px; font-weight: 600;">Could not load active orders. Please check connection.</p><button class="btn btn-outline" onclick="location.reload()" style="font-size: 13px; padding: 6px 16px;">Retry</button></div>';
+        if (newList && newList.innerText.includes('Listening for new orders...')) {
+          newList.innerHTML = '<div style="text-align: center; padding: 32px 16px; color: var(--danger); font-size: 14px;"><p style="margin-bottom: 12px; font-weight: 600;">Could not load orders. Please check connection.</p><button class="btn btn-outline" onclick="location.reload()" style="font-size: 13px; padding: 6px 16px;">Retry</button></div>';
         }
       }, 10000);
 
@@ -1248,61 +1403,200 @@
         if (workerOrdersLoadTimeout) clearTimeout(workerOrdersLoadTimeout);
         console.error('Order listener error:', err);
         updateDebugPanel({ error: 'RTDB Orders: ' + err.message });
-        if (activeList) {
-          activeList.innerHTML = '<div style="text-align: center; padding: 32px 16px; color: var(--danger); font-size: 14px;"><p style="margin-bottom: 12px; font-weight: 600;">Could not load orders: ' + escapeHtml(err.message || 'Permission denied') + '</p><button class="btn btn-outline" onclick="location.reload()" style="font-size: 13px; padding: 6px 16px;">Retry</button></div>';
+        if (newList) {
+          newList.innerHTML = '<div style="text-align: center; padding: 32px 16px; color: var(--danger); font-size: 14px;"><p style="margin-bottom: 12px; font-weight: 600;">Could not load orders: ' + escapeHtml(err.message || 'Permission denied') + '</p><button class="btn btn-outline" onclick="location.reload()" style="font-size: 13px; padding: 6px 16px;">Retry</button></div>';
         }
       });
     }
 
     function renderOrders() {
-      const activeList = document.getElementById('activeOrdersList');
+      const newList = document.getElementById('newOrdersList');
+      const myList = document.getElementById('myOrdersList');
       const completedList = document.getElementById('completedOrdersList');
       const t = I18N[currentLang];
 
       const orders = Object.entries(ordersCache).map(([k, v]) => Object.assign({ pushKey: k }, v));
 
-      // Strictly sorted newest first by real created time (Requirement 2)
-      orders.sort((a, b) => getOrderTimestamp(b) - getOrderTimestamp(a));
-
-      const activeOrders = orders.filter(o => {
-        if (o.paymentMethod === 'online_razorpay' && o.paymentStatus !== 'paid') return false;
-        return o.status === 'placed' || o.status === 'accepted' || o.status === 'packed' || o.status === 'out_for_delivery';
+      // Filter out unconfirmed (Feature A) and expired orders
+      const validOrders = orders.filter(o => {
+        if (o.status !== 'pending_confirmation' && o.status !== 'expired') {
+          if (o.paymentMethod === 'online_razorpay' && o.paymentStatus !== 'paid') return false;
+          return true;
+        }
+        return false;
       });
 
-      const completedOrders = orders.filter(o => o.status === 'delivered' || o.status === 'cancelled');
+      // Populate dynamic area dropdown
+      const areaSelect = document.getElementById('newAreaFilter');
+      if (areaSelect) {
+        const currentSelected = areaSelect.value;
+        const areas = new Set();
+        validOrders.forEach(o => {
+          if (!o.claimedBy && (o.status === 'placed' || o.status === 'accepted' || o.status === 'packed')) {
+            areas.add(getOrderLandmark(o));
+          }
+        });
+        const options = ['<option value="all">📍 All Areas / Landmarks</option>'];
+        Array.from(areas).sort().forEach(a => {
+          options.push('<option value="' + escapeHtml(a) + '"' + (currentSelected === a ? ' selected' : '') + '>📍 ' + escapeHtml(a) + '</option>');
+        });
+        areaSelect.innerHTML = options.join('');
+      }
+      const selectedArea = areaSelect ? areaSelect.value : 'all';
+
+      // Role determination
+      const staffRole = (currentStaffData?.role || '').toLowerCase();
+      const isPacker = staffRole.includes('packer');
+      const isRider = staffRole.includes('rider');
+      const isOwner = staffRole.includes('owner') || staffRole.includes('admin');
+      const canPack = isOwner || isPacker || (!isPacker && !isRider);
+      const canRide = isOwner || isRider || (!isPacker && !isRider);
+
+      // 1. New Orders Pool (Unclaimed)
+      const newOrders = validOrders.filter(o => {
+        if (o.claimedBy) return false;
+        if (o.status === 'delivered' || o.status === 'cancelled') return false;
+
+        const allowed = [];
+        if (canPack) allowed.push('placed', 'accepted');
+        if (canRide) allowed.push('packed');
+        if (!allowed.includes(o.status)) return false;
+
+        if (selectedArea !== 'all' && getOrderLandmark(o) !== selectedArea) return false;
+        return true;
+      });
+      // SORT: Oldest first (waiting longest at top)
+      newOrders.sort((a, b) => getOrderTimestamp(a) - getOrderTimestamp(b));
+      const newBadge = document.getElementById('newCountBadge');
+      if (newBadge) newBadge.innerText = newOrders.length;
+
+      // 2. My Orders (Claimed by current user)
+      const myOrders = validOrders.filter(o => {
+        if (!currentUser) return false;
+        if (!o.claimedBy || o.claimedBy.uid !== currentUser.uid) return false;
+        return o.status !== 'delivered' && o.status !== 'cancelled';
+      });
+      // SORT: Oldest first
+      myOrders.sort((a, b) => getOrderTimestamp(a) - getOrderTimestamp(b));
+      const myBadge = document.getElementById('myCountBadge');
+      if (myBadge) myBadge.innerText = myOrders.length;
+
+      // Update worker personal header
+      const firstName = (currentStaffData?.name || currentUser?.displayName || currentUser?.email || 'Staff').split(' ')[0];
+      const myTabLabel = document.getElementById('myOrdersTabLabel');
+      if (myTabLabel) {
+        myTabLabel.innerText = (currentLang === 'te') ? (firstName + ' ఆర్డర్లు') : (firstName + "'s Orders");
+      }
+
+      // 3. Completed Today
+      const todayStr = new Date().toDateString();
+      const completedOrders = validOrders.filter(o => {
+        if (o.status !== 'delivered') return false;
+        const delDate = new Date(o.deliveredAt || o.updatedAt || 0).toDateString();
+        if (delDate !== todayStr) return false;
+        if (isOwner) return true;
+        if (!currentUser) return false;
+        return (o.deliveredBy && o.deliveredBy.uid === currentUser.uid) ||
+               (o.claimedBy && o.claimedBy.uid === currentUser.uid) ||
+               (o.handledBy === currentUser.email);
+      });
+      // SORT: Newest first
       completedOrders.sort((a, b) => getOrderTimestamp(b) - getOrderTimestamp(a));
+      const doneBadge = document.getElementById('doneCountBadge');
+      if (doneBadge) doneBadge.innerText = completedOrders.length;
 
-      document.getElementById('activeCountBadge').innerText = activeOrders.length;
-
-      // Summary counts
-      let deliveredCount = 0;
-      let pendingCod = 0;
-      orders.forEach(o => {
-        if (o.status === 'delivered') deliveredCount++;
-        if (o.paymentMethod === 'cod' && o.status !== 'cancelled' && o.status !== 'pending_confirmation' && o.status !== 'expired' && o.paymentStatus !== 'cod_collected') {
-          pendingCod += Number(o.total || 0);
+      // 4. Summary counts
+      let myDeliveredCount = completedOrders.length;
+      let myCashInHand = 0;
+      completedOrders.forEach(o => {
+        if (o.paymentMethod === 'cod') {
+          myCashInHand += Number(o.total || 0);
         }
       });
-      document.getElementById('sumDeliveredCount').innerText = deliveredCount;
-      document.getElementById('sumPendingCod').innerText = '₹' + pendingCod;
+      const sumDelivered = document.getElementById('sumDeliveredCount');
+      if (sumDelivered) sumDelivered.innerText = myDeliveredCount;
+      const sumCod = document.getElementById('sumPendingCod');
+      if (sumCod) sumCod.innerText = '₹' + myCashInHand;
 
-      if (activeOrders.length === 0) {
-        activeList.innerHTML = '<p style="text-align: center; color: var(--muted); padding: 40px 0;">No active orders right now. Good job! 🎉</p>';
-      } else {
-        activeList.innerHTML = activeOrders.map(o => renderOrderCard(o, t)).join('');
+      // Render Tab 1: New Pool
+      if (newList) {
+        if (newOrders.length === 0) {
+          newList.innerHTML = '<p style="text-align: center; color: var(--muted); padding: 40px 0;">' + (currentLang === 'te' ? 'ప్రస్తుతం కొత్త ఆర్డర్లు లేవు 🎉' : 'No unclaimed orders available right now 🎉') + '</p>';
+        } else {
+          newList.innerHTML = newOrders.map(o => renderNewOrderCard(o, t)).join('');
+        }
       }
 
-      if (completedOrders.length === 0) {
-        completedList.innerHTML = '<p style="text-align: center; color: var(--muted); padding: 40px 0;">No completed orders yet today.</p>';
-      } else {
-        completedList.innerHTML = completedOrders.map(o => renderOrderCard(o, t, true)).join('');
+      // Render Tab 2: My Orders
+      if (myList) {
+        if (myOrders.length === 0) {
+          myList.innerHTML = '<p style="text-align: center; color: var(--muted); padding: 40px 0;">' + (currentLang === 'te' ? 'మీరు ఇంకా ఆర్డర్ క్లెయిమ్ చేయలేదు. పైన "కొత్త ఆర్డర్లు" ట్యాబ్ నుండి తీసుకోండి!' : 'No claimed orders. Claim from the New pool above!') + '</p>';
+        } else {
+          myList.innerHTML = myOrders.map(o => renderMyOrderCard(o, t)).join('');
+        }
       }
+
+      // Render Tab 3: Completed
+      if (completedList) {
+        if (completedOrders.length === 0) {
+          completedList.innerHTML = '<p style="text-align: center; color: var(--muted); padding: 40px 0;">' + (currentLang === 'te' ? 'ఈ రోజు ఇంకా డెలివరీలు పూర్తి కాలేదు.' : 'No completed orders yet today.') + '</p>';
+        } else {
+          completedList.innerHTML = completedOrders.map(o => renderCompletedOrderCard(o, t)).join('');
+        }
+      }
+
+      // Render Tab 5: Team
+      renderTeamTab();
 
       attachCardEventListeners();
     }
 
-    function renderOrderCard(o, t, isCompleted) {
-      if (typeof isCompleted === 'undefined') isCompleted = false;
+    // Tab 1: New Order Card (Operational details only, NO customer PII)
+    function renderNewOrderCard(o, t) {
+      const isCod = o.paymentMethod === 'cod';
+      const isPaid = o.paymentStatus === 'paid';
+      const createdMs = getOrderTimestamp(o);
+      const waitingMins = Math.max(0, Math.floor((Date.now() - createdMs) / 60000));
+      let waitBadge = '';
+      if (waitingMins >= 20) {
+        waitBadge = '<span class="badge badge-red-wait">🚨 ' + waitingMins + 'm waiting!</span>';
+      } else if (waitingMins >= 10) {
+        waitBadge = '<span class="badge badge-amber-wait">⏳ ' + waitingMins + 'm waiting</span>';
+      } else {
+        waitBadge = '<span class="badge" style="background: #F3F4F6; color: #4B5563;">⏱️ ' + waitingMins + 'm</span>';
+      }
+
+      const items = Array.isArray(o.items) ? o.items : [];
+      const itemCount = items.reduce((sum, it) => sum + Number(it.quantity || 1), 0);
+      const landmark = getOrderLandmark(o);
+
+      return '<div class="order-card" id="card-new-' + o.pushKey + '">' +
+        '<div class="order-header">' +
+          '<div>' +
+            '<div class="order-id">#' + escapeHtml(o.id || o.pushKey) + '</div>' +
+            '<div class="order-time">' + (createdMs ? new Date(createdMs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '') + '</div>' +
+          '</div>' +
+          '<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">' +
+            waitBadge +
+            (isCod ? '<span class="badge badge-cod">💵 COD: Collect ₹' + o.total + '</span>' : '') +
+            (isPaid ? '<span class="badge badge-paid">⚡ PAID ✅</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div style="margin: 10px 0; padding: 10px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px;">' +
+          '<div style="font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px;">📍 Area: <span style="color: var(--primary);">' + escapeHtml(landmark) + '</span></div>' +
+          '<div style="font-size: 12px; color: var(--muted); display: flex; justify-content: space-between;">' +
+            '<span>📦 Items to pack: <strong>' + itemCount + ' items</strong></span>' +
+            '<span>Bill: <strong style="color: var(--primary); font-size: 14px;">₹' + (o.total || 0) + '</strong></span>' +
+          '</div>' +
+        '</div>' +
+        '<button type="button" class="btn btn-primary claim-new-order-btn" data-pushkey="' + o.pushKey + '" style="width: 100%; min-height: 44px; font-size: 15px; font-weight: 700;">' +
+          '🙋 ' + (currentLang === 'te' ? 'ఈ ఆర్డర్ తీసుకోండి (Claim)' : 'Claim Order') +
+        '</button>' +
+      '</div>';
+    }
+
+    // Tab 2: My Orders Card (Full customer details, checklist, status advancement, release, help)
+    function renderMyOrderCard(o, t) {
       const isCod = o.paymentMethod === 'cod';
       const isPaid = o.paymentStatus === 'paid';
       const isMorning = !!(o.scheduledSlot || (o.customer && o.customer.scheduledSlot));
@@ -1312,18 +1606,15 @@
       const packingChecks = o.packingChecks || {};
       const unavailableItems = o.unavailableItems || {};
 
-      // Minutes waiting calculation
-      const createdMs = o.createdAt ? new Date(o.createdAt).getTime() : Date.now();
+      const createdMs = getOrderTimestamp(o);
       const waitingMins = Math.max(0, Math.floor((Date.now() - createdMs) / 60000));
       let waitBadge = '';
-      if (!isCompleted && !isCancelled) {
-        if (waitingMins >= 20) {
-          waitBadge = '<span class="badge badge-red-wait">🚨 ' + waitingMins + 'm waiting!</span>';
-        } else if (waitingMins >= 10) {
-          waitBadge = '<span class="badge badge-amber-wait">⏳ ' + waitingMins + 'm waiting</span>';
-        } else {
-          waitBadge = '<span class="badge" style="background: #F3F4F6; color: #4B5563;">⏱️ ' + waitingMins + 'm</span>';
-        }
+      if (waitingMins >= 20) {
+        waitBadge = '<span class="badge badge-red-wait">🚨 ' + waitingMins + 'm waiting!</span>';
+      } else if (waitingMins >= 10) {
+        waitBadge = '<span class="badge badge-amber-wait">⏳ ' + waitingMins + 'm waiting</span>';
+      } else {
+        waitBadge = '<span class="badge" style="background: #F3F4F6; color: #4B5563;">⏱️ ' + waitingMins + 'm</span>';
       }
 
       let itemsHtml = items.map((item, idx) => {
@@ -1333,7 +1624,7 @@
 
         return '<div class="item-row ' + itemClass + '">' +
           '<label class="item-check-label">' +
-            '<input type="checkbox" class="item-checkbox" data-pushkey="' + o.pushKey + '" data-itemidx="' + idx + '" ' + (isChecked ? 'checked' : '') + ' ' + (isCompleted || isCancelled ? 'disabled' : '') + '>' +
+            '<input type="checkbox" class="item-checkbox" data-pushkey="' + o.pushKey + '" data-itemidx="' + idx + '" ' + (isChecked ? 'checked' : '') + ' ' + (isCancelled ? 'disabled' : '') + '>' +
             '<div class="item-details">' +
               '<div class="item-name">' + escapeHtml(item.name || 'Item') + '</div>' +
               '<div class="item-qty">' + escapeHtml(item.quantity || 1) + ' × ' + escapeHtml(item.unit || 'unit') + '</div>' +
@@ -1341,37 +1632,13 @@
           '</label>' +
           '<div style="display: flex; align-items: center; gap: 8px;">' +
             '<span class="item-price">₹' + (Number(item.price || 0) * Number(item.quantity || 1)) + '</span>' +
-            (!isCompleted && !isCancelled ? '<button type="button" class="btn btn-outline btn-small item-unavail-btn" data-pushkey="' + o.pushKey + '" data-itemidx="' + idx + '" data-itemname="' + escapeHtml(item.name || '') + '" style="color: #991B1B; padding: 4px 8px; font-size: 11px;">⚠️</button>' : '') +
+            (!isCancelled ? '<button type="button" class="btn btn-outline btn-small item-unavail-btn" data-pushkey="' + o.pushKey + '" data-itemidx="' + idx + '" data-itemname="' + escapeHtml(item.name || '') + '" style="color: #991B1B; padding: 4px 8px; font-size: 11px;">⚠️</button>' : '') +
           '</div>' +
         '</div>';
       }).join('');
 
-            const isClaimedByMe = currentUser && o.claimedBy && (o.claimedBy.uid === currentUser.uid);
-      const isClaimedByOther = currentUser && o.claimedBy && (o.claimedBy.uid !== currentUser.uid);
-      let claimingHtml = '';
-      if (!isCompleted && !isCancelled) {
-        if (isClaimedByMe) {
-          claimingHtml = '<div style="margin-bottom: 8px; padding: 6px 10px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">' +
-            '<span style="color: #1E40AF; font-weight: 700;">👤 ' + (currentLang === 'te' ? 'మీరు క్లెయిమ్ చేశారు' : 'Claimed by you') + '</span>' +
-            '<button type="button" class="btn btn-outline btn-small unclaim-order-btn" data-pushkey="' + o.pushKey + '" style="font-size: 11px; padding: 2px 8px;">' + (currentLang === 'te' ? 'వదిలివేయండి' : 'Unclaim') + '</button>' +
-          '</div>';
-        } else if (isClaimedByOther) {
-          claimingHtml = '<div style="margin-bottom: 8px; padding: 6px 10px; background: #FEE2E2; border: 1px solid #FECACA; border-radius: 6px; font-size: 12px; color: #991B1B; font-weight: 700;">' +
-            '🔒 ' + (currentLang === 'te' ? 'మరొక వర్కర్ తీసుకున్నారు' : 'Taken by ' + escapeHtml(o.claimedBy.name || o.claimedBy.email || 'another worker')) +
-          '</div>';
-        } else {
-          claimingHtml = '<div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">' +
-            '<span style="font-size: 12px; color: var(--muted);">' + (currentLang === 'te' ? 'క్లెయిమ్ చేయలేదు' : 'Unclaimed order') + '</span>' +
-            '<button type="button" class="btn btn-outline btn-small claim-order-btn" data-pushkey="' + o.pushKey + '" style="background: #EFF6FF; color: #1D4ED8; border-color: #93C5FD; font-weight: 700; font-size: 11px; padding: 4px 10px;">🙋 ' + (currentLang === 'te' ? 'ఈ ఆర్డర్ తీసుకోండి' : 'Claim Order') + '</button>' +
-          '</div>';
-        }
-      }
-
       let actionButtons = '';
-      if (!isCompleted && !isCancelled) {
-        if (isClaimedByOther) {
-          actionButtons = '<div style="font-size: 12px; color: var(--muted); text-align: center; padding: 8px; background: #F9FAFB; border-radius: 6px;">' + (currentLang === 'te' ? 'ఈ ఆర్డర్ మరొక వర్కర్ డెలివరీ చేస్తున్నారు' : 'Claimed by another worker') + '</div>';
-        } else
+      if (!isCancelled) {
         if (o.status === 'placed') {
           actionButtons = '<button class="btn btn-primary advance-btn" data-pushkey="' + o.pushKey + '" data-next="accepted">' + t.acceptBtn + '</button>';
         } else if (o.status === 'accepted') {
@@ -1392,14 +1659,15 @@
       }
 
       const mapQuery = encodeURIComponent((o.customer && o.customer.address ? o.customer.address : '') + ' Anantapur');
+      const cleanPhone = (o.customer && o.customer.phone ? String(o.customer.phone).replace(/\D/g, '') : '');
 
-      return '<div class="order-card" id="card-' + o.pushKey + '">' +
+      return '<div class="order-card" id="card-my-' + o.pushKey + '">' +
         (isCancelled ? '<div class="cancel-alert-banner">' + t.cancelledBanner + '</div>' : '') +
 
         '<div class="order-header">' +
           '<div>' +
             '<div class="order-id">#' + escapeHtml(o.id || o.pushKey) + '</div>' +
-            '<div class="order-time">' + (o.createdAt ? new Date(o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '') + '</div>' +
+            '<div class="order-time">' + (createdMs ? new Date(createdMs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '') + '</div>' +
           '</div>' +
           '<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">' +
             waitBadge +
@@ -1409,7 +1677,12 @@
           '</div>' +
         '</div>' +
 
-        claimingHtml + '<div class="customer-block">' +
+        '<div style="margin-bottom: 8px; padding: 6px 10px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">' +
+          '<span style="color: #1E40AF; font-weight: 700;">👤 ' + (currentLang === 'te' ? 'మీరు క్లెయిమ్ చేశారు' : 'Claimed by you') + '</span>' +
+          '<span style="font-size: 11px; color: var(--muted);">' + (o.claimedAt ? new Date(o.claimedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '') + '</span>' +
+        '</div>' +
+
+        '<div class="customer-block">' +
           '<div class="customer-name">👤 ' + escapeHtml((o.customer && o.customer.name) || 'Customer') + '</div>' +
           '<div class="customer-address">📍 ' + escapeHtml((o.customer && o.customer.address) || 'Anantapur') + '</div>' +
           (o.customer && o.customer.notes ? '<div class="customer-notes">📝 Note: <strong>' + escapeHtml(o.customer.notes) + '</strong></div>' : '') +
@@ -1420,17 +1693,17 @@
               '<a href="https://www.google.com/maps/dir/?api=1&destination=' + (((o.delivery && o.delivery.geo) || o.customer.geo).lat) + '%2C' + (((o.delivery && o.delivery.geo) || o.customer.geo).lng) + '" target="_blank" style="background: #2563EB; color: #fff; padding: 3px 8px; border-radius: 4px; font-weight: 700; text-decoration: none; font-size: 11px;">🗺️ Turn-by-Turn Navigate</a>' +
             '</div>'
           ) : (
-            (!isCompleted && o.customer && o.customer.phone ? (
+            (cleanPhone ? (
               '<div style="margin: 4px 0; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; align-items: center;">' +
                 '<span>📍 No GPS pin shared</span>' +
-                '<a href="https://wa.me/91' + escapeHtml(o.customer.phone.replace(/\D/g,'')) + '?text=' + encodeURIComponent('Hello ' + ((o.customer && o.customer.name) || 'Customer') + ', this is your delivery partner from Sri Sai Anantapur for order #' + (o.id || o.pushKey) + '. Please share your location in WhatsApp so I can reach your doorstep quickly.') + '" target="_blank" style="color: #15803D; font-weight: 600; text-decoration: none;">💬 Ask WhatsApp Location</a>' +
+                '<a href="https://wa.me/91' + escapeHtml(cleanPhone) + '?text=' + encodeURIComponent('Hello ' + ((o.customer && o.customer.name) || 'Customer') + ', this is your delivery partner from Sri Sai Anantapur for order #' + (o.id || o.pushKey) + '. Please share your location in WhatsApp so I can reach your doorstep quickly.') + '" target="_blank" style="color: #15803D; font-weight: 600; text-decoration: none;">💬 Ask WhatsApp Location</a>' +
               '</div>'
             ) : '')
           )) +
 
           '<div class="action-links">' +
-            (!isCompleted && o.customer && o.customer.phone ? '<a href="tel:' + escapeHtml(o.customer.phone) + '" class="action-link" style="color: #1D4ED8;">' + t.call + '</a>' +
-              '<a href="https://wa.me/91' + escapeHtml(o.customer.phone.replace(/\D/g,'')) + '?text=' + encodeURIComponent('Hello ' + ((o.customer && o.customer.name) || '') + ', this is Sri Sai Staff regarding your grocery order #' + o.id + '.') + '" target="_blank" class="action-link" style="color: #15803D;">' + t.wa + '</a>' : '') +
+            (cleanPhone ? '<a href="tel:' + escapeHtml(cleanPhone) + '" class="action-link" style="color: #1D4ED8;">' + t.call + '</a>' +
+              '<a href="https://wa.me/91' + escapeHtml(cleanPhone) + '?text=' + encodeURIComponent('Hello ' + ((o.customer && o.customer.name) || '') + ', this is Sri Sai Staff regarding your grocery order #' + (o.id || o.pushKey) + '.') + '" target="_blank" class="action-link" style="color: #15803D;">' + t.wa + '</a>' : '') +
             '<button class="action-link copy-addr-btn" data-addr="' + escapeHtml((o.customer && o.customer.address) || '') + '">' + t.copy + '</button>' +
             (((o.delivery && o.delivery.geo) || (o.customer && o.customer.geo)) ? (
               '<a href="https://www.google.com/maps?q=' + (((o.delivery && o.delivery.geo) || o.customer.geo).lat) + ',' + (((o.delivery && o.delivery.geo) || o.customer.geo).lng) + '" target="_blank" class="action-link" style="color: #2563EB;">📌 ' + t.maps + '</a>'
@@ -1449,59 +1722,148 @@
           '<span style="font-size: 18px; color: var(--primary);">₹' + (o.total || 0) + '</span>' +
         '</div>' +
 
-        (!isCompleted && !isCancelled ? '<div class="order-actions-grid">' +
+        (!isCancelled ? '<div class="order-actions-grid">' +
             actionButtons +
-            '<div style="display: flex; gap: 8px;">' +
-              '<button class="btn btn-outline print-slip-btn" data-pushkey="' + o.pushKey + '" style="flex: 1;">🖨️ Slip</button>' +
-              '<button class="btn btn-outline req-cancel-btn" data-pushkey="' + o.pushKey + '" style="flex: 1; color: var(--danger);">' + t.reqCancel + '</button>' +
+            '<div style="display: flex; gap: 6px; margin-top: 4px;">' +
+              '<button class="btn btn-outline print-slip-btn" data-pushkey="' + o.pushKey + '" style="flex: 1; font-size: 12px; padding: 6px 8px;">🖨️ Slip</button>' +
+              '<button class="btn btn-outline release-order-btn" data-pushkey="' + o.pushKey + '" style="flex: 1; font-size: 12px; padding: 6px 8px; color: var(--danger); border-color: var(--danger);">↩️ Release</button>' +
+              '<button class="btn btn-outline help-order-btn" data-pushkey="' + o.pushKey + '" style="flex: 1; font-size: 12px; padding: 6px 8px; color: #B45309; border-color: #FDE68A;">🆘 Help</button>' +
             '</div>' +
-          '</div>' : '<div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted);">' +
-            '<span>Status: <strong>' + (o.status || '').toUpperCase() + '</strong></span>' +
-            '<button class="btn btn-outline btn-small print-slip-btn" data-pushkey="' + o.pushKey + '">🖨️ Print Slip</button>' +
-          '</div>') +
+          '</div>' : '') +
       '</div>';
     }
 
+    // Tab 3: Completed Order Card
+    function renderCompletedOrderCard(o, t) {
+      const isCod = o.paymentMethod === 'cod';
+      const isPaid = o.paymentStatus === 'paid' || o.paymentStatus === 'cod_collected';
+      const delTime = o.deliveredAt ? new Date(o.deliveredAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
+      return '<div class="order-card" id="card-done-' + o.pushKey + '" style="opacity: 0.92;">' +
+        '<div class="order-header">' +
+          '<div>' +
+            '<div class="order-id">#' + escapeHtml(o.id || o.pushKey) + '</div>' +
+            '<div class="order-time">Delivered at ' + delTime + '</div>' +
+          '</div>' +
+          '<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">' +
+            '<span class="badge" style="background: #DCFCE7; color: #16A34A; font-weight: 700;">Delivered ✅</span>' +
+            (isCod ? '<span class="badge badge-cod">💵 COD ₹' + o.total + '</span>' : '') +
+            (isPaid && !isCod ? '<span class="badge badge-paid">⚡ PAID ₹' + o.total + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div style="font-size: 13px; color: var(--text); margin-bottom: 6px;">' +
+          '👤 <strong>' + escapeHtml((o.customer && o.customer.name) || 'Customer') + '</strong> · ' + escapeHtml((o.customer && o.customer.address) || 'Anantapur') +
+        '</div>' +
+        '<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">' +
+          '<span style="font-size: 14px; font-weight: 700; color: var(--primary);">Total: ₹' + (o.total || 0) + '</span>' +
+          '<button class="btn btn-outline btn-small print-slip-btn" data-pushkey="' + o.pushKey + '">🖨️ Print Slip</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    // Tab 5: Team Live Activity (Read-only for workers)
+    function renderTeamTab() {
+      const container = document.getElementById('teamLiveList');
+      if (!container) return;
+      const staffList = Object.entries(staffRoster).filter(([k, s]) => s && s.active !== false);
+      if (staffList.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--muted); padding: 32px 0;">No active staff found.</p>';
+        return;
+      }
+
+      const now = Date.now();
+      const html = staffList.map(([uid, s]) => {
+        const isSelf = currentUser && uid === currentUser.uid;
+        const presence = s.presence || {};
+        const isOnline = presence.online === true && (now - (presence.lastSeenAt || 0) < 120000);
+        let lastSeenText = 'Offline';
+        if (isOnline) {
+          lastSeenText = 'Live Now';
+        } else if (presence.lastSeenAt) {
+          const mins = Math.floor((now - presence.lastSeenAt) / 60000);
+          lastSeenText = mins <= 1 ? '1 min ago' : (mins < 60 ? mins + ' mins ago' : Math.floor(mins / 60) + ' hrs ago');
+        }
+
+        const activeCount = Object.values(ordersCache).filter(o => o.claimedBy && o.claimedBy.uid === uid && o.status !== 'delivered' && o.status !== 'cancelled').length;
+        const currentTask = presence.currentTask ? (presence.currentTask.charAt(0).toUpperCase() + presence.currentTask.slice(1)) : (activeCount > 0 ? 'Busy (' + activeCount + ' orders)' : 'Idle');
+
+        return '<div class="order-card" style="margin-bottom: 12px; border-left: 4px solid ' + (isOnline ? '#10B981' : '#9CA3AF') + ';">' +
+          '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">' +
+            '<div>' +
+              '<div style="font-size: 15px; font-weight: 700; color: var(--text);">' +
+                escapeHtml(s.name || 'Staff Member') + (isSelf ? ' <span style="font-size: 11px; background: #DBEAFE; color: #1E40AF; padding: 2px 6px; border-radius: 4px;">You</span>' : '') +
+              '</div>' +
+              '<div style="font-size: 12px; color: var(--muted);">' + escapeHtml(s.role || 'Staff') + '</div>' +
+            '</div>' +
+            '<span class="badge" style="background: ' + (isOnline ? '#DCFCE7' : '#F3F4F6') + '; color: ' + (isOnline ? '#16A34A' : '#6B7280') + '; font-weight: 700;">' +
+              (isOnline ? '🟢 Online' : '⚪ ' + lastSeenText) +
+            '</span>' +
+          '</div>' +
+          '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; background: #F8FAFC; padding: 8px 10px; border-radius: 6px;">' +
+            '<div>Task: <strong style="color: var(--primary);">' + escapeHtml(currentTask) + '</strong></div>' +
+            '<div>Active: <strong>' + activeCount + ' orders</strong></div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      container.innerHTML = html;
+    }
+
+    // Attach Event Listeners to rendered cards
     function attachCardEventListeners() {
-      // Order claiming handlers (M5)
-      document.querySelectorAll('.claim-order-btn').forEach(btn => {
+      // Claim Order from New Pool (Feature B Server API)
+      document.querySelectorAll('.claim-new-order-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           if (!currentUser) return;
           const pushKey = btn.getAttribute('data-pushkey');
-          const workerInfo = {
-            uid: currentUser.uid,
-            name: currentUser.displayName || currentUser.email || 'Staff Worker',
-            email: currentUser.email || '',
-            claimedAt: new Date().toISOString()
-          };
+          btn.disabled = true;
+          btn.innerText = (currentLang === 'te') ? 'తీసుకుంటున్నారు...' : 'Claiming...';
           try {
-            const res = await db.ref('orders/' + pushKey + '/claimedBy').transaction(current => {
-              if (!current) return workerInfo;
-              return undefined;
+            const idToken = await currentUser.getIdToken();
+            const resp = await fetch(WORKER_API + '/api/staff/claim-order', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + idToken
+              },
+              body: JSON.stringify({ pushKey })
             });
-            if (res.committed) {
-              showToast(currentLang === 'te' ? 'ఆర్డర్ మీకు కేటాయించబడింది!' : 'Order claimed by you!');
-            } else {
-              alert(currentLang === 'te' ? 'ఈ ఆర్డర్ ఇప్పటికే మరొకరు తీసుకున్నారు.' : 'Order was already claimed by another worker.');
+            const data = await resp.json();
+            if (!resp.ok || !data.success) {
+              throw new Error(data.error || 'Failed to claim order');
             }
+            playChime();
+            showToast(currentLang === 'te' ? 'ఆర్డర్ మీకు కేటాయించబడింది!' : 'Order claimed by you!');
+            sendStaffHeartbeat();
+            switchTab('myOrders');
           } catch (err) {
-            alert('Error claiming order: ' + err.message);
+            alert(err.message);
+            btn.disabled = false;
+            btn.innerText = (currentLang === 'te') ? '🙋 ఈ ఆర్డర్ తీసుకోండి' : '🙋 Claim Order';
           }
         });
       });
 
-      document.querySelectorAll('.unclaim-order-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const pushKey = btn.getAttribute('data-pushkey');
-          if (!confirm(currentLang === 'te' ? 'ఈ ఆర్డర్ క్లెయిమ్ విడుదల చేయాలా?' : 'Release your claim on this order?')) return;
-          try {
-            await db.ref('orders/' + pushKey + '/claimedBy').remove();
-            showToast(currentLang === 'te' ? 'క్లెయిమ్ విడుదల చేయబడింది.' : 'Claim released.');
-          } catch (err) {
-            alert('Error releasing claim: ' + err.message);
-          }
+      // Release Order Modal Open
+      document.querySelectorAll('.release-order-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          pendingReleasePushKey = btn.getAttribute('data-pushkey');
+          document.getElementById('releaseOrderPushKey').value = pendingReleasePushKey;
+          document.getElementById('releaseReasonSelect').selectedIndex = 0;
+          document.getElementById('releaseOrderModal').style.display = 'flex';
         });
       });
+
+      // Need Help Modal Open
+      document.querySelectorAll('.help-order-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          pendingHelpPushKey = btn.getAttribute('data-pushkey');
+          document.getElementById('helpOrderPushKey').value = pendingHelpPushKey;
+          document.getElementById('helpNoteInput').value = '';
+          document.getElementById('helpModal').style.display = 'flex';
+        });
+      });
+
       // Packing item checkboxes
       document.querySelectorAll('.item-checkbox').forEach(cb => {
         cb.addEventListener('change', async () => {
@@ -1516,7 +1878,7 @@
         });
       });
 
-      // Item Unavailable button
+      // Item Unavailable (OOS) button
       document.querySelectorAll('.item-unavail-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const pushKey = btn.getAttribute('data-pushkey');
@@ -1564,14 +1926,6 @@
         });
       });
 
-      // Request cancellation
-      document.querySelectorAll('.req-cancel-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          pendingCancelPushKey = btn.getAttribute('data-pushkey');
-          document.getElementById('cancelRequestModal').style.display = 'flex';
-        });
-      });
-
       // Print packing slip
       document.querySelectorAll('.print-slip-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1580,6 +1934,126 @@
         });
       });
     }
+
+    // Area filter listener
+    document.getElementById('newAreaFilter')?.addEventListener('change', () => {
+      renderOrders();
+    });
+
+    // Release Order Modal Listeners
+    document.getElementById('closeReleaseModalBtn')?.addEventListener('click', () => {
+      document.getElementById('releaseOrderModal').style.display = 'none';
+      pendingReleasePushKey = null;
+    });
+    document.getElementById('cancelReleaseBtn')?.addEventListener('click', () => {
+      document.getElementById('releaseOrderModal').style.display = 'none';
+      pendingReleasePushKey = null;
+    });
+    document.getElementById('confirmReleaseBtn')?.addEventListener('click', async () => {
+      if (!pendingReleasePushKey || !currentUser) return;
+      const pushKey = pendingReleasePushKey;
+      const reason = document.getElementById('releaseReasonSelect').value;
+      const btn = document.getElementById('confirmReleaseBtn');
+      btn.disabled = true;
+      btn.innerText = (currentLang === 'te') ? 'విడుదల చేస్తోంది...' : 'Releasing...';
+
+      try {
+        const idToken = await currentUser.getIdToken();
+        const resp = await fetch(WORKER_API + '/api/staff/release-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + idToken
+          },
+          body: JSON.stringify({ pushKey, reason })
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.success) {
+          throw new Error(data.error || 'Failed to release order');
+        }
+        document.getElementById('releaseOrderModal').style.display = 'none';
+        pendingReleasePushKey = null;
+        showToast(currentLang === 'te' ? 'ఆర్డర్ పూల్‌కి విడుదల చేయబడింది.' : 'Order released back to pool.');
+        sendStaffHeartbeat();
+        switchTab('new');
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = (currentLang === 'te') ? 'విడుదల' : 'Release';
+      }
+    });
+
+    // Need Help Modal Listeners
+    document.getElementById('closeHelpModalBtn')?.addEventListener('click', () => {
+      document.getElementById('helpModal').style.display = 'none';
+      pendingHelpPushKey = null;
+    });
+    document.getElementById('cancelHelpBtn')?.addEventListener('click', () => {
+      document.getElementById('helpModal').style.display = 'none';
+      pendingHelpPushKey = null;
+    });
+    document.getElementById('confirmHelpBtn')?.addEventListener('click', async () => {
+      if (!pendingHelpPushKey || !currentUser) return;
+      const pushKey = pendingHelpPushKey;
+      const note = document.getElementById('helpNoteInput').value.trim();
+      if (!note) {
+        alert(currentLang === 'te' ? 'దయచేసి సమస్యను వివరించండి.' : 'Please describe what help is needed.');
+        return;
+      }
+      const btn = document.getElementById('confirmHelpBtn');
+      btn.disabled = true;
+      btn.innerText = (currentLang === 'te') ? 'పంపుతోంది...' : 'Sending...';
+
+      try {
+        const order = ordersCache[pushKey];
+        const alertId = 'help_' + Date.now();
+        await Promise.all([
+          db.ref('orders/' + pushKey + '/helpRequest').set({
+            requestedAt: new Date().toISOString(),
+            workerUid: currentUser.uid,
+            workerName: currentStaffData?.name || currentUser.email || 'Staff',
+            note: note
+          }),
+          db.ref('alerts/' + alertId).set({
+            type: 'worker_help_needed',
+            orderId: (order && order.id) || pushKey,
+            pushKey: pushKey,
+            workerName: currentStaffData?.name || currentUser.email || 'Staff',
+            note: note,
+            timestamp: new Date().toISOString(),
+            read: false
+          })
+        ]);
+        document.getElementById('helpModal').style.display = 'none';
+        document.getElementById('helpNoteInput').value = '';
+        pendingHelpPushKey = null;
+        showToast(currentLang === 'te' ? 'యజమానికి అలర్ట్ పంపబడింది!' : 'Help alert sent to store owner!');
+      } catch (err) {
+        alert('Failed to send help alert: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = (currentLang === 'te') ? 'అలర్ట్ పంపండి' : 'Send Alert';
+      }
+    });
+
+    // 30-minute Inactivity Auto-Logout
+    ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, () => { lastActivityTime = Date.now(); }, { passive: true });
+    });
+    setInterval(() => {
+      if (currentUser && Date.now() - lastActivityTime > 30 * 60 * 1000) {
+        showToast("Logged out due to 30 minutes of inactivity.");
+        auth.signOut();
+      }
+    }, 60000);
+
+    // Unload Presence Cleanup
+    window.addEventListener('beforeunload', () => {
+      if (currentUser) {
+        try { db.ref('staff/' + currentUser.uid + '/presence/online').set(false); } catch (_) {}
+      }
+    });
 
     // Touch Slide-to-Confirm Handler
     function setupSlideToConfirm(track, onConfirm) {
@@ -1644,18 +2118,47 @@
       window.addEventListener('mouseup', onTouchEnd);
     }
 
+    // Delivery Modal Opener
+    function openDeliveryModal(pushKey) {
+      const order = ordersCache[pushKey];
+      if (!order) return;
+      pendingDeliveryKey = pushKey;
+
+      const badge = document.getElementById('deliveryOrderBadge');
+      if (badge) badge.innerText = '#' + (order.id || pushKey);
+      const otpInput = document.getElementById('deliveryOtpInput');
+      if (otpInput) otpInput.value = '';
+      const errEl = document.getElementById('deliveryOtpError');
+      if (errEl) errEl.style.display = 'none';
+
+      const codSection = document.getElementById('deliveryCodSection');
+      if (codSection) {
+        if (order.paymentMethod === 'cod') {
+          codSection.style.display = 'block';
+          const amtText = document.getElementById('deliveryCodAmountText');
+          if (amtText) amtText.innerText = '₹' + (order.total || 0);
+          const rcvInput = document.getElementById('deliveryCodReceivedInput');
+          if (rcvInput) rcvInput.value = '';
+          const chgText = document.getElementById('deliveryCodChangeText');
+          if (chgText) chgText.innerText = 'Change: ₹0';
+        } else {
+          codSection.style.display = 'none';
+        }
+      }
+
+      document.getElementById('deliveryModal').style.display = 'flex';
+      setTimeout(() => {
+        document.getElementById('deliveryOtpInput')?.focus();
+      }, 100);
+    }
+
     // Handle Order Status Transitions
     async function handleOrderTransition(pushKey, nextStatus) {
       const order = ordersCache[pushKey];
       if (!order) return;
 
-      // If COD and marking delivered, verify cash collection modal
-      if (nextStatus === 'delivered' && order.paymentMethod === 'cod' && order.paymentStatus !== 'cod_collected') {
-        pendingCodOrderId = pushKey;
-        document.getElementById('codAmountText').innerText = '₹' + order.total;
-        document.getElementById('codReceivedInput').value = '';
-        document.getElementById('codChangeReturnText').innerText = 'Change: ₹0';
-        document.getElementById('codModal').style.display = 'flex';
+      if (nextStatus === 'delivered') {
+        openDeliveryModal(pushKey);
         return;
       }
 
@@ -1666,13 +2169,32 @@
           handledBy: (currentUser && currentUser.email) || 'staff'
         };
 
-        if (nextStatus === 'delivered') {
-          updatePayload.deliveredAt = new Date().toISOString();
+        if (nextStatus === 'packed') {
+          updatePayload.packedAt = new Date().toISOString();
+          if (currentUser && !order.packedBy) {
+            updatePayload.packedBy = {
+              uid: currentUser.uid,
+              name: currentStaffData?.name || currentUser.displayName || currentUser.email || 'Staff'
+            };
+          }
+        } else if (nextStatus === 'out_for_delivery') {
+          updatePayload.dispatchedAt = new Date().toISOString();
+          if (currentUser && !order.deliveredBy) {
+            updatePayload.deliveredBy = {
+              uid: currentUser.uid,
+              name: currentStaffData?.name || currentUser.displayName || currentUser.email || 'Staff'
+            };
+          }
         }
 
         await db.ref('orders/' + pushKey).update(updatePayload);
-        fetch((window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/notify-order-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId: pushKey, status: nextStatus }) }).catch(() => {});
+        fetch((window.APP_CONFIG?.workerApi || 'https://ra-store-api.chowdarynikhil095.workers.dev') + '/api/notify-order-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: pushKey, status: nextStatus })
+        }).catch(() => {});
         showToast('Order #' + (order.id || pushKey) + ' marked ' + nextStatus.toUpperCase());
+        sendStaffHeartbeat();
       } catch (err) {
         console.error('Update order failed:', err);
         showToast("Error updating order: " + err.message);

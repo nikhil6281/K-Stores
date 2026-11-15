@@ -3325,13 +3325,17 @@ async function handleStaffHeartbeat(request, env, cors) {
   const user = await verifyFirebaseIdToken(token, env);
   if (!user) return jsonError('Unauthorized', 'UNAUTHORIZED', 401, cors);
 
+  const body = await request.json().catch(() => ({}));
   const now = Date.now();
-  await rtdbFetch(env, `staff/${user.uid}/presence`, 'PUT', {
+  const presenceData = {
     lastSeenAt: now,
-    online: true
-  }).catch(() => {});
+    online: true,
+    currentTask: body?.currentTask || 'idle',
+    activeCount: typeof body?.activeCount === 'number' ? body.activeCount : 0
+  };
+  await rtdbFetch(env, `staff/${user.uid}/presence`, 'PUT', presenceData).catch(() => {});
 
-  return jsonResponse({ success: true, timestamp: now }, 200, cors);
+  return jsonResponse({ success: true, timestamp: now, presence: presenceData }, 200, cors);
 }
 
 async function handleAdminReassignOrder(request, env, cors) {

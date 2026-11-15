@@ -1559,6 +1559,60 @@ it('FA.5: Staff portal and RTDB rules isolation for pending_confirmation and exp
   assert(workerHtml.includes("o.status !== 'pending_confirmation'"), 'worker.html must filter pending_confirmation orders');
 });
 
+// ========================================================
+// FEATURE B: STAFF PORTAL CLAIM SYSTEM & WORKER SECTIONS
+// ========================================================
+
+it('FB.1: Staff portal claim endpoint enforces max active orders and updates worker count', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/staff/claim-order'), 'Must mount /api/staff/claim-order route');
+  assert(workerCode.includes('handleStaffClaimOrder'), 'Must implement handleStaffClaimOrder');
+  assert(workerCode.includes('maxActiveOrdersPerWorker'), 'Must check maxActiveOrdersPerWorker');
+  assert(workerCode.includes('MAX_ACTIVE_EXCEEDED'), 'Must throw error if worker exceeds max active orders');
+  assert(workerCode.includes('ALREADY_CLAIMED'), 'Must reject if already claimed by another worker');
+  assert(workerCode.includes('activeOrderCount'), 'Must update staff activeOrderCount');
+});
+
+it('FB.2: Staff portal release order returns order to pool with reason and records audit', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/staff/release-order'), 'Must mount /api/staff/release-order route');
+  assert(workerCode.includes('handleStaffReleaseOrder'), 'Must implement handleStaffReleaseOrder');
+  assert(workerCode.includes('CANNOT_RELEASE_OUT_FOR_DELIVERY'), 'Must prevent releasing orders that are out for delivery without admin');
+  assert(workerCode.includes('ORDER_RELEASED'), 'Must record audit log on order release');
+});
+
+it('FB.3: Worker heartbeat updates presence with online, lastSeenAt, and currentTask', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/staff/heartbeat'), 'Must mount /api/staff/heartbeat route');
+  assert(workerCode.includes('handleStaffHeartbeat'), 'Must implement handleStaffHeartbeat');
+  assert(workerCode.includes('lastSeenAt'), 'Must record lastSeenAt in presence');
+  assert(workerCode.includes('currentTask'), 'Must persist currentTask in presence');
+});
+
+it('FB.4: Staff portal markup contains 5 tabs and release/help modals', () => {
+  const workerHtml = fs.readFileSync('worker.html', 'utf8');
+  assert(workerHtml.includes('id="tabNewBtn"'), 'Must have New pool tab button');
+  assert(workerHtml.includes('id="tabMyOrdersBtn"'), 'Must have My Orders tab button');
+  assert(workerHtml.includes('id="tabCompletedBtn"'), 'Must have Done Today tab button');
+  assert(workerHtml.includes('id="tabSummaryBtn"'), 'Must have Summary tab button');
+  assert(workerHtml.includes('id="tabTeamBtn"'), 'Must have Team tab button');
+  assert(workerHtml.includes('id="newAreaFilter"'), 'Must have dynamic Area/Landmark filter dropdown');
+  assert(workerHtml.includes('id="releaseOrderModal"'), 'Must have #releaseOrderModal in worker.html');
+  assert(workerHtml.includes('id="helpModal"'), 'Must have #helpModal in worker.html');
+});
+
+it('FB.5: New pool preserves privacy: operational cards do not expose customer name, phone, or exact address before claim', () => {
+  const workerHtml = fs.readFileSync('worker.html', 'utf8');
+  assert(workerHtml.includes('renderNewOrderCard'), 'Must have renderNewOrderCard function');
+  assert(workerHtml.includes('claim-new-order-btn'), 'Must have claim button on new order cards');
+  // Check that renderNewOrderCard only uses operational info
+  const newCardFn = workerHtml.match(/function renderNewOrderCard\([\s\S]*?^    \}/m)?.[0] || '';
+  assert(newCardFn.length > 0, 'renderNewOrderCard must exist');
+  assert(!newCardFn.includes('o.customer.name'), 'renderNewOrderCard must not show customer name before claim');
+  assert(!newCardFn.includes('o.customer.phone'), 'renderNewOrderCard must not show customer phone before claim');
+  assert(!newCardFn.includes('o.customer.address'), 'renderNewOrderCard must not show exact customer address before claim');
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');
