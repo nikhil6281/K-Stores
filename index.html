@@ -4870,14 +4870,14 @@
           const isPendingOnline = (o.paymentMethod === 'online_razorpay' && o.paymentStatus === 'pending' && !isCancelled && !isDelivered);
           const orderCreatedMs = new Date(o.createdAt).getTime() || now;
           const expiresMs = o.expiresAt ? new Date(o.expiresAt).getTime() : (orderCreatedMs + 15 * 60 * 1000);
-          const isExpired = isPendingOnline && (now > expiresMs);
+          const isPaymentWindowExpired = isPendingOnline && (now > expiresMs);
           const remainingSecs = Math.max(0, Math.floor((expiresMs - now) / 1000));
           const remMins = Math.floor(remainingSecs / 60);
           const remSecs = remainingSecs % 60;
 
           let pendingActionHtml = '';
           if (isPendingOnline) {
-            if (isExpired) {
+            if (isPaymentWindowExpired) {
               pendingActionHtml = `
                 <div style="background: #FEE2E2; border: 1px solid #FECACA; color: var(--danger); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin: 8px 0; display: flex; justify-content: space-between; align-items: center;">
                   <span>⏰ Payment window expired (15m)</span>
