@@ -6549,7 +6549,7 @@
       } else {
         debugLog('swState', 'Registering...');
       }
-      navigator.serviceWorker.register('./sw.js?v=20261115v19', { scope: './' }).then(reg => {
+      navigator.serviceWorker.register('./sw.js?v=20261115v20', { scope: './' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {
