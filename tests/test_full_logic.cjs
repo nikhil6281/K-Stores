@@ -1613,6 +1613,56 @@ it('FB.5: New pool preserves privacy: operational cards do not expose customer n
   assert(!newCardFn.includes('o.customer.address'), 'renderNewOrderCard must not show exact customer address before claim');
 });
 
+// ========================================================
+// FEATURE C: OWNER PORTAL FULL VISIBILITY & ADMIN CONTROL
+// ========================================================
+
+it('FC.1: Admin reassign order endpoint updates claimedBy and appends audit event', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/admin/reassign-order'), 'Must mount /api/admin/reassign-order route');
+  assert(workerCode.includes('handleAdminReassignOrder'), 'Must implement handleAdminReassignOrder');
+  assert(workerCode.includes('ORDER_REASSIGNED'), 'Must record audit log on admin reassignment');
+});
+
+it('FC.2: Admin release to pool endpoint removes claimedBy and appends audit event', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/admin/release-to-pool'), 'Must mount /api/admin/release-to-pool route');
+  assert(workerCode.includes('handleAdminReleaseToPool'), 'Must implement handleAdminReleaseToPool');
+  assert(workerCode.includes('released_by_admin'), 'Must append released_by_admin event in order timeline');
+  assert(workerCode.includes('ORDER_RELEASED_BY_ADMIN'), 'Must record audit log on admin order release');
+});
+
+it('FC.3: Admin cash reconciliation endpoint records handover under cashReconciliations and resets worker cashInHand', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/admin/cash-reconciliation'), 'Must mount /api/admin/cash-reconciliation route');
+  assert(workerCode.includes('handleAdminCashReconciliation'), 'Must implement handleAdminCashReconciliation');
+  assert(workerCode.includes('cashReconciliations/'), 'Must record handover under cashReconciliations path');
+  assert(workerCode.includes('CASH_HANDOVER_RECORDED'), 'Must audit log cash handover');
+});
+
+it('FC.4: Owner portal admin.html contains 4 new Alerts Inbox sections (Stale Unclaimed, Stale Claimed, High Cash, Worker Help)', () => {
+  const adminHtml = fs.readFileSync('admin.html', 'utf8');
+  assert(adminHtml.includes('id="staleUnclaimedContainer"'), 'Must have stale unclaimed container');
+  assert(adminHtml.includes('id="staleClaimedContainer"'), 'Must have stale claimed container');
+  assert(adminHtml.includes('id="highCashContainer"'), 'Must have high cash container');
+  assert(adminHtml.includes('id="workerHelpContainer"'), 'Must have worker help container');
+  assert(adminHtml.includes('staleUnclaimed'), 'renderAlertsInbox must compute stale unclaimed orders');
+  assert(adminHtml.includes('staleClaimed'), 'renderAlertsInbox must compute stale claimed orders');
+  assert(adminHtml.includes('highCashWorkers'), 'renderAlertsInbox must compute high cash workers');
+  assert(adminHtml.includes('helpRequests'), 'renderAlertsInbox must compute worker help requests');
+});
+
+it('FC.5: Owner portal admin.html contains Team Live Activity container, Reassign modal, Cash Reconciliation modal, and Order Timeline drawer with CSV claimedBy columns', () => {
+  const adminHtml = fs.readFileSync('admin.html', 'utf8');
+  assert(adminHtml.includes('id="teamLiveCardsContainer"'), 'Must have team live cards container');
+  assert(adminHtml.includes('renderTeamLiveActivity'), 'Must implement renderTeamLiveActivity');
+  assert(adminHtml.includes('id="reassignOrderModal"'), 'Must have reassign order modal');
+  assert(adminHtml.includes('id="cashReconciliationModal"'), 'Must have cash reconciliation modal');
+  assert(adminHtml.includes('id="orderTimelineDrawer"'), 'Must have order timeline drawer');
+  assert(adminHtml.includes('openOrderTimelineDrawer'), 'Must implement openOrderTimelineDrawer');
+  assert(adminHtml.includes('Claimed By,Claimed At,Packed By,Delivered By'), 'CSV export must include worker attribution columns');
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');
