@@ -643,6 +643,9 @@
     #loginModal {
       z-index: 600 !important;
     }
+    #orderConfirmModal {
+      z-index: 700 !important;
+    }
 
     .modal {
       max-height: 88dvh;
@@ -1932,6 +1935,20 @@
     let searchTimeout = null;
     let loggedMisses = new Set();
     let ordersRef = null;
+    let pendingOrderSession = null;
+    let orderConfirmTimerInterval = null;
+    let resendCooldownInterval = null;
+
+    function maskPhone(p) {
+      if (!p) return '';
+      const digits = String(p).replace(/\D/g, '');
+      if (digits.length >= 10) {
+        const last4 = digits.slice(-4);
+        const prefix = digits.startsWith('91') && digits.length === 12 ? '+91 ' : '';
+        return `${prefix}••••••${last4}`;
+      }
+      return p;
+    }
 
     let storeSettings = {
       deliveryFee: 25,
@@ -4164,11 +4181,16 @@
         if (orderCreatedOnServer && serverData && serverData.success) {
           const finalTotal = serverData.total !== undefined ? serverData.total : clientTotal;
 
+          // 1. Immediately Clear Cart State & localStorage (Issue 1)
+          cart = {};
+          saveCart();
+
           // Feature A: Check if order requires OTP confirmation
           if (serverData.pendingConfirmation) {
             submitBtn.disabled = false;
             submitBtn.innerText = isStoreCurrentlyOpen ? (I18N[currentLang]?.confirmOrderBtn || 'Confirm & Place Order') : (I18N[currentLang]?.scheduleForMorning || 'Schedule for Morning Delivery');
-            closeModal('checkoutModal');
+            closeModal('checkoutModal', false, true);
+            closeModal('cartDrawerModal', false, true);
 
             pendingOrderSession = {
               orderId: serverData.orderId,
@@ -4176,11 +4198,42 @@
               paymentMethod: serverData.paymentMethod || payMethod,
               total: finalTotal,
               customer: customer,
-              phoneMasked: serverData.phoneMasked,
-              expiresAt: new Date(serverData.expiresAt).getTime()
+              phoneMasked: serverData.phoneMasked || maskPhone(customer.phone),
+              expiresAt: new Date(serverData.expiresAt || (Date.now() + 15 * 60 * 1000)).getTime()
             };
 
-            openOrderConfirmModal(pendingOrderSession);
+            // Pre-seed local cache with the newly created unconfirmed order
+            try {
+              if (currentUser && currentUser.uid) {
+                const cachedRaw = localStorage.getItem('ra_customer_orders_' + currentUser.uid);
+                const currentCached = cachedRaw ? JSON.parse(cachedRaw) : {};
+                currentCached[serverData.pushKey] = {
+                  id: serverData.orderId,
+                  uid: currentUser.uid,
+                  status: 'pending_confirmation',
+                  createdAt: new Date().toISOString(),
+                  paymentMethod: serverData.paymentMethod || payMethod,
+                  paymentStatus: 'pending',
+                  total: finalTotal,
+                  customer: customer,
+                  items: verifiedItems,
+                  expiresAt: new Date(serverData.expiresAt || (Date.now() + 15 * 60 * 1000)).toISOString()
+                };
+                localStorage.setItem('ra_customer_orders_' + currentUser.uid, JSON.stringify(currentCached));
+              }
+            } catch (e) {}
+
+            // Issue 2: Transition customer directly to the active order view/theme displaying "Enter Code" and "Cancel Order"
+            openOrdersModal();
+            setTimeout(() => {
+              const inp = document.getElementById('inline-code-input-' + serverData.pushKey);
+              if (inp) {
+                inp.focus();
+                inp.select();
+              }
+              startOrderConfirmTimer(new Date(serverData.expiresAt || (Date.now() + 15 * 60 * 1000)).getTime(), serverData.pushKey);
+              startResendCooldown(30, serverData.pushKey);
+            }, 250);
             return;
           }
 
@@ -4392,21 +4445,8 @@
     }
 
     // Customer Order Confirmation OTP Controller (Feature A)
-    let orderConfirmTimerInterval = null;
-    let resendCooldownInterval = null;
-    let pendingOrderSession = null;
-
-    function maskPhone(p) {
-      if (!p) return '';
-      const digits = String(p).replace(/\D/g, '');
-      if (digits.length >= 10) {
-        const last3 = digits.slice(-3);
-        return `+91 ••••• ••${last3}`;
-      }
-      return p;
-    }
-
     function openOrderConfirmModal(session) {
+      if (!session) return;
       pendingOrderSession = session;
       const phoneText = session.phoneMasked || maskPhone(session.customer?.phone || session.phone || '');
       const phoneEl = document.getElementById('orderConfirmPhoneText');
@@ -4414,55 +4454,81 @@
       const input = document.getElementById('orderConfirmOtpInput');
       if (input) {
         input.value = '';
+        input.disabled = false;
+      }
+      const verifyBtn = document.getElementById('btnVerifyOrderOtp');
+      if (verifyBtn) {
+        verifyBtn.disabled = false;
+        verifyBtn.innerText = I18N[currentLang]?.verifyAndPlaceOrderBtn || 'Verify & Place Order';
       }
       hideConfirmNotice();
       openModal('orderConfirmModal');
-      setTimeout(() => input?.focus(), 250);
+      setTimeout(() => {
+        const inp = document.getElementById('orderConfirmOtpInput');
+        if (inp) {
+          inp.focus();
+          inp.click();
+        }
+      }, 100);
 
-      startOrderConfirmTimer(session.expiresAt || (Date.now() + 10 * 60 * 1000));
-      startResendCooldown(30);
+      startOrderConfirmTimer(session.expiresAt || (Date.now() + 10 * 60 * 1000), session.pushKey);
+      startResendCooldown(30, session.pushKey);
     }
 
-    function startOrderConfirmTimer(targetTimestamp) {
+    function startOrderConfirmTimer(targetTimestamp, key = null) {
       if (orderConfirmTimerInterval) clearInterval(orderConfirmTimerInterval);
       const timerEl = document.getElementById('orderConfirmTimer');
+      const inlineTimerEl = key ? document.getElementById('inline-timer-' + key) : null;
       const update = () => {
         const remaining = Math.max(0, Math.floor((targetTimestamp - Date.now()) / 1000));
         const mins = Math.floor(remaining / 60);
         const secs = remaining % 60;
-        if (timerEl) {
-          timerEl.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
+        const timeStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        if (timerEl) timerEl.innerText = timeStr;
+        if (inlineTimerEl) inlineTimerEl.innerText = timeStr;
         if (remaining <= 0) {
           clearInterval(orderConfirmTimerInterval);
           showConfirmNotice(I18N[currentLang]?.orderConfirmationExpired || 'Order confirmation timed out. Expired.', 'danger');
           const btn = document.getElementById('btnVerifyOrderOtp');
           if (btn) btn.disabled = true;
+          if (key) {
+            const inlineBtn = document.querySelector(`.action-submit-inline-code[data-key="${key}"]`);
+            if (inlineBtn) inlineBtn.disabled = true;
+          }
         }
       };
       update();
       orderConfirmTimerInterval = setInterval(update, 1000);
     }
 
-    function startResendCooldown(seconds) {
+    function startResendCooldown(seconds, key = null) {
       if (resendCooldownInterval) clearInterval(resendCooldownInterval);
       const resendBtn = document.getElementById('btnResendOrderOtp');
       const timerSpan = document.getElementById('resendTimerSec');
-      if (!resendBtn) return;
-      resendBtn.disabled = true;
+      const inlineResendBtn = key ? document.querySelector(`.btn-resend-inline-code[data-key="${key}"]`) : null;
+      if (resendBtn) resendBtn.disabled = true;
+      if (inlineResendBtn) inlineResendBtn.disabled = true;
       let left = seconds;
       if (timerSpan) timerSpan.innerText = left;
-      const resendText = I18N[currentLang]?.resendCodeBtn || 'Resend';
-      resendBtn.innerText = `${resendText} (${left}s)`;
+      const resendText = I18N[currentLang]?.resendCodeBtn || 'Resend Code';
+      if (resendBtn) resendBtn.innerText = `${resendText} (${left}s)`;
+      if (inlineResendBtn) inlineResendBtn.innerText = `${resendText} (${left}s)`;
 
       resendCooldownInterval = setInterval(() => {
         left--;
         if (left <= 0) {
           clearInterval(resendCooldownInterval);
-          resendBtn.disabled = false;
-          resendBtn.innerText = I18N[currentLang]?.resendCodeBtn || 'Resend Code';
+          if (resendBtn) {
+            resendBtn.disabled = false;
+            resendBtn.innerText = resendText;
+          }
+          if (inlineResendBtn) {
+            inlineResendBtn.disabled = false;
+            inlineResendBtn.innerText = resendText;
+          }
         } else {
-          resendBtn.innerText = `${resendText} (${left}s)`;
+          if (resendBtn) resendBtn.innerText = `${resendText} (${left}s)`;
+          if (inlineResendBtn) inlineResendBtn.innerText = `${resendText} (${left}s)`;
         }
       }, 1000);
     }
@@ -4488,23 +4554,33 @@
       if (box) box.style.display = 'none';
     }
 
-    document.getElementById('btnVerifyOrderOtp')?.addEventListener('click', async () => {
-      const input = document.getElementById('orderConfirmOtpInput');
-      const otpVal = (input?.value || '').trim();
-      if (!/^\d{6}$/.test(otpVal)) {
-        showConfirmNotice(I18N[currentLang]?.enterConfirmCode || 'Please enter the 6-digit confirmation code.', 'danger');
+    async function submitConfirmationOtp(pushKey, otpVal, noticeEl, btnEl) {
+      const cleanOtp = String(otpVal || '').trim().replace(/\D/g, '');
+      if (cleanOtp.length !== 6) {
+        if (noticeEl) {
+          noticeEl.style.display = 'block';
+          noticeEl.style.background = '#FEE2E2';
+          noticeEl.style.color = '#B91C1C';
+          noticeEl.innerHTML = I18N[currentLang]?.enterConfirmCode || 'Please enter the 6-digit confirmation code.';
+        }
         return;
       }
 
-      if (!pendingOrderSession || !pendingOrderSession.pushKey) {
-        showConfirmNotice('Order session not found. Please try again.', 'danger');
+      if (!pushKey) {
+        if (noticeEl) {
+          noticeEl.style.display = 'block';
+          noticeEl.style.background = '#FEE2E2';
+          noticeEl.style.color = '#B91C1C';
+          noticeEl.innerHTML = 'Order session not found. Please try again.';
+        }
         return;
       }
 
-      const verifyBtn = document.getElementById('btnVerifyOrderOtp');
-      verifyBtn.disabled = true;
-      verifyBtn.innerText = 'Verifying…';
-      hideConfirmNotice();
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerText = 'Verifying…';
+      }
+      if (noticeEl) noticeEl.style.display = 'none';
 
       try {
         let token = '';
@@ -4519,27 +4595,51 @@
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            pushKey: pendingOrderSession.pushKey,
-            otp: otpVal
+            pushKey: pushKey,
+            otp: cleanOtp
           })
         });
 
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.success) {
-          verifyBtn.disabled = false;
-          verifyBtn.innerText = I18N[currentLang]?.verifyAndPlaceOrderBtn || 'Verify & Place Order';
-          showConfirmNotice(data.error || 'Invalid code. Please check and try again.', 'danger');
+          if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerText = I18N[currentLang]?.verifyAndPlaceOrderBtn || I18N[currentLang]?.verifyBtn || 'Verify & Place Order';
+          }
+          if (noticeEl) {
+            noticeEl.style.display = 'block';
+            noticeEl.style.background = '#FEE2E2';
+            noticeEl.style.color = '#B91C1C';
+            noticeEl.innerHTML = data.error || 'Invalid code. Please check and try again.';
+          }
           return;
         }
 
         // Successfully confirmed!
+        showToast('Order confirmed successfully! 🎉');
         if (orderConfirmTimerInterval) clearInterval(orderConfirmTimerInterval);
         if (resendCooldownInterval) clearInterval(resendCooldownInterval);
-        closeModal('orderConfirmModal');
+        closeModal('orderConfirmModal', false, true);
 
         // Clear cart
         cart = {};
         saveCart();
+
+        // Update local cache & re-render
+        if (currentUser && currentUser.uid) {
+          try {
+            const cachedRaw = localStorage.getItem('ra_customer_orders_' + currentUser.uid);
+            if (cachedRaw) {
+              const orders = JSON.parse(cachedRaw);
+              if (orders[pushKey]) {
+                orders[pushKey].status = (data.paymentMethod === 'online_razorpay') ? 'payment_pending' : 'placed';
+                orders[pushKey].paymentStatus = (data.paymentMethod === 'online_razorpay') ? 'pending' : 'cod_pending';
+                localStorage.setItem('ra_customer_orders_' + currentUser.uid, JSON.stringify(orders));
+                renderCustomerOrdersView(orders);
+              }
+            }
+          } catch (e) {}
+        }
 
         if (data.paymentMethod === 'online_razorpay' && data.razorpayOrderId) {
           await loadRazorpaySdk();
@@ -4572,11 +4672,11 @@
                   })
                 });
               } catch (e) {}
-              showOrderSuccess(data.orderId, pendingOrderSession.customer, data.total);
+              showOrderSuccess(data.orderId, pendingOrderSession?.customer, data.total);
             },
             prefill: {
-              name: pendingOrderSession.customer?.name || '',
-              contact: pendingOrderSession.customer?.phone || '',
+              name: pendingOrderSession?.customer?.name || '',
+              contact: pendingOrderSession?.customer?.phone || '',
               email: currentUser?.email || ''
             },
             theme: { color: '#0C831F' }
@@ -4584,23 +4684,29 @@
           const rzp = new Razorpay(options);
           rzp.open();
         } else {
-          // Cash on Delivery
-          showOrderSuccess(data.orderId, pendingOrderSession.customer, data.total);
+          // Cash on Delivery: refresh orders modal
+          openOrdersModal();
         }
       } catch (err) {
-        verifyBtn.disabled = false;
-        verifyBtn.innerText = I18N[currentLang]?.verifyAndPlaceOrderBtn || 'Verify & Place Order';
-        showConfirmNotice('Network error verifying code. Please try again.', 'danger');
+        if (btnEl) {
+          btnEl.disabled = false;
+          btnEl.innerText = I18N[currentLang]?.verifyAndPlaceOrderBtn || I18N[currentLang]?.verifyBtn || 'Verify & Place Order';
+        }
+        if (noticeEl) {
+          noticeEl.style.display = 'block';
+          noticeEl.style.background = '#FEE2E2';
+          noticeEl.style.color = '#B91C1C';
+          noticeEl.innerHTML = 'Network error verifying code. Please try again.';
+        }
       }
-    });
+    }
 
-    document.getElementById('btnResendOrderOtp')?.addEventListener('click', async () => {
-      if (!pendingOrderSession || !pendingOrderSession.pushKey) return;
-      const resendBtn = document.getElementById('btnResendOrderOtp');
-      resendBtn.disabled = true;
-      resendBtn.innerText = 'Sending…';
-      hideConfirmNotice();
-
+    async function resendConfirmationOtp(pushKey, btnEl, noticeEl) {
+      if (!pushKey) return;
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerText = 'Sending…';
+      }
       try {
         let token = '';
         if (currentUser) {
@@ -4613,29 +4719,80 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({
-            pushKey: pendingOrderSession.pushKey
-          })
+          body: JSON.stringify({ pushKey })
         });
 
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.success) {
-          resendBtn.disabled = false;
-          resendBtn.innerText = I18N[currentLang]?.resendCodeBtn || 'Resend Code';
-          showConfirmNotice(data.error || 'Failed to resend code.', 'danger');
+          if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerText = I18N[currentLang]?.resendCodeBtn || 'Resend Code';
+          }
+          if (noticeEl) {
+            noticeEl.style.display = 'block';
+            noticeEl.style.background = '#FEE2E2';
+            noticeEl.style.color = '#B91C1C';
+            noticeEl.innerHTML = data.error || 'Failed to resend code.';
+          }
           return;
         }
 
-        showConfirmNotice('Fresh code sent on WhatsApp!', 'success');
-        startResendCooldown(30);
+        if (noticeEl) {
+          noticeEl.style.display = 'block';
+          noticeEl.style.background = '#DCFCE7';
+          noticeEl.style.color = '#15803D';
+          noticeEl.innerHTML = 'Fresh code sent on WhatsApp!';
+        }
+        startResendCooldown(30, pushKey);
         if (data.expiresAt) {
-          startOrderConfirmTimer(new Date(data.expiresAt).getTime());
+          startOrderConfirmTimer(new Date(data.expiresAt).getTime(), pushKey);
         }
       } catch (err) {
-        resendBtn.disabled = false;
-        resendBtn.innerText = I18N[currentLang]?.resendCodeBtn || 'Resend Code';
-        showConfirmNotice('Network error requesting new code.', 'danger');
+        if (btnEl) {
+          btnEl.disabled = false;
+          btnEl.innerText = I18N[currentLang]?.resendCodeBtn || 'Resend Code';
+        }
+        if (noticeEl) {
+          noticeEl.style.display = 'block';
+          noticeEl.style.background = '#FEE2E2';
+          noticeEl.style.color = '#B91C1C';
+          noticeEl.innerHTML = 'Network error requesting new code.';
+        }
       }
+    }
+
+    document.getElementById('btnVerifyOrderOtp')?.addEventListener('click', () => {
+      const input = document.getElementById('orderConfirmOtpInput');
+      const otpVal = (input?.value || '').trim();
+      const noticeBox = document.getElementById('orderConfirmOtpNotice');
+      const verifyBtn = document.getElementById('btnVerifyOrderOtp');
+      submitConfirmationOtp(pendingOrderSession?.pushKey, otpVal, noticeBox, verifyBtn);
+    });
+
+    document.getElementById('orderConfirmOtpInput')?.addEventListener('input', (e) => {
+      const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+      e.target.value = val;
+      if (val.length === 6) {
+        const noticeBox = document.getElementById('orderConfirmOtpNotice');
+        const verifyBtn = document.getElementById('btnVerifyOrderOtp');
+        submitConfirmationOtp(pendingOrderSession?.pushKey, val, noticeBox, verifyBtn);
+      }
+    });
+
+    document.getElementById('orderConfirmOtpInput')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = e.target.value.trim();
+        const noticeBox = document.getElementById('orderConfirmOtpNotice');
+        const verifyBtn = document.getElementById('btnVerifyOrderOtp');
+        submitConfirmationOtp(pendingOrderSession?.pushKey, val, noticeBox, verifyBtn);
+      }
+    });
+
+    document.getElementById('btnResendOrderOtp')?.addEventListener('click', () => {
+      const resendBtn = document.getElementById('btnResendOrderOtp');
+      const noticeBox = document.getElementById('orderConfirmOtpNotice');
+      resendConfirmationOtp(pendingOrderSession?.pushKey, resendBtn, noticeBox);
     });
 
     document.getElementById('btnCancelOrderConfirm')?.addEventListener('click', async () => {
@@ -4663,12 +4820,13 @@
 
       if (orderConfirmTimerInterval) clearInterval(orderConfirmTimerInterval);
       if (resendCooldownInterval) clearInterval(resendCooldownInterval);
-      closeModal('orderConfirmModal');
+      closeModal('orderConfirmModal', false, true);
       showToast(I18N[currentLang]?.orderCancelled || 'Order cancelled');
+      openOrdersModal();
     });
 
     document.getElementById('closeOrderConfirmModalBtn')?.addEventListener('click', () => {
-      closeModal('orderConfirmModal');
+      closeModal('orderConfirmModal', false, true);
     });
 
     // Phase 3: Order History & Status Timeline Stepper with 10s timeout, error callback & signed-out view (Requirement 1 & 2)
@@ -4719,6 +4877,23 @@
               el.innerText = p.code;
             }
           }).catch(() => {});
+        }
+      });
+
+      // Initialize countdown timer for unconfirmed orders
+      Object.keys(orders).forEach(k => {
+        const o = orders[k];
+        if (o && o.status === 'pending_confirmation') {
+          const expMs = o.expiresAt ? new Date(o.expiresAt).getTime() : (getOrderTimestamp(o) + 15 * 60 * 1000);
+          setTimeout(() => {
+            const timerEl = document.getElementById('inline-timer-' + k);
+            if (timerEl) {
+              const rem = Math.max(0, Math.floor((expMs - Date.now()) / 1000));
+              const m = Math.floor(rem / 60);
+              const s = rem % 60;
+              timerEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            }
+          }, 50);
         }
       });
 
@@ -4783,20 +4958,38 @@
         let timelineHtml = '';
         if (isUnconfirmed) {
           timelineHtml = `
-            <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 12px; margin: 10px 0;">
+            <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 12px; margin: 10px 0;">
               <div style="font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 4px;">
                 ⚠️ ${t.orderNotConfirmed || 'Awaiting WhatsApp Confirmation'}
               </div>
               <div style="font-size: 12px; color: #78350F; margin-bottom: 10px;">
                 ${(t.codeSentToWhatsApp || 'Code sent to {phone} via WhatsApp').replace('{phone}', escapeHtml(maskPhone(o.customer?.phone || '')))}
               </div>
-              <div style="display: flex; gap: 8px;">
-                <button type="button" class="btn btn-primary action-enter-confirm-code" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id || '')}" data-phone="${escapeHtml(o.customer?.phone || '')}" data-method="${escapeHtml(o.paymentMethod || '')}" data-total="${escapeHtml(o.total || '')}" style="font-size: 12px; padding: 8px 14px; min-height: 38px; flex: 1;">
+              <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <button type="button" class="btn btn-primary action-enter-confirm-code" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id || '')}" data-phone="${escapeHtml(o.customer?.phone || '')}" data-method="${escapeHtml(o.paymentMethod || '')}" data-total="${escapeHtml(o.total || '')}" style="font-size: 13px; padding: 8px 14px; min-height: 40px; flex: 1; font-weight: 700;">
                   🔑 ${t.enterOtpBtn || 'Enter Code'}
                 </button>
-                <button type="button" class="btn btn-outline action-cancel-unconfirmed" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id || '')}" style="font-size: 12px; padding: 8px 14px; min-height: 38px; color: var(--danger); border-color: var(--danger); flex: 1;">
+                <button type="button" class="btn btn-outline action-cancel-unconfirmed" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id || '')}" style="font-size: 13px; padding: 8px 14px; min-height: 40px; color: var(--danger); border-color: var(--danger); flex: 1; font-weight: 600;">
                   ✕ ${t.cancelOrderBtn || 'Cancel Order'}
                 </button>
+              </div>
+
+              <!-- Inline Code Entry Box -->
+              <div id="inline-code-box-${escapeHtml(k)}" class="inline-confirm-box" style="padding: 12px; background: #FFFFFF; border: 1px solid #FCD34D; border-radius: 8px; text-align: center;">
+                <div id="inline-notice-${escapeHtml(k)}" style="display: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; text-align: left;"></div>
+                <label for="inline-code-input-${escapeHtml(k)}" style="display: block; font-size: 12px; font-weight: 700; color: #78350F; margin-bottom: 6px;">${t.enterConfirmCode || 'Enter 6-digit confirmation code'}</label>
+                <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 8px;">
+                  <input type="text" id="inline-code-input-${escapeHtml(k)}" class="inline-confirm-input" data-key="${escapeHtml(k)}" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="••••••" style="width: 140px; font-size: 20px; font-weight: 800; letter-spacing: 4px; text-align: center; padding: 6px 8px; border: 2px solid var(--border); border-radius: 6px; background: #fff;" />
+                  <button type="button" class="btn btn-primary action-submit-inline-code" data-key="${escapeHtml(k)}" style="padding: 7px 16px; font-size: 13px; min-height: 38px; font-weight: 700;">
+                    ${t.verifyBtn || 'Verify'}
+                  </button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); margin-top: 4px;">
+                  <span>⏱️ <span id="inline-timer-${escapeHtml(k)}">10:00</span></span>
+                  <button type="button" class="btn-resend-inline-code" data-key="${escapeHtml(k)}" style="background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 4px;">
+                    ${t.resendCodeBtn || 'Resend Code'}
+                  </button>
+                </div>
               </div>
             </div>
           `;
@@ -5049,7 +5242,7 @@
         }
         console.error('Customer orders listener error:', err);
         const el = document.getElementById('customerOrdersList');
-        if (el) {
+        if (el && (el.innerHTML.includes('Loading orders...') || !el.children.length)) {
           el.innerHTML = `
             <div style="text-align: center; padding: 32px 16px;">
               <p style="color: var(--danger); font-size: 14px; margin-bottom: 12px; font-weight: 600;">Could not load orders: ${escapeHtml(err.message || 'Permission denied')}</p>
@@ -5080,8 +5273,38 @@
           total: Number(total),
           expiresAt: Date.now() + 10 * 60 * 1000
         };
-        closeModal('ordersModal');
-        openOrderConfirmModal(pendingOrderSession);
+
+        const inlineBox = document.getElementById('inline-code-box-' + pushKey);
+        const inlineInput = document.getElementById('inline-code-input-' + pushKey);
+        if (inlineBox) inlineBox.style.display = 'block';
+        if (inlineInput) {
+          inlineInput.disabled = false;
+          inlineInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            inlineInput.focus();
+            inlineInput.select();
+          }, 50);
+        }
+        return;
+      }
+
+      // Submit inline confirmation code (Feature A)
+      const submitInlineBtn = e.target.closest('.action-submit-inline-code');
+      if (submitInlineBtn) {
+        const pushKey = submitInlineBtn.getAttribute('data-key');
+        const inlineInput = document.getElementById('inline-code-input-' + pushKey);
+        const otpVal = (inlineInput?.value || '').trim();
+        const noticeEl = document.getElementById('inline-notice-' + pushKey);
+        submitConfirmationOtp(pushKey, otpVal, noticeEl, submitInlineBtn);
+        return;
+      }
+
+      // Resend inline confirmation code (Feature A)
+      const resendInlineBtn = e.target.closest('.btn-resend-inline-code');
+      if (resendInlineBtn) {
+        const pushKey = resendInlineBtn.getAttribute('data-key');
+        const noticeEl = document.getElementById('inline-notice-' + pushKey);
+        resendConfirmationOtp(pushKey, resendInlineBtn, noticeEl);
         return;
       }
 
@@ -5109,12 +5332,29 @@
           });
           if (res.ok) {
             showToast(I18N[currentLang]?.orderCancelled || 'Order cancelled');
+            if (currentUser && currentUser.uid) {
+              try {
+                const cachedRaw = localStorage.getItem('ra_customer_orders_' + currentUser.uid);
+                if (cachedRaw) {
+                  const orders = JSON.parse(cachedRaw);
+                  if (orders[pushKey]) {
+                    orders[pushKey].status = 'cancelled';
+                    localStorage.setItem('ra_customer_orders_' + currentUser.uid, JSON.stringify(orders));
+                    renderCustomerOrdersView(orders);
+                  }
+                }
+              } catch (e) {}
+            }
           } else {
             const err = await res.json().catch(() => ({}));
             showToast(err.error || 'Failed to cancel order');
+            cancelUnconfirmedBtn.disabled = false;
+            cancelUnconfirmedBtn.innerText = I18N[currentLang]?.cancelOrderBtn || 'Cancel Order';
           }
         } catch (err) {
           showToast('Network error cancelling order');
+          cancelUnconfirmedBtn.disabled = false;
+          cancelUnconfirmedBtn.innerText = I18N[currentLang]?.cancelOrderBtn || 'Cancel Order';
         }
         return;
       }
@@ -5271,6 +5511,34 @@
       }
     });
 
+    // Auto-submit 6-digit confirmation code on input
+    document.getElementById('customerOrdersList')?.addEventListener('input', (e) => {
+      const input = e.target.closest('.inline-confirm-input');
+      if (input) {
+        const pushKey = input.getAttribute('data-key');
+        const val = input.value.replace(/\D/g, '').slice(0, 6);
+        input.value = val;
+        if (val.length === 6) {
+          const noticeEl = document.getElementById('inline-notice-' + pushKey);
+          const btnEl = document.querySelector(`.action-submit-inline-code[data-key="${pushKey}"]`);
+          submitConfirmationOtp(pushKey, val, noticeEl, btnEl);
+        }
+      }
+    });
+
+    // Submit on Enter key inside inline confirmation input
+    document.getElementById('customerOrdersList')?.addEventListener('keydown', (e) => {
+      const input = e.target.closest('.inline-confirm-input');
+      if (input && e.key === 'Enter') {
+        e.preventDefault();
+        const pushKey = input.getAttribute('data-key');
+        const val = input.value.trim();
+        const noticeEl = document.getElementById('inline-notice-' + pushKey);
+        const btnEl = document.querySelector(`.action-submit-inline-code[data-key="${pushKey}"]`);
+        submitConfirmationOtp(pushKey, val, noticeEl, btnEl);
+      }
+    });
+
     function openModal(id) {
       const el = document.getElementById(id);
       if (el) {
@@ -5290,7 +5558,7 @@
       }
     }
 
-    function closeModal(id, fromPopState = false) {
+    function closeModal(id, fromPopState = false, skipHistory = false) {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
       if (id === 'loginModal') {
@@ -5322,7 +5590,7 @@
           setActiveNavTab(previousNavTab || 'home', false);
         }
       }
-      if (!fromPopState && history.state && history.state.modalId === id) {
+      if (!skipHistory && !fromPopState && history.state && history.state.modalId === id) {
         try {
           history.back();
         } catch (e) {}
@@ -6602,7 +6870,7 @@
       } else {
         debugLog('swState', 'Registering...');
       }
-      navigator.serviceWorker.register('./sw.js?v=20261115v21', { scope: './' }).then(reg => {
+      navigator.serviceWorker.register('./sw.js?v=20261115v22', { scope: './' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {

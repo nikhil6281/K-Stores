@@ -1548,6 +1548,10 @@ it('FA.4: Frontend order confirmation modal and unconfirmed status badge in inde
   assert(indexHtml.includes('unconfirmedOrderBadge'), 'Must have I18N string for unconfirmed badge');
   assert(indexHtml.includes('action-enter-confirm-code'), 'Must have Enter Code action in orders list');
   assert(indexHtml.includes('action-cancel-unconfirmed'), 'Must have Cancel action for unconfirmed orders');
+  assert(indexHtml.includes('inline-code-box-'), 'Must have inline code box for unconfirmed orders');
+  assert(indexHtml.includes('inline-code-input-'), 'Must have inline code input for unconfirmed orders');
+  assert(indexHtml.includes('action-submit-inline-code'), 'Must have action-submit-inline-code button');
+  assert(indexHtml.includes('btn-resend-inline-code'), 'Must have btn-resend-inline-code button');
 });
 
 it('FA.5: Staff portal and RTDB rules isolation for pending_confirmation and expired orders', () => {
