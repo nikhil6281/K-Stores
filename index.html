@@ -2774,6 +2774,8 @@
           pendingOrdersAfterLogin = false;
           closeModal('loginModal');
           openOrdersModal();
+        } else if (document.getElementById('ordersModal')?.style.display === 'flex') {
+          openOrdersModal();
         }
       } else {
         if (loginBtn) {
@@ -4681,19 +4683,292 @@
       return isNaN(parsed) ? 0 : parsed;
     }
 
+    function renderCustomerOrdersView(orders) {
+      const list = document.getElementById('customerOrdersList');
+      if (!list) return;
+
+      if (!orders || Object.keys(orders).length === 0) {
+        list.innerHTML = `
+          <div style='text-align: center; padding: 36px 16px;'>
+            <div style='font-size: 42px; margin-bottom: 12px;'>📦</div>
+            <p style='color: var(--muted); font-size: 14px; font-weight: 600;'>${currentLang === 'te' ? 'ఆర్డర్‌లు ఏవీ లేవు' : 'No orders yet'}</p>
+            <p style='font-size: 12px; color: var(--muted); margin-top: 4px;'>${currentLang === 'te' ? 'మీరు చేసిన ఆర్డర్‌లు ఇక్కడ కనిపిస్తాయి.' : 'Your placed orders will appear here.'}</p>
+          </div>`;
+        return;
+      }
+
+      const stepRanks = {
+        placed: 0,
+        accepted: 0,
+        packed: 1,
+        out_for_delivery: 2,
+        delivered: 3,
+        cancelled: -1
+      };
+
+      const t = I18N[currentLang] || {};
+      const now = Date.now();
+
+      // Load OTP for out_for_delivery orders
+      Object.keys(orders).forEach(k => {
+        if (orders[k] && orders[k].status === 'out_for_delivery') {
+          db.ref('orderPrivate/' + k).once('value').then(snap => {
+            const p = snap.val();
+            const el = document.getElementById('otp-code-' + k);
+            if (el && p && p.code) {
+              el.innerText = p.code;
+            }
+          }).catch(() => {});
+        }
+      });
+
+      // 1. Sort all orders strictly newest first -> oldest by creation timestamp
+      const orderEntries = Object.entries(orders);
+      orderEntries.sort((a, b) => getOrderTimestamp(b[1]) - getOrderTimestamp(a[1]));
+
+      // 2. Keep the most recent order updated for "Reorder Last"
+      const mostRecentValidOrder = orderEntries.find(([_, o]) => Array.isArray(o?.items) && o.items.length > 0)?.[1];
+      if (mostRecentValidOrder) {
+        lastOrder = mostRecentValidOrder;
+        try {
+          localStorage.setItem('ra_last_order', JSON.stringify(mostRecentValidOrder));
+        } catch (e) {}
+        const reorderBtn = document.getElementById('reorderLastBtn');
+        if (reorderBtn) reorderBtn.style.display = 'inline-flex';
+      }
+
+      // 3. Partition into Live Orders and Past Orders
+      const liveEntries = [];
+      const pastEntries = [];
+      orderEntries.forEach(entry => {
+        const ord = entry[1];
+        if (!ord || typeof ord !== 'object') return;
+        const st = ord.status || 'placed';
+        if (st === 'delivered' || st === 'cancelled') {
+          pastEntries.push(entry);
+        } else {
+          liveEntries.push(entry);
+        }
+      });
+
+      function renderOrderCard(k, o) {
+        if (!o || typeof o !== 'object') return '';
+        const st = o.status || 'placed';
+        const isUnconfirmed = st === 'pending_confirmation';
+        const isExpired = st === 'expired';
+        const isCancelled = st === 'cancelled' || isExpired;
+        const isDelivered = st === 'delivered';
+        const canCancel = (st === 'placed' || st === 'accepted' || st === 'packed' || isUnconfirmed);
+        const currentRank = (stepRanks[st] !== undefined) ? stepRanks[st] : 0;
+
+        // Payment badge
+        let payBadgeHtml = '';
+        if (isUnconfirmed) {
+          payBadgeHtml = `<span style="background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.unconfirmedOrderBadge || '⚠️ Not confirmed'}</span>`;
+        } else if (isExpired) {
+          payBadgeHtml = `<span style="background: #FEE2E2; color: #991B1B; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">⏰ ${t.expired || 'Expired'}</span>`;
+        } else if (o.paymentMethod === 'cod') {
+          payBadgeHtml = `<span style="background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeCod || 'Pay on delivery 💵'}</span>`;
+        } else if (o.paymentStatus === 'paid' || o.paymentStatus === 'cod_collected') {
+          payBadgeHtml = `<span style="background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgePaid || 'PAID ✅'}</span>`;
+        } else if (o.paymentStatus === 'refund_initiated') {
+          payBadgeHtml = `<span style="background: #E0E7FF; color: #3730A3; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeRefundInitiated || 'Refund initiated'}</span>`;
+        } else if (o.paymentStatus === 'refunded') {
+          payBadgeHtml = `<span style="background: #E2E8F0; color: #475569; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeRefunded || 'Refunded ✅'}</span>`;
+        } else {
+          payBadgeHtml = `<span style="background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeAwaiting || '⏳ Awaiting payment'}</span>`;
+        }
+
+        // Visual stepper timeline
+        let timelineHtml = '';
+        if (isUnconfirmed) {
+          timelineHtml = `
+            <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 12px; margin: 10px 0;">
+              <div style="font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 4px;">
+                ⚠️ ${t.orderNotConfirmed || 'Awaiting WhatsApp Confirmation'}
+              </div>
+              <div style="font-size: 12px; color: #78350F; margin-bottom: 10px;">
+                ${(t.codeSentToWhatsApp || 'Code sent to {phone} via WhatsApp').replace('{phone}', escapeHtml(maskPhone(o.customer?.phone || '')))}
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn btn-primary action-enter-confirm-code" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id || '')}" data-phone="${escapeHtml(o.customer?.phone || '')}" data-method="${escapeHtml(o.paymentMethod || '')}" data-total="${escapeHtml(o.total || '')}" style="font-size: 12px; padding: 8px 14px; min-height: 38px; flex: 1;">
+                  🔑 ${t.enterOtpBtn || 'Enter Code'}
+                </button>
+                <button type="button" class="btn btn-outline action-cancel-unconfirmed" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id || '')}" style="font-size: 12px; padding: 8px 14px; min-height: 38px; color: var(--danger); border-color: var(--danger); flex: 1;">
+                  ✕ ${t.cancelOrderBtn || 'Cancel Order'}
+                </button>
+              </div>
+            </div>
+          `;
+        } else if (isCancelled) {
+          const refundNote = o.paymentStatus === 'refund_initiated' ? ' (Refund Initiated)' : (o.paymentStatus === 'refunded' ? ' (Refunded ✅)' : '');
+          timelineHtml = `
+            <div style="background: #FEE2E2; border: 1px solid #FECACA; color: var(--danger); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin: 10px 0;">
+              ❌ ${isExpired ? (t.orderConfirmationExpired || 'Order confirmation timed out (15m). Expired.') : (t.stepCancelled || 'Cancelled')}${refundNote}
+            </div>
+          `;
+        } else {
+          const packerName = o.packedBy?.name ? ` (${escapeHtml(o.packedBy.name)})` : (o.claimedBy?.name ? ` (${escapeHtml(o.claimedBy.name)})` : '');
+          const riderName = o.deliveredBy?.name ? ` (${escapeHtml(o.deliveredBy.name)})` : (o.claimedBy?.name ? ` (${escapeHtml(o.claimedBy.name)})` : '');
+          timelineHtml = `
+            <div class="order-timeline">
+              <div class="timeline-step ${currentRank >= 0 ? 'active' : ''} ${currentRank === 0 ? 'current' : ''}">
+                <div class="step-circle">${currentRank > 0 ? '✓' : '1'}</div>
+                <div class="step-label">${t.stepPlaced || 'Placed'}</div>
+              </div>
+              <div class="timeline-line ${currentRank >= 1 ? 'active' : ''}"></div>
+              <div class="timeline-step ${currentRank >= 1 ? 'active' : ''} ${currentRank === 1 ? 'current' : ''}">
+                <div class="step-circle">${currentRank > 1 ? '✓' : '2'}</div>
+                <div class="step-label">${t.stepPacked || 'Packed'}${packerName}</div>
+              </div>
+              <div class="timeline-line ${currentRank >= 2 ? 'active' : ''}"></div>
+              <div class="timeline-step ${currentRank >= 2 ? 'active' : ''} ${currentRank === 2 ? 'current' : ''}">
+                <div class="step-circle">${currentRank > 2 ? '✓' : '3'}</div>
+                <div class="step-label">${t.stepOut || 'Out for Delivery'}${riderName}</div>
+              </div>
+              <div class="timeline-line ${currentRank >= 3 ? 'active' : ''}"></div>
+              <div class="timeline-step ${currentRank >= 3 ? 'active' : ''} ${currentRank === 3 ? 'current' : ''}">
+                <div class="step-circle">${currentRank >= 3 ? '✓' : '4'}</div>
+                <div class="step-label">${t.stepDelivered || 'Delivered'}</div>
+              </div>
+            </div>
+          `;
+        }
+
+        // Online pending order expiry countdown and Pay Now
+        const isPendingOnline = (o.paymentMethod === 'online_razorpay' && o.paymentStatus === 'pending' && !isCancelled && !isDelivered);
+        const orderCreatedMs = getOrderTimestamp(o) || now;
+        const expiresMs = o.expiresAt ? new Date(o.expiresAt).getTime() : (orderCreatedMs + 15 * 60 * 1000);
+        const isPaymentWindowExpired = isPendingOnline && (now > expiresMs);
+        const remainingSecs = Math.max(0, Math.floor((expiresMs - now) / 1000));
+        const remMins = Math.floor(remainingSecs / 60);
+        const remSecs = remainingSecs % 60;
+
+        let pendingActionHtml = '';
+        if (isPendingOnline) {
+          if (isPaymentWindowExpired) {
+            pendingActionHtml = `
+              <div style="background: #FEE2E2; border: 1px solid #FECACA; color: var(--danger); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin: 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                <span>⏰ Payment window expired (15m)</span>
+                <span style="font-weight: 700;">${t.expired || 'Expired'}</span>
+              </div>
+            `;
+          } else {
+            pendingActionHtml = `
+              <div style="background: #FEF3C7; border: 1px solid #FDE68A; padding: 8px 12px; border-radius: 8px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 8px;">
+                <span style="font-size: 12px; color: #92400E; font-weight: 600;">⏳ Held for: <strong>${remMins}m ${remSecs < 10 ? '0' : ''}${remSecs}s</strong></span>
+                <button type="button" class="btn btn-primary action-pay-now-pending" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id || '')}" data-rzp-order="${escapeHtml(o.razorpayOrderId || '')}" data-total="${escapeHtml(o.total || '')}" style="font-size: 12px; padding: 6px 14px; min-height: 38px;">
+                  ${t.payNowBtn || 'Pay Now ⚡'}
+                </button>
+              </div>
+            `;
+          }
+        }
+
+        const itemsJson = escapeHtml(JSON.stringify(o.items || []));
+        const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString() : '';
+
+        return `
+          <div class="order-card-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-weight: 700; font-size: 14px;">#${escapeHtml(o.id || k)}</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                ${payBadgeHtml}
+                <span style="font-weight: 700; color: var(--primary); font-size: 15px;">₹${escapeHtml(o.total ?? '')}</span>
+              </div>
+            </div>
+            <div style="font-size: 11px; color: var(--muted); margin: 2px 0 6px;">${escapeHtml(dateStr)}</div>
+            
+            ${timelineHtml}
+
+            ${(st === 'out_for_delivery') ? `
+              <div id="otp-box-${escapeHtml(k)}" class="delivery-otp-box" style="background: linear-gradient(135deg, #ECFDF5, #D1FAE5); border: 2px solid #10B981; border-radius: 12px; padding: 14px; margin: 12px 0; text-align: center; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
+                <div style="font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+                  🔑 ${t.deliveryOtpTitle || 'Doorstep Delivery OTP'}
+                </div>
+                <div id="otp-code-${escapeHtml(k)}" style="font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #065F46; font-family: monospace; margin: 6px 0;">
+                  ----
+                </div>
+                <div style="font-size: 11px; color: #047857; font-weight: 600;">
+                  ${t.deliveryOtpSub || 'Share this 4-digit code ONLY with your Sri Sai delivery rider'}
+                </div>
+              </div>
+            ` : ''}
+
+            <div style="font-size: 12px; color: var(--text); background: #F8FAFC; border: 1px solid var(--border); padding: 8px 10px; border-radius: 6px; margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere;">
+              <span style="font-weight: 700; color: var(--muted); font-size: 11px;">📍 Delivery Address:</span>
+              <div>${escapeHtml(o.customer?.address || 'Anantapur')}</div>
+              ${o.customer?.notes ? `<div style="font-size: 11px; color: var(--muted); margin-top: 4px;">📝 <strong>Notes:</strong> ${escapeHtml(o.customer.notes)}</div>` : ''}
+            </div>
+
+            <div style="font-size: 12px; color: var(--muted); margin: 8px 0;">
+              ${(o.items || []).map(i => `${escapeHtml(i.name || 'Item')} (${escapeHtml(i.quantity || 1)})`).join(', ')}
+            </div>
+
+            ${o.customer?.scheduledSlot ? `
+              <div style="font-size: 11px; color: #B45309; background: #FEF3C7; padding: 4px 8px; border-radius: 6px; margin-bottom: 8px;">
+                ⏰ ${escapeHtml(o.customer.scheduledSlot)}
+              </div>
+            ` : ''}
+
+            ${pendingActionHtml}
+
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+              <button class="btn btn-outline action-reorder-past-order" data-order-id="${escapeHtml(o.id || k)}" data-items="${itemsJson}" style="flex: 1; font-size: 12px; min-height: 38px;">
+                ${t.reorderOrderBtn || '🔁 Reorder Items'}
+              </button>
+              ${canCancel ? `
+                <button class="btn btn-outline action-cancel-my-order" data-key="${escapeHtml(k)}" data-method="${escapeHtml(o.paymentMethod || '')}" data-paystatus="${escapeHtml(o.paymentStatus || '')}" data-total="${escapeHtml(o.total || 0)}" style="color: var(--danger); border-color: var(--danger); font-size: 12px; padding: 4px 10px; min-height: 38px;">
+                  ${t.cancelOrderBtn || 'Cancel Order'}
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      let fullHtml = '';
+      if (liveEntries.length > 0) {
+        fullHtml += `<div class="orders-group-header" style="font-size: 13px; font-weight: 700; color: var(--primary, #0C831F); margin: 6px 0 10px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span>🛵</span> <span>${t.liveOrdersTitle || (currentLang === 'te' ? 'లైవ్ ఆర్డర్లు & ట్రాకింగ్' : 'Live Orders & Live Tracking')}</span>
+          </div>
+          <span style="font-size: 11px; background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 12px; font-weight: 700;">${liveEntries.length} active</span>
+        </div>`;
+        fullHtml += liveEntries.map(([k, o]) => renderOrderCard(k, o)).join('');
+      }
+
+      if (pastEntries.length > 0) {
+        if (liveEntries.length > 0) {
+          fullHtml += `<div class="orders-group-header" style="font-size: 13px; font-weight: 700; color: #4B5563; margin: 18px 0 10px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>📦</span> <span>${t.pastOrdersTitle || (currentLang === 'te' ? 'గత ఆర్డర్లు' : 'Past Orders')}</span>
+            </div>
+            <span style="font-size: 11px; background: #F3F4F6; color: #4B5563; padding: 2px 8px; border-radius: 12px; font-weight: 700;">${pastEntries.length}</span>
+          </div>`;
+        }
+        fullHtml += pastEntries.map(([k, o]) => renderOrderCard(k, o)).join('');
+      }
+
+      list.innerHTML = fullHtml;
+    }
+
     function openOrdersModal() {
       openModal('ordersModal');
       setActiveNavTab('orders');
 
       const list = document.getElementById('customerOrdersList');
-      if (!currentUser) {
+      const activeUser = currentUser || (typeof auth !== 'undefined' ? auth.currentUser : null);
+
+      if (!activeUser) {
         if (list) {
+          const isTe = currentLang === 'te';
           list.innerHTML = `
             <div style="text-align: center; padding: 36px 16px;">
               <div style="font-size: 44px; margin-bottom: 12px;">🛍️</div>
-              <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Sign in to see your orders</h4>
-              <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5;">Please sign in with your email or Google account to track your orders in real time.</p>
-              <button type="button" class="btn btn-primary" id="ordersSignInPromptBtn" style="padding: 10px 24px; font-size: 14px; border-radius: 8px;">Sign In</button>
+              <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">${isTe ? 'మీ ఆర్డర్లను వీక్షించడానికి లాగిన్ చేయండి' : 'Sign in to see your orders'}</h4>
+              <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5;">${isTe ? 'మీ ఆర్డర్‌లను వీక్షించడానికి మరియు లైవ్ ట్రాక్ చేయడానికి దయచేసి వాట్సాప్ లేదా Google తో లాగిన్ అవ్వండి.' : 'Please sign in with your WhatsApp number or Google account to track your orders in real time.'}</p>
+              <button type="button" class="btn btn-primary" id="ordersSignInPromptBtn" style="padding: 10px 24px; font-size: 14px; border-radius: 8px;">${isTe ? 'లాగిన్ చేయండి' : 'Sign In'}</button>
             </div>`;
           document.getElementById('ordersSignInPromptBtn')?.addEventListener('click', () => {
             pendingOrdersAfterLogin = true;
@@ -4703,8 +4978,25 @@
         return;
       }
 
-      if (list) {
-        list.innerHTML = "<div style='text-align: center; padding: 30px 16px;'><p style='color: var(--muted); font-size: 14px;'>Loading orders...</p></div>";
+      // Instant hydration from cache if available so the user never sees an endless spinner
+      let hasHydrated = false;
+      try {
+        const cachedRaw = localStorage.getItem('ra_customer_orders_' + activeUser.uid);
+        if (cachedRaw) {
+          const parsed = JSON.parse(cachedRaw);
+          if (parsed && typeof parsed === 'object') {
+            renderCustomerOrdersView(parsed);
+            hasHydrated = true;
+          }
+        }
+      } catch (e) {}
+
+      if (!hasHydrated && list) {
+        list.innerHTML = `
+          <div style="text-align: center; padding: 36px 16px;">
+            <div class="spinner" style="margin: 0 auto 12px; width: 28px; height: 28px; border: 3px solid #E5E7EB; border-top-color: var(--primary, #0C831F); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <p style="color: var(--muted); font-size: 14px; font-weight: 500;">Loading orders...</p>
+          </div>`;
       }
 
       if (customerOrdersLoadTimeout) clearTimeout(customerOrdersLoadTimeout);
@@ -4720,273 +5012,45 @@
         }
       }, 10000);
 
-      if (ordersRef) ordersRef.off();
-      ordersRef = db.ref('orders').orderByChild('uid').equalTo(currentUser.uid);
+      if (ordersRef) {
+        ordersRef.off();
+        ordersRef = null;
+      }
+
+      ordersRef = db.ref('orders').orderByChild('uid').equalTo(activeUser.uid);
 
       ordersRef.on('value', snap => {
-        if (customerOrdersLoadTimeout) clearTimeout(customerOrdersLoadTimeout);
-        const list = document.getElementById('customerOrdersList');
-        const orders = snap.val();
-        if (!orders || Object.keys(orders).length === 0) {
-          list.innerHTML = "<div style='text-align: center; padding: 36px 16px;'><div style='font-size: 42px; margin-bottom: 12px;'>📦</div><p style='color: var(--muted); font-size: 14px; font-weight: 600;'>No orders yet</p><p style='font-size: 12px; color: var(--muted); margin-top: 4px;'>Your placed orders will appear here.</p></div>";
-          return;
+        if (customerOrdersLoadTimeout) {
+          clearTimeout(customerOrdersLoadTimeout);
+          customerOrdersLoadTimeout = null;
         }
-
-        const stepRanks = {
-          placed: 0,
-          accepted: 0,
-          packed: 1,
-          out_for_delivery: 2,
-          delivered: 3,
-          cancelled: -1
-        };
-
-        const t = I18N[currentLang];
-        const now = Date.now();
-
-        // Load OTP for out_for_delivery orders
-        Object.keys(orders).forEach(k => {
-          if (orders[k] && orders[k].status === 'out_for_delivery') {
-            db.ref('orderPrivate/' + k).once('value').then(snap => {
-              const p = snap.val();
-              const el = document.getElementById('otp-code-' + k);
-              if (el && p && p.code) {
-                el.innerText = p.code;
-              }
-            }).catch(() => {});
-          }
-        });
-
-        // 1. Sort all orders strictly newest first -> oldest by creation timestamp (Requirement 2)
-        const orderEntries = Object.entries(orders);
-        orderEntries.sort((a, b) => getOrderTimestamp(b[1]) - getOrderTimestamp(a[1]));
-
-        // 2. Keep the most recent order updated for "Reorder Last"
-        const mostRecentValidOrder = orderEntries.find(([_, o]) => Array.isArray(o.items) && o.items.length > 0)?.[1];
-        if (mostRecentValidOrder) {
-          lastOrder = mostRecentValidOrder;
+        try {
+          const orders = snap.val() || {};
           try {
-            localStorage.setItem('ra_last_order', JSON.stringify(mostRecentValidOrder));
+            localStorage.setItem('ra_customer_orders_' + activeUser.uid, JSON.stringify(orders));
           } catch (e) {}
-          const reorderBtn = document.getElementById('reorderLastBtn');
-          if (reorderBtn) reorderBtn.style.display = 'inline-flex';
+          renderCustomerOrdersView(orders);
+        } catch (renderErr) {
+          console.error('Customer orders render error:', renderErr);
+          const el = document.getElementById('customerOrdersList');
+          if (el) {
+            el.innerHTML = `
+              <div style="text-align: center; padding: 32px 16px;">
+                <p style="color: var(--danger); font-size: 14px; margin-bottom: 12px; font-weight: 600;">Could not render orders. Please try again.</p>
+                <button type="button" class="btn btn-outline" id="retryOrdersBtn" style="padding: 8px 18px; font-size: 13px;">Retry</button>
+              </div>`;
+            document.getElementById('retryOrdersBtn')?.addEventListener('click', () => openOrdersModal());
+          }
         }
-
-        // 3. Partition into Live Orders (placed, accepted, packed, out_for_delivery) and Past Orders (delivered, cancelled)
-        const liveEntries = [];
-        const pastEntries = [];
-        orderEntries.forEach(entry => {
-          const st = entry[1].status || 'placed';
-          if (st === 'delivered' || st === 'cancelled') {
-            pastEntries.push(entry);
-          } else {
-            liveEntries.push(entry);
-          }
-        });
-
-        function renderOrderCard(k, o) {
-          const st = o.status || 'placed';
-          const isUnconfirmed = st === 'pending_confirmation';
-          const isExpired = st === 'expired';
-          const isCancelled = st === 'cancelled' || isExpired;
-          const isDelivered = st === 'delivered';
-          const canCancel = (st === 'placed' || st === 'accepted' || st === 'packed' || isUnconfirmed);
-
-          // Payment badge
-          let payBadgeHtml = '';
-          if (isUnconfirmed) {
-            payBadgeHtml = `<span style="background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.unconfirmedOrderBadge || '⚠️ Not confirmed'}</span>`;
-          } else if (isExpired) {
-            payBadgeHtml = `<span style="background: #FEE2E2; color: #991B1B; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">⏰ ${t.expired || 'Expired'}</span>`;
-          } else if (o.paymentMethod === 'cod') {
-            payBadgeHtml = `<span style="background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeCod}</span>`;
-          } else if (o.paymentStatus === 'paid' || o.paymentStatus === 'cod_collected') {
-            payBadgeHtml = `<span style="background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgePaid}</span>`;
-          } else if (o.paymentStatus === 'refund_initiated') {
-            payBadgeHtml = `<span style="background: #E0E7FF; color: #3730A3; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeRefundInitiated}</span>`;
-          } else if (o.paymentStatus === 'refunded') {
-            payBadgeHtml = `<span style="background: #E2E8F0; color: #475569; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeRefunded}</span>`;
-          } else {
-            payBadgeHtml = `<span style="background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeAwaiting}</span>`;
-          }
-
-          // Visual stepper timeline
-          let timelineHtml = '';
-          if (isUnconfirmed) {
-            timelineHtml = `
-              <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 12px; margin: 10px 0;">
-                <div style="font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 4px;">
-                  ⚠️ ${t.orderNotConfirmed || 'Awaiting WhatsApp Confirmation'}
-                </div>
-                <div style="font-size: 12px; color: #78350F; margin-bottom: 10px;">
-                  ${(t.codeSentToWhatsApp || 'Code sent to {phone} via WhatsApp').replace('{phone}', escapeHtml(maskPhone(o.customer?.phone || '')))}
-                </div>
-                <div style="display: flex; gap: 8px;">
-                  <button type="button" class="btn btn-primary action-enter-confirm-code" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id)}" data-phone="${escapeHtml(o.customer?.phone || '')}" data-method="${escapeHtml(o.paymentMethod || '')}" data-total="${escapeHtml(o.total || '')}" style="font-size: 12px; padding: 8px 14px; min-height: 38px; flex: 1;">
-                    🔑 ${t.enterOtpBtn || 'Enter Code'}
-                  </button>
-                  <button type="button" class="btn btn-outline action-cancel-unconfirmed" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id)}" style="font-size: 12px; padding: 8px 14px; min-height: 38px; color: var(--danger); border-color: var(--danger); flex: 1;">
-                    ✕ ${t.cancelOrderBtn || 'Cancel Order'}
-                  </button>
-                </div>
-              </div>
-            `;
-          } else if (isCancelled) {
-            const refundNote = o.paymentStatus === 'refund_initiated' ? ' (Refund Initiated)' : (o.paymentStatus === 'refunded' ? ' (Refunded ✅)' : '');
-            timelineHtml = `
-              <div style="background: #FEE2E2; border: 1px solid #FECACA; color: var(--danger); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin: 10px 0;">
-                ❌ ${isExpired ? (t.orderConfirmationExpired || 'Order confirmation timed out (15m). Expired.') : t.stepCancelled}${refundNote}
-              </div>
-            `;
-          } else {
-            const packerName = o.packedBy?.name ? ` (${escapeHtml(o.packedBy.name)})` : (o.claimedBy?.name ? ` (${escapeHtml(o.claimedBy.name)})` : '');
-            const riderName = o.deliveredBy?.name ? ` (${escapeHtml(o.deliveredBy.name)})` : (o.claimedBy?.name ? ` (${escapeHtml(o.claimedBy.name)})` : '');
-            timelineHtml = `
-              <div class="order-timeline">
-                <div class="timeline-step ${currentRank >= 0 ? 'active' : ''} ${currentRank === 0 ? 'current' : ''}">
-                  <div class="step-circle">${currentRank > 0 ? '✓' : '1'}</div>
-                  <div class="step-label">${t.stepPlaced}</div>
-                </div>
-                <div class="timeline-line ${currentRank >= 1 ? 'active' : ''}"></div>
-                <div class="timeline-step ${currentRank >= 1 ? 'active' : ''} ${currentRank === 1 ? 'current' : ''}">
-                  <div class="step-circle">${currentRank > 1 ? '✓' : '2'}</div>
-                  <div class="step-label">${t.stepPacked}${packerName}</div>
-                </div>
-                <div class="timeline-line ${currentRank >= 2 ? 'active' : ''}"></div>
-                <div class="timeline-step ${currentRank >= 2 ? 'active' : ''} ${currentRank === 2 ? 'current' : ''}">
-                  <div class="step-circle">${currentRank > 2 ? '✓' : '3'}</div>
-                  <div class="step-label">${t.stepOut}${riderName}</div>
-                </div>
-                <div class="timeline-line ${currentRank >= 3 ? 'active' : ''}"></div>
-                <div class="timeline-step ${currentRank >= 3 ? 'active' : ''} ${currentRank === 3 ? 'current' : ''}">
-                  <div class="step-circle">${currentRank >= 3 ? '✓' : '4'}</div>
-                  <div class="step-label">${t.stepDelivered}</div>
-                </div>
-              </div>
-            `;
-          }
-
-          // Online pending order expiry countdown and Pay Now
-          const isPendingOnline = (o.paymentMethod === 'online_razorpay' && o.paymentStatus === 'pending' && !isCancelled && !isDelivered);
-          const orderCreatedMs = new Date(o.createdAt).getTime() || now;
-          const expiresMs = o.expiresAt ? new Date(o.expiresAt).getTime() : (orderCreatedMs + 15 * 60 * 1000);
-          const isPaymentWindowExpired = isPendingOnline && (now > expiresMs);
-          const remainingSecs = Math.max(0, Math.floor((expiresMs - now) / 1000));
-          const remMins = Math.floor(remainingSecs / 60);
-          const remSecs = remainingSecs % 60;
-
-          let pendingActionHtml = '';
-          if (isPendingOnline) {
-            if (isPaymentWindowExpired) {
-              pendingActionHtml = `
-                <div style="background: #FEE2E2; border: 1px solid #FECACA; color: var(--danger); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin: 8px 0; display: flex; justify-content: space-between; align-items: center;">
-                  <span>⏰ Payment window expired (15m)</span>
-                  <span style="font-weight: 700;">${t.expired}</span>
-                </div>
-              `;
-            } else {
-              pendingActionHtml = `
-                <div style="background: #FEF3C7; border: 1px solid #FDE68A; padding: 8px 12px; border-radius: 8px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                  <span style="font-size: 12px; color: #92400E; font-weight: 600;">⏳ Held for: <strong>${remMins}m ${remSecs < 10 ? '0' : ''}${remSecs}s</strong></span>
-                  <button type="button" class="btn btn-primary action-pay-now-pending" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id)}" data-rzp-order="${escapeHtml(o.razorpayOrderId || '')}" data-total="${escapeHtml(o.total)}" style="font-size: 12px; padding: 6px 14px; min-height: 38px;">
-                    ${t.payNowBtn}
-                  </button>
-                </div>
-              `;
-            }
-          }
-
-          const itemsJson = escapeHtml(JSON.stringify(o.items || []));
-
-          return `
-            <div class="order-card-box">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-weight: 700; font-size: 14px;">#${escapeHtml(o.id)}</span>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  ${payBadgeHtml}
-                  <span style="font-weight: 700; color: var(--primary); font-size: 15px;">₹${escapeHtml(o.total)}</span>
-                </div>
-              </div>
-              <div style="font-size: 11px; color: var(--muted); margin: 2px 0 6px;">${new Date(o.createdAt).toLocaleString()}</div>
-              
-              ${timelineHtml}
-
-              ${(st === 'out_for_delivery') ? `
-                <div id="otp-box-${escapeHtml(k)}" class="delivery-otp-box" style="background: linear-gradient(135deg, #ECFDF5, #D1FAE5); border: 2px solid #10B981; border-radius: 12px; padding: 14px; margin: 12px 0; text-align: center; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
-                  <div style="font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
-                    🔑 ${t.deliveryOtpTitle}
-                  </div>
-                  <div id="otp-code-${escapeHtml(k)}" style="font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #065F46; font-family: monospace; margin: 6px 0;">
-                    ----
-                  </div>
-                  <div style="font-size: 11px; color: #047857; font-weight: 600;">
-                    ${t.deliveryOtpSub}
-                  </div>
-                </div>
-              ` : ''}
-
-              <div style="font-size: 12px; color: var(--text); background: #F8FAFC; border: 1px solid var(--border); padding: 8px 10px; border-radius: 6px; margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere;">
-                <span style="font-weight: 700; color: var(--muted); font-size: 11px;">📍 Delivery Address:</span>
-                <div>${escapeHtml(o.customer?.address || 'Anantapur')}</div>
-                ${o.customer?.notes ? `<div style="font-size: 11px; color: var(--muted); margin-top: 4px;">📝 <strong>Notes:</strong> ${escapeHtml(o.customer.notes)}</div>` : ''}
-              </div>
-
-              <div style="font-size: 12px; color: var(--muted); margin: 8px 0;">
-                ${(o.items || []).map(i => `${escapeHtml(i.name)} (${i.quantity})`).join(', ')}
-              </div>
-
-              ${o.customer?.scheduledSlot ? `
-                <div style="font-size: 11px; color: #B45309; background: #FEF3C7; padding: 4px 8px; border-radius: 6px; margin-bottom: 8px;">
-                  ⏰ ${escapeHtml(o.customer.scheduledSlot)}
-                </div>
-              ` : ''}
-
-              ${pendingActionHtml}
-
-              <div style="display: flex; gap: 8px; margin-top: 10px;">
-                <button class="btn btn-outline action-reorder-past-order" data-order-id="${escapeHtml(o.id)}" data-items="${itemsJson}" style="flex: 1; font-size: 12px; min-height: 38px;">
-                  ${t.reorderOrderBtn}
-                </button>
-                ${canCancel ? `
-                  <button class="btn btn-outline action-cancel-my-order" data-key="${escapeHtml(k)}" data-method="${escapeHtml(o.paymentMethod || '')}" data-paystatus="${escapeHtml(o.paymentStatus || '')}" data-total="${escapeHtml(o.total || 0)}" style="color: var(--danger); border-color: var(--danger); font-size: 12px; padding: 4px 10px; min-height: 38px;">
-                    ${t.cancelOrderBtn}
-                  </button>
-                ` : ''}
-              </div>
-            </div>
-          `;
-        }
-
-        let fullHtml = '';
-        if (liveEntries.length > 0) {
-          fullHtml += `<div class="orders-group-header" style="font-size: 13px; font-weight: 700; color: var(--primary, #0C831F); margin: 6px 0 10px; display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <span>🛵</span> <span>${t.liveOrdersTitle || (currentLang === 'te' ? 'లైవ్ ఆర్డర్లు & ట్రాకింగ్' : 'Live Orders & Live Tracking')}</span>
-            </div>
-            <span style="font-size: 11px; background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 12px; font-weight: 700;">${liveEntries.length} active</span>
-          </div>`;
-          fullHtml += liveEntries.map(([k, o]) => renderOrderCard(k, o)).join('');
-        }
-
-        if (pastEntries.length > 0) {
-          if (liveEntries.length > 0) {
-            fullHtml += `<div class="orders-group-header" style="font-size: 13px; font-weight: 700; color: #4B5563; margin: 18px 0 10px; display: flex; align-items: center; justify-content: space-between;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span>📦</span> <span>${t.pastOrdersTitle || (currentLang === 'te' ? 'గత ఆర్డర్లు' : 'Past Orders')}</span>
-              </div>
-              <span style="font-size: 11px; background: #F3F4F6; color: #4B5563; padding: 2px 8px; border-radius: 12px; font-weight: 700;">${pastEntries.length}</span>
-            </div>`;
-          }
-          fullHtml += pastEntries.map(([k, o]) => renderOrderCard(k, o)).join('');
-        }
-
-        list.innerHTML = fullHtml;
       }, (err) => {
-        if (customerOrdersLoadTimeout) clearTimeout(customerOrdersLoadTimeout);
+        if (customerOrdersLoadTimeout) {
+          clearTimeout(customerOrdersLoadTimeout);
+          customerOrdersLoadTimeout = null;
+        }
         console.error('Customer orders listener error:', err);
-        const list = document.getElementById('customerOrdersList');
-        if (list) {
-          list.innerHTML = `
+        const el = document.getElementById('customerOrdersList');
+        if (el) {
+          el.innerHTML = `
             <div style="text-align: center; padding: 32px 16px;">
               <p style="color: var(--danger); font-size: 14px; margin-bottom: 12px; font-weight: 600;">Could not load orders: ${escapeHtml(err.message || 'Permission denied')}</p>
               <button type="button" class="btn btn-outline" id="retryOrdersBtn" style="padding: 8px 18px; font-size: 13px;">Retry</button>
@@ -6538,7 +6602,7 @@
       } else {
         debugLog('swState', 'Registering...');
       }
-      navigator.serviceWorker.register('./sw.js?v=20261115v20', { scope: './' }).then(reg => {
+      navigator.serviceWorker.register('./sw.js?v=20261115v21', { scope: './' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {
