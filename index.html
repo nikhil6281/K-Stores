@@ -1613,7 +1613,7 @@
       <button type="button" class="modal-close-btn" data-modal="orderConfirmModal" id="closeOrderConfirmModalBtn" aria-label="Close" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted);">✕</button>
       <span style="font-size: 38px;">📲</span>
       <h3 style="font-size: 18px; font-weight: 700; margin: 8px 0 4px;" id="orderConfirmModalTitle">Confirm Your Order</h3>
-      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;" id="orderConfirmSubtitle">Code sent to <strong id="orderConfirmPhoneText">+91 ••••• ••123</strong> via WhatsApp</p>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;" id="orderConfirmSubtitle">Please enter the confirmation code sent to <strong id="orderConfirmPhoneText">+91 ••••• ••123</strong> on WhatsApp.</p>
 
       <div id="orderConfirmOtpNotice" style="display: none; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; text-align: left;"></div>
 
@@ -1626,15 +1626,15 @@
       </div>
 
       <button type="button" class="btn btn-primary" id="btnVerifyOrderOtp" style="width: 100%; min-height: 48px; font-size: 15px; font-weight: 700; margin-bottom: 10px;">
-        Verify & Place Order
+        Confirm Order
       </button>
 
       <div style="display: flex; gap: 8px; justify-content: space-between;">
+        <button type="button" class="btn btn-outline" id="btnCancelOrderConfirm" style="flex: 1; min-height: 42px; font-size: 13px; color: var(--danger); border-color: var(--danger); font-weight: 600;">
+          Cancel Order
+        </button>
         <button type="button" class="btn btn-outline" id="btnResendOrderOtp" style="flex: 1; min-height: 42px; font-size: 13px;">
           Resend (<span id="resendTimerSec">30</span>s)
-        </button>
-        <button type="button" class="btn btn-outline" id="btnCancelOrderConfirm" style="flex: 1; min-height: 42px; font-size: 13px; color: var(--danger); border-color: var(--danger);">
-          Cancel Order
         </button>
       </div>
     </div>
@@ -4048,6 +4048,33 @@
         rawPhone = rawPhone.slice(1);
       }
 
+      // Check fallback from user profile / auth session if missing
+      if (!rawPhone || rawPhone.length < 10) {
+        let fallbackPhone = '';
+        if (currentUser && currentUser.phoneNumber) {
+          fallbackPhone = currentUser.phoneNumber;
+        }
+        if (!fallbackPhone) {
+          try {
+            const prof = JSON.parse(localStorage.getItem('ra_customer_profile_' + (currentUser?.uid || '')) || localStorage.getItem('ra_customer_profile') || '{}');
+            fallbackPhone = prof.phone || '';
+          } catch (e) {}
+        }
+        if (!fallbackPhone && window.pendingLoginPhone) {
+          fallbackPhone = window.pendingLoginPhone;
+        }
+        if (fallbackPhone) {
+          let cleaned = String(fallbackPhone).replace(/\D/g, '');
+          if (cleaned.length === 12 && cleaned.startsWith('91')) cleaned = cleaned.slice(2);
+          else if (cleaned.length === 11 && cleaned.startsWith('0')) cleaned = cleaned.slice(1);
+          if (cleaned.length === 10) {
+            rawPhone = cleaned;
+            const phoneInput = document.getElementById('custPhone');
+            if (phoneInput && !phoneInput.value) phoneInput.value = rawPhone;
+          }
+        }
+      }
+
       const custName = (document.getElementById('custName')?.value || '').trim();
       const custAddress = (document.getElementById('custAddress')?.value || '').trim();
 
@@ -4223,17 +4250,8 @@
               }
             } catch (e) {}
 
-            // Issue 2: Transition customer directly to the active order view/theme displaying "Enter Code" and "Cancel Order"
-            openOrdersModal();
-            setTimeout(() => {
-              const inp = document.getElementById('inline-code-input-' + serverData.pushKey);
-              if (inp) {
-                inp.focus();
-                inp.select();
-              }
-              startOrderConfirmTimer(new Date(serverData.expiresAt || (Date.now() + 15 * 60 * 1000)).getTime(), serverData.pushKey);
-              startResendCooldown(30, serverData.pushKey);
-            }, 250);
+            // Issue 2: Immediately open prominent on-screen confirmation modal right there on the spot (no manual navigation to My Orders)
+            openOrderConfirmModal(pendingOrderSession);
             return;
           }
 
@@ -4459,7 +4477,7 @@
       const verifyBtn = document.getElementById('btnVerifyOrderOtp');
       if (verifyBtn) {
         verifyBtn.disabled = false;
-        verifyBtn.innerText = I18N[currentLang]?.verifyAndPlaceOrderBtn || 'Verify & Place Order';
+        verifyBtn.innerText = (currentLang === 'te') ? 'ఆర్డర్ ధృవీకరించండి' : (I18N[currentLang]?.confirmOrderBtn || 'Confirm Order');
       }
       hideConfirmNotice();
       openModal('orderConfirmModal');
@@ -6870,7 +6888,7 @@
       } else {
         debugLog('swState', 'Registering...');
       }
-      navigator.serviceWorker.register('./sw.js?v=20261115v22', { scope: './' }).then(reg => {
+      navigator.serviceWorker.register('./sw.js?v=20261115v23', { scope: './' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {
