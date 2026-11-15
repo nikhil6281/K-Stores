@@ -4865,17 +4865,6 @@
               </div>
             `;
           }
-                  <div class="step-circle">${currentRank > 2 ? '✓' : '3'}</div>
-                  <div class="step-label">${t.stepOut}</div>
-                </div>
-                <div class="timeline-line ${currentRank >= 3 ? 'active' : ''}"></div>
-                <div class="timeline-step ${currentRank >= 3 ? 'active' : ''} ${currentRank === 3 ? 'current' : ''}">
-                  <div class="step-circle">${currentRank >= 3 ? '✓' : '4'}</div>
-                  <div class="step-label">${t.stepDelivered}</div>
-                </div>
-              </div>
-            `;
-          }
 
           // Online pending order expiry countdown and Pay Now
           const isPendingOnline = (o.paymentMethod === 'online_razorpay' && o.paymentStatus === 'pending' && !isCancelled && !isDelivered);
