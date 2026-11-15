@@ -436,6 +436,51 @@ export default {
         return await handleVerifyWhatsappOtp(request, env, cors);
       }
 
+      // 20. POST /api/order/confirm-otp
+      if (pathname === '/api/order/confirm-otp' && request.method === 'POST') {
+        return await handleConfirmOrderOtp(request, env, cors);
+      }
+
+      // 21. POST /api/order/resend-confirmation-otp
+      if (pathname === '/api/order/resend-confirmation-otp' && request.method === 'POST') {
+        return await handleResendOrderConfirmationOtp(request, env, cors);
+      }
+
+      // 22. POST /api/order/cancel-unconfirmed
+      if (pathname === '/api/order/cancel-unconfirmed' && request.method === 'POST') {
+        return await handleCancelUnconfirmedOrder(request, env, cors);
+      }
+
+      // 23. POST /api/staff/claim-order
+      if (pathname === '/api/staff/claim-order' && request.method === 'POST') {
+        return await handleStaffClaimOrder(request, env, cors);
+      }
+
+      // 24. POST /api/staff/release-order
+      if (pathname === '/api/staff/release-order' && request.method === 'POST') {
+        return await handleStaffReleaseOrder(request, env, cors);
+      }
+
+      // 25. POST /api/staff/heartbeat
+      if (pathname === '/api/staff/heartbeat' && request.method === 'POST') {
+        return await handleStaffHeartbeat(request, env, cors);
+      }
+
+      // 26. POST /api/admin/reassign-order
+      if (pathname === '/api/admin/reassign-order' && request.method === 'POST') {
+        return await handleAdminReassignOrder(request, env, cors);
+      }
+
+      // 27. POST /api/admin/release-to-pool
+      if (pathname === '/api/admin/release-to-pool' && request.method === 'POST') {
+        return await handleAdminReleaseToPool(request, env, cors);
+      }
+
+      // 28. POST /api/admin/cash-reconciliation
+      if (pathname === '/api/admin/cash-reconciliation' && request.method === 'POST') {
+        return await handleAdminCashReconciliation(request, env, cors);
+      }
+
       return jsonError('Route not found', 'NOT_FOUND', 404, cors);
     } catch (err) {
       console.error('Unhandled Worker error:', err);
@@ -574,6 +619,94 @@ async function handleCreateOrder(request, env, cors) {
     createdAt: now.toISOString(),
     updatedAt: now.toISOString()
   };
+
+  // Check Settings for Customer Order-Confirmation OTP (Feature A)
+  // Options: 'all' (default), 'cod_only', 'off'
+  const otpSetting = (dbSettings.orderConfirmationOtp || 'all').toLowerCase();
+  const trustedSkip = dbSettings.trustedCustomerSkipOtp === true;
+  let requireOtp = true;
+
+  if (otpSetting === 'off') {
+    requireOtp = false;
+  } else if (otpSetting === 'cod_only' && paymentMethod === 'online_razorpay') {
+    requireOtp = false;
+  }
+
+  if (requireOtp && trustedSkip) {
+    const trusted = await isCustomerTrusted(user.uid, env);
+    if (trusted) requireOtp = false;
+  }
+
+  if (requireOtp) {
+    // Abuse protection: limit unconfirmed or expired orders in last 24h (< 3)
+    const oneDayAgo = now.getTime() - (24 * 60 * 60 * 1000);
+    const existingOrders = await rtdbFetch(env, 'orders', 'GET') || {};
+    let unconfirmedCount = 0;
+    for (const ord of Object.values(existingOrders)) {
+      const ordCreated = ord.createdAt ? new Date(ord.createdAt).getTime() : 0;
+      if (ordCreated > oneDayAgo && (ord.uid === user.uid || (ord.customer && ord.customer.phone === customer.phone))) {
+        if (ord.status === 'pending_confirmation' || ord.status === 'expired') {
+          unconfirmedCount++;
+        }
+      }
+    }
+    if (unconfirmedCount >= 3) {
+      return jsonError('Too many unconfirmed orders in the last 24 hours. Please wait before placing another order or contact store support.', 'RATE_LIMITED_UNCONFIRMED', 429, cors);
+    }
+
+    const otpCode = generateCryptoOtp6();
+    const salt = generateRandomSaltHex(16);
+    const otpHash = await hmacSha256Hex(salt, otpCode);
+    const expiresAtMs = now.getTime() + (10 * 60 * 1000); // 10 minutes
+
+    // Store private verification record in orderConfirmationOtps/{pushKey}
+    await rtdbFetch(env, `orderConfirmationOtps/${pushKey}`, 'PUT', {
+      orderId: humanOrderId,
+      pushKey: pushKey,
+      uid: user.uid,
+      phone: customer.phone,
+      otpHash: otpHash,
+      salt: salt,
+      expiresAt: expiresAtMs,
+      attempts: 0,
+      maxAttempts: 5,
+      resends: 0,
+      maxResends: 3,
+      lastSentAt: now.getTime(),
+      locked: false,
+      createdAt: now.getTime()
+    });
+
+    orderRecord.status = 'pending_confirmation';
+    orderRecord.paymentStatus = paymentMethod === 'online_razorpay' ? 'pending' : 'cod_pending';
+    orderRecord.confirmation = {
+      status: 'pending',
+      expiresAt: new Date(expiresAtMs).toISOString(),
+      attempts: 0,
+      resends: 0
+    };
+
+    await rtdbFetch(env, `orders/${pushKey}`, 'PUT', orderRecord);
+
+    // Deliver OTP via WhatsApp text message
+    try {
+      const otpMsg = `Your Sri Sai Stores order confirmation code is: ${otpCode}. Valid for 10 minutes. Do not share this code.`;
+      await sendWhatsappViaMeta(customer.phone, otpCode, env, otpMsg);
+    } catch (e) {
+      console.warn('[handleCreateOrder WhatsApp Error]', e);
+    }
+
+    return jsonResponse({
+      success: true,
+      pendingConfirmation: true,
+      orderId: humanOrderId,
+      pushKey: pushKey,
+      phoneMasked: maskPhone(customer.phone),
+      expiresAt: orderRecord.confirmation.expiresAt,
+      paymentMethod: orderRecord.paymentMethod,
+      total: total
+    }, 200, cors);
+  }
 
   if (paymentMethod === 'online_razorpay') {
     const amountPaise = Math.round(total * 100);
@@ -1059,6 +1192,26 @@ async function handleScheduledOrderExpiry(env) {
               updatedAt: nowIso
             });
           }
+        }
+      }
+
+      // Feature A: Expire unconfirmed orders after 15 minutes
+      if (ord.status === 'pending_confirmation') {
+        const createdMs = ord.createdAt ? new Date(ord.createdAt).getTime() : 0;
+        if (createdMs && (now - createdMs > 15 * 60 * 1000)) {
+          await rtdbFetch(env, `orders/${k}`, 'PATCH', {
+            status: 'expired',
+            cancelReason: 'Order confirmation timed out (15m)',
+            updatedAt: nowIso
+          });
+          await rtdbFetch(env, `orderConfirmationOtps/${k}`, 'DELETE').catch(() => {});
+          await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+            adminUid: 'system',
+            adminEmail: 'cron@srisai',
+            action: 'ORDER_EXPIRED_UNCONFIRMED',
+            orderId: ord.id,
+            timestamp: nowIso
+          }).catch(() => {});
         }
       }
     }
@@ -2452,7 +2605,7 @@ function isReviewerDemoPhone(phone) {
   );
 }
 
-async function sendWhatsappViaMeta(toPhone, otpCode, env) {
+async function sendWhatsappViaMeta(toPhone, otpCode, env, customBody = null) {
   const phoneNumberId = env.WHATSAPP_PHONE_NUMBER_ID || '1407373839132455';
   const accessToken = env.WHATSAPP_ACCESS_TOKEN;
 
@@ -2460,15 +2613,18 @@ async function sendWhatsappViaMeta(toPhone, otpCode, env) {
     throw new Error('Meta WhatsApp credentials not configured in environment variables');
   }
 
+  const normalized = normalizeWhatsappPhone(toPhone);
+  const targetPhone = normalized || toPhone;
+
   // Free-form text message payload for instant OTP delivery (bypasses template restrictions)
   const payload = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
-    to: toPhone,
+    to: targetPhone,
     type: 'text',
     text: {
       preview_url: false,
-      body: `Your Sri Sai Stores login verification code is: ${otpCode}. Valid for 5 minutes. Do not share this code.`
+      body: customBody || `Your Sri Sai Stores login verification code is: ${otpCode}. Valid for 5 minutes. Do not share this code.`
     }
   };
 
@@ -2700,4 +2856,635 @@ async function handleVerifyWhatsappOtp(request, env, cors) {
     uid: uid,
     phone: `+${normalizedPhone}`
   }, 200, cors);
+}
+
+// ==========================================
+// Customer Order-Confirmation OTP & State Machine (Features A, B, C, D)
+// ==========================================
+
+function generateCryptoOtp6() {
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return String(100000 + (arr[0] % 900000));
+}
+
+function generateRandomSaltHex(bytes = 16) {
+  const arr = new Uint8Array(bytes);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function constantTimeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+function maskPhone(p) {
+  if (!p) return '';
+  const digits = String(p).replace(/\D/g, '');
+  if (digits.length >= 10) {
+    const last3 = digits.slice(-3);
+    return `+91 ••••• ••${last3}`;
+  }
+  return p;
+}
+
+async function isCustomerTrusted(uid, env) {
+  if (!uid) return false;
+  try {
+    const allOrders = await rtdbFetch(env, 'orders', 'GET') || {};
+    let delivered = 0;
+    let failedOrRefused = 0;
+    for (const ord of Object.values(allOrders)) {
+      if (ord.uid === uid) {
+        if (ord.status === 'delivered') delivered++;
+        if (ord.status === 'cancelled' && ord.cancelReason && ord.cancelReason.toLowerCase().includes('refused')) {
+          failedOrRefused++;
+        }
+      }
+    }
+    return delivered >= 2 && failedOrRefused === 0;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function handleConfirmOrderOtp(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) {
+    return jsonError('Unauthorized: login required', 'UNAUTHORIZED', 401, cors);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const { pushKey, otp } = body || {};
+  if (!pushKey || !otp || String(otp).trim().length !== 6) {
+    return jsonError('Please enter a valid 6-digit confirmation code', 'INVALID_OTP', 400, cors);
+  }
+
+  const confirmationRecord = await rtdbFetch(env, `orderConfirmationOtps/${pushKey}`, 'GET');
+  if (!confirmationRecord) {
+    return jsonError('Confirmation session expired or not found. Please check your order status.', 'NOT_FOUND', 404, cors);
+  }
+
+  if (confirmationRecord.uid !== user.uid) {
+    return jsonError('Unauthorized order access', 'FORBIDDEN', 403, cors);
+  }
+
+  const now = Date.now();
+  if (now > confirmationRecord.expiresAt) {
+    return jsonError('Confirmation code has expired. Please tap Resend for a fresh code.', 'EXPIRED', 400, cors);
+  }
+
+  if (confirmationRecord.locked || (confirmationRecord.attempts || 0) >= 5) {
+    return jsonError('Confirmation locked after 5 failed attempts. Please tap Resend for a fresh code.', 'LOCKED', 429, cors);
+  }
+
+  const computedHash = await hmacSha256Hex(confirmationRecord.salt, String(otp).trim());
+  const isMatch = constantTimeCompare(computedHash, confirmationRecord.otpHash);
+
+  if (!isMatch) {
+    const nextAttempts = (confirmationRecord.attempts || 0) + 1;
+    const isLocked = nextAttempts >= 5;
+    await rtdbFetch(env, `orderConfirmationOtps/${pushKey}/attempts`, 'PUT', nextAttempts);
+    if (isLocked) {
+      await rtdbFetch(env, `orderConfirmationOtps/${pushKey}/locked`, 'PUT', true);
+      return jsonError('Verification failed: 5 wrong attempts. Confirmation locked. Please tap Resend for a fresh code.', 'LOCKED', 429, cors);
+    }
+    const remaining = 5 - nextAttempts;
+    return jsonError(`Incorrect verification code. Attempts remaining: ${remaining}`, 'INVALID_OTP', 400, cors);
+  }
+
+  // Code verified!
+  const order = await rtdbFetch(env, `orders/${pushKey}`, 'GET');
+  if (!order) {
+    return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+  }
+
+  const nowIso = new Date().toISOString();
+  const orderUpdates = {
+    'confirmation/status': 'confirmed',
+    'confirmation/confirmedAt': nowIso,
+    'updatedAt': nowIso
+  };
+
+  // Remove private OTP record
+  await rtdbFetch(env, `orderConfirmationOtps/${pushKey}`, 'DELETE').catch(() => {});
+
+  // If online_razorpay, initialize payment step
+  if (order.paymentMethod === 'online_razorpay') {
+    const amountPaise = Math.round(Number(order.total) * 100);
+    const rzpOrder = await createRazorpayOrder(amountPaise, order.id, env);
+
+    orderUpdates['status'] = 'payment_pending';
+    orderUpdates['paymentStatus'] = 'pending';
+    orderUpdates['razorpayOrderId'] = rzpOrder.id;
+    orderUpdates['expiresAt'] = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+    await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', orderUpdates);
+
+    // Audit log
+    await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+      adminUid: user.uid,
+      adminEmail: user.email || 'customer',
+      action: 'ORDER_CONFIRMED_OTP',
+      orderId: order.id,
+      timestamp: nowIso
+    }).catch(() => {});
+
+    return jsonResponse({
+      success: true,
+      confirmed: true,
+      orderId: order.id,
+      pushKey: pushKey,
+      paymentMethod: 'online_razorpay',
+      razorpayOrderId: rzpOrder.id,
+      razorpayKeyId: env.RAZORPAY_KEY_ID,
+      amount: amountPaise,
+      total: order.total
+    }, 200, cors);
+  } else {
+    // Cash on Delivery
+    orderUpdates['status'] = 'placed';
+    orderUpdates['paymentStatus'] = 'cod_pending';
+    await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', orderUpdates);
+
+    // Audit log
+    await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+      adminUid: user.uid,
+      adminEmail: user.email || 'customer',
+      action: 'ORDER_CONFIRMED_OTP',
+      orderId: order.id,
+      timestamp: nowIso
+    }).catch(() => {});
+
+    return jsonResponse({
+      success: true,
+      confirmed: true,
+      orderId: order.id,
+      pushKey: pushKey,
+      paymentMethod: 'cod',
+      total: order.total
+    }, 200, cors);
+  }
+}
+
+async function handleResendOrderConfirmationOtp(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) {
+    return jsonError('Unauthorized: login required', 'UNAUTHORIZED', 401, cors);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const { pushKey } = body || {};
+  if (!pushKey) {
+    return jsonError('pushKey is required', 'INVALID_PARAM', 400, cors);
+  }
+
+  const confirmationRecord = await rtdbFetch(env, `orderConfirmationOtps/${pushKey}`, 'GET');
+  if (!confirmationRecord) {
+    return jsonError('Confirmation session expired or not found', 'NOT_FOUND', 404, cors);
+  }
+
+  if (confirmationRecord.uid !== user.uid) {
+    return jsonError('Unauthorized order access', 'FORBIDDEN', 403, cors);
+  }
+
+  const now = Date.now();
+  // 30s Cooldown
+  if (confirmationRecord.lastSentAt && (now - confirmationRecord.lastSentAt < 30 * 1000)) {
+    const waitSec = Math.ceil((30 * 1000 - (now - confirmationRecord.lastSentAt)) / 1000);
+    return jsonError(`Please wait ${waitSec} seconds before requesting a new code.`, 'RATE_LIMITED', 429, cors);
+  }
+
+  // Max 3 resends
+  const currentResends = confirmationRecord.resends || 0;
+  if (currentResends >= 3) {
+    return jsonError('Maximum resend limit (3) reached. Please contact customer support.', 'MAX_RESENDS_EXCEEDED', 429, cors);
+  }
+
+  const newOtp = generateCryptoOtp6();
+  const newSalt = generateRandomSaltHex(16);
+  const newHash = await hmacSha256Hex(newSalt, newOtp);
+  const newExpiresAt = now + (10 * 60 * 1000);
+
+  await rtdbFetch(env, `orderConfirmationOtps/${pushKey}`, 'PATCH', {
+    otpHash: newHash,
+    salt: newSalt,
+    attempts: 0,
+    locked: false,
+    resends: currentResends + 1,
+    lastSentAt: now,
+    expiresAt: newExpiresAt
+  });
+
+  await rtdbFetch(env, `orders/${pushKey}/confirmation`, 'PATCH', {
+    resends: currentResends + 1,
+    expiresAt: new Date(newExpiresAt).toISOString()
+  }).catch(() => {});
+
+  try {
+    const msgBody = `Your new Sri Sai Stores order confirmation code is: ${newOtp}. Valid for 10 minutes. Do not share this code.`;
+    await sendWhatsappViaMeta(confirmationRecord.phone, newOtp, env, msgBody);
+  } catch (err) {
+    console.warn('[handleResendOrderConfirmationOtp WhatsApp Error]', err);
+  }
+
+  return jsonResponse({
+    success: true,
+    message: 'A fresh confirmation code was sent via WhatsApp.',
+    resendsRemaining: 3 - (currentResends + 1),
+    expiresAt: new Date(newExpiresAt).toISOString()
+  }, 200, cors);
+}
+
+async function handleCancelUnconfirmedOrder(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) {
+    return jsonError('Unauthorized: login required', 'UNAUTHORIZED', 401, cors);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const { pushKey } = body || {};
+  if (!pushKey) {
+    return jsonError('pushKey is required', 'INVALID_PARAM', 400, cors);
+  }
+
+  const order = await rtdbFetch(env, `orders/${pushKey}`, 'GET');
+  if (!order) {
+    return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+  }
+
+  if (order.uid !== user.uid) {
+    return jsonError('Unauthorized', 'FORBIDDEN', 403, cors);
+  }
+
+  if (order.status !== 'pending_confirmation') {
+    return jsonError('Only unconfirmed orders can be cancelled through this action', 'BAD_REQUEST', 400, cors);
+  }
+
+  const nowIso = new Date().toISOString();
+  await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', {
+    status: 'cancelled',
+    cancelReason: 'Customer cancelled prior to OTP confirmation',
+    updatedAt: nowIso
+  });
+
+  await rtdbFetch(env, `orderConfirmationOtps/${pushKey}`, 'DELETE').catch(() => {});
+
+  await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+    adminUid: user.uid,
+    adminEmail: user.email || 'customer',
+    action: 'ORDER_CANCELLED_UNCONFIRMED',
+    orderId: order.id,
+    timestamp: nowIso
+  }).catch(() => {});
+
+  return jsonResponse({
+    success: true,
+    message: 'Order cancelled successfully'
+  }, 200, cors);
+}
+
+async function handleStaffClaimOrder(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) return jsonError('Unauthorized', 'UNAUTHORIZED', 401, cors);
+
+  // Verify staff active
+  const staffRecord = await rtdbFetch(env, `staff/${user.uid}`, 'GET');
+  if (!staffRecord || staffRecord.active !== true) {
+    return jsonError('Forbidden: active staff account required', 'FORBIDDEN_STAFF', 403, cors);
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const { pushKey } = body || {};
+  if (!pushKey) return jsonError('pushKey is required', 'INVALID_PARAM', 400, cors);
+
+  // Check max active orders (default 3)
+  const settings = await rtdbFetch(env, 'settings', 'GET') || {};
+  const maxActive = settings.maxActiveOrdersPerWorker || 3;
+
+  const allOrders = await rtdbFetch(env, 'orders', 'GET') || {};
+  let currentWorkerActiveCount = 0;
+  for (const ord of Object.values(allOrders)) {
+    if (ord.claimedBy && ord.claimedBy.uid === user.uid && ord.status !== 'delivered' && ord.status !== 'cancelled') {
+      currentWorkerActiveCount++;
+    }
+  }
+
+  if (currentWorkerActiveCount >= maxActive) {
+    return jsonError(`You already have ${currentWorkerActiveCount} active orders (maximum: ${maxActive}). Please complete or release one first.`, 'MAX_ACTIVE_EXCEEDED', 400, cors);
+  }
+
+  const order = allOrders[pushKey];
+  if (!order) return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+
+  if (order.status === 'pending_confirmation' || order.status === 'expired' || order.status === 'delivered' || order.status === 'cancelled') {
+    return jsonError(`Order cannot be claimed in status: ${order.status}`, 'INVALID_STATE', 400, cors);
+  }
+
+  if (order.claimedBy && order.claimedBy.uid !== user.uid) {
+    return jsonError(`Already claimed by ${order.claimedBy.name || 'another worker'}`, 'ALREADY_CLAIMED', 409, cors);
+  }
+
+  const nowIso = new Date().toISOString();
+  const workerInfo = {
+    uid: user.uid,
+    name: staffRecord.name || user.email || 'Worker',
+    role: staffRecord.role || 'Staff'
+  };
+
+  const updates = {
+    claimedBy: workerInfo,
+    claimedAt: nowIso,
+    updatedAt: nowIso
+  };
+
+  if (order.status === 'placed') {
+    updates.status = 'accepted';
+  }
+
+  if (staffRecord.role && staffRecord.role.toLowerCase().includes('packer')) {
+    if (!order.packedBy) updates.packedBy = workerInfo;
+  }
+  if (staffRecord.role && staffRecord.role.toLowerCase().includes('rider')) {
+    if (!order.deliveredBy) updates.deliveredBy = workerInfo;
+  }
+
+  const events = Array.isArray(order.events) ? [...order.events] : [];
+  events.push({
+    event: 'claimed',
+    actor: workerInfo.name,
+    role: workerInfo.role,
+    uid: workerInfo.uid,
+    timestamp: nowIso
+  });
+  updates.events = events;
+
+  await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', updates);
+  await rtdbFetch(env, `staff/${user.uid}/activeOrderCount`, 'PUT', currentWorkerActiveCount + 1).catch(() => {});
+
+  await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+    adminUid: user.uid,
+    adminEmail: user.email || 'staff',
+    action: 'ORDER_CLAIMED',
+    orderId: order.id,
+    timestamp: nowIso
+  }).catch(() => {});
+
+  return jsonResponse({
+    success: true,
+    order: { ...order, ...updates }
+  }, 200, cors);
+}
+
+async function handleStaffReleaseOrder(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) return jsonError('Unauthorized', 'UNAUTHORIZED', 401, cors);
+
+  const body = await request.json().catch(() => ({}));
+  const { pushKey, reason } = body || {};
+  if (!pushKey || !reason) {
+    return jsonError('pushKey and reason are required to release an order', 'INVALID_PARAM', 400, cors);
+  }
+
+  const order = await rtdbFetch(env, `orders/${pushKey}`, 'GET');
+  if (!order) return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+
+  const isAdmin = await isUserAdmin(user.uid, env);
+  if (!isAdmin && (!order.claimedBy || order.claimedBy.uid !== user.uid)) {
+    return jsonError('You can only release orders that you have claimed', 'FORBIDDEN', 403, cors);
+  }
+
+  if (order.status === 'out_for_delivery' && !isAdmin) {
+    return jsonError('Orders out for delivery cannot be released by staff. Please contact the store owner.', 'CANNOT_RELEASE_OUT_FOR_DELIVERY', 400, cors);
+  }
+
+  const nowIso = new Date().toISOString();
+  const events = Array.isArray(order.events) ? [...order.events] : [];
+  events.push({
+    event: 'released',
+    actor: order.claimedBy?.name || user.email || 'Staff',
+    reason: reason,
+    timestamp: nowIso
+  });
+
+  const updates = {
+    claimedBy: null,
+    claimedAt: null,
+    status: 'placed',
+    events: events,
+    updatedAt: nowIso
+  };
+
+  await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', updates);
+
+  if (order.claimedBy?.uid) {
+    const allOrders = await rtdbFetch(env, 'orders', 'GET') || {};
+    let count = 0;
+    for (const ord of Object.values(allOrders)) {
+      if (ord.claimedBy && ord.claimedBy.uid === order.claimedBy.uid && ord.status !== 'delivered' && ord.status !== 'cancelled' && ord.id !== order.id) {
+        count++;
+      }
+    }
+    await rtdbFetch(env, `staff/${order.claimedBy.uid}/activeOrderCount`, 'PUT', count).catch(() => {});
+  }
+
+  await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+    adminUid: user.uid,
+    adminEmail: user.email || 'staff',
+    action: 'ORDER_RELEASED',
+    orderId: order.id,
+    reason: reason,
+    timestamp: nowIso
+  }).catch(() => {});
+
+  return jsonResponse({
+    success: true,
+    message: 'Order released back to unclaimed pool'
+  }, 200, cors);
+}
+
+async function handleStaffHeartbeat(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) return jsonError('Unauthorized', 'UNAUTHORIZED', 401, cors);
+
+  const now = Date.now();
+  await rtdbFetch(env, `staff/${user.uid}/presence`, 'PUT', {
+    lastSeenAt: now,
+    online: true
+  }).catch(() => {});
+
+  return jsonResponse({ success: true, timestamp: now }, 200, cors);
+}
+
+async function handleAdminReassignOrder(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) return jsonError('Unauthorized', 'UNAUTHORIZED', 401, cors);
+
+  const isAdmin = await isUserAdmin(user.uid, env);
+  if (!isAdmin) return jsonError('Admin access required', 'FORBIDDEN', 403, cors);
+
+  const body = await request.json().catch(() => ({}));
+  const { pushKey, targetStaffUid, reason } = body || {};
+  if (!pushKey || !targetStaffUid) {
+    return jsonError('pushKey and targetStaffUid are required', 'INVALID_PARAM', 400, cors);
+  }
+
+  const [order, targetStaff] = await Promise.all([
+    rtdbFetch(env, `orders/${pushKey}`, 'GET'),
+    rtdbFetch(env, `staff/${targetStaffUid}`, 'GET')
+  ]);
+
+  if (!order) return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+  if (!targetStaff || targetStaff.active !== true) {
+    return jsonError('Target staff member is not active', 'INVALID_STAFF', 400, cors);
+  }
+
+  const nowIso = new Date().toISOString();
+  const previousWorker = order.claimedBy?.name || 'Unclaimed';
+  const newWorker = {
+    uid: targetStaffUid,
+    name: targetStaff.name || targetStaff.email || 'Staff',
+    role: targetStaff.role || 'Staff'
+  };
+
+  const events = Array.isArray(order.events) ? [...order.events] : [];
+  events.push({
+    event: 'reassigned',
+    actor: user.email || 'Owner',
+    from: previousWorker,
+    to: newWorker.name,
+    reason: reason || 'Reassigned by owner',
+    timestamp: nowIso
+  });
+
+  const updates = {
+    claimedBy: newWorker,
+    claimedAt: nowIso,
+    events: events,
+    updatedAt: nowIso
+  };
+
+  await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', updates);
+
+  await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+    adminUid: user.uid,
+    adminEmail: user.email || 'admin',
+    action: 'ORDER_REASSIGNED',
+    orderId: order.id,
+    from: previousWorker,
+    to: newWorker.name,
+    reason: reason,
+    timestamp: nowIso
+  }).catch(() => {});
+
+  return jsonResponse({ success: true, order: { ...order, ...updates } }, 200, cors);
+}
+
+async function handleAdminReleaseToPool(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) return jsonError('Unauthorized', 'UNAUTHORIZED', 401, cors);
+
+  const isAdmin = await isUserAdmin(user.uid, env);
+  if (!isAdmin) return jsonError('Admin access required', 'FORBIDDEN', 403, cors);
+
+  const body = await request.json().catch(() => ({}));
+  const { pushKey, reason } = body || {};
+  if (!pushKey) return jsonError('pushKey is required', 'INVALID_PARAM', 400, cors);
+
+  const order = await rtdbFetch(env, `orders/${pushKey}`, 'GET');
+  if (!order) return jsonError('Order not found', 'NOT_FOUND', 404, cors);
+
+  const nowIso = new Date().toISOString();
+  const events = Array.isArray(order.events) ? [...order.events] : [];
+  events.push({
+    event: 'released_by_admin',
+    actor: user.email || 'Owner',
+    reason: reason || 'Released to pool by owner',
+    timestamp: nowIso
+  });
+
+  const updates = {
+    claimedBy: null,
+    claimedAt: null,
+    status: 'placed',
+    events: events,
+    updatedAt: nowIso
+  };
+
+  await rtdbFetch(env, `orders/${pushKey}`, 'PATCH', updates);
+
+  await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+    adminUid: user.uid,
+    adminEmail: user.email || 'admin',
+    action: 'ORDER_RELEASED_BY_ADMIN',
+    orderId: order.id,
+    reason: reason,
+    timestamp: nowIso
+  }).catch(() => {});
+
+  return jsonResponse({ success: true, message: 'Order released back to unclaimed pool' }, 200, cors);
+}
+
+async function handleAdminCashReconciliation(request, env, cors) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  const user = await verifyFirebaseIdToken(token, env);
+  if (!user) return jsonError('Unauthorized', 'UNAUTHORIZED', 401, cors);
+
+  const isAdmin = await isUserAdmin(user.uid, env);
+  if (!isAdmin) return jsonError('Admin access required', 'FORBIDDEN', 403, cors);
+
+  const body = await request.json().catch(() => ({}));
+  const { staffUid, amount, notes } = body || {};
+  if (!staffUid || amount === undefined) {
+    return jsonError('staffUid and amount are required', 'INVALID_PARAM', 400, cors);
+  }
+
+  const nowIso = new Date().toISOString();
+  const reconId = `recon_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+
+  await rtdbFetch(env, `cashReconciliations/${reconId}`, 'PUT', {
+    staffUid,
+    amount: Number(amount),
+    receivedBy: user.uid,
+    adminEmail: user.email,
+    notes: notes || 'Shift end handover',
+    timestamp: nowIso
+  });
+
+  // Reset worker cashInHand in staff record
+  await rtdbFetch(env, `staff/${staffUid}/cashInHand`, 'PUT', 0).catch(() => {});
+
+  await rtdbFetch(env, `audit/aud_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, 'PUT', {
+    adminUid: user.uid,
+    adminEmail: user.email || 'admin',
+    action: 'CASH_HANDOVER_RECORDED',
+    staffUid: staffUid,
+    amount: Number(amount),
+    timestamp: nowIso
+  }).catch(() => {});
+
+  return jsonResponse({ success: true, message: 'Cash handover recorded successfully', reconId }, 200, cors);
 }

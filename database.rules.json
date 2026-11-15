@@ -89,8 +89,8 @@
       ],
       ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true || query.orderByChild === 'uid' && query.equalTo === auth.uid)",
       "$orderId": {
-        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('staff').child(auth.uid).child('active').val() === true && data.child('status').val() != 'delivered') || data.child('uid').val() === auth.uid)",
-        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && newData.child('uid').val() === auth.uid) || (root.child('staff').child(auth.uid).child('active').val() === true && data.exists() && newData.exists() && newData.child('status').val() != 'cancelled' && newData.child('status').val() != 'delivered' && data.child('status').val() != 'cancelled'))",
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('staff').child(auth.uid).child('active').val() === true && data.child('status').val() != 'delivered' && data.child('status').val() != 'pending_confirmation' && data.child('status').val() != 'expired') || data.child('uid').val() === auth.uid)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && newData.child('uid').val() === auth.uid && (!newData.child('status').exists() || newData.child('status').val() === 'pending_confirmation' || newData.child('status').val() === 'placed')) || (root.child('staff').child(auth.uid).child('active').val() === true && data.exists() && newData.exists() && data.child('status').val() != 'pending_confirmation' && data.child('status').val() != 'expired' && newData.child('status').val() != 'cancelled' && newData.child('status').val() != 'delivered' && data.child('status').val() != 'cancelled'))",
         "packingChecks": {
           ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('staff').child(auth.uid).child('active').val() === true)"
         },
@@ -109,6 +109,17 @@
       "$orderId": {
         ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (data.child('customerUid').val() === auth.uid && root.child('orders').child($orderId).child('status').val() === 'out_for_delivery'))",
         ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "orderConfirmationOtps": {
+      ".read": false,
+      ".write": false
+    },
+    "cashReconciliations": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$reconId": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true && !data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['staffUid', 'amount', 'timestamp'])"
       }
     },
     "otpChallenges": {

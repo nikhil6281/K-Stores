@@ -1507,6 +1507,58 @@ it('S3.3: Cloudflare Worker routes and bilingual status notification pipeline fo
   assert(workerCode.includes('/api/verify-delivery-otp'), 'worker must mount /api/verify-delivery-otp route');
 });
 
+// ========================================================
+// FEATURE A: CUSTOMER ORDER-CONFIRMATION OTP TESTS
+// ========================================================
+
+it('FA.1: Customer Order-Confirmation OTP generation, salted HMAC storage and route handlers in worker', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/order/confirm-otp'), 'Must implement /api/order/confirm-otp endpoint');
+  assert(workerCode.includes('/api/order/resend-confirmation-otp'), 'Must implement /api/order/resend-confirmation-otp endpoint');
+  assert(workerCode.includes('/api/order/cancel-unconfirmed'), 'Must implement /api/order/cancel-unconfirmed endpoint');
+  assert(workerCode.includes('pending_confirmation'), 'Must create order in pending_confirmation status');
+  assert(workerCode.includes('orderConfirmationOtps/'), 'Must store private OTP data in orderConfirmationOtps/');
+  assert(workerCode.includes('generateCryptoOtp6'), 'Must generate cryptographic 6-digit OTP');
+  assert(workerCode.includes('generateRandomSaltHex'), 'Must generate random salt for HMAC');
+  assert(workerCode.includes('constantTimeCompare'), 'Must use constant-time comparison for OTP hash');
+});
+
+it('FA.2: 5 wrong attempts lock confirmation session and require resend', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('attempts >= 5'), 'Must check if attempts >= 5 for lockout');
+  assert(workerCode.includes('Confirmation locked after 5 failed attempts'), 'Must provide locked message');
+  assert(workerCode.includes('maxResends: 3'), 'Must support max 3 resends');
+  assert(workerCode.includes('30 * 1000'), 'Must enforce 30s resend cooldown');
+});
+
+it('FA.3: Unconfirmed order expiry after 15m and 24h rate limiting (<3 unconfirmed)', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('ORDER_EXPIRED_UNCONFIRMED'), 'Must record audit log on unconfirmed order expiry');
+  assert(workerCode.includes('RATE_LIMITED_UNCONFIRMED'), 'Must rate limit customers with >=3 unconfirmed orders in 24h');
+  assert(workerCode.includes('isCustomerTrusted'), 'Must support trusted customer OTP skip');
+});
+
+it('FA.4: Frontend order confirmation modal and unconfirmed status badge in index.html', () => {
+  const indexHtml = fs.readFileSync('index.html', 'utf8');
+  assert(indexHtml.includes('id="orderConfirmModal"'), 'Must have #orderConfirmModal in index.html');
+  assert(indexHtml.includes('id="orderConfirmOtpInput"'), 'Must have 6-digit OTP input');
+  assert(indexHtml.includes('id="btnVerifyOrderOtp"'), 'Must have Verify & Place Order button');
+  assert(indexHtml.includes('id="btnResendOrderOtp"'), 'Must have Resend OTP button');
+  assert(indexHtml.includes('id="btnCancelOrderConfirm"'), 'Must have Cancel Order button');
+  assert(indexHtml.includes('unconfirmedOrderBadge'), 'Must have I18N string for unconfirmed badge');
+  assert(indexHtml.includes('action-enter-confirm-code'), 'Must have Enter Code action in orders list');
+  assert(indexHtml.includes('action-cancel-unconfirmed'), 'Must have Cancel action for unconfirmed orders');
+});
+
+it('FA.5: Staff portal and RTDB rules isolation for pending_confirmation and expired orders', () => {
+  const rulesJson = fs.readFileSync('database.rules.json', 'utf8');
+  assert(rulesJson.includes('"orderConfirmationOtps"'), 'database.rules.json must protect orderConfirmationOtps');
+  assert(rulesJson.includes("data.child('status').val() != 'pending_confirmation'"), 'Staff must not read pending_confirmation orders');
+  assert(rulesJson.includes("data.child('status').val() != 'expired'"), 'Staff must not read expired orders');
+  const workerHtml = fs.readFileSync('worker.html', 'utf8');
+  assert(workerHtml.includes("o.status !== 'pending_confirmation'"), 'worker.html must filter pending_confirmation orders');
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');

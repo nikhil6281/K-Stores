@@ -1279,7 +1279,7 @@
       let pendingCod = 0;
       orders.forEach(o => {
         if (o.status === 'delivered') deliveredCount++;
-        if (o.paymentMethod === 'cod' && o.status !== 'cancelled' && o.paymentStatus !== 'cod_collected') {
+        if (o.paymentMethod === 'cod' && o.status !== 'cancelled' && o.status !== 'pending_confirmation' && o.status !== 'expired' && o.paymentStatus !== 'cod_collected') {
           pendingCod += Number(o.total || 0);
         }
       });

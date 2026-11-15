@@ -430,13 +430,23 @@
             <option value="all">All Time</option>
           </select>
           <select id="orderStatusFilter">
-            <option value="all">All Statuses</option>
+            <option value="all">Active Orders (Confirmed)</option>
+            <option value="pending_confirmation">⚠️ Unconfirmed (Pending OTP)</option>
             <option value="placed">Placed</option>
             <option value="accepted">Accepted</option>
             <option value="packed">Packed</option>
             <option value="out_for_delivery">Out for Delivery</option>
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
+            <option value="expired">Expired</option>
+          </select>
+          <select id="orderClaimFilter">
+            <option value="all">All Claim States</option>
+            <option value="unclaimed">Unclaimed Only</option>
+            <option value="claimed">Claimed Only</option>
+          </select>
+          <select id="orderWorkerFilter">
+            <option value="all">All Workers</option>
           </select>
           <select id="orderMethodFilter">
             <option value="all">All Methods</option>
@@ -1450,6 +1460,8 @@
       const dateFilter = document.getElementById('orderDateFilter').value;
       const statusFilter = document.getElementById('orderStatusFilter').value;
       const methodFilter = document.getElementById('orderMethodFilter').value;
+      const claimFilter = document.getElementById('orderClaimFilter')?.value || 'all';
+      const workerFilter = document.getElementById('orderWorkerFilter')?.value || 'all';
 
       const now = new Date();
       let keys = Object.keys(allOrders);
@@ -1465,7 +1477,15 @@
           if (!matchId && !matchName && !matchPhone && !matchAddr) return false;
         }
 
-        if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+        if (statusFilter === 'all') {
+          if (o.status === 'pending_confirmation' || o.status === 'expired') return false;
+        } else if (o.status !== statusFilter) {
+          return false;
+        }
+
+        if (claimFilter === 'unclaimed' && o.claimedBy) return false;
+        if (claimFilter === 'claimed' && !o.claimedBy) return false;
+        if (workerFilter !== 'all' && (!o.claimedBy || o.claimedBy.uid !== workerFilter)) return false;
 
         const orderDate = new Date(o.createdAt);
         if (dateFilter === 'today') {
@@ -1599,8 +1619,9 @@
       list.innerHTML = html;
     }
 
-    ['orderSearchInput', 'orderDateFilter', 'orderStatusFilter', 'orderMethodFilter'].forEach(id => {
-      document.getElementById(id).addEventListener('input', renderOrdersList);
+    ['orderSearchInput', 'orderDateFilter', 'orderStatusFilter', 'orderMethodFilter', 'orderClaimFilter', 'orderWorkerFilter'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', renderOrdersList);
+      document.getElementById(id)?.addEventListener('change', renderOrdersList);
     });
 
     document.getElementById('ordersList').addEventListener('click', async (e) => {
@@ -1871,6 +1892,7 @@
       const orderSource = Object.keys(allHistoricalOrders).length ? allHistoricalOrders : allOrders;
       Object.keys(orderSource).forEach(key => {
         const o = orderSource[key];
+        if (o.status === 'pending_confirmation' || o.status === 'expired') return;
         const phone = o.customer?.phone || 'unknown';
         if (!customerProfiles[phone]) {
           customerProfiles[phone] = {

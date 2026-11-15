@@ -1604,6 +1604,39 @@
     </div>
   </div>
 
+  <!-- Customer Order Confirmation OTP Modal (Feature A) -->
+  <div class="modal-overlay" id="orderConfirmModal" role="dialog" aria-modal="true" aria-labelledby="orderConfirmModalTitle">
+    <div class="modal" style="text-align: center; position: relative; max-width: 420px;">
+      <button type="button" class="modal-close-btn" data-modal="orderConfirmModal" id="closeOrderConfirmModalBtn" aria-label="Close" style="position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted);">✕</button>
+      <span style="font-size: 38px;">📲</span>
+      <h3 style="font-size: 18px; font-weight: 700; margin: 8px 0 4px;" id="orderConfirmModalTitle">Confirm Your Order</h3>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;" id="orderConfirmSubtitle">Code sent to <strong id="orderConfirmPhoneText">+91 ••••• ••123</strong> via WhatsApp</p>
+
+      <div id="orderConfirmOtpNotice" style="display: none; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; text-align: left;"></div>
+
+      <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+        <label for="orderConfirmOtpInput" style="display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px;" id="lblEnterConfirmCode">Enter 6-digit confirmation code</label>
+        <input type="text" id="orderConfirmOtpInput" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="••••••" style="width: 100%; max-width: 240px; margin: 0 auto; display: block; font-size: 26px; font-weight: 800; letter-spacing: 8px; text-align: center; padding: 10px; border: 2px solid var(--border); border-radius: 8px; background: #fff;" />
+        <div style="font-size: 12px; color: var(--muted); margin-top: 8px;">
+          ⏱️ <span id="lblCodeExpiresIn">Expires in:</span> <strong id="orderConfirmTimer" style="color: var(--primary);">10:00</strong>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="btnVerifyOrderOtp" style="width: 100%; min-height: 48px; font-size: 15px; font-weight: 700; margin-bottom: 10px;">
+        Verify & Place Order
+      </button>
+
+      <div style="display: flex; gap: 8px; justify-content: space-between;">
+        <button type="button" class="btn btn-outline" id="btnResendOrderOtp" style="flex: 1; min-height: 42px; font-size: 13px;">
+          Resend (<span id="resendTimerSec">30</span>s)
+        </button>
+        <button type="button" class="btn btn-outline" id="btnCancelOrderConfirm" style="flex: 1; min-height: 42px; font-size: 13px; color: var(--danger); border-color: var(--danger);">
+          Cancel Order
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Order Success Modal -->
   <div class="modal-overlay" id="successModal" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
     <div class="modal" style="text-align: center; position: relative;">
@@ -2059,6 +2092,19 @@
         couldNotLoadItems: "Couldn't load items",
         retryBtn: "Retry",
         noItemsAvailable: "No items available right now",
+        confirmYourOrder: "Confirm Your Order",
+        codeSentToWhatsApp: "Code sent to {phone} via WhatsApp",
+        enterConfirmCode: "Enter 6-digit confirmation code",
+        codeExpiresIn: "Expires in:",
+        verifyAndPlaceOrderBtn: "Verify & Place Order",
+        resendCodeBtn: "Resend Code",
+        unconfirmedOrderBadge: "⚠️ Not confirmed",
+        enterOtpBtn: "Enter Code",
+        cancelOrderConfirmPrompt: "Are you sure you want to cancel this order?",
+        orderConfirmedSuccess: "Order confirmed successfully!",
+        orderConfirmationExpired: "Confirmation timed out. Order expired.",
+        packedByPrefix: "Packed by",
+        deliveredByPrefix: "Delivery by",
       },
       te: {
         toggleText: "English",
@@ -2207,7 +2253,20 @@
         deleteAddrConfirm: "ఈ చిరునామాను తొలగించాలనుకుంటున్నారా?",
         couldNotLoadItems: "వస్తువులను లోడ్ చేయడం సాధ్యపడలేదు",
         retryBtn: "మళ్ళీ ప్రయత్నించండి",
-        noItemsAvailable: "ప్రస్తుతం ఏ వస్తువులు అందుబాటులో లేవు"
+        noItemsAvailable: "ప్రస్తుతం ఏ వస్తువులు అందుబాటులో లేవు",
+        confirmYourOrder: "మీ ఆర్డర్‌ను ధృవీకరించండి",
+        codeSentToWhatsApp: "వాట్సాప్ ద్వారా {phone} కి కోడ్ పంపబడింది",
+        enterConfirmCode: "6 అంకెల ధృవీకరణ కోడ్ నమోదు చేయండి",
+        codeExpiresIn: "గడువు:",
+        verifyAndPlaceOrderBtn: "ధృవీకరించి ఆర్డర్ చేయండి",
+        resendCodeBtn: "మళ్లీ కోడ్ పంపండి",
+        unconfirmedOrderBadge: "⚠️ ధృవీకరించబడలేదు",
+        enterOtpBtn: "కోడ్ నమోదు చేయండి",
+        cancelOrderConfirmPrompt: "మీరు ఈ ఆర్డర్‌ను రద్దు చేయాలనుకుంటున్నారా?",
+        orderConfirmedSuccess: "ఆర్డర్ విజయవంతంగా ధృవీకరించబడింది!",
+        orderConfirmationExpired: "సమయం ముగిసింది. ఆర్డర్ రద్దు చేయబడింది.",
+        packedByPrefix: "ప్యాకింగ్ చేసినవారు:",
+        deliveredByPrefix: "డెలివరీ చేసేవారు:",
       }
     };
 
@@ -4103,6 +4162,26 @@
         if (orderCreatedOnServer && serverData && serverData.success) {
           const finalTotal = serverData.total !== undefined ? serverData.total : clientTotal;
 
+          // Feature A: Check if order requires OTP confirmation
+          if (serverData.pendingConfirmation) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = isStoreCurrentlyOpen ? (I18N[currentLang]?.confirmOrderBtn || 'Confirm & Place Order') : (I18N[currentLang]?.scheduleForMorning || 'Schedule for Morning Delivery');
+            closeModal('checkoutModal');
+
+            pendingOrderSession = {
+              orderId: serverData.orderId,
+              pushKey: serverData.pushKey,
+              paymentMethod: serverData.paymentMethod || payMethod,
+              total: finalTotal,
+              customer: customer,
+              phoneMasked: serverData.phoneMasked,
+              expiresAt: new Date(serverData.expiresAt).getTime()
+            };
+
+            openOrderConfirmModal(pendingOrderSession);
+            return;
+          }
+
           if (payMethod === 'online_razorpay' && serverData.razorpayOrderId) {
             await loadRazorpaySdk();
 
@@ -4310,6 +4389,286 @@
       openModal('successModal');
     }
 
+    // Customer Order Confirmation OTP Controller (Feature A)
+    let orderConfirmTimerInterval = null;
+    let resendCooldownInterval = null;
+    let pendingOrderSession = null;
+
+    function maskPhone(p) {
+      if (!p) return '';
+      const digits = String(p).replace(/\D/g, '');
+      if (digits.length >= 10) {
+        const last3 = digits.slice(-3);
+        return `+91 ••••• ••${last3}`;
+      }
+      return p;
+    }
+
+    function openOrderConfirmModal(session) {
+      pendingOrderSession = session;
+      const phoneText = session.phoneMasked || maskPhone(session.customer?.phone || session.phone || '');
+      const phoneEl = document.getElementById('orderConfirmPhoneText');
+      if (phoneEl) phoneEl.innerText = phoneText;
+      const input = document.getElementById('orderConfirmOtpInput');
+      if (input) {
+        input.value = '';
+      }
+      hideConfirmNotice();
+      openModal('orderConfirmModal');
+      setTimeout(() => input?.focus(), 250);
+
+      startOrderConfirmTimer(session.expiresAt || (Date.now() + 10 * 60 * 1000));
+      startResendCooldown(30);
+    }
+
+    function startOrderConfirmTimer(targetTimestamp) {
+      if (orderConfirmTimerInterval) clearInterval(orderConfirmTimerInterval);
+      const timerEl = document.getElementById('orderConfirmTimer');
+      const update = () => {
+        const remaining = Math.max(0, Math.floor((targetTimestamp - Date.now()) / 1000));
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        if (timerEl) {
+          timerEl.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+        if (remaining <= 0) {
+          clearInterval(orderConfirmTimerInterval);
+          showConfirmNotice(I18N[currentLang]?.orderConfirmationExpired || 'Order confirmation timed out. Expired.', 'danger');
+          const btn = document.getElementById('btnVerifyOrderOtp');
+          if (btn) btn.disabled = true;
+        }
+      };
+      update();
+      orderConfirmTimerInterval = setInterval(update, 1000);
+    }
+
+    function startResendCooldown(seconds) {
+      if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+      const resendBtn = document.getElementById('btnResendOrderOtp');
+      const timerSpan = document.getElementById('resendTimerSec');
+      if (!resendBtn) return;
+      resendBtn.disabled = true;
+      let left = seconds;
+      if (timerSpan) timerSpan.innerText = left;
+      const resendText = I18N[currentLang]?.resendCodeBtn || 'Resend';
+      resendBtn.innerText = `${resendText} (${left}s)`;
+
+      resendCooldownInterval = setInterval(() => {
+        left--;
+        if (left <= 0) {
+          clearInterval(resendCooldownInterval);
+          resendBtn.disabled = false;
+          resendBtn.innerText = I18N[currentLang]?.resendCodeBtn || 'Resend Code';
+        } else {
+          resendBtn.innerText = `${resendText} (${left}s)`;
+        }
+      }, 1000);
+    }
+
+    function showConfirmNotice(msg, type = 'danger') {
+      const box = document.getElementById('orderConfirmOtpNotice');
+      if (!box) return;
+      box.style.display = 'block';
+      if (type === 'danger') {
+        box.style.background = '#FEE2E2';
+        box.style.color = '#B91C1C';
+        box.style.border = '1px solid #FECACA';
+      } else {
+        box.style.background = '#DCFCE7';
+        box.style.color = '#15803D';
+        box.style.border = '1px solid #BBF7D0';
+      }
+      box.innerHTML = msg;
+    }
+
+    function hideConfirmNotice() {
+      const box = document.getElementById('orderConfirmOtpNotice');
+      if (box) box.style.display = 'none';
+    }
+
+    document.getElementById('btnVerifyOrderOtp')?.addEventListener('click', async () => {
+      const input = document.getElementById('orderConfirmOtpInput');
+      const otpVal = (input?.value || '').trim();
+      if (!/^\d{6}$/.test(otpVal)) {
+        showConfirmNotice(I18N[currentLang]?.enterConfirmCode || 'Please enter the 6-digit confirmation code.', 'danger');
+        return;
+      }
+
+      if (!pendingOrderSession || !pendingOrderSession.pushKey) {
+        showConfirmNotice('Order session not found. Please try again.', 'danger');
+        return;
+      }
+
+      const verifyBtn = document.getElementById('btnVerifyOrderOtp');
+      verifyBtn.disabled = true;
+      verifyBtn.innerText = 'Verifying…';
+      hideConfirmNotice();
+
+      try {
+        let token = '';
+        if (currentUser) {
+          try { token = await currentUser.getIdToken(); } catch (e) {}
+        }
+
+        const res = await fetch(`${WORKER_API}/api/order/confirm-otp`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            pushKey: pendingOrderSession.pushKey,
+            otp: otpVal
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) {
+          verifyBtn.disabled = false;
+          verifyBtn.innerText = I18N[currentLang]?.verifyAndPlaceOrderBtn || 'Verify & Place Order';
+          showConfirmNotice(data.error || 'Invalid code. Please check and try again.', 'danger');
+          return;
+        }
+
+        // Successfully confirmed!
+        if (orderConfirmTimerInterval) clearInterval(orderConfirmTimerInterval);
+        if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+        closeModal('orderConfirmModal');
+
+        // Clear cart
+        cart = {};
+        saveCart();
+
+        if (data.paymentMethod === 'online_razorpay' && data.razorpayOrderId) {
+          await loadRazorpaySdk();
+          const options = {
+            key: data.razorpayKeyId,
+            amount: data.amount,
+            currency: 'INR',
+            name: 'Sri Sai Anantapur',
+            description: `Order #${data.orderId}`,
+            callback_url: `${WORKER_API}/api/razorpay-callback`,
+            redirect: true,
+            order_id: data.razorpayOrderId,
+            handler: async function (response) {
+              try {
+                let verifyHeaders = { 'Content-Type': 'application/json' };
+                if (currentUser) {
+                  try {
+                    const verifyToken = await currentUser.getIdToken();
+                    verifyHeaders['Authorization'] = `Bearer ${verifyToken}`;
+                  } catch (e) {}
+                }
+                await fetch(`${WORKER_API}/api/verify-payment`, {
+                  method: 'POST',
+                  headers: verifyHeaders,
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderId: data.orderId
+                  })
+                });
+              } catch (e) {}
+              showOrderSuccess(data.orderId, pendingOrderSession.customer, data.total);
+            },
+            prefill: {
+              name: pendingOrderSession.customer?.name || '',
+              contact: pendingOrderSession.customer?.phone || '',
+              email: currentUser?.email || ''
+            },
+            theme: { color: '#0C831F' }
+          };
+          const rzp = new Razorpay(options);
+          rzp.open();
+        } else {
+          // Cash on Delivery
+          showOrderSuccess(data.orderId, pendingOrderSession.customer, data.total);
+        }
+      } catch (err) {
+        verifyBtn.disabled = false;
+        verifyBtn.innerText = I18N[currentLang]?.verifyAndPlaceOrderBtn || 'Verify & Place Order';
+        showConfirmNotice('Network error verifying code. Please try again.', 'danger');
+      }
+    });
+
+    document.getElementById('btnResendOrderOtp')?.addEventListener('click', async () => {
+      if (!pendingOrderSession || !pendingOrderSession.pushKey) return;
+      const resendBtn = document.getElementById('btnResendOrderOtp');
+      resendBtn.disabled = true;
+      resendBtn.innerText = 'Sending…';
+      hideConfirmNotice();
+
+      try {
+        let token = '';
+        if (currentUser) {
+          try { token = await currentUser.getIdToken(); } catch (e) {}
+        }
+
+        const res = await fetch(`${WORKER_API}/api/order/resend-confirmation-otp`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            pushKey: pendingOrderSession.pushKey
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) {
+          resendBtn.disabled = false;
+          resendBtn.innerText = I18N[currentLang]?.resendCodeBtn || 'Resend Code';
+          showConfirmNotice(data.error || 'Failed to resend code.', 'danger');
+          return;
+        }
+
+        showConfirmNotice('Fresh code sent on WhatsApp!', 'success');
+        startResendCooldown(30);
+        if (data.expiresAt) {
+          startOrderConfirmTimer(new Date(data.expiresAt).getTime());
+        }
+      } catch (err) {
+        resendBtn.disabled = false;
+        resendBtn.innerText = I18N[currentLang]?.resendCodeBtn || 'Resend Code';
+        showConfirmNotice('Network error requesting new code.', 'danger');
+      }
+    });
+
+    document.getElementById('btnCancelOrderConfirm')?.addEventListener('click', async () => {
+      if (!pendingOrderSession || !pendingOrderSession.pushKey) return;
+      if (!confirm(I18N[currentLang]?.cancelOrderConfirmPrompt || 'Cancel this unconfirmed order?')) return;
+
+      const cancelBtn = document.getElementById('btnCancelOrderConfirm');
+      cancelBtn.disabled = true;
+      cancelBtn.innerText = 'Cancelling…';
+
+      try {
+        let token = '';
+        if (currentUser) {
+          try { token = await currentUser.getIdToken(); } catch (e) {}
+        }
+        await fetch(`${WORKER_API}/api/order/cancel-unconfirmed`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ pushKey: pendingOrderSession.pushKey })
+        });
+      } catch (e) {}
+
+      if (orderConfirmTimerInterval) clearInterval(orderConfirmTimerInterval);
+      if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+      closeModal('orderConfirmModal');
+      showToast(I18N[currentLang]?.orderCancelled || 'Order cancelled');
+    });
+
+    document.getElementById('closeOrderConfirmModalBtn')?.addEventListener('click', () => {
+      closeModal('orderConfirmModal');
+    });
+
     // Phase 3: Order History & Status Timeline Stepper with 10s timeout, error callback & signed-out view (Requirement 1 & 2)
     let customerOrdersLoadTimeout = null;
 
@@ -4427,14 +4786,19 @@
 
         function renderOrderCard(k, o) {
           const st = o.status || 'placed';
-          const currentRank = stepRanks[st] !== undefined ? stepRanks[st] : 0;
-          const isCancelled = st === 'cancelled';
+          const isUnconfirmed = st === 'pending_confirmation';
+          const isExpired = st === 'expired';
+          const isCancelled = st === 'cancelled' || isExpired;
           const isDelivered = st === 'delivered';
-          const canCancel = (st === 'placed' || st === 'accepted' || st === 'packed');
+          const canCancel = (st === 'placed' || st === 'accepted' || st === 'packed' || isUnconfirmed);
 
           // Payment badge
           let payBadgeHtml = '';
-          if (o.paymentMethod === 'cod') {
+          if (isUnconfirmed) {
+            payBadgeHtml = `<span style="background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.unconfirmedOrderBadge || '⚠️ Not confirmed'}</span>`;
+          } else if (isExpired) {
+            payBadgeHtml = `<span style="background: #FEE2E2; color: #991B1B; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">⏰ ${t.expired || 'Expired'}</span>`;
+          } else if (o.paymentMethod === 'cod') {
             payBadgeHtml = `<span style="background: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgeCod}</span>`;
           } else if (o.paymentStatus === 'paid' || o.paymentStatus === 'cod_collected') {
             payBadgeHtml = `<span style="background: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">${t.badgePaid}</span>`;
@@ -4448,14 +4812,35 @@
 
           // Visual stepper timeline
           let timelineHtml = '';
-          if (isCancelled) {
+          if (isUnconfirmed) {
+            timelineHtml = `
+              <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 12px; margin: 10px 0;">
+                <div style="font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 4px;">
+                  ⚠️ ${t.orderNotConfirmed || 'Awaiting WhatsApp Confirmation'}
+                </div>
+                <div style="font-size: 12px; color: #78350F; margin-bottom: 10px;">
+                  ${(t.codeSentToWhatsApp || 'Code sent to {phone} via WhatsApp').replace('{phone}', escapeHtml(maskPhone(o.customer?.phone || '')))}
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-primary action-enter-confirm-code" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id)}" data-phone="${escapeHtml(o.customer?.phone || '')}" data-method="${escapeHtml(o.paymentMethod || '')}" data-total="${escapeHtml(o.total || '')}" style="font-size: 12px; padding: 8px 14px; min-height: 38px; flex: 1;">
+                    🔑 ${t.enterOtpBtn || 'Enter Code'}
+                  </button>
+                  <button type="button" class="btn btn-outline action-cancel-unconfirmed" data-key="${escapeHtml(k)}" data-id="${escapeHtml(o.id)}" style="font-size: 12px; padding: 8px 14px; min-height: 38px; color: var(--danger); border-color: var(--danger); flex: 1;">
+                    ✕ ${t.cancelOrderBtn || 'Cancel Order'}
+                  </button>
+                </div>
+              </div>
+            `;
+          } else if (isCancelled) {
             const refundNote = o.paymentStatus === 'refund_initiated' ? ' (Refund Initiated)' : (o.paymentStatus === 'refunded' ? ' (Refunded ✅)' : '');
             timelineHtml = `
               <div style="background: #FEE2E2; border: 1px solid #FECACA; color: var(--danger); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin: 10px 0;">
-                ❌ ${t.stepCancelled}${refundNote}
+                ❌ ${isExpired ? (t.orderConfirmationExpired || 'Order confirmation timed out (15m). Expired.') : t.stepCancelled}${refundNote}
               </div>
             `;
           } else {
+            const packerName = o.packedBy?.name ? ` (${escapeHtml(o.packedBy.name)})` : (o.claimedBy?.name ? ` (${escapeHtml(o.claimedBy.name)})` : '');
+            const riderName = o.deliveredBy?.name ? ` (${escapeHtml(o.deliveredBy.name)})` : (o.claimedBy?.name ? ` (${escapeHtml(o.claimedBy.name)})` : '');
             timelineHtml = `
               <div class="order-timeline">
                 <div class="timeline-step ${currentRank >= 0 ? 'active' : ''} ${currentRank === 0 ? 'current' : ''}">
@@ -4465,10 +4850,21 @@
                 <div class="timeline-line ${currentRank >= 1 ? 'active' : ''}"></div>
                 <div class="timeline-step ${currentRank >= 1 ? 'active' : ''} ${currentRank === 1 ? 'current' : ''}">
                   <div class="step-circle">${currentRank > 1 ? '✓' : '2'}</div>
-                  <div class="step-label">${t.stepPacked}</div>
+                  <div class="step-label">${t.stepPacked}${packerName}</div>
                 </div>
                 <div class="timeline-line ${currentRank >= 2 ? 'active' : ''}"></div>
                 <div class="timeline-step ${currentRank >= 2 ? 'active' : ''} ${currentRank === 2 ? 'current' : ''}">
+                  <div class="step-circle">${currentRank > 2 ? '✓' : '3'}</div>
+                  <div class="step-label">${t.stepOut}${riderName}</div>
+                </div>
+                <div class="timeline-line ${currentRank >= 3 ? 'active' : ''}"></div>
+                <div class="timeline-step ${currentRank >= 3 ? 'active' : ''} ${currentRank === 3 ? 'current' : ''}">
+                  <div class="step-circle">${currentRank >= 3 ? '✓' : '4'}</div>
+                  <div class="step-label">${t.stepDelivered}</div>
+                </div>
+              </div>
+            `;
+          }
                   <div class="step-circle">${currentRank > 2 ? '✓' : '3'}</div>
                   <div class="step-label">${t.stepOut}</div>
                 </div>
@@ -4614,6 +5010,62 @@
     document.getElementById('ordersNavBtn')?.addEventListener('click', openOrdersModal);
 
     document.getElementById('customerOrdersList').addEventListener('click', async (e) => {
+      // Enter Code for unconfirmed order (Feature A)
+      const enterOtpBtn = e.target.closest('.action-enter-confirm-code');
+      if (enterOtpBtn) {
+        const pushKey = enterOtpBtn.getAttribute('data-key');
+        const orderId = enterOtpBtn.getAttribute('data-id');
+        const phone = enterOtpBtn.getAttribute('data-phone');
+        const payMethod = enterOtpBtn.getAttribute('data-method');
+        const total = enterOtpBtn.getAttribute('data-total');
+
+        pendingOrderSession = {
+          orderId: orderId,
+          pushKey: pushKey,
+          phone: phone,
+          paymentMethod: payMethod,
+          total: Number(total),
+          expiresAt: Date.now() + 10 * 60 * 1000
+        };
+        closeModal('ordersModal');
+        openOrderConfirmModal(pendingOrderSession);
+        return;
+      }
+
+      // Cancel unconfirmed order (Feature A)
+      const cancelUnconfirmedBtn = e.target.closest('.action-cancel-unconfirmed');
+      if (cancelUnconfirmedBtn) {
+        const pushKey = cancelUnconfirmedBtn.getAttribute('data-key');
+        if (!confirm(I18N[currentLang]?.cancelOrderConfirmPrompt || 'Cancel this order?')) {
+          return;
+        }
+        cancelUnconfirmedBtn.disabled = true;
+        cancelUnconfirmedBtn.innerText = 'Cancelling…';
+        try {
+          let token = '';
+          if (currentUser) {
+            try { token = await currentUser.getIdToken(); } catch (err) {}
+          }
+          const res = await fetch(`${WORKER_API}/api/order/cancel-unconfirmed`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ pushKey })
+          });
+          if (res.ok) {
+            showToast(I18N[currentLang]?.orderCancelled || 'Order cancelled');
+          } else {
+            const err = await res.json().catch(() => ({}));
+            showToast(err.error || 'Failed to cancel order');
+          }
+        } catch (err) {
+          showToast('Network error cancelling order');
+        }
+        return;
+      }
+
       // Reorder button on past orders
       const reorderBtn = e.target.closest('.action-reorder-past-order');
       if (reorderBtn) {
