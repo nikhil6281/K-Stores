@@ -14,7 +14,7 @@
  * - Automatically purges any previous cache versions.
  */
 
-const CACHE_NAME = 'sri-sai-shell-v18';
+const CACHE_NAME = 'sri-sai-shell-v19';
 const SHELL_ASSETS = [
   './',
   './index.html',

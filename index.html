@@ -1377,14 +1377,6 @@
             </div>
             <input type="tel" id="loginPhoneInput" aria-label="Mobile Number" placeholder="10-digit mobile number" maxlength="10" autocomplete="tel-national" inputmode="numeric" pattern="[0-9]{10}" style="flex: 1; border: 1.5px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 15px;">
           </div>
-
-          <!-- First-Time WhatsApp User Helper -->
-          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: #166534; line-height: 1.45;">
-            <p style="margin: 0 0 8px 0;" id="tFirstTimeWhatsappNote">First time logging in? Tap here to send "Hi" on WhatsApp to +91 62817 30144 so we can deliver your OTP instantly:</p>
-            <a href="https://wa.me/916281730144?text=Hi%20Sri%20Sai%20Stores%20Activate%20OTP" target="_blank" rel="noopener noreferrer" id="tActivateWhatsappBtn" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 38px; background: #15803D; color: #FFFFFF; font-size: 12px; font-weight: 700; border-radius: 6px; text-decoration: none;">
-              <span>💬</span> <span id="tActivateWhatsappBtnText">Send "Hi" on WhatsApp to +91 62817 30144</span>
-            </a>
-          </div>
           <button type="button" id="sendWhatsappOtpBtn" class="btn btn-primary" style="width: 100%; min-height: 46px; font-size: 14px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; border-color: #25D366; color: #FFFFFF; font-weight: 600;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.34C9.36 7.34 9.09 7.4 8.87 7.65C8.65 7.89 8.02 8.47 8.02 9.68C8.02 10.88 8.9 12.04 9.02 12.2C9.14 12.37 10.74 14.84 13.2 15.9C13.79 16.15 14.24 16.3 14.6 16.42C15.19 16.61 15.73 16.58 16.15 16.52C16.63 16.45 17.61 15.92 17.81 15.35C18.02 14.78 18.02 14.29 17.96 14.19C17.9 14.09 17.75 14.03 17.53 13.92C17.3 13.81 16.21 13.27 16 13.2C15.8 13.12 15.66 13.08 15.51 13.31C15.36 13.53 14.95 14.03 14.83 14.17C14.7 14.32 14.58 14.34 14.36 14.23C14.14 14.12 13.42 13.88 12.57 13.13C11.91 12.54 11.46 11.82 11.34 11.6C11.21 11.38 11.32 11.26 11.44 11.14C11.53 11.04 11.66 10.89 11.78 10.75C11.89 10.61 11.93 10.5 12 10.35C12.08 10.21 12.04 10.08 11.98 9.97C11.93 9.86 11.48 8.76 11.3 8.31C11.11 7.89 10.93 7.95 10.78 7.94H10.45C10.27 7.94 9.98 7.92 9.74 8.16C9.53 7.34 9.53 7.34 9.53 7.34Z"/></svg>
             <span id="tSendWhatsappOtpText">Send OTP on WhatsApp</span>
@@ -2258,18 +2250,6 @@
       if (lDivider) lDivider.innerText = (lang === 'te' ? 'లేదా WHATSAPP OTP తో' : 'OR WITH WHATSAPP OTP');
       const lPhoneSub = document.getElementById('tPhoneLoginSub');
       if (lPhoneSub) lPhoneSub.innerText = (lang === 'te' ? 'ధృవీకరణ కోడ్ కోసం మీ WhatsApp మొబైల్ నంబర్ నమోదు చేయండి.' : 'Enter your WhatsApp mobile number to receive a 6-digit verification code.');
-      const lFirstTimeNote = document.getElementById('tFirstTimeWhatsappNote');
-      if (lFirstTimeNote) {
-        lFirstTimeNote.innerText = (lang === 'te'
-          ? 'మొదటిసారి లాగిన్ అవుతున్నారా? మీకు వెంటనే OTP అందడానికి WhatsApp లో +91 62817 30144 కి "Hi" అని మెసేజ్ చేయండి:'
-          : 'First time logging in? Tap here to send "Hi" on WhatsApp to +91 62817 30144 so we can deliver your OTP instantly:');
-      }
-      const lFirstTimeBtn = document.getElementById('tActivateWhatsappBtnText');
-      if (lFirstTimeBtn) {
-        lFirstTimeBtn.innerText = (lang === 'te'
-          ? 'WhatsApp లో "Hi" పంపండి (+91 62817 30144)'
-          : 'Send "Hi" on WhatsApp to +91 62817 30144');
-      }
       const lSendWhatsappBtn = document.getElementById('tSendWhatsappOtpText');
       if (lSendWhatsappBtn) lSendWhatsappBtn.innerText = (lang === 'te' ? 'WhatsApp లో OTP పంపండి' : 'Send OTP on WhatsApp');
       const lVerifyWhatsappBtn = document.getElementById('tVerifyOtpBtnText');
@@ -6117,7 +6097,7 @@
       } else {
         debugLog('swState', 'Registering...');
       }
-      navigator.serviceWorker.register('./sw.js?v=20261115v18', { scope: './' }).then(reg => {
+      navigator.serviceWorker.register('./sw.js?v=20261115v19', { scope: './' }).then(reg => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (newWorker) {
