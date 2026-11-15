@@ -410,13 +410,57 @@
         </div>
 
         <!-- 4. Payment Mismatches & Refund Issues -->
-        <div class="card">
+        <div class="card" style="margin-bottom: 16px;">
           <h3 style="font-size: 15px; font-weight: 700; color: #6B21A8; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
             <span>💳 Payment Mismatches & Refund Flags</span>
             <span id="payIssuesCount" class="badge" style="background: #F3E8FF; color: #6B21A8; font-size: 11px;">0</span>
           </h3>
           <div id="payIssuesContainer">
             <p style="color: var(--muted); font-size: 13px;">No payment anomalies detected.</p>
+          </div>
+        </div>
+
+        <!-- 5. Stale Unclaimed Orders (>10m) (Feature C) -->
+        <div class="card" style="margin-bottom: 16px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #DC2626; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <span>⏳ Stale Unclaimed Orders (Waiting > 10m)</span>
+            <span id="staleUnclaimedCount" class="badge" style="background: #FEE2E2; color: #DC2626; font-size: 11px;">0</span>
+          </h3>
+          <div id="staleUnclaimedContainer">
+            <p style="color: var(--muted); font-size: 13px;">No stale unclaimed orders.</p>
+          </div>
+        </div>
+
+        <!-- 6. Claimed Orders With No Progress (>20m) (Feature C) -->
+        <div class="card" style="margin-bottom: 16px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #D97706; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <span>⚠️ Claimed Orders Stalled (> 20m in Step)</span>
+            <span id="staleClaimedCount" class="badge" style="background: #FEF3C7; color: #D97706; font-size: 11px;">0</span>
+          </h3>
+          <div id="staleClaimedContainer">
+            <p style="color: var(--muted); font-size: 13px;">All claimed orders are progressing normally.</p>
+          </div>
+        </div>
+
+        <!-- 7. High Worker Cash in Hand (> ₹5,000) (Feature C) -->
+        <div class="card" style="margin-bottom: 16px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #047857; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <span>💵 Worker Cash in Hand Limit Alert (> ₹5,000)</span>
+            <span id="highCashCount" class="badge" style="background: #DCFCE7; color: #047857; font-size: 11px;">0</span>
+          </h3>
+          <div id="highCashContainer">
+            <p style="color: var(--muted); font-size: 13px;">All worker cash in hand levels are within safe limits.</p>
+          </div>
+        </div>
+
+        <!-- 8. Worker Help Requests (Feature C) -->
+        <div class="card">
+          <h3 style="font-size: 15px; font-weight: 700; color: #B45309; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <span>🆘 Worker Doorstep Help Requests</span>
+            <span id="workerHelpCount" class="badge" style="background: #FEF3C7; color: #B45309; font-size: 11px;">0</span>
+          </h3>
+          <div id="workerHelpContainer">
+            <p style="color: var(--muted); font-size: 13px;">No pending help requests from workers.</p>
           </div>
         </div>
       </div>
@@ -430,13 +474,23 @@
             <option value="all">All Time</option>
           </select>
           <select id="orderStatusFilter">
-            <option value="all">All Statuses</option>
+            <option value="all">Active Orders (Confirmed)</option>
+            <option value="pending_confirmation">⚠️ Unconfirmed (Pending OTP)</option>
             <option value="placed">Placed</option>
             <option value="accepted">Accepted</option>
             <option value="packed">Packed</option>
             <option value="out_for_delivery">Out for Delivery</option>
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
+            <option value="expired">Expired</option>
+          </select>
+          <select id="orderClaimFilter">
+            <option value="all">All Claim States</option>
+            <option value="unclaimed">Unclaimed Only</option>
+            <option value="claimed">Claimed Only</option>
+          </select>
+          <select id="orderWorkerFilter">
+            <option value="all">All Workers</option>
           </select>
           <select id="orderMethodFilter">
             <option value="all">All Methods</option>
@@ -626,6 +680,47 @@
           </div>
           <button type="button" class="btn btn-outline btn-small" id="btnUseCurrentStoreLocation" style="margin-bottom: 12px;">📍 Use My Current Location for Store</button>
 
+          <!-- Order Confirmation & Staff Policies (Feature C) -->
+          <div style="border-top: 1px solid var(--border); padding-top: 14px; margin-top: 16px; margin-bottom: 14px;">
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 10px;">🔐 Order Confirmation & Staff Claim Policies</h4>
+
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 12px; font-weight: 600;">Customer Order Confirmation OTP</label>
+              <select id="settingOrderConfirmationOtp" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px;">
+                <option value="cod_only">COD Only (Recommended for Anantapur)</option>
+                <option value="all">All Orders (COD + Online)</option>
+                <option value="off">Off (Instant Placement without OTP)</option>
+              </select>
+              <small style="font-size: 11px; color: var(--muted); display: block; margin-top: 2px;">Sends 6-digit WhatsApp OTP before placing orders to eliminate fake COD orders.</small>
+            </div>
+
+            <div style="margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="settingTrustedCustomerSkipOtp" checked style="width: 18px; height: 18px;">
+              <label for="settingTrustedCustomerSkipOtp" style="font-size: 12px; font-weight: 600; margin-bottom: 0;">Skip OTP for Trusted Customers (>= 3 delivered orders)</label>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+              <div>
+                <label style="font-size: 12px; font-weight: 600;">Max Active Orders / Worker</label>
+                <input type="number" id="settingMaxActiveOrdersPerWorker" min="1" max="10" value="3" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px;">
+              </div>
+              <div>
+                <label style="font-size: 12px; font-weight: 600;">Stale Claim Alert (Minutes)</label>
+                <input type="number" id="settingStaleClaimMinutes" min="5" max="60" value="20" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px;">
+              </div>
+            </div>
+
+            <div style="margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="settingAutoReleaseStaleClaims" style="width: 18px; height: 18px;">
+              <label for="settingAutoReleaseStaleClaims" style="font-size: 12px; font-weight: 600; margin-bottom: 0;">Auto-Release Stale Claims back to pool if no progress</label>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 12px; font-weight: 600;">Staff Portal Idle Logout (Minutes)</label>
+              <input type="number" id="settingStaffIdleMinutes" min="10" max="120" value="30" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px;">
+            </div>
+          </div>
+
           <button class="btn btn-primary" id="saveSettingsBtn">Save All Settings</button>
         </div>
 
@@ -705,7 +800,19 @@
           </div>
           <button class="btn btn-primary" id="addStaffBtn">+ Add Staff Member</button>
         </div>
+
+        <!-- Team Live Activity & Cash Overview (Feature C) -->
+        <div style="margin-bottom: 20px;">
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <span>👥</span> Team Live Activity & Shift Status
+          </h3>
+          <div id="teamLiveCardsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">
+            <p style="color: var(--muted); font-size: 13px;">Loading team status...</p>
+          </div>
+        </div>
+
         <div class="card">
+          <div style="font-size: 14px; font-weight: 700; margin-bottom: 10px;">Staff Roster & Permissions</div>
           <div id="staffListContainer">Loading staff members...</div>
         </div>
       </div>
@@ -883,6 +990,73 @@
     </div>
   </div>
 
+  <!-- REASSIGN ORDER MODAL (Feature C) -->
+  <div class="modal-overlay" id="reassignOrderModal" style="display: none;">
+    <div class="modal" style="max-width: 420px; width: 92%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: var(--primary);">🔄 Reassign Order</h3>
+        <button type="button" class="btn btn-outline btn-small" id="closeReassignModalBtn">✕</button>
+      </div>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;" id="reassignOrderModalDesc">Select a staff member to assign this order to:</p>
+      <input type="hidden" id="reassignOrderPushKey" value="">
+      <div style="margin-bottom: 12px;">
+        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Assign To Staff Member</label>
+        <select id="reassignStaffSelect" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px;"></select>
+      </div>
+      <div style="margin-bottom: 14px;">
+        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Reason for Reassignment</label>
+        <input type="text" id="reassignReasonInput" placeholder="e.g. Shift ended, vehicle breakdown, rebalanced workload..." style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px;">
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn btn-outline" id="cancelReassignBtn" style="flex: 1;">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmReassignBtn" style="flex: 1;">Reassign Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHIFT-END CASH RECONCILIATION MODAL (Feature C) -->
+  <div class="modal-overlay" id="cashReconciliationModal" style="display: none;">
+    <div class="modal" style="max-width: 420px; width: 92%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: #16A34A;">💵 Shift-End Cash Reconciliation</h3>
+        <button type="button" class="btn btn-outline btn-small" id="closeCashReconModalBtn">✕</button>
+      </div>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 12px;" id="cashReconWorkerDesc">Record COD cash received from staff member:</p>
+      <input type="hidden" id="cashReconStaffUid" value="">
+      <div style="background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;">
+        <div style="font-size: 11px; color: #92400E; font-weight: 700;">CURRENT COD CASH IN HAND</div>
+        <div style="font-size: 22px; font-weight: 800; color: #B45309;" id="cashReconCurrentAmount">₹0</div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Cash Handed Over (₹)</label>
+        <input type="number" id="cashReconAmountInput" step="1" min="0" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-weight: 700;">
+      </div>
+      <div style="margin-bottom: 14px;">
+        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 4px;">Handover Notes (Optional)</label>
+        <input type="text" id="cashReconNotesInput" value="Shift end handover" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px;">
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn btn-outline" id="cancelCashReconBtn" style="flex: 1;">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmCashReconBtn" style="flex: 1; background: #16A34A; border-color: #16A34A;">Record Handover</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER TIMELINE DRAWER (Feature C) -->
+  <div id="orderTimelineDrawer" style="display: none; position: fixed; top: 0; right: 0; width: 420px; max-width: 92vw; height: 100vh; background: #fff; box-shadow: -4px 0 25px rgba(0,0,0,0.18); z-index: 1100; overflow-y: auto; padding: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">
+      <div>
+        <h3 style="font-size: 16px; font-weight: 800; color: var(--primary);" id="timelineOrderId">Order Timeline</h3>
+        <div style="font-size: 12px; color: var(--muted);" id="timelineCustomerInfo">Customer info</div>
+      </div>
+      <button type="button" class="btn btn-outline btn-small" id="closeTimelineDrawerBtn">✕</button>
+    </div>
+    <div id="timelineEventsContainer">
+      <!-- Events rendered chronologically -->
+    </div>
+  </div>
+  <div id="timelineOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 1090;"></div>
+
   <div id="toast" class="toast">
     <span id="toastMsg"></span>
     <button id="toastUndoBtn" class="toast-undo" style="display: none;">UNDO</button>
@@ -914,6 +1088,7 @@
     }
 
     const WORKER_API = "https://ra-store-api.chowdarynikhil095.workers.dev";
+    const WORKER_API_BASE = WORKER_API;
 
     let currentUser = null;
     let allOrders = {};
@@ -1062,10 +1237,149 @@
     // --- Staff Management Logic ---
     let staffCache = {};
 
+    function getWorkerTodayCodCash(staffUid) {
+      if (staffCache[staffUid] && typeof staffCache[staffUid].cashInHand === 'number') {
+        return staffCache[staffUid].cashInHand;
+      }
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayTs = todayStart.getTime();
+
+      let cash = 0;
+      Object.values(allOrders || {}).forEach(o => {
+        if (o.status === 'delivered' && o.paymentMethod === 'cod') {
+          const orderTs = o.deliveredAt ? new Date(o.deliveredAt).getTime() : (o.createdAt ? new Date(o.createdAt).getTime() : 0);
+          if (orderTs >= todayTs) {
+            if ((o.deliveredBy && o.deliveredBy.uid === staffUid) || (o.claimedBy && o.claimedBy.uid === staffUid)) {
+              cash += Number(o.total || 0);
+            }
+          }
+        }
+      });
+      return cash;
+    }
+
+    function getWorkerActiveOrdersCount(staffUid) {
+      let count = 0;
+      Object.values(allOrders || {}).forEach(o => {
+        if (o.claimedBy && o.claimedBy.uid === staffUid) {
+          if (['placed', 'accepted', 'packed', 'out_for_delivery'].includes(o.status)) {
+            count++;
+          }
+        }
+      });
+      return count;
+    }
+
+    function getWorkerDoneTodayCount(staffUid) {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayTs = todayStart.getTime();
+      let count = 0;
+      Object.values(allOrders || {}).forEach(o => {
+        if (o.status === 'delivered') {
+          const orderTs = o.deliveredAt ? new Date(o.deliveredAt).getTime() : (o.createdAt ? new Date(o.createdAt).getTime() : 0);
+          if (orderTs >= todayTs) {
+            if ((o.deliveredBy && o.deliveredBy.uid === staffUid) || (o.claimedBy && o.claimedBy.uid === staffUid)) {
+              count++;
+            }
+          }
+        }
+      });
+      return count;
+    }
+
+    function updateWorkerFilterOptions() {
+      const orderWorkerSelect = document.getElementById('orderWorkerFilter');
+      const reassignStaffSelect = document.getElementById('reassignStaffSelect');
+      const entries = Object.entries(staffCache);
+
+      if (orderWorkerSelect) {
+        const currentVal = orderWorkerSelect.value;
+        let html = '<option value="all">All Workers</option>';
+        entries.forEach(([uid, staff]) => {
+          html += `<option value="${escapeHtml(uid)}">${escapeHtml(staff.name || staff.email || uid)}</option>`;
+        });
+        orderWorkerSelect.innerHTML = html;
+        if (currentVal && orderWorkerSelect.querySelector(`option[value="${currentVal}"]`)) {
+          orderWorkerSelect.value = currentVal;
+        }
+      }
+
+      if (reassignStaffSelect) {
+        let html = '<option value="">-- Select active staff member --</option>';
+        entries.filter(([, s]) => s.active !== false).forEach(([uid, staff]) => {
+          html += `<option value="${escapeHtml(uid)}">${escapeHtml(staff.name || staff.email || uid)} (${escapeHtml(staff.role || 'Staff')})</option>`;
+        });
+        reassignStaffSelect.innerHTML = html;
+      }
+    }
+
+    function renderTeamLiveActivity() {
+      const container = document.getElementById('teamLiveCardsContainer');
+      if (!container) return;
+      const entries = Object.entries(staffCache);
+      if (entries.length === 0) {
+        container.innerHTML = '<p style="color: var(--muted); font-size: 13px; grid-column: 1 / -1;">No staff members configured.</p>';
+        return;
+      }
+
+      const now = Date.now();
+      container.innerHTML = entries.map(([uid, staff]) => {
+        const isOnline = staff.online === true && staff.lastSeenAt && (now - new Date(staff.lastSeenAt).getTime() < 5 * 60 * 1000);
+        let lastSeenText = 'Never';
+        if (staff.lastSeenAt) {
+          const minsAgo = Math.floor((now - new Date(staff.lastSeenAt).getTime()) / 60000);
+          if (minsAgo < 1) lastSeenText = 'Just now';
+          else if (minsAgo < 60) lastSeenText = minsAgo + 'm ago';
+          else lastSeenText = Math.floor(minsAgo / 60) + 'h ago';
+        }
+        const activeCount = getWorkerActiveOrdersCount(uid);
+        const doneToday = getWorkerDoneTodayCount(uid);
+        const cashInHand = getWorkerTodayCodCash(uid);
+        const currentTask = staff.currentTask || (activeCount > 0 ? (activeCount + ' active order' + (activeCount > 1 ? 's' : '')) : 'Idle');
+        const isHighCash = cashInHand >= 5000;
+
+        return `
+          <div class="card" style="margin-bottom: 0; border-left: 4px solid ${isOnline ? '#16A34A' : '#9CA3AF'};">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+              <div>
+                <strong style="font-size: 14px; color: var(--dark);">${escapeHtml(staff.name || 'Staff')}</strong>
+                <div style="font-size: 12px; color: var(--muted);">${escapeHtml(staff.role || 'Staff')}</div>
+              </div>
+              <span class="badge" style="background: ${isOnline ? '#DCFCE7' : '#F3F4F6'}; color: ${isOnline ? '#15803D' : '#6B7280'}; font-weight: 700; font-size: 11px;">
+                ${isOnline ? '🟢 Live Now' : '⚪ Offline'}
+              </span>
+            </div>
+
+            <div style="font-size: 12px; margin-bottom: 8px; color: #4B5563;">
+              <div><strong>Task:</strong> ${escapeHtml(currentTask)}</div>
+              <div style="color: var(--muted); font-size: 11px;">Last seen: ${escapeHtml(lastSeenText)}</div>
+            </div>
+
+            <div style="display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;">
+              <span class="badge" style="background: #EFF6FF; color: #1E40AF; font-size: 11px;">⚡ Active: ${activeCount}</span>
+              <span class="badge" style="background: #ECFDF5; color: #047857; font-size: 11px;">✅ Done: ${doneToday}</span>
+              <span class="badge" style="background: ${isHighCash ? '#FEE2E2' : '#FEF3C7'}; color: ${isHighCash ? '#DC2626' : '#92400E'}; font-weight: 700; font-size: 11px;">
+                💵 Cash: ₹${cashInHand} ${isHighCash ? '⚠️' : ''}
+              </span>
+            </div>
+
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn btn-outline btn-small action-view-worker-orders" data-uid="${escapeHtml(uid)}" style="flex: 1; font-size: 11px; padding: 4px 6px;">🔍 View Orders</button>
+              <button type="button" class="btn btn-outline btn-small action-open-cash-recon" data-uid="${escapeHtml(uid)}" data-name="${escapeHtml(staff.name || 'Staff')}" data-cash="${cashInHand}" style="flex: 1; font-size: 11px; padding: 4px 6px; color: #16A34A; border-color: #86EFAC;">💵 Handover</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     function initStaffListeners() {
       db.ref('staff').on('value', (snap) => {
         staffCache = snap.val() || {};
         renderStaffList();
+        renderTeamLiveActivity();
+        updateWorkerFilterOptions();
       });
     }
 
@@ -1236,6 +1550,7 @@
         renderOrdersList();
         renderCustomersList();
         calculateReports();
+        renderTeamLiveActivity();
       }, (err) => {
         if (adminOrdersLoadTimeout) clearTimeout(adminOrdersLoadTimeout);
         console.error('Admin live orders listener error:', err);
@@ -1251,6 +1566,7 @@
         allHistoricalOrders = snap.val() || {};
         renderCustomersList();
         calculateReports();
+        renderTeamLiveActivity();
       });
 
       // Repeat soft chime every 30s if there are unaccepted payable orders
@@ -1295,15 +1611,44 @@
         document.getElementById('settingAnnouncement').value = s.announcement || '';
         document.getElementById('settingAutoOffersEnabled').checked = (s.automaticOffersEnabled !== false);
         updateOfferAudienceEstimates();
-          if (document.getElementById('settingAddress')) document.getElementById('settingAddress').value = s.address || (window.APP_CONFIG ? window.APP_CONFIG.address : '');
-          if (document.getElementById('settingLandmarks')) document.getElementById('settingLandmarks').value = (s.landmarks && s.landmarks.join) ? s.landmarks.join(', ') : (window.APP_CONFIG ? window.APP_CONFIG.landmarks.join(', ') : '');
-          if (document.getElementById('settingPinCodes')) document.getElementById('settingPinCodes').value = (s.pinCodes && s.pinCodes.join) ? s.pinCodes.join(', ') : (window.APP_CONFIG ? window.APP_CONFIG.pinCodes.join(', ') : '');
+        if (document.getElementById('settingAddress')) document.getElementById('settingAddress').value = s.address || (window.APP_CONFIG ? window.APP_CONFIG.address : '');
+        if (document.getElementById('settingLandmarks')) document.getElementById('settingLandmarks').value = (s.landmarks && s.landmarks.join) ? s.landmarks.join(', ') : (window.APP_CONFIG ? window.APP_CONFIG.landmarks.join(', ') : '');
+        if (document.getElementById('settingPinCodes')) document.getElementById('settingPinCodes').value = (s.pinCodes && s.pinCodes.join) ? s.pinCodes.join(', ') : (window.APP_CONFIG ? window.APP_CONFIG.pinCodes.join(', ') : '');
+
+        // Feature A & C: Order Confirmation & Staff Policies
+        if (document.getElementById('settingOrderConfirmationOtp')) {
+          document.getElementById('settingOrderConfirmationOtp').value = s.orderConfirmationOtp || 'cod_only';
+        }
+        if (document.getElementById('settingTrustedCustomerSkipOtp')) {
+          document.getElementById('settingTrustedCustomerSkipOtp').checked = (s.trustedCustomerSkipOtp !== false);
+        }
+        if (document.getElementById('settingMaxActiveOrdersPerWorker')) {
+          document.getElementById('settingMaxActiveOrdersPerWorker').value = s.maxActiveOrdersPerWorker ?? 3;
+        }
+        if (document.getElementById('settingStaleClaimMinutes')) {
+          document.getElementById('settingStaleClaimMinutes').value = s.staleClaimMinutes ?? 20;
+        }
+        if (document.getElementById('settingAutoReleaseStaleClaims')) {
+          document.getElementById('settingAutoReleaseStaleClaims').checked = (s.autoReleaseStaleClaims === true);
+        }
+        if (document.getElementById('settingStaffIdleMinutes')) {
+          document.getElementById('settingStaffIdleMinutes').value = s.staffIdleLogoutMinutes ?? 30;
+        }
       });
     }
 
     // =========================================================
     // ORDERS TAB (Parts A1, A2, A3, A4, A5)
     // =========================================================
+    function timeInStepBadge(ord, now) {
+      if (['delivered', 'cancelled', 'expired'].includes(ord.status)) return '';
+      const statusTime = ord.packedAt || ord.acceptedAt || ord.claimedAt || ord.createdAt;
+      if (!statusTime) return '';
+      const mins = Math.max(0, Math.floor((now - new Date(statusTime)) / 60000));
+      const isStalled = mins >= 20;
+      return `<span style="font-size: 11px; padding: 1px 5px; border-radius: 4px; background: ${isStalled ? '#FEE2E2' : '#F3F4F6'}; color: ${isStalled ? '#DC2626' : '#4B5563'}; font-weight: ${isStalled ? '700' : '500'};">⏱️ in ${escapeHtml(ord.status)}: ${mins}m</span>`;
+    }
+
     function renderOrderCardHtml(key, ord, now) {
       const checks = ord.packingChecks || {};
       const isCancelled = ord.status === 'cancelled';
@@ -1369,11 +1714,19 @@
           <div style="font-size: 15px; margin-bottom: 6px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
             <div><strong>${escapeHtml(ord.customer?.name || 'Customer')}</strong> (${escapeHtml(ord.customer?.phone || '')})</div>
             ${ord.claimedBy ? `
-              <div style="font-size: 12px; color: #1E40AF; background: #EFF6FF; border: 1px solid #BFDBFE; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px;">
+              <div style="font-size: 12px; color: #1E40AF; background: #EFF6FF; border: 1px solid #BFDBFE; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span>👤 Claimed by: <strong>${escapeHtml(ord.claimedBy.name || ord.claimedBy.email)}</strong></span>
-                <button class="btn btn-outline btn-small action-admin-unclaim" data-key="${escapeHtml(key)}" style="padding: 1px 6px; font-size: 11px;">Release</button>
+                <span style="font-size: 11px; color: var(--muted);">${ord.claimedAt ? new Date(ord.claimedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</span>
+                ${timeInStepBadge(ord, now)}
+                <button type="button" class="btn btn-outline btn-small action-open-reassign" data-key="${escapeHtml(key)}" style="padding: 1px 6px; font-size: 11px;">🔄 Reassign</button>
+                <button type="button" class="btn btn-outline btn-small action-admin-unclaim" data-key="${escapeHtml(key)}" style="padding: 1px 6px; font-size: 11px; color: var(--danger);">↩️ Release</button>
               </div>
-            ` : `<span style="font-size: 11px; color: var(--muted);">👤 Unclaimed</span>`}
+            ` : `
+              <div style="display: inline-flex; align-items: center; gap: 6px;">
+                <span style="font-size: 11px; color: var(--muted);">👤 Unclaimed (${minsSincePlaced}m)</span>
+                ${!isCancelled && !isDelivered ? `<button type="button" class="btn btn-outline btn-small action-open-reassign" data-key="${escapeHtml(key)}" style="padding: 1px 6px; font-size: 11px;">👤 Assign</button>` : ''}
+              </div>
+            `}
           </div>
 
           <!-- A1: Prominent Address Block -->
@@ -1429,7 +1782,8 @@
             </div>
 
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn btn-outline action-print" data-key="${escapeHtml(key)}" style="color: var(--text); border-color: var(--border);">🖨️ Bill</button>
+              <button type="button" class="btn btn-outline action-print" data-key="${escapeHtml(key)}" style="color: var(--text); border-color: var(--border);">🖨️ Bill</button>
+              <button type="button" class="btn btn-outline action-view-timeline" data-key="${escapeHtml(key)}" style="color: var(--primary); border-color: var(--primary); font-size: 12px;">📜 Timeline</button>
 
               ${!isCancelled && !isDelivered ? `
                 ${ord.status === 'placed' ? `<button class="btn btn-light action-status" data-key="${escapeHtml(key)}" data-status="accepted" ${dispatchDisabled}>Accept</button>` : ''}
@@ -1450,6 +1804,8 @@
       const dateFilter = document.getElementById('orderDateFilter').value;
       const statusFilter = document.getElementById('orderStatusFilter').value;
       const methodFilter = document.getElementById('orderMethodFilter').value;
+      const claimFilter = document.getElementById('orderClaimFilter')?.value || 'all';
+      const workerFilter = document.getElementById('orderWorkerFilter')?.value || 'all';
 
       const now = new Date();
       let keys = Object.keys(allOrders);
@@ -1465,7 +1821,15 @@
           if (!matchId && !matchName && !matchPhone && !matchAddr) return false;
         }
 
-        if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+        if (statusFilter === 'all') {
+          if (o.status === 'pending_confirmation' || o.status === 'expired') return false;
+        } else if (o.status !== statusFilter) {
+          return false;
+        }
+
+        if (claimFilter === 'unclaimed' && o.claimedBy) return false;
+        if (claimFilter === 'claimed' && !o.claimedBy) return false;
+        if (workerFilter !== 'all' && (!o.claimedBy || o.claimedBy.uid !== workerFilter)) return false;
 
         const orderDate = new Date(o.createdAt);
         if (dateFilter === 'today') {
@@ -1599,8 +1963,9 @@
       list.innerHTML = html;
     }
 
-    ['orderSearchInput', 'orderDateFilter', 'orderStatusFilter', 'orderMethodFilter'].forEach(id => {
-      document.getElementById(id).addEventListener('input', renderOrdersList);
+    ['orderSearchInput', 'orderDateFilter', 'orderStatusFilter', 'orderMethodFilter', 'orderClaimFilter', 'orderWorkerFilter'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', renderOrdersList);
+      document.getElementById(id)?.addEventListener('change', renderOrdersList);
     });
 
     document.getElementById('ordersList').addEventListener('click', async (e) => {
@@ -1871,6 +2236,7 @@
       const orderSource = Object.keys(allHistoricalOrders).length ? allHistoricalOrders : allOrders;
       Object.keys(orderSource).forEach(key => {
         const o = orderSource[key];
+        if (o.status === 'pending_confirmation' || o.status === 'expired') return;
         const phone = o.customer?.phone || 'unknown';
         if (!customerProfiles[phone]) {
           customerProfiles[phone] = {
@@ -2152,7 +2518,7 @@
 
       if (!orders.length) { alert('No eligible orders to export.'); return; }
 
-      let csv = "Order ID,Date,Customer Name,Phone,Delivery Address,Delivery Notes,Scheduled Slot,Payment Method,Payment Status,Razorpay Payment ID,Refund Amount,Order Status,Subtotal,Delivery Fee,Total,Items\n";
+      let csv = "Order ID,Date,Customer Name,Phone,Delivery Address,Delivery Notes,Scheduled Slot,Payment Method,Payment Status,Razorpay Payment ID,Refund Amount,Order Status,Subtotal,Delivery Fee,Total,Items,Claimed By,Claimed At,Packed By,Delivered By\n";
 
       orders.forEach(o => {
         const date = new Date(o.createdAt).toISOString();
@@ -2175,7 +2541,11 @@
           sanitizeCsvCell(o.subtotal || 0),
           sanitizeCsvCell(o.deliveryFee || 0),
           sanitizeCsvCell(o.total || 0),
-          sanitizeCsvCell(items)
+          sanitizeCsvCell(items),
+          sanitizeCsvCell(o.claimedBy?.name || o.claimedBy?.email || ''),
+          sanitizeCsvCell(o.claimedAt || ''),
+          sanitizeCsvCell(o.packedBy?.name || o.packedBy?.email || ''),
+          sanitizeCsvCell(o.deliveredBy?.name || o.deliveredBy?.email || '')
         ].join(',') + '\n';
       });
 
@@ -2865,7 +3235,13 @@
         deliveryFee: (deliveryFeeRaw !== '' && !isNaN(parseFloat(deliveryFeeRaw))) ? parseFloat(deliveryFeeRaw) : 25,
         freeDeliveryThreshold: (freeThreshRaw !== '' && !isNaN(parseFloat(freeThreshRaw))) ? parseFloat(freeThreshRaw) : 299,
         whatsappNumber: document.getElementById('settingWhatsapp').value.trim(),
-        announcement: document.getElementById('settingAnnouncement').value.trim()
+        announcement: document.getElementById('settingAnnouncement').value.trim(),
+        orderConfirmationOtp: document.getElementById('settingOrderConfirmationOtp')?.value || 'cod_only',
+        trustedCustomerSkipOtp: document.getElementById('settingTrustedCustomerSkipOtp')?.checked ?? true,
+        maxActiveOrdersPerWorker: parseInt(document.getElementById('settingMaxActiveOrdersPerWorker')?.value) || 3,
+        staleClaimMinutes: parseInt(document.getElementById('settingStaleClaimMinutes')?.value) || 20,
+        autoReleaseStaleClaims: document.getElementById('settingAutoReleaseStaleClaims')?.checked ?? false,
+        staffIdleLogoutMinutes: parseInt(document.getElementById('settingStaffIdleMinutes')?.value) || 30
       };
       await db.ref('settings').update(updates);
       showToast('Store settings saved successfully!');
@@ -3023,6 +3399,138 @@
         payContainer.innerHTML = '<p style="color: var(--muted); font-size: 13px;">No payment anomalies detected.</p>';
       }
 
+      // 5. Stale Unclaimed Orders (>10m) (Feature C)
+      const now = Date.now();
+      const staleUnclaimed = Object.entries(allOrders).filter(([k, o]) => {
+        if (['delivered', 'cancelled', 'expired', 'pending_confirmation'].includes(o.status)) return false;
+        if (o.claimedBy) return false;
+        const createdAt = o.createdAt ? new Date(o.createdAt).getTime() : 0;
+        return (now - createdAt) >= 10 * 60 * 1000;
+      });
+      const staleUnclaimedCountEl = document.getElementById('staleUnclaimedCount');
+      if (staleUnclaimedCountEl) staleUnclaimedCountEl.innerText = staleUnclaimed.length;
+      totalAlerts += staleUnclaimed.length;
+
+      const staleUnclaimedCont = document.getElementById('staleUnclaimedContainer');
+      if (staleUnclaimedCont) {
+        if (staleUnclaimed.length) {
+          staleUnclaimedCont.innerHTML = staleUnclaimed.map(([k, o]) => {
+            const mins = Math.floor((now - new Date(o.createdAt).getTime()) / 60000);
+            return `
+              <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <div style="font-weight: 700; color: #DC2626;">Order #${escapeHtml(o.id || k)} • Waiting ${mins}m unclaimed</div>
+                  <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">${escapeHtml(o.customer?.name || 'Customer')} • ${escapeHtml(o.customer?.address || '')} (₹${o.total || 0})</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-primary btn-small action-open-reassign" data-key="${escapeHtml(k)}" style="font-size: 11px;">👤 Assign Worker</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          staleUnclaimedCont.innerHTML = '<p style="color: var(--muted); font-size: 13px;">No stale unclaimed orders.</p>';
+        }
+      }
+
+      // 6. Claimed Orders With No Progress (>20m) (Feature C)
+      const staleClaimed = Object.entries(allOrders).filter(([k, o]) => {
+        if (['delivered', 'cancelled', 'expired', 'pending_confirmation'].includes(o.status)) return false;
+        if (!o.claimedBy) return false;
+        const statusTime = o.packedAt || o.acceptedAt || o.claimedAt || o.createdAt;
+        if (!statusTime) return false;
+        return (now - new Date(statusTime).getTime()) >= 20 * 60 * 1000;
+      });
+      const staleClaimedCountEl = document.getElementById('staleClaimedCount');
+      if (staleClaimedCountEl) staleClaimedCountEl.innerText = staleClaimed.length;
+      totalAlerts += staleClaimed.length;
+
+      const staleClaimedCont = document.getElementById('staleClaimedContainer');
+      if (staleClaimedCont) {
+        if (staleClaimed.length) {
+          staleClaimedCont.innerHTML = staleClaimed.map(([k, o]) => {
+            const statusTime = o.packedAt || o.acceptedAt || o.claimedAt || o.createdAt;
+            const mins = Math.floor((now - new Date(statusTime).getTime()) / 60000);
+            return `
+              <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <div style="font-weight: 700; color: #D97706;">Order #${escapeHtml(o.id || k)} • ${mins}m in ${escapeHtml(o.status)}</div>
+                  <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">Assigned to: <strong>${escapeHtml(o.claimedBy?.name || 'Staff')}</strong></div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" class="btn btn-outline btn-small action-open-reassign" data-key="${escapeHtml(k)}" style="font-size: 11px;">🔄 Reassign</button>
+                  <button type="button" class="btn btn-outline btn-small action-admin-unclaim" data-key="${escapeHtml(k)}" style="font-size: 11px; color: var(--danger);">↩️ Release</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          staleClaimedCont.innerHTML = '<p style="color: var(--muted); font-size: 13px;">All claimed orders are progressing normally.</p>';
+        }
+      }
+
+      // 7. High Worker Cash in Hand (> ₹5,000) (Feature C)
+      const highCashWorkers = Object.entries(staffCache).filter(([uid]) => {
+        return getWorkerTodayCodCash(uid) >= 5000;
+      });
+      const highCashCountEl = document.getElementById('highCashCount');
+      if (highCashCountEl) highCashCountEl.innerText = highCashWorkers.length;
+      totalAlerts += highCashWorkers.length;
+
+      const highCashCont = document.getElementById('highCashContainer');
+      if (highCashCont) {
+        if (highCashWorkers.length) {
+          highCashCont.innerHTML = highCashWorkers.map(([uid, staff]) => {
+            const cash = getWorkerTodayCodCash(uid);
+            return `
+              <div style="background: #ECFDF5; border: 1px solid #A7F3D0; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <div style="font-weight: 700; color: #047857;">${escapeHtml(staff.name || 'Staff')} has ₹${cash} COD Cash in Hand</div>
+                  <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">Exceeds the ₹5,000 safety threshold. Schedule cash handover.</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-primary btn-small action-open-cash-recon" data-uid="${escapeHtml(uid)}" data-name="${escapeHtml(staff.name || 'Staff')}" data-cash="${cash}" style="font-size: 11px; background: #047857;">💵 Collect Cash</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          highCashCont.innerHTML = '<p style="color: var(--muted); font-size: 13px;">All worker cash in hand levels are within safe limits.</p>';
+        }
+      }
+
+      // 8. Worker Doorstep Help Requests (Feature C)
+      const helpRequests = Object.entries(allOrders).filter(([k, o]) => {
+        return o.helpRequest && o.helpRequest.status === 'open' && o.status !== 'cancelled' && o.status !== 'delivered';
+      });
+      const workerHelpCountEl = document.getElementById('workerHelpCount');
+      if (workerHelpCountEl) workerHelpCountEl.innerText = helpRequests.length;
+      totalAlerts += helpRequests.length;
+
+      const workerHelpCont = document.getElementById('workerHelpContainer');
+      if (workerHelpCont) {
+        if (helpRequests.length) {
+          workerHelpCont.innerHTML = helpRequests.map(([k, o]) => {
+            const hr = o.helpRequest || {};
+            return `
+              <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <div style="font-weight: 700; color: #B45309;">Order #${escapeHtml(o.id || k)}: ${escapeHtml(hr.requestedBy || 'Staff')} needs help!</div>
+                  <div style="font-size: 13px; margin: 3px 0;"><strong>Reason:</strong> ${escapeHtml(hr.reason || 'Doorstep issue')}</div>
+                  <div style="font-size: 11px; color: var(--muted);">Customer: ${escapeHtml(o.customer?.name || '')} (${escapeHtml(o.customer?.phone || '')}) • ${escapeHtml(o.customer?.address || '')}</div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  ${o.customer?.phone ? `<a href="tel:${escapeHtml(o.customer.phone)}" class="btn btn-outline btn-small" style="color: var(--primary);">📞 Call Customer</a>` : ''}
+                  <button type="button" class="btn btn-light btn-small action-view-timeline" data-key="${escapeHtml(k)}" style="font-size: 11px;">📜 View</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          workerHelpCont.innerHTML = '<p style="color: var(--muted); font-size: 13px;">No pending help requests from workers.</p>';
+        }
+      }
+
       // Update badge
       const badge = document.getElementById('alertsBadge');
       if (badge) {
@@ -3040,19 +3548,353 @@
 
     document.getElementById('refreshAlertsBtn')?.addEventListener('click', renderAlertsInbox);
 
+    // --- Modals & Timeline Drawer Logic (Feature C) ---
+    function openReassignModal(key) {
+      const ord = allOrders[key] || allHistoricalOrders[key];
+      if (!ord) return;
+      document.getElementById('reassignOrderPushKey').value = key;
+      const desc = document.getElementById('reassignOrderModalDesc');
+      if (desc) {
+        desc.innerText = `Reassign Order #${ord.id || key} (currently ${ord.claimedBy ? 'assigned to ' + (ord.claimedBy.name || ord.claimedBy.email) : 'unclaimed'}):`;
+      }
+      document.getElementById('reassignReasonInput').value = '';
+      updateWorkerFilterOptions();
+      document.getElementById('reassignOrderModal').style.display = 'flex';
+    }
+
+    function closeReassignModal() {
+      document.getElementById('reassignOrderModal').style.display = 'none';
+    }
+
+    document.getElementById('closeReassignModalBtn')?.addEventListener('click', closeReassignModal);
+    document.getElementById('cancelReassignBtn')?.addEventListener('click', closeReassignModal);
+
+    document.getElementById('confirmReassignBtn')?.addEventListener('click', async () => {
+      const key = document.getElementById('reassignOrderPushKey').value;
+      const targetStaffUid = document.getElementById('reassignStaffSelect').value;
+      const reason = document.getElementById('reassignReasonInput').value.trim() || 'Reassigned by store owner';
+
+      if (!targetStaffUid) {
+        alert('Please select a staff member to assign this order to.');
+        return;
+      }
+
+      const confirmBtn = document.getElementById('confirmReassignBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.innerText = 'Reassigning...';
+
+      try {
+        const token = await auth.currentUser.getIdToken();
+        const res = await fetch(`${WORKER_API_BASE}/api/admin/reassign-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ pushKey: key, targetStaffUid, reason })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Order #${allOrders[key]?.id || key} reassigned successfully! ✅`);
+          closeReassignModal();
+          renderOrdersList();
+          renderTeamLiveActivity();
+        } else {
+          alert('Error reassigning order: ' + (data.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Network error connecting to Worker API: ' + err.message);
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = 'Reassign Order';
+      }
+    });
+
+    function openCashReconModal(staffUid, staffName, currentCash) {
+      document.getElementById('cashReconStaffUid').value = staffUid;
+      const desc = document.getElementById('cashReconWorkerDesc');
+      if (desc) desc.innerText = `Record COD cash received from ${staffName || 'Staff'}:`;
+      const curAmtEl = document.getElementById('cashReconCurrentAmount');
+      if (curAmtEl) curAmtEl.innerText = `₹${currentCash}`;
+      const amtInput = document.getElementById('cashReconAmountInput');
+      if (amtInput) amtInput.value = currentCash;
+      document.getElementById('cashReconNotesInput').value = 'Shift end handover';
+      document.getElementById('cashReconciliationModal').style.display = 'flex';
+    }
+
+    function closeCashReconModal() {
+      document.getElementById('cashReconciliationModal').style.display = 'none';
+    }
+
+    document.getElementById('closeCashReconModalBtn')?.addEventListener('click', closeCashReconModal);
+    document.getElementById('cancelCashReconBtn')?.addEventListener('click', closeCashReconModal);
+
+    document.getElementById('confirmCashReconBtn')?.addEventListener('click', async () => {
+      const staffUid = document.getElementById('cashReconStaffUid').value;
+      const amount = parseFloat(document.getElementById('cashReconAmountInput').value) || 0;
+      const notes = document.getElementById('cashReconNotesInput').value.trim() || 'Shift end handover';
+
+      if (!staffUid) {
+        alert('Staff member identifier missing.');
+        return;
+      }
+      if (amount <= 0 && !confirm('Amount is ₹0. Record zero cash handover?')) {
+        return;
+      }
+
+      const confirmBtn = document.getElementById('confirmCashReconBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.innerText = 'Recording...';
+
+      try {
+        const token = await auth.currentUser.getIdToken();
+        const res = await fetch(`${WORKER_API_BASE}/api/admin/cash-reconciliation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ staffUid, amount, notes })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Handover of ₹${amount} recorded successfully! ✅`);
+          closeCashReconModal();
+          if (staffCache[staffUid]) {
+            staffCache[staffUid].cashInHand = 0;
+          }
+          renderTeamLiveActivity();
+          renderAlertsInbox();
+        } else {
+          alert('Error recording handover: ' + (data.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Network error connecting to Worker API: ' + err.message);
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = 'Record Cash Received';
+      }
+    });
+
+    function openOrderTimelineDrawer(key) {
+      const ord = allOrders[key] || allHistoricalOrders[key];
+      if (!ord) {
+        alert('Order details not found.');
+        return;
+      }
+      const drawer = document.getElementById('orderTimelineDrawer');
+      const overlay = document.getElementById('timelineOverlay');
+      const titleEl = document.getElementById('timelineOrderId');
+      const custEl = document.getElementById('timelineCustomerInfo');
+      const eventsEl = document.getElementById('timelineEventsContainer');
+      if (!drawer || !eventsEl) return;
+
+      titleEl.innerText = `Order #${ord.id || key}`;
+      custEl.innerText = `${ord.customer?.name || 'Customer'} • ${ord.customer?.phone || ''} • ${ord.customer?.address || ''}`;
+
+      let eventsList = [];
+      if (Array.isArray(ord.events) && ord.events.length > 0) {
+        eventsList = [...ord.events];
+      }
+
+      const hasEvent = (type) => eventsList.some(e => e.event === type || e.action === type);
+
+      if (!hasEvent('placed') && ord.createdAt) {
+        eventsList.push({
+          event: 'placed',
+          actor: ord.customer?.name || 'Customer',
+          details: `Order placed (${ord.paymentMethod === 'cod' ? 'COD' : 'Online'}) - Total ₹${ord.total || 0}`,
+          timestamp: ord.createdAt
+        });
+      }
+      if (!hasEvent('confirmed') && ord.confirmedAt) {
+        eventsList.push({
+          event: 'confirmed',
+          actor: 'Customer OTP',
+          details: 'Order verified via 6-digit WhatsApp OTP',
+          timestamp: ord.confirmedAt
+        });
+      }
+      if (!hasEvent('claimed') && ord.claimedAt) {
+        eventsList.push({
+          event: 'claimed',
+          actor: ord.claimedBy?.name || 'Staff',
+          details: `Claimed by ${ord.claimedBy?.name || 'Staff'} (${ord.claimedBy?.role || 'Staff'})`,
+          timestamp: ord.claimedAt
+        });
+      }
+      if (!hasEvent('accepted') && ord.acceptedAt) {
+        eventsList.push({
+          event: 'accepted',
+          actor: ord.acceptedBy || 'Staff',
+          details: 'Order accepted for processing',
+          timestamp: ord.acceptedAt
+        });
+      }
+      if (!hasEvent('packed') && ord.packedAt) {
+        eventsList.push({
+          event: 'packed',
+          actor: ord.packedBy?.name || 'Packer',
+          details: 'Order packed with checklist completed',
+          timestamp: ord.packedAt
+        });
+      }
+      if (!hasEvent('out_for_delivery') && ord.outForDeliveryAt) {
+        eventsList.push({
+          event: 'out_for_delivery',
+          actor: ord.deliveredBy?.name || 'Rider',
+          details: 'Out for doorstep delivery',
+          timestamp: ord.outForDeliveryAt
+        });
+      }
+      if (!hasEvent('delivered') && ord.deliveredAt) {
+        eventsList.push({
+          event: 'delivered',
+          actor: ord.deliveredBy?.name || 'Rider',
+          details: `Delivered successfully${ord.otpVerified ? ' (4-digit code verified)' : (ord.deliveredWithoutOtp ? ' (Deliver without OTP override)' : '')}${ord.paymentMethod === 'cod' ? ' - Cash collected ₹' + (ord.total || 0) : ''}`,
+          timestamp: ord.deliveredAt
+        });
+      }
+      if (!hasEvent('cancelled') && ord.cancelledAt) {
+        eventsList.push({
+          event: 'cancelled',
+          actor: ord.cancelledBy || 'Owner',
+          details: `Order cancelled. Reason: ${ord.cancellationReason || 'No reason provided'}`,
+          timestamp: ord.cancelledAt
+        });
+      }
+
+      eventsList.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+
+      const iconMap = {
+        placed: '🛒',
+        confirmed: '🔐',
+        claimed: '👤',
+        released: '↩️',
+        released_by_admin: '↩️',
+        reassigned: '🔄',
+        accepted: '📋',
+        packed: '📦',
+        out_for_delivery: '🛵',
+        delivered: '✅',
+        cancelled: '❌',
+        doorstep_help_requested: '🆘'
+      };
+
+      if (eventsList.length === 0) {
+        eventsEl.innerHTML = '<p style="color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center;">No timeline events recorded yet.</p>';
+      } else {
+        eventsEl.innerHTML = `
+          <div style="position: relative; padding-left: 24px; border-left: 2px solid var(--border); margin-left: 10px;">
+            ${eventsList.map(ev => {
+              const icon = iconMap[ev.event] || '📌';
+              const timeStr = ev.timestamp ? new Date(ev.timestamp).toLocaleString() : 'Recent';
+              const desc = ev.details || ev.reason || (ev.from && ev.to ? `From ${ev.from} to ${ev.to}` : ev.event);
+              return `
+                <div style="margin-bottom: 20px; position: relative;">
+                  <span style="position: absolute; left: -35px; top: 0; background: #fff; border: 1px solid var(--border); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px;">
+                    ${icon}
+                  </span>
+                  <div style="font-weight: 700; font-size: 13px; color: var(--dark); text-transform: capitalize;">
+                    ${escapeHtml((ev.event || '').replace(/_/g, ' '))}
+                  </div>
+                  <div style="font-size: 11px; color: var(--muted); margin: 2px 0;">
+                    ${escapeHtml(timeStr)} • <strong>${escapeHtml(ev.actor || 'System')}</strong>
+                  </div>
+                  <div style="font-size: 12px; color: #374151; background: #F9FAFB; padding: 6px 8px; border-radius: 6px; margin-top: 4px;">
+                    ${escapeHtml(desc)}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      drawer.style.display = 'block';
+      overlay.style.display = 'block';
+    }
+
+    function closeOrderTimelineDrawer() {
+      const drawer = document.getElementById('orderTimelineDrawer');
+      const overlay = document.getElementById('timelineOverlay');
+      if (drawer) drawer.style.display = 'none';
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    document.getElementById('closeTimelineDrawerBtn')?.addEventListener('click', closeOrderTimelineDrawer);
+    document.getElementById('timelineOverlay')?.addEventListener('click', closeOrderTimelineDrawer);
+
     // Global listener for Alerts & Orders actions
     document.addEventListener('click', async (e) => {
+      // 0. Timeline Drawer Trigger
+      const timelineBtn = e.target.closest('.action-view-timeline');
+      if (timelineBtn) {
+        const key = timelineBtn.getAttribute('data-key');
+        if (key) openOrderTimelineDrawer(key);
+        return;
+      }
+
+      // 0.1 Open Reassign Modal
+      const openReassignBtn = e.target.closest('.action-open-reassign');
+      if (openReassignBtn) {
+        const key = openReassignBtn.getAttribute('data-key');
+        if (key) openReassignModal(key);
+        return;
+      }
+
+      // 0.2 View Worker Orders Filter
+      const viewWorkerBtn = e.target.closest('.action-view-worker-orders');
+      if (viewWorkerBtn) {
+        const uid = viewWorkerBtn.getAttribute('data-uid');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const ordersTabBtn = document.querySelector('.tab-btn[data-tab="orders"]');
+        if (ordersTabBtn) ordersTabBtn.classList.add('active');
+        ['alerts', 'orders', 'products', 'categories', 'customers', 'reports', 'misses', 'settings', 'staff'].forEach(tab => {
+          const el = document.getElementById(tab + 'Tab');
+          if (el) el.style.display = (tab === 'orders') ? 'block' : 'none';
+        });
+        const workerSelect = document.getElementById('orderWorkerFilter');
+        if (workerSelect) workerSelect.value = uid;
+        const claimSelect = document.getElementById('orderClaimFilter');
+        if (claimSelect) claimSelect.value = 'claimed';
+        renderOrdersList();
+        const ordersListEl = document.getElementById('ordersList');
+        if (ordersListEl) ordersListEl.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      // 0.3 Open Cash Reconciliation Modal
+      const openCashReconBtn = e.target.closest('.action-open-cash-recon');
+      if (openCashReconBtn) {
+        const uid = openCashReconBtn.getAttribute('data-uid');
+        const name = openCashReconBtn.getAttribute('data-name');
+        const cash = parseFloat(openCashReconBtn.getAttribute('data-cash')) || 0;
+        openCashReconModal(uid, name, cash);
+        return;
+      }
+
       // 1. Release Claim (Admin)
       const unclaimBtn = e.target.closest('.action-admin-unclaim');
       if (unclaimBtn) {
         const key = unclaimBtn.getAttribute('data-key');
-        if (!confirm('Release staff claim on this order? It will return to the unclaimed pool.')) return;
+        const reason = prompt('Release this order back to the unclaimed pool? Enter reason (optional):', 'Released by store owner');
+        if (reason === null) return;
         try {
-          await db.ref('orders/' + key + '/claimedBy').remove();
+          const token = await auth.currentUser.getIdToken();
+          const res = await fetch(`${WORKER_API_BASE}/api/admin/release-to-pool`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ pushKey: key, reason: reason.trim() || 'Released by owner' })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast('Order released back to unclaimed pool.');
+            renderOrdersList();
+            renderTeamLiveActivity();
+          } else {
+            await db.ref('orders/' + key + '/claimedBy').remove();
+            showToast('Order claim released.');
+            renderOrdersList();
+          }
+        } catch (err) {
+          await db.ref('orders/' + key + '/claimedBy').remove().catch(() => {});
           showToast('Order claim released.');
           renderOrdersList();
-        } catch (err) {
-          alert('Could not release claim: ' + err.message);
         }
         return;
       }

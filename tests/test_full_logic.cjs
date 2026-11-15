@@ -1507,6 +1507,162 @@ it('S3.3: Cloudflare Worker routes and bilingual status notification pipeline fo
   assert(workerCode.includes('/api/verify-delivery-otp'), 'worker must mount /api/verify-delivery-otp route');
 });
 
+// ========================================================
+// FEATURE A: CUSTOMER ORDER-CONFIRMATION OTP TESTS
+// ========================================================
+
+it('FA.1: Customer Order-Confirmation OTP generation, salted HMAC storage and route handlers in worker', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/order/confirm-otp'), 'Must implement /api/order/confirm-otp endpoint');
+  assert(workerCode.includes('/api/order/resend-confirmation-otp'), 'Must implement /api/order/resend-confirmation-otp endpoint');
+  assert(workerCode.includes('/api/order/cancel-unconfirmed'), 'Must implement /api/order/cancel-unconfirmed endpoint');
+  assert(workerCode.includes('pending_confirmation'), 'Must create order in pending_confirmation status');
+  assert(workerCode.includes('orderConfirmationOtps/'), 'Must store private OTP data in orderConfirmationOtps/');
+  assert(workerCode.includes('generateCryptoOtp6'), 'Must generate cryptographic 6-digit OTP');
+  assert(workerCode.includes('generateRandomSaltHex'), 'Must generate random salt for HMAC');
+  assert(workerCode.includes('constantTimeCompare'), 'Must use constant-time comparison for OTP hash');
+});
+
+it('FA.2: 5 wrong attempts lock confirmation session and require resend', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('attempts >= 5'), 'Must check if attempts >= 5 for lockout');
+  assert(workerCode.includes('Confirmation locked after 5 failed attempts'), 'Must provide locked message');
+  assert(workerCode.includes('maxResends: 3'), 'Must support max 3 resends');
+  assert(workerCode.includes('30 * 1000'), 'Must enforce 30s resend cooldown');
+});
+
+it('FA.3: Unconfirmed order expiry after 15m and 24h rate limiting (<3 unconfirmed)', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('ORDER_EXPIRED_UNCONFIRMED'), 'Must record audit log on unconfirmed order expiry');
+  assert(workerCode.includes('RATE_LIMITED_UNCONFIRMED'), 'Must rate limit customers with >=3 unconfirmed orders in 24h');
+  assert(workerCode.includes('isCustomerTrusted'), 'Must support trusted customer OTP skip');
+});
+
+it('FA.4: Frontend order confirmation modal and unconfirmed status badge in index.html', () => {
+  const indexHtml = fs.readFileSync('index.html', 'utf8');
+  assert(indexHtml.includes('id="orderConfirmModal"'), 'Must have #orderConfirmModal in index.html');
+  assert(indexHtml.includes('id="orderConfirmOtpInput"'), 'Must have 6-digit OTP input');
+  assert(indexHtml.includes('id="btnVerifyOrderOtp"'), 'Must have Verify & Place Order button');
+  assert(indexHtml.includes('id="btnResendOrderOtp"'), 'Must have Resend OTP button');
+  assert(indexHtml.includes('id="btnCancelOrderConfirm"'), 'Must have Cancel Order button');
+  assert(indexHtml.includes('unconfirmedOrderBadge'), 'Must have I18N string for unconfirmed badge');
+  assert(indexHtml.includes('action-enter-confirm-code'), 'Must have Enter Code action in orders list');
+  assert(indexHtml.includes('action-cancel-unconfirmed'), 'Must have Cancel action for unconfirmed orders');
+});
+
+it('FA.5: Staff portal and RTDB rules isolation for pending_confirmation and expired orders', () => {
+  const rulesJson = fs.readFileSync('database.rules.json', 'utf8');
+  assert(rulesJson.includes('"orderConfirmationOtps"'), 'database.rules.json must protect orderConfirmationOtps');
+  assert(rulesJson.includes("data.child('status').val() != 'pending_confirmation'"), 'Staff must not read pending_confirmation orders');
+  assert(rulesJson.includes("data.child('status').val() != 'expired'"), 'Staff must not read expired orders');
+  const workerHtml = fs.readFileSync('worker.html', 'utf8');
+  assert(workerHtml.includes("o.status !== 'pending_confirmation'"), 'worker.html must filter pending_confirmation orders');
+});
+
+// ========================================================
+// FEATURE B: STAFF PORTAL CLAIM SYSTEM & WORKER SECTIONS
+// ========================================================
+
+it('FB.1: Staff portal claim endpoint enforces max active orders and updates worker count', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/staff/claim-order'), 'Must mount /api/staff/claim-order route');
+  assert(workerCode.includes('handleStaffClaimOrder'), 'Must implement handleStaffClaimOrder');
+  assert(workerCode.includes('maxActiveOrdersPerWorker'), 'Must check maxActiveOrdersPerWorker');
+  assert(workerCode.includes('MAX_ACTIVE_EXCEEDED'), 'Must throw error if worker exceeds max active orders');
+  assert(workerCode.includes('ALREADY_CLAIMED'), 'Must reject if already claimed by another worker');
+  assert(workerCode.includes('activeOrderCount'), 'Must update staff activeOrderCount');
+});
+
+it('FB.2: Staff portal release order returns order to pool with reason and records audit', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/staff/release-order'), 'Must mount /api/staff/release-order route');
+  assert(workerCode.includes('handleStaffReleaseOrder'), 'Must implement handleStaffReleaseOrder');
+  assert(workerCode.includes('CANNOT_RELEASE_OUT_FOR_DELIVERY'), 'Must prevent releasing orders that are out for delivery without admin');
+  assert(workerCode.includes('ORDER_RELEASED'), 'Must record audit log on order release');
+});
+
+it('FB.3: Worker heartbeat updates presence with online, lastSeenAt, and currentTask', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/staff/heartbeat'), 'Must mount /api/staff/heartbeat route');
+  assert(workerCode.includes('handleStaffHeartbeat'), 'Must implement handleStaffHeartbeat');
+  assert(workerCode.includes('lastSeenAt'), 'Must record lastSeenAt in presence');
+  assert(workerCode.includes('currentTask'), 'Must persist currentTask in presence');
+});
+
+it('FB.4: Staff portal markup contains 5 tabs and release/help modals', () => {
+  const workerHtml = fs.readFileSync('worker.html', 'utf8');
+  assert(workerHtml.includes('id="tabNewBtn"'), 'Must have New pool tab button');
+  assert(workerHtml.includes('id="tabMyOrdersBtn"'), 'Must have My Orders tab button');
+  assert(workerHtml.includes('id="tabCompletedBtn"'), 'Must have Done Today tab button');
+  assert(workerHtml.includes('id="tabSummaryBtn"'), 'Must have Summary tab button');
+  assert(workerHtml.includes('id="tabTeamBtn"'), 'Must have Team tab button');
+  assert(workerHtml.includes('id="newAreaFilter"'), 'Must have dynamic Area/Landmark filter dropdown');
+  assert(workerHtml.includes('id="releaseOrderModal"'), 'Must have #releaseOrderModal in worker.html');
+  assert(workerHtml.includes('id="helpModal"'), 'Must have #helpModal in worker.html');
+});
+
+it('FB.5: New pool preserves privacy: operational cards do not expose customer name, phone, or exact address before claim', () => {
+  const workerHtml = fs.readFileSync('worker.html', 'utf8');
+  assert(workerHtml.includes('renderNewOrderCard'), 'Must have renderNewOrderCard function');
+  assert(workerHtml.includes('claim-new-order-btn'), 'Must have claim button on new order cards');
+  // Check that renderNewOrderCard only uses operational info
+  const newCardFn = workerHtml.match(/function renderNewOrderCard\([\s\S]*?^    \}/m)?.[0] || '';
+  assert(newCardFn.length > 0, 'renderNewOrderCard must exist');
+  assert(!newCardFn.includes('o.customer.name'), 'renderNewOrderCard must not show customer name before claim');
+  assert(!newCardFn.includes('o.customer.phone'), 'renderNewOrderCard must not show customer phone before claim');
+  assert(!newCardFn.includes('o.customer.address'), 'renderNewOrderCard must not show exact customer address before claim');
+});
+
+// ========================================================
+// FEATURE C: OWNER PORTAL FULL VISIBILITY & ADMIN CONTROL
+// ========================================================
+
+it('FC.1: Admin reassign order endpoint updates claimedBy and appends audit event', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/admin/reassign-order'), 'Must mount /api/admin/reassign-order route');
+  assert(workerCode.includes('handleAdminReassignOrder'), 'Must implement handleAdminReassignOrder');
+  assert(workerCode.includes('ORDER_REASSIGNED'), 'Must record audit log on admin reassignment');
+});
+
+it('FC.2: Admin release to pool endpoint removes claimedBy and appends audit event', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/admin/release-to-pool'), 'Must mount /api/admin/release-to-pool route');
+  assert(workerCode.includes('handleAdminReleaseToPool'), 'Must implement handleAdminReleaseToPool');
+  assert(workerCode.includes('released_by_admin'), 'Must append released_by_admin event in order timeline');
+  assert(workerCode.includes('ORDER_RELEASED_BY_ADMIN'), 'Must record audit log on admin order release');
+});
+
+it('FC.3: Admin cash reconciliation endpoint records handover under cashReconciliations and resets worker cashInHand', () => {
+  const workerCode = fs.readFileSync('worker/src/index.js', 'utf8');
+  assert(workerCode.includes('/api/admin/cash-reconciliation'), 'Must mount /api/admin/cash-reconciliation route');
+  assert(workerCode.includes('handleAdminCashReconciliation'), 'Must implement handleAdminCashReconciliation');
+  assert(workerCode.includes('cashReconciliations/'), 'Must record handover under cashReconciliations path');
+  assert(workerCode.includes('CASH_HANDOVER_RECORDED'), 'Must audit log cash handover');
+});
+
+it('FC.4: Owner portal admin.html contains 4 new Alerts Inbox sections (Stale Unclaimed, Stale Claimed, High Cash, Worker Help)', () => {
+  const adminHtml = fs.readFileSync('admin.html', 'utf8');
+  assert(adminHtml.includes('id="staleUnclaimedContainer"'), 'Must have stale unclaimed container');
+  assert(adminHtml.includes('id="staleClaimedContainer"'), 'Must have stale claimed container');
+  assert(adminHtml.includes('id="highCashContainer"'), 'Must have high cash container');
+  assert(adminHtml.includes('id="workerHelpContainer"'), 'Must have worker help container');
+  assert(adminHtml.includes('staleUnclaimed'), 'renderAlertsInbox must compute stale unclaimed orders');
+  assert(adminHtml.includes('staleClaimed'), 'renderAlertsInbox must compute stale claimed orders');
+  assert(adminHtml.includes('highCashWorkers'), 'renderAlertsInbox must compute high cash workers');
+  assert(adminHtml.includes('helpRequests'), 'renderAlertsInbox must compute worker help requests');
+});
+
+it('FC.5: Owner portal admin.html contains Team Live Activity container, Reassign modal, Cash Reconciliation modal, and Order Timeline drawer with CSV claimedBy columns', () => {
+  const adminHtml = fs.readFileSync('admin.html', 'utf8');
+  assert(adminHtml.includes('id="teamLiveCardsContainer"'), 'Must have team live cards container');
+  assert(adminHtml.includes('renderTeamLiveActivity'), 'Must implement renderTeamLiveActivity');
+  assert(adminHtml.includes('id="reassignOrderModal"'), 'Must have reassign order modal');
+  assert(adminHtml.includes('id="cashReconciliationModal"'), 'Must have cash reconciliation modal');
+  assert(adminHtml.includes('id="orderTimelineDrawer"'), 'Must have order timeline drawer');
+  assert(adminHtml.includes('openOrderTimelineDrawer'), 'Must implement openOrderTimelineDrawer');
+  assert(adminHtml.includes('Claimed By,Claimed At,Packed By,Delivered By'), 'CSV export must include worker attribution columns');
+});
+
 console.log('\n--------------------------------------------------------');
 console.log(`Test Summary: ${passCount} Passed, ${failCount} Failed`);
 console.log('--------------------------------------------------------\n');
