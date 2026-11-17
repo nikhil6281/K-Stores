@@ -162,7 +162,7 @@ app.post(['/api/auth/whatsapp/send-otp', '/api/send-whatsapp-otp'], async (req, 
     });
 
     const isTestMode = String(process.env.OTP_TEST_MODE || '').toLowerCase() === 'true';
-    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '1407373839132455';
+    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '1413011581899185';
     const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
 
     let metaSuccess = false;

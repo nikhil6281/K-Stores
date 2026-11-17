@@ -35,14 +35,14 @@ const APP_CONFIG = {
   ],
   address: "Sri Sai • Old Town, Anantapur, Andhra Pradesh - 515001",
   addressTelugu: "శ్రీ సాయి • ఓల్డ్ టౌన్, అనంతపురం, ఆంధ్రప్రదేశ్ - 515001",
-  phone: "6281730144",
-  formattedPhone: "+91 62817 30144",
-  whatsappNumber: "916281730144",
+  phone: "7989792937",
+  formattedPhone: "+91 79897 92937",
+  whatsappNumber: "917989792937",
   supportEmail: "support@srisai.in",
   grievanceOfficer: {
     name: "Somala Pandu Ranga Naidu",
     email: "grievance@srisai.in",
-    phone: "+91 62817 30144",
+    phone: "+91 79897 92937",
     address: "Sri Sai • Old Town, Anantapur, Andhra Pradesh - 515001"
   },
   hours: "7:00 AM - 9:00 PM IST",

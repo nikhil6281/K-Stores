@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useStore } from './context/StoreContext';
 import { Header } from './components/Header';
 import { PromotionsTicker } from './components/PromotionsTicker';
@@ -274,7 +274,7 @@ export const AppContent: React.FC = () => {
                 className="w-full sm:w-auto bg-white text-emerald-900 hover:bg-emerald-50 active:scale-95 font-extrabold px-5 py-3 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all"
               >
                 <MessageSquare className="w-4 h-4 text-emerald-700 fill-emerald-700" />
-                <span>WhatsApp Store (+91 62817 30144)</span>
+                <span>WhatsApp Store (+91 79897 92937)</span>
               </a>
 
               <a

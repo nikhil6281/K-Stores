@@ -2621,7 +2621,7 @@ function isReviewerDemoPhone(phone) {
 }
 
 async function sendWhatsappViaMeta(toPhone, otpCode, env, customBody = null) {
-  const phoneNumberId = (env && env.WHATSAPP_PHONE_NUMBER_ID) || '1407373839132455';
+  const phoneNumberId = (env && env.WHATSAPP_PHONE_NUMBER_ID) || '1413011581899185';
   const accessToken = (env && env.WHATSAPP_ACCESS_TOKEN) || 'EAAUSZBZAzx9boBSymYC8JdSNFA92V3gVZC6NPrbF1yjZBxUqJZA1CgPVg6YJmVx0tNEure4fxIdE9MEKvlO7wCJKIJsJrKtBSEhZApRY8rdUPmgzfyqnOl1E942fXKZAZB1zMgZBsZCwUGZCiGyu5fnnegrzupswZBAeQ9yhx9RI60uLs13vsBADTb3D6zZBAsBhR9gZDZD';
 
   if (!accessToken || !phoneNumberId) {
@@ -2763,7 +2763,7 @@ async function handleSendWhatsappOtp(request, env, cors) {
   if (!metaResult.success && !isTestMode) {
     let errMsg = metaResult.error || 'Failed to send WhatsApp message. Please check number and try again.';
     if (metaResult.details?.error?.code === 131047 || (errMsg && errMsg.includes('24 hours'))) {
-      errMsg = 'First-time user? Please tap "Send Hi on WhatsApp" above to activate messaging with Sri Sai Stores (+91 62817 30144) first.';
+      errMsg = 'First-time user? Please tap "Send Hi on WhatsApp" above to activate messaging with Sri Sai Stores (+91 79897 92937) first.';
     }
     return jsonError(errMsg, 'WHATSAPP_SEND_FAILED', 400, cors);
   }

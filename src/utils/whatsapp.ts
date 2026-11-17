@@ -1,7 +1,7 @@
-﻿import type { Order } from '../types';
+import type { Order } from '../types';
 
-export const STORE_OWNER_PHONE = '916281730144';
-export const STORE_OWNER_DISPLAY_PHONE = '+91 62817 30144';
+export const STORE_OWNER_PHONE = '917989792937';
+export const STORE_OWNER_DISPLAY_PHONE = '+91 79897 92937';
 export const STORE_NAME = 'K-Stores (à°•à±†-à°¸à±à°Ÿà±‹à°°à±à°¸à±)';
 
 /**
