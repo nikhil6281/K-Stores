@@ -164,8 +164,6 @@ app.post(['/api/auth/whatsapp/send-otp', '/api/send-whatsapp-otp'], async (req, 
     const isTestMode = String(process.env.OTP_TEST_MODE || '').toLowerCase() === 'true';
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '1413011581899185';
     const accessToken = process.env.WHATSAPP_ACCESS_TOKEN || 'EAAUSZBZAzx9boBTOEiJN7sy2lx8lyWZBU9szhZCtTIGsGxz3SQFRiEZCr2hTKGbhM994DVtYPOf9IrIkNVBBMJwk7BcN6qrjF7UJ0svgjC9Y9ZCY25ezmbZBrZApr9Wax2NNVHLtdQRLIptap8ZBO6ACXUVmTZAgXa2VoGKU3oIOPEZAOZC8Plx9FcPyMLEgxxC16wZDZD';
-    const templateName = process.env.WHATSAPP_TEMPLATE_NAME || 'otp_login';
-    const templateLang = process.env.WHATSAPP_TEMPLATE_LANG || 'en';
 
     let metaSuccess = false;
     let metaError = null;
@@ -176,34 +174,10 @@ app.post(['/api/auth/whatsapp/send-otp', '/api/send-whatsapp-otp'], async (req, 
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
           to: normalizedPhone,
-          type: 'template',
-          template: {
-            name: templateName,
-            language: {
-              code: templateLang
-            },
-            components: [
-              {
-                type: 'body',
-                parameters: [
-                  {
-                    type: 'text',
-                    text: String(otpCode)
-                  }
-                ]
-              },
-              {
-                type: 'button',
-                sub_type: 'url',
-                index: '0',
-                parameters: [
-                  {
-                    type: 'text',
-                    text: String(otpCode)
-                  }
-                ]
-              }
-            ]
+          type: 'text',
+          text: {
+            preview_url: false,
+            body: `Your Sri Sai Stores verification code is: ${otpCode}. Valid for 5 minutes. Do not share this code.`
           }
         };
 

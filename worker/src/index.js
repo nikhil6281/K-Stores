@@ -2622,8 +2622,6 @@ function isReviewerDemoPhone(phone) {
 async function sendWhatsappViaMeta(toPhone, otpCode, env) {
   const phoneNumberId = (env && env.WHATSAPP_PHONE_NUMBER_ID) || '1413011581899185';
   const accessToken = (env && env.WHATSAPP_ACCESS_TOKEN) || 'EAAUSZBZAzx9boBTOEiJN7sy2lx8lyWZBU9szhZCtTIGsGxz3SQFRiEZCr2hTKGbhM994DVtYPOf9IrIkNVBBMJwk7BcN6qrjF7UJ0svgjC9Y9ZCY25ezmbZBrZApr9Wax2NNVHLtdQRLIptap8ZBO6ACXUVmTZAgXa2VoGKU3oIOPEZAOZC8Plx9FcPyMLEgxxC16wZDZD';
-  const templateName = (env && env.WHATSAPP_TEMPLATE_NAME) || 'otp_login';
-  const templateLang = (env && env.WHATSAPP_TEMPLATE_LANG) || 'en';
 
   if (!accessToken || !phoneNumberId) {
     throw new Error('Meta WhatsApp credentials not configured in environment variables');
@@ -2643,39 +2641,15 @@ async function sendWhatsappViaMeta(toPhone, otpCode, env) {
 
   const otpStr = String(otpCode || '').trim();
 
-  // Direct template message payload delivers OTP directly without requiring customer to send "Hi" first
+  // Direct text payload with zero templates
   const payload = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
     to: targetPhone,
-    type: 'template',
-    template: {
-      name: templateName,
-      language: {
-        code: templateLang
-      },
-      components: [
-        {
-          type: 'body',
-          parameters: [
-            {
-              type: 'text',
-              text: otpStr
-            }
-          ]
-        },
-        {
-          type: 'button',
-          sub_type: 'url',
-          index: '0',
-          parameters: [
-            {
-              type: 'text',
-              text: otpStr
-            }
-          ]
-        }
-      ]
+    type: 'text',
+    text: {
+      preview_url: false,
+      body: `Your Sri Sai Stores verification code is: ${otpStr}. Valid for 5 minutes. Do not share this code.`
     }
   };
 
