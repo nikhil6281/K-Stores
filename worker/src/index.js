@@ -700,14 +700,16 @@ async function handleCreateOrder(request, env, cors) {
     await rtdbFetch(env, `orders/${pushKey}`, 'PUT', orderRecord);
 
     // Deliver OTP via WhatsApp template message
+    let otpDelivery = 'failed';
     try {
-      console.log(`[handleCreateOrder] Delivering WhatsApp OTP to ${formattedWhatsappPhone}: ${otpCode}`);
       const metaRes = await sendWhatsappViaMeta(formattedWhatsappPhone, otpCode, env);
-      if (!metaRes.success) {
-        console.warn('[handleCreateOrder WhatsApp Error]', metaRes.error);
+      if (metaRes.success) {
+        otpDelivery = 'sent';
+      } else {
+        console.warn(`[handleCreateOrder WhatsApp Error] code=${metaRes.metaCode}:`, metaRes.metaMessage);
       }
     } catch (e) {
-      console.warn('[handleCreateOrder WhatsApp Error]', e);
+      console.warn('[handleCreateOrder WhatsApp Exception]', e);
     }
 
     return jsonResponse({
@@ -718,7 +720,8 @@ async function handleCreateOrder(request, env, cors) {
       phoneMasked: maskPhone(formattedWhatsappPhone),
       expiresAt: orderRecord.confirmation.expiresAt,
       paymentMethod: orderRecord.paymentMethod,
-      total: total
+      total: total,
+      otpDelivery: otpDelivery
     }, 200, cors);
   }
 
@@ -2619,14 +2622,17 @@ function isReviewerDemoPhone(phone) {
   );
 }
 
-async function sendWhatsappViaMeta(toPhone, otpCode, env) {
-  const phoneNumberId = (env && env.WHATSAPP_PHONE_NUMBER_ID) || '1413011581899185';
-  const accessToken = (env && env.WHATSAPP_ACCESS_TOKEN) || 'EAAUSZBZAzx9boBTOEiJN7sy2lx8lyWZBU9szhZCtTIGsGxz3SQFRiEZCr2hTKGbhM994DVtYPOf9IrIkNVBBMJwk7BcN6qrjF7UJ0svgjC9Y9ZCY25ezmbZBrZApr9Wax2NNVHLtdQRLIptap8ZBO6ACXUVmTZAgXa2VoGKU3oIOPEZAOZC8Plx9FcPyMLEgxxC16wZDZD';
-
+// Meta only delivers FREE-FORM text if the customer messaged the business in the last 24h.
+// A login OTP is business-initiated, so it MUST be sent as an approved AUTHENTICATION template.
+export async function sendWhatsappViaMeta(toPhone, otpCode, env) {
+  const phoneNumberId = env && env.WHATSAPP_PHONE_NUMBER_ID;
+  const accessToken = env && env.WHATSAPP_ACCESS_TOKEN;
+  const templateName = (env && env.WHATSAPP_TEMPLATE_NAME) || 'sri_sai_login_otp';
+  const templateLang = (env && env.WHATSAPP_TEMPLATE_LANG) || 'en';
   if (!accessToken || !phoneNumberId) {
-    throw new Error('Meta WhatsApp credentials not configured in environment variables');
+    throw new Error('Meta WhatsApp credentials not configured (set WHATSAPP_ACCESS_TOKEN as a Worker secret)');
   }
-
+  // keep the existing phone normalisation block (10 / 11 / 12 digit -> 91XXXXXXXXXX) exactly as it is
   const cleanDigits = String(toPhone || '').replace(/\D/g, '');
   let targetPhone = cleanDigits;
   if (cleanDigits.length === 10) {
@@ -2638,37 +2644,36 @@ async function sendWhatsappViaMeta(toPhone, otpCode, env) {
   } else if (cleanDigits.length > 10) {
     targetPhone = '91' + cleanDigits.slice(-10);
   }
-
   const otpStr = String(otpCode || '').trim();
-
-  // Direct text payload with zero templates
   const payload = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
     to: targetPhone,
-    type: 'text',
-    text: {
-      preview_url: false,
-      body: `Your Sri Sai Stores verification code is: ${otpStr}. Valid for 5 minutes. Do not share this code.`
+    type: 'template',
+    template: {
+      name: templateName,
+      language: { code: templateLang },
+      components: [
+        { type: 'body', parameters: [{ type: 'text', text: otpStr }] },
+        { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpStr }] }
+      ]
     }
   };
-
   const res = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
-
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const errMsg = data?.error?.message || `Meta WhatsApp API error: ${res.status}`;
-    console.warn(`[WhatsApp API Error] (${res.status}):`, data);
-    return { success: false, error: errMsg, details: data };
+    const metaCode = data?.error?.code;
+    const metaMessage = data?.error?.message || `Meta WhatsApp API error: ${res.status}`;
+    console.warn(`[WhatsApp API Error] http=${res.status} code=${metaCode} template=${templateName}/${templateLang}:`, metaMessage);
+    let customerMsg = 'We could not send the WhatsApp code right now. Please try again in a minute or contact the store.';
+    if (metaCode === 131026) customerMsg = 'This number does not appear to be on WhatsApp. Please check the number and try again.';
+    return { success: false, error: customerMsg, metaCode, metaMessage, details: data };
   }
-  return { success: true, data };
+  return { success: true, messageId: data?.messages?.[0]?.id || null, data };
 }
 
 async function handleSendWhatsappOtp(request, env, cors) {
@@ -2737,7 +2742,7 @@ async function handleSendWhatsappOtp(request, env, cors) {
   }
 
   // Generate 6-digit random code
-  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpCode = generateCryptoOtp6();
   const codeHash = await sha256Hex(otpCode);
 
   await rtdbFetch(env, `whatsappOtps/${phoneHash}`, 'PUT', {
@@ -2760,7 +2765,7 @@ async function handleSendWhatsappOtp(request, env, cors) {
     metaResult = { success: false, error: err.message };
   }
 
-  console.log(`[WhatsApp OTP] Generated OTP for ${normalizedPhone}: ${otpCode}`);
+  console.log(`[WhatsApp OTP] to=${normalizedPhone} sent=${metaResult.success} messageId=${metaResult.messageId || 'none'}`);
 
   if (!metaResult.success && !isTestMode) {
     const errMsg = metaResult.error || 'Failed to send WhatsApp message. Please check number and try again.';
@@ -3116,9 +3121,12 @@ async function handleResendOrderConfirmationOtp(request, env, cors) {
   try {
     const cleanDigits = String(confirmationRecord.phone || '').replace(/\D/g, '');
     const targetPhone = cleanDigits.length === 10 ? ('91' + cleanDigits) : (cleanDigits.startsWith('91') ? cleanDigits : ('91' + cleanDigits.slice(-10)));
-    await sendWhatsappViaMeta(targetPhone, newOtp, env);
+    const metaRes = await sendWhatsappViaMeta(targetPhone, newOtp, env);
+    if (!metaRes.success) {
+      console.warn(`[handleResendOrderConfirmationOtp WhatsApp Error] code=${metaRes.metaCode}:`, metaRes.metaMessage);
+    }
   } catch (err) {
-    console.warn('[handleResendOrderConfirmationOtp WhatsApp Error]', err);
+    console.warn('[handleResendOrderConfirmationOtp WhatsApp Exception]', err);
   }
 
   return jsonResponse({
