@@ -699,11 +699,10 @@ async function handleCreateOrder(request, env, cors) {
 
     await rtdbFetch(env, `orders/${pushKey}`, 'PUT', orderRecord);
 
-    // Deliver OTP via WhatsApp text message
+    // Deliver OTP via WhatsApp template message
     try {
-      const otpMsg = `Your Sri Sai Stores order confirmation code is: ${otpCode}. Please enter this code in the app to confirm your order.`;
       console.log(`[handleCreateOrder] Delivering WhatsApp OTP to ${formattedWhatsappPhone}: ${otpCode}`);
-      const metaRes = await sendWhatsappViaMeta(formattedWhatsappPhone, otpCode, env, otpMsg);
+      const metaRes = await sendWhatsappViaMeta(formattedWhatsappPhone, otpCode, env);
       if (!metaRes.success) {
         console.warn('[handleCreateOrder WhatsApp Error]', metaRes.error);
       }
@@ -2620,9 +2619,11 @@ function isReviewerDemoPhone(phone) {
   );
 }
 
-async function sendWhatsappViaMeta(toPhone, otpCode, env, customBody = null) {
+async function sendWhatsappViaMeta(toPhone, otpCode, env) {
   const phoneNumberId = (env && env.WHATSAPP_PHONE_NUMBER_ID) || '1413011581899185';
-  const accessToken = (env && env.WHATSAPP_ACCESS_TOKEN) || 'EAAUSZBZAzx9boBSymYC8JdSNFA92V3gVZC6NPrbF1yjZBxUqJZA1CgPVg6YJmVx0tNEure4fxIdE9MEKvlO7wCJKIJsJrKtBSEhZApRY8rdUPmgzfyqnOl1E942fXKZAZB1zMgZBsZCwUGZCiGyu5fnnegrzupswZBAeQ9yhx9RI60uLs13vsBADTb3D6zZBAsBhR9gZDZD';
+  const accessToken = (env && env.WHATSAPP_ACCESS_TOKEN) || 'EAAUSZBZAzx9boBTOEiJN7sy2lx8lyWZBU9szhZCtTIGsGxz3SQFRiEZCr2hTKGbhM994DVtYPOf9IrIkNVBBMJwk7BcN6qrjF7UJ0svgjC9Y9ZCY25ezmbZBrZApr9Wax2NNVHLtdQRLIptap8ZBO6ACXUVmTZAgXa2VoGKU3oIOPEZAOZC8Plx9FcPyMLEgxxC16wZDZD';
+  const templateName = (env && env.WHATSAPP_TEMPLATE_NAME) || 'otp_login';
+  const templateLang = (env && env.WHATSAPP_TEMPLATE_LANG) || 'en';
 
   if (!accessToken || !phoneNumberId) {
     throw new Error('Meta WhatsApp credentials not configured in environment variables');
@@ -2636,18 +2637,45 @@ async function sendWhatsappViaMeta(toPhone, otpCode, env, customBody = null) {
     targetPhone = '91' + cleanDigits.slice(1);
   } else if (cleanDigits.length === 12 && cleanDigits.startsWith('91')) {
     targetPhone = cleanDigits;
+  } else if (cleanDigits.length > 10) {
+    targetPhone = '91' + cleanDigits.slice(-10);
   }
 
-  // Free-form text message payload for instant OTP delivery (bypasses template restrictions)
-  const defaultBody = `Your Sri Sai Stores login verification code is: ${otpCode}. Valid for 5 minutes. Do not share this code.`;
+  const otpStr = String(otpCode || '').trim();
+
+  // Direct template message payload delivers OTP directly without requiring customer to send "Hi" first
   const payload = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
     to: targetPhone,
-    type: 'text',
-    text: {
-      preview_url: false,
-      body: customBody || defaultBody
+    type: 'template',
+    template: {
+      name: templateName,
+      language: {
+        code: templateLang
+      },
+      components: [
+        {
+          type: 'body',
+          parameters: [
+            {
+              type: 'text',
+              text: otpStr
+            }
+          ]
+        },
+        {
+          type: 'button',
+          sub_type: 'url',
+          index: '0',
+          parameters: [
+            {
+              type: 'text',
+              text: otpStr
+            }
+          ]
+        }
+      ]
     }
   };
 
@@ -2761,10 +2789,7 @@ async function handleSendWhatsappOtp(request, env, cors) {
   console.log(`[WhatsApp OTP] Generated OTP for ${normalizedPhone}: ${otpCode}`);
 
   if (!metaResult.success && !isTestMode) {
-    let errMsg = metaResult.error || 'Failed to send WhatsApp message. Please check number and try again.';
-    if (metaResult.details?.error?.code === 131047 || (errMsg && errMsg.includes('24 hours'))) {
-      errMsg = 'First-time user? Please tap "Send Hi on WhatsApp" above to activate messaging with Sri Sai Stores (+91 79897 92937) first.';
-    }
+    const errMsg = metaResult.error || 'Failed to send WhatsApp message. Please check number and try again.';
     return jsonError(errMsg, 'WHATSAPP_SEND_FAILED', 400, cors);
   }
 
@@ -3117,8 +3142,7 @@ async function handleResendOrderConfirmationOtp(request, env, cors) {
   try {
     const cleanDigits = String(confirmationRecord.phone || '').replace(/\D/g, '');
     const targetPhone = cleanDigits.length === 10 ? ('91' + cleanDigits) : (cleanDigits.startsWith('91') ? cleanDigits : ('91' + cleanDigits.slice(-10)));
-    const msgBody = `Your Sri Sai Stores order confirmation code is: ${newOtp}. Please enter this code in the app to confirm your order.`;
-    await sendWhatsappViaMeta(targetPhone, newOtp, env, msgBody);
+    await sendWhatsappViaMeta(targetPhone, newOtp, env);
   } catch (err) {
     console.warn('[handleResendOrderConfirmationOtp WhatsApp Error]', err);
   }
