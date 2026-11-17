@@ -1,4 +1,4 @@
-﻿export const translations = {
+export const translations = {
   en: {
     // Header & Brand
     storeName: 'K-Stores',
@@ -99,8 +99,8 @@
     orderSuccessTitle: 'Order Placed Successfully! ✨',
     orderSuccessSubtitle: 'Your order #{orderId} is being prepared for fast 20-minute delivery.',
     whatsappCardTitle: 'Send Bill to Store Owner on WhatsApp',
-    whatsappCardDesc: 'Tap below to send the automated itemized bill directly to the store owner WhatsApp (+91 62817 30144) for immediate processing.',
-    sendWhatsAppBtn: '“² Send Bill via WhatsApp (+91 62817 30144)',
+    whatsappCardDesc: 'Tap below to send the automated itemized bill directly to the store owner WhatsApp (+91 79897 92937) for immediate processing.',
+    sendWhatsAppBtn: '“² Send Bill via WhatsApp (+91 79897 92937)',
     whatsappSentToast: 'Opening WhatsApp with complete bill details...',
     trackOrderBtn: 'Track 20-Min Live Delivery',
     printBillBtn: 'Print / Save Bill Receipt',
@@ -125,7 +125,7 @@
     // Customer Support & FAQs
     supportTitle: 'Kirana Customer Support',
     storeOwnerName: 'RA General Store',
-    ownerPhone: '+91 62817 30144',
+    ownerPhone: '+91 79897 92937',
     storeHours: 'Everyday: 5:00 AM to 8:30 PM',
     storeAddress: 'on main road , Anantapur beside Anantapur road',
     directWhatsApp: 'Chat on WhatsApp',
@@ -134,7 +134,7 @@
     faq1A: 'All items shown are in-stock directly at our village store. As soon as you place the order, our staff packs and delivers it to your doorstep on a bike within 20 minutes.',
     faq2Q: 'How do I pay for my groceries?',
     faq2A: 'You only pay when the items arrive at your doorstep! We accept Cash on Delivery (COD) as well as PhonePe, Google Pay, or Paytm QR code at your door.',
-    faq3Q: 'Why is the bill sent to WhatsApp (+91 62817 30144)?',
+    faq3Q: 'Why is the bill sent to WhatsApp (+91 79897 92937)?',
     faq3A: 'Sending the bill to WhatsApp notifies the store owner directly so your order is prioritized and packed without delay even if internet is slow.',
     faq4Q: 'Can I pick up the items myself?',
     faq4A: 'Yes! Select "Store Counter Pickup" at checkout and your bag will be packed and ready in 5 minutes at the store counter.',
@@ -312,8 +312,8 @@
     orderSuccessTitle: 'à°†à°°à±à°¡à°°à± à°µà°¿à°œà°¯à°µà°‚à°¤à°‚à°—à°¾ à°¨à°®à±‹à°¦à±ˆà°‚à°¦à°¿! ✨',
     orderSuccessSubtitle: 'à°®à±€ à°†à°°à±à°¡à°°à± #{orderId} à°µà±‡à°—à°µà°‚à°¤à°®à±ˆà°¨ 20 à°¨à°¿à°®à°¿à°·à°¾à°² à°¡à±†à°²à°¿à°µà°°à±€ à°•à±‹à°¸à°‚ à°¸à°¿à°¦à±à°§à°‚ à°šà±‡à°¯à°¬à°¡à±à°¤à±‹à°‚à°¦à°¿.',
     whatsappCardTitle: 'à°·à°¾à°ªà± à°“à°¨à°°à±â€Œà°•à°¿ à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¬à°¿à°²à±à°²à± à°ªà°‚à°ªà°‚à°¡à°¿',
-    whatsappCardDesc: 'à°µà±†à°‚à°Ÿà°¨à±‡ à°ªà±à°¯à°¾à°•à°¿à°‚à°—à± à°ªà±à°°à°¾à°°à°‚à°­à°¿à°‚à°šà°¡à°¾à°¨à°¿à°•à°¿ à°•à±à°°à°¿à°‚à°¦à°¿ à°¬à°Ÿà°¨à± à°¨à±Šà°•à±à°•à°¿ à°µà°¿à°µà°°à°®à±ˆà°¨ à°¬à°¿à°²à±à°²à±à°¨à± à°“à°¨à°°à± à°µà°¾à°Ÿà±à°¸à°¾à°ªà± (+91 62817 30144) à°•à°¿ à°ªà°‚à°ªà°‚à°¡à°¿.',
-    sendWhatsAppBtn: '“² à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¬à°¿à°²à±à°²à± à°ªà°‚à°ªà°‚à°¡à°¿ (+91 62817 30144)',
+    whatsappCardDesc: 'à°µà±†à°‚à°Ÿà°¨à±‡ à°ªà±à°¯à°¾à°•à°¿à°‚à°—à± à°ªà±à°°à°¾à°°à°‚à°­à°¿à°‚à°šà°¡à°¾à°¨à°¿à°•à°¿ à°•à±à°°à°¿à°‚à°¦à°¿ à°¬à°Ÿà°¨à± à°¨à±Šà°•à±à°•à°¿ à°µà°¿à°µà°°à°®à±ˆà°¨ à°¬à°¿à°²à±à°²à±à°¨à± à°“à°¨à°°à± à°µà°¾à°Ÿà±à°¸à°¾à°ªà± (+91 79897 92937) à°•à°¿ à°ªà°‚à°ªà°‚à°¡à°¿.',
+    sendWhatsAppBtn: '“² à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¬à°¿à°²à±à°²à± à°ªà°‚à°ªà°‚à°¡à°¿ (+91 79897 92937)',
     whatsappSentToast: 'à°ªà±‚à°°à±à°¤à°¿ à°¬à°¿à°²à±à°²à±à°¤à±‹ à°µà°¾à°Ÿà±à°¸à°¾à°ªà± à°“à°ªà±†à°¨à± à°…à°µà±à°¤à±‹à°‚à°¦à°¿...',
     trackOrderBtn: '20-à°¨à°¿à°®à°¿à°·à°¾à°² à°²à±ˆà°µà± à°¡à±†à°²à°¿à°µà°°à±€ à°Ÿà±à°°à°¾à°•à°¿à°‚à°—à±',
     printBillBtn: 'à°¬à°¿à°²à±à°²à± à°°à°¸à±€à°¦à± à°¸à±‡à°µà± / à°ªà±à°°à°¿à°‚à°Ÿà± à°šà±‡à°¯à°‚à°¡à°¿',
@@ -338,7 +338,7 @@
     // Customer Support & FAQs
     supportTitle: 'à°•à°¿à°°à°¾à°£à°¾ à°•à°¸à±à°Ÿà°®à°°à± à°•à±‡à°°à± & à°·à°¾à°ªà± à°µà°¿à°µà°°à°¾à°²à±',
     storeOwnerName: 'à°¶à±à°°à±€ à°µà±†à°‚à°•à°Ÿà±‡à°¶à±à°µà°° à°•à°¿à°°à°¾à°£à°¾ & à°œà°¨à°°à°²à± à°¸à±à°Ÿà±‹à°°à±à°¸à±',
-    ownerPhone: '+91 62817 30144',
+    ownerPhone: '+91 79897 92937',
     storeHours: 'Everyday: 5:00 AM to 8:30 PM',
     storeAddress: 'on main road , Anantapur beside Anantapur road',
     directWhatsApp: 'à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¸à°‚à°ªà±à°°à°¦à°¿à°‚à°šà°‚à°¡à°¿',
@@ -347,7 +347,7 @@
     faq1A: 'à°¯à°¾à°ªà±â€Œà°²à±‹ à°‰à°¨à±à°¨ à°…à°¨à±à°¨à°¿ à°µà°¸à±à°¤à±à°µà±à°²à± à°®à°¾ à°—à±à°°à°¾à°® à°•à°¿à°°à°¾à°£à°¾ à°·à°¾à°ªà±â€Œà°²à±‹ à°Žà°²à±à°²à°ªà±à°ªà±à°¡à±‚ à°¸à°¿à°¦à±à°§à°‚à°—à°¾ à°‰à°‚à°Ÿà°¾à°¯à°¿. à°®à±€à°°à± à°†à°°à±à°¡à°°à± à°šà±‡à°¸à°¿à°¨ à°µà±†à°‚à°Ÿà°¨à±‡ à°®à°¾ à°¸à°¿à°¬à±à°¬à°‚à°¦à°¿ à°ªà±à°¯à°¾à°•à± à°šà±‡à°¸à°¿ à°¬à±ˆà°•à±â€Œà°ªà±ˆ 20 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°®à±€ à°‡à°‚à°Ÿà°¿à°•à°¿ à°¤à±†à°¸à±à°¤à°¾à°°à±.',
     faq2Q: 'à°¡à°¬à±à°¬à±à°²à± à°Žà°²à°¾ à°šà±†à°²à±à°²à°¿à°‚à°šà°¾à°²à°¿?',
     faq2A: 'à°¸à°°à±à°•à±à°²à± à°®à±€ à°‡à°‚à°Ÿà°¿à°•à°¿ à°šà±‡à°°à°¿à°¨ à°¤à°°à±à°µà°¾à°¤ à°®à°¾à°¤à±à°°à°®à±‡ à°¨à°—à°¦à± (Cash) à°²à±‡à°¦à°¾ PhonePe, Google Pay QR à°•à±‹à°¡à± à°¦à±à°µà°¾à°°à°¾ à°šà±†à°²à±à°²à°¿à°‚à°šà°µà°šà±à°šà±.',
-    faq3Q: 'à°µà°¾à°Ÿà±à°¸à°¾à°ªà± (+91 62817 30144) à°•à°¿ à°¬à°¿à°²à±à°²à± à°Žà°‚à°¦à±à°•à± à°ªà°‚à°ªà°¾à°²à°¿?',
+    faq3Q: 'à°µà°¾à°Ÿà±à°¸à°¾à°ªà± (+91 79897 92937) à°•à°¿ à°¬à°¿à°²à±à°²à± à°Žà°‚à°¦à±à°•à± à°ªà°‚à°ªà°¾à°²à°¿?',
     faq3A: 'à°µà°¾à°Ÿà±à°¸à°¾à°ªà±â€Œà°²à±‹ à°¬à°¿à°²à±à°²à± à°ªà°‚à°ªà°¡à°‚ à°µà°²à±à°² à°‡à°‚à°Ÿà°°à±à°¨à±†à°Ÿà± à°¨à±†à°®à±à°®à°¦à°¿à°—à°¾ à°‰à°¨à±à°¨à°¾ à°“à°¨à°°à±â€Œà°•à°¿ à°µà±†à°‚à°Ÿà°¨à±‡ à°¸à°®à°¾à°šà°¾à°°à°‚ à°µà±†à°³à±à°²à°¿ à°†à°°à±à°¡à°°à± à°¤à±à°µà°°à°—à°¾ à°ªà±à°¯à°¾à°•à± à°…à°µà±à°¤à±à°‚à°¦à°¿.',
     faq4Q: 'à°¨à±‡à°¨à±‡ à°¨à±‡à°°à±à°—à°¾ à°·à°¾à°ªà±â€Œà°•à°¿ à°µà±†à°³à±à°²à°¿ à°¤à±†à°šà±à°šà±à°•à±‹à°µà°šà±à°šà°¾?',
     faq4A: 'à°¤à°ªà±à°ªà°•à±à°‚à°¡à°¾! à°šà±†à°•à±à°…à°µà±à°Ÿà± à°µà°¦à±à°¦ "à°·à°¾à°ªà± à°•à±Œà°‚à°Ÿà°°à± à°µà°¦à±à°¦ à°ªà°¿à°•à°ªà±" à°Žà°‚à°šà±à°•à±à°‚à°Ÿà±‡ 5 à°¨à°¿à°®à°¿à°·à°¾à°²à±à°²à±‹ à°®à±€ à°¸à°‚à°šà±€ à°¸à°¿à°¦à±à°§à°‚ à°šà±‡à°¸à°¿ à°‰à°‚à°šà±à°¤à°¾à°°à±.',

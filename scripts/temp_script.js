@@ -180,7 +180,7 @@
     let storeSettings = {
       deliveryFee: 25,
       freeDeliveryThreshold: 299,
-      whatsappNumber: '916281730144',
+      whatsappNumber: '917989792937',
       storeHours: { open: "07:00", close: "21:00", mode: "auto" }
     };
     let isStoreCurrentlyOpen = true;
@@ -301,8 +301,8 @@
         deliverySlotLabel: "Morning Delivery Slot:",
         storeHoursLabel: "Store Operating Hours:",
         helpSupportTitle: "Help & Support",
-        callStoreText: "📞 Call Store (+91 62817 30144)",
-        whatsappStoreText: "💬 WhatsApp Chat (+91 62817 30144)",
+        callStoreText: "📞 Call Store (+91 79897 92937)",
+        whatsappStoreText: "💬 WhatsApp Chat (+91 79897 92937)",
         aboutPoliciesTitle: "About & Policies",
         aboutUsLink: "About Us",
         contactUsLink: "Contact Us",
@@ -450,8 +450,8 @@
         deliverySlotLabel: "ఉదయం డెలివరీ సమయం:",
         storeHoursLabel: "స్టోర్ తెరిచే వేళలు:",
         helpSupportTitle: "సహాయం & మద్దతు",
-        callStoreText: "📞 కాల్ చేయండి (+91 62817 30144)",
-        whatsappStoreText: "💬 వాట్సాప్ చాట్ (+91 62817 30144)",
+        callStoreText: "📞 కాల్ చేయండి (+91 79897 92937)",
+        whatsappStoreText: "💬 వాట్సాప్ చాట్ (+91 79897 92937)",
         aboutPoliciesTitle: "మా గురించి & నిబంధనలు",
         aboutUsLink: "మా గురించి",
         contactUsLink: "మమ్మల్ని సంప్రదించండి",
@@ -2323,7 +2323,7 @@
                       statusRef.off('value', onStatus);
                       submitBtn.disabled = false;
                       submitBtn.innerText = I18N[currentLang]?.confirmOrderBtn || 'Confirm & Place Order';
-                      const helpline = (storeSettings && storeSettings.whatsappNumber) || '916281730144';
+                      const helpline = (storeSettings && storeSettings.whatsappNumber) || '917989792937';
                       showCheckoutNotice(I18N[currentLang]?.paymentFailedContact?.replace('{phone}', helpline) || 'Payment verification pending. Please contact store: ' + helpline, 'danger');
                     }
                   }, 60000);

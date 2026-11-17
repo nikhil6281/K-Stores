@@ -8,9 +8,9 @@ export const HeroBanner: React.FC = () => (
     <h2 style={{margin:'0 0 14px',fontSize:'26px',fontWeight:800,color:'var(--text)',lineHeight:1.2,letterSpacing:'-0.5px'}}>
       Fresh picks for you
     </h2>
-    <a href="https://wa.me/916281730144?text=Hello%20RA%20General%20Store%2C%20I%20want%20to%20order" target="_blank" rel="noopener noreferrer"
+    <a href="https://wa.me/917989792937?text=Hello%20RA%20General%20Store%2C%20I%20want%20to%20order" target="_blank" rel="noopener noreferrer"
       style={{display:'inline-flex',alignItems:'center',gap:'6px',background:'#25D366',color:'#fff',padding:'8px 16px',borderRadius:'999px',fontSize:'12px',fontWeight:700,textDecoration:'none',marginBottom:'6px',boxShadow:'0 2px 8px rgba(37,211,102,0.3)'}}>
-      <span>📞</span> Quick WhatsApp Order: 62817 30144
+      <span>📞</span> Quick WhatsApp Order: 79897 92937
     </a>
   </div>
 );
