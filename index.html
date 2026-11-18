@@ -1519,6 +1519,7 @@
       <a href="./privacy-policy.html">Privacy Policy</a>
       <a href="./refund-policy.html">Cancellation & Refund</a>
       <a href="./shipping-policy.html">Shipping & Delivery</a>
+      <a href="./delete-account.html">Delete Account</a>
     </div>
     <div><strong>Sri Sai</strong> • <span id="footerAddressText">Old Town, Anantapur, Andhra Pradesh</span></div>
     <div style="margin-top: 6px;">
@@ -1704,8 +1705,11 @@
         <a href="./refund-policy.html" style="padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
           <span id="tRefundPolicyLink">Cancellation & Refund Policy</span> <span style="color: var(--muted);">›</span>
         </a>
-        <a href="./shipping-policy.html" style="padding: 10px 0; font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+        <a href="./shipping-policy.html" style="padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
           <span id="tShippingPolicyLink">Shipping & Delivery Policy</span> <span style="color: var(--muted);">›</span>
+        </a>
+        <a href="./delete-account.html" style="padding: 10px 0; font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+          <span id="tDeleteAccountPolicyLink">Account & Data Deletion</span> <span style="color: var(--muted);">›</span>
         </a>
       </div>
     </div>
@@ -1723,8 +1727,8 @@
 
       <!-- 9. Delete My Account Link -->
       <div style="text-align: center; margin-bottom: 16px;">
-        <button type="button" id="btnDeleteAccount" style="background: none; border: none; color: #9CA3AF; font-size: 12px; text-decoration: underline; cursor: pointer;">
-          <span id="tDeleteAccountLink">Delete my account</span>
+        <button type="button" id="btnDeleteAccount" style="background: none; border: none; color: #DC2626; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 6px 12px;">
+          <span id="tDeleteAccountLink">🗑️ Delete Account & Data</span>
         </button>
       </div>
     </div>
@@ -2605,11 +2609,12 @@
         privacyLink: "Privacy Policy",
         refundPolicyLink: "Cancellation & Refund Policy",
         shippingPolicyLink: "Shipping & Delivery Policy",
+        deleteAccountPolicyLink: "Account & Data Deletion",
         shareStoreBtn: "Share Sri Sai with Friends & Family",
         logoutBtnText: "🚪 Log Out",
         logoutConfirm: "Log out of Sri Sai?",
         loggedOutToast: "Logged out successfully",
-        deleteAccountLink: "Delete my account",
+        deleteAccountLink: "🗑️ Delete Account & Data",
         deleteAccountConfirm: "Are you sure you want to delete your profile and saved addresses? Your past orders will remain in the store records.",
         accountDeletedToast: "Account data deleted",
         gettingLocation: "Getting location…",
@@ -2767,11 +2772,12 @@
         privacyLink: "గోప్యతా విధానం",
         refundPolicyLink: "రద్దు & రీఫండ్ విధానం",
         shippingPolicyLink: "షిప్పింగ్ & డెలివరీ విధానం",
+        deleteAccountPolicyLink: "ఖాతా & డేటా తొలగింపు",
         shareStoreBtn: "స్నేహితులు & కుటుంబ సభ్యులతో షేర్ చేయండి",
         logoutBtnText: "🚪 లాగ్ అవుట్",
         logoutConfirm: "శ్రీ సాయి నుండి లాగ్ అవుట్ అవ్వాలా?",
         loggedOutToast: "లాగ్ అవుట్ అయ్యారు",
-        deleteAccountLink: "నా ఖాతాను తొలగించండి",
+        deleteAccountLink: "🗑️ ఖాతా & డేటాను తొలగించండి",
         deleteAccountConfirm: "మీ ప్రొఫైల్ మరియు భద్రపరిచిన చిరునామాలను తొలగించాలనుకుంటున్నారా? మీ గత ఆర్డర్ల రికార్డులు స్టోర్ వద్ద ఉంటాయి.",
         accountDeletedToast: "ఖాతా వివరాలు తొలగించబడ్డాయి",
         gettingLocation: "లొకేషన్ తీసుకుంటోంది…",
@@ -2886,6 +2892,19 @@
       if (document.getElementById('bnavCartBtn')) document.getElementById('bnavCartBtn').setAttribute('aria-label', t.bnavCart || (lang === 'te' ? 'కార్ట్' : 'Cart'));
       if (document.getElementById('bnavOrdersBtn')) document.getElementById('bnavOrdersBtn').setAttribute('aria-label', t.bnavOrders || (lang === 'te' ? 'ఆర్డర్లు' : 'Orders'));
       if (document.getElementById('bnavAccountBtn')) document.getElementById('bnavAccountBtn').setAttribute('aria-label', t.bnavAccount || (lang === 'te' ? 'ఖాతా' : 'Account'));
+
+      // Account view translations
+      if (document.getElementById('tAboutPoliciesTitle')) document.getElementById('tAboutPoliciesTitle').innerText = t.aboutPoliciesTitle || 'About & Policies';
+      if (document.getElementById('tAboutUsLink')) document.getElementById('tAboutUsLink').innerText = t.aboutUsLink || 'About Us';
+      if (document.getElementById('tContactUsLink')) document.getElementById('tContactUsLink').innerText = t.contactUsLink || 'Contact Us';
+      if (document.getElementById('tTermsLink')) document.getElementById('tTermsLink').innerText = t.termsLink || 'Terms of Service';
+      if (document.getElementById('tPrivacyLink')) document.getElementById('tPrivacyLink').innerText = t.privacyLink || 'Privacy Policy';
+      if (document.getElementById('tRefundPolicyLink')) document.getElementById('tRefundPolicyLink').innerText = t.refundPolicyLink || 'Cancellation & Refund Policy';
+      if (document.getElementById('tShippingPolicyLink')) document.getElementById('tShippingPolicyLink').innerText = t.shippingPolicyLink || 'Shipping & Delivery Policy';
+      if (document.getElementById('tDeleteAccountPolicyLink')) document.getElementById('tDeleteAccountPolicyLink').innerText = t.deleteAccountPolicyLink || 'Account & Data Deletion';
+      if (document.getElementById('tShareStoreBtn')) document.getElementById('tShareStoreBtn').innerText = t.shareStoreBtn || 'Share Sri Sai with Friends & Family';
+      if (document.getElementById('tLogoutBtnText')) document.getElementById('tLogoutBtnText').innerText = t.logoutBtnText || '🚪 Log Out';
+      if (document.getElementById('tDeleteAccountLink')) document.getElementById('tDeleteAccountLink').innerText = t.deleteAccountLink || '🗑️ Delete Account & Data';
 
       checkStoreHours();
       renderCategoryChips();
@@ -7493,6 +7512,11 @@
         setTimeout(() => {
           openOrdersModal();
         }, 600);
+      }
+      if (window.location.hash === '#account' || p.get('view') === 'account') {
+        setTimeout(() => {
+          document.getElementById('bnavAccountBtn')?.click();
+        }, 300);
       }
       const offerId = p.get('n');
       if (offerId && currentUser) {

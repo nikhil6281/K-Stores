@@ -28,6 +28,13 @@ if (fs.existsSync(root404)) {
   console.log('✅ 404.html copied to dist');
 }
 
+// 3b. Ensure delete-account.html exists in dist
+const rootDeleteAccount = path.resolve(__dirname, '..', 'delete-account.html');
+if (fs.existsSync(rootDeleteAccount)) {
+  fs.copyFileSync(rootDeleteAccount, path.join(distPath, 'delete-account.html'));
+  console.log('✅ delete-account.html copied to dist');
+}
+
 // 4. Ensure .well-known/assetlinks.json exists in dist
 const assetlinksSrc = path.resolve(__dirname, '..', '.well-known', 'assetlinks.json');
 const assetlinksDestDir = path.join(distPath, '.well-known');
