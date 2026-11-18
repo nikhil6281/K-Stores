@@ -562,6 +562,8 @@ async function sendTransactionalEmail(toEmail, code) {
 }
 
 const ALLOWED_CORS_ORIGINS = [
+  'https://srisaistores.in',
+  'https://www.srisaistores.in',
   'https://nikhil6281.github.io',
   'https://localhost',
   'http://localhost',

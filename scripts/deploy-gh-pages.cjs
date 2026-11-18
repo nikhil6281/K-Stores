@@ -11,9 +11,15 @@ if (!fs.existsSync(distPath)) {
   process.exit(1);
 }
 
-// 2. Ensure .nojekyll exists in dist
+// 2. Ensure .nojekyll and CNAME exist in dist
 fs.writeFileSync(path.join(distPath, '.nojekyll'), '');
 console.log('✅ .nojekyll ensured in dist');
+
+const rootCname = path.resolve(__dirname, '..', 'CNAME');
+if (fs.existsSync(rootCname)) {
+  fs.copyFileSync(rootCname, path.join(distPath, 'CNAME'));
+  console.log('✅ CNAME ensured in dist');
+}
 
 // 3. Ensure 404.html exists in dist
 const root404 = path.resolve(__dirname, '..', '404.html');

@@ -8,6 +8,8 @@ WHATSAPP_WABA_ID = "4550276351881942"
 WHATSAPP_TEMPLATE_NAME = "sri_sai_login_otp"
 WHATSAPP_TEMPLATE_LANG = "en"
 OTP_TEST_MODE = "false"
+FRONTEND_URL = "https://srisaistores.in"
+ALLOWED_ORIGINS = "https://srisaistores.in,https://www.srisaistores.in,https://nikhil6281.github.io,http://localhost,capacitor://localhost"
 # Note: WHATSAPP_ACCESS_TOKEN is a secret set with `npx wrangler secret put WHATSAPP_ACCESS_TOKEN`
 
 [triggers]

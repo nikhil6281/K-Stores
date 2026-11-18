@@ -9,10 +9,10 @@
   <!-- SEO & Social Meta -->
   <title>Sri Sai — Fresh Groceries Delivered in Anantapur</title>
   <meta name="description" content="Order fresh vegetables, milk, and daily groceries online in Anantapur. 100% refund guarantee before dispatch. Fast doorstep delivery.">
-  <link rel="canonical" href="https://nikhil6281.github.io/K-Stores/">
+  <link rel="canonical" href="https://srisaistores.in/">
   <meta property="og:title" content="Sri Sai — Fresh Groceries Delivered in Anantapur">
   <meta property="og:description" content="Local grocery delivery for Anantapur, Andhra Pradesh. Browse fresh items, order online, or choose Cash on Delivery.">
-  <meta property="og:url" content="https://nikhil6281.github.io/K-Stores/">
+  <meta property="og:url" content="https://srisaistores.in/">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#15803d">
   
@@ -7072,7 +7072,7 @@
       const shareData = {
         title: 'Sri Sai — Anantapur Grocery Delivery',
         text: 'Order fresh groceries in Anantapur with fast doorstep delivery from Sri Sai!',
-        url: window.location.origin + '/K-Stores/'
+        url: window.location.origin + (window.location.pathname.startsWith('/K-Stores') ? '/K-Stores/' : '/')
       };
       if (navigator.share) {
         try {

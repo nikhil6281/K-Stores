@@ -51,16 +51,27 @@ function b64UrlDecode(str) {
   return atob(str);
 }
 
-function getCorsHeaders(request) {
+function getCorsHeaders(request, env) {
   const origin = request.headers.get('Origin') || '';
-  const isAllowed = origin === 'https://nikhil6281.github.io' ||
+  const defaultAllowed = [
+    'https://srisaistores.in',
+    'https://www.srisaistores.in',
+    'https://nikhil6281.github.io',
+    'http://localhost',
+    'capacitor://localhost'
+  ];
+  let allowedList = defaultAllowed;
+  if (env && env.ALLOWED_ORIGINS) {
+    const extra = String(env.ALLOWED_ORIGINS).split(',').map(s => s.trim()).filter(Boolean);
+    allowedList = [...new Set([...defaultAllowed, ...extra])];
+  }
+  const isAllowed = allowedList.includes(origin) ||
                     origin.startsWith('http://localhost:') ||
                     origin.startsWith('http://127.0.0.1:') ||
-                    origin === 'capacitor://localhost' ||
-                    origin === 'http://localhost' ||
                     origin.startsWith('https://localhost');
+  const defaultOrigin = (env && env.FRONTEND_URL) || 'https://srisaistores.in';
   return {
-    'Access-Control-Allow-Origin': isAllowed ? origin : 'https://nikhil6281.github.io',
+    'Access-Control-Allow-Origin': isAllowed ? origin : defaultOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Razorpay-Signature',
     'Access-Control-Max-Age': '86400'
@@ -321,7 +332,7 @@ async function createRazorpayRefund(paymentId, amountPaise, orderId, env) {
 
 export default {
   async fetch(request, env, ctx) {
-    const cors = getCorsHeaders(request);
+    const cors = getCorsHeaders(request, env);
 
     // Preflight OPTIONS handler
     if (request.method === 'OPTIONS') {
@@ -1683,7 +1694,7 @@ async function handleRazorpayCallback(request, env, cors) {
     errorCode = url.searchParams.get('error[code]') || '';
   }
 
-  const clientBase = 'https://nikhil6281.github.io/K-Stores';
+  const clientBase = (env && env.FRONTEND_URL) || 'https://srisaistores.in';
 
   if (errorCode || (!razorpay_payment_id && !razorpay_order_id)) {
     return Response.redirect(`${clientBase}/?payment_status=failed&reason=${encodeURIComponent(errorCode || 'cancelled')}`, 302);
