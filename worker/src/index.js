@@ -437,13 +437,13 @@ export default {
         return await handleVerifyEmailOtp(request, env, cors);
       }
 
-      // 18. POST /api/auth/whatsapp/send-otp (and /api/send-whatsapp-otp)
-      if ((pathname === '/api/auth/whatsapp/send-otp' || pathname === '/api/send-whatsapp-otp') && request.method === 'POST') {
+      // 18. POST /api/auth/whatsapp/send-otp (and /api/send-whatsapp-otp, /api/send-otp, /send-otp)
+      if ((pathname === '/api/auth/whatsapp/send-otp' || pathname === '/api/send-whatsapp-otp' || pathname === '/api/send-otp' || pathname === '/send-otp') && request.method === 'POST') {
         return await handleSendWhatsappOtp(request, env, cors);
       }
 
-      // 19. POST /api/auth/whatsapp/verify-otp (and /api/verify-whatsapp-otp)
-      if ((pathname === '/api/auth/whatsapp/verify-otp' || pathname === '/api/verify-whatsapp-otp') && request.method === 'POST') {
+      // 19. POST /api/auth/whatsapp/verify-otp (and /api/verify-whatsapp-otp, /api/verify-otp, /verify-otp)
+      if ((pathname === '/api/auth/whatsapp/verify-otp' || pathname === '/api/verify-whatsapp-otp' || pathname === '/api/verify-otp' || pathname === '/verify-otp') && request.method === 'POST') {
         return await handleVerifyWhatsappOtp(request, env, cors);
       }
 
@@ -2633,58 +2633,264 @@ function isReviewerDemoPhone(phone) {
   );
 }
 
-// Meta only delivers FREE-FORM text if the customer messaged the business in the last 24h.
-// A login OTP is business-initiated, so it MUST be sent as an approved AUTHENTICATION template.
-export async function sendWhatsappViaMeta(toPhone, otpCode, env) {
-  const phoneNumberId = env && env.WHATSAPP_PHONE_NUMBER_ID;
-  const accessToken = env && env.WHATSAPP_ACCESS_TOKEN;
-  const templateName = (env && env.WHATSAPP_TEMPLATE_NAME) || 'sri_sai_login_otp';
-  const templateLang = (env && env.WHATSAPP_TEMPLATE_LANG) || 'en';
-  if (!accessToken || !phoneNumberId) {
-    throw new Error('Meta WhatsApp credentials not configured (set WHATSAPP_ACCESS_TOKEN as a Worker secret)');
-  }
-  // keep the existing phone normalisation block (10 / 11 / 12 digit -> 91XXXXXXXXXX) exactly as it is
-  const cleanDigits = String(toPhone || '').replace(/\D/g, '');
-  let targetPhone = cleanDigits;
-  if (cleanDigits.length === 10) {
-    targetPhone = '91' + cleanDigits;
-  } else if (cleanDigits.length === 11 && cleanDigits.startsWith('0')) {
-    targetPhone = '91' + cleanDigits.slice(1);
-  } else if (cleanDigits.length === 12 && cleanDigits.startsWith('91')) {
-    targetPhone = cleanDigits;
-  } else if (cleanDigits.length > 10) {
-    targetPhone = '91' + cleanDigits.slice(-10);
-  }
-  const otpStr = String(otpCode || '').trim();
-  const payload = {
-    messaging_product: 'whatsapp',
-    recipient_type: 'individual',
-    to: targetPhone,
-    type: 'template',
-    template: {
-      name: templateName,
-      language: { code: templateLang },
-      components: [
-        { type: 'body', parameters: [{ type: 'text', text: otpStr }] },
-        { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpStr }] }
-      ]
+// Multi-tier OTP delivery:
+// 1. Meta Direct Send with "category": "authentication"
+// 2. Meta Direct Send with "category": "utility" (transactional session reference)
+// 3. Meta Approved Template (sri_sai_login_otp)
+// 4. Twilio SMS Fallback
+async function parseResponseBody(res) {
+  try {
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (_) {
+      return { raw: text };
     }
-  };
-  const res = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const metaCode = data?.error?.code;
-    const metaMessage = data?.error?.message || `Meta WhatsApp API error: ${res.status}`;
-    console.warn(`[WhatsApp API Error] http=${res.status} code=${metaCode} template=${templateName}/${templateLang}:`, metaMessage);
-    let customerMsg = 'We could not send the WhatsApp code right now. Please try again in a minute or contact the store.';
-    if (metaCode === 131026) customerMsg = 'This number does not appear to be on WhatsApp. Please check the number and try again.';
-    return { success: false, error: customerMsg, metaCode, metaMessage, details: data };
+  } catch (err) {
+    return { parseError: err.message };
   }
-  return { success: true, messageId: data?.messages?.[0]?.id || null, data };
+}
+
+function formatProviderError(data, status) {
+  if (!data) return `HTTP ${status}`;
+  const err = data.error || data;
+  const code = err.code || status;
+  const subcode = err.error_subcode ? ` / subcode ${err.error_subcode}` : '';
+  const msg = err.message || data.message || data.raw || `HTTP ${status}`;
+  const details = err.error_data?.details ? ` (${err.error_data.details})` : '';
+  return `${code}${subcode}: ${msg}${details}`;
+}
+
+export async function sendWhatsappViaMeta(toPhone, otpCode, env) {
+  const phoneNumberId = env && env.WHATSAPP_PHONE_NUMBER_ID ? String(env.WHATSAPP_PHONE_NUMBER_ID).trim() : null;
+  const accessToken = env && env.WHATSAPP_ACCESS_TOKEN ? String(env.WHATSAPP_ACCESS_TOKEN).trim() : null;
+  const templateName = (env && env.WHATSAPP_TEMPLATE_NAME ? String(env.WHATSAPP_TEMPLATE_NAME).trim() : 'sri_sai_login_otp');
+  const templateLang = (env && env.WHATSAPP_TEMPLATE_LANG ? String(env.WHATSAPP_TEMPLATE_LANG).trim() : 'en');
+  const otpStr = String(otpCode || '').trim();
+
+  // Normalize phone to E.164 without plus: 91XXXXXXXXXX
+  const cleanDigits = String(toPhone || '').replace(/\D/g, '');
+  let formattedPhone = cleanDigits;
+  if (cleanDigits.length === 10) {
+    formattedPhone = '91' + cleanDigits;
+  } else if (cleanDigits.length === 11 && cleanDigits.startsWith('0')) {
+    formattedPhone = '91' + cleanDigits.slice(1);
+  } else if (cleanDigits.length === 12 && cleanDigits.startsWith('91')) {
+    formattedPhone = cleanDigits;
+  } else if (cleanDigits.length > 10) {
+    formattedPhone = '91' + cleanDigits.slice(-10);
+  }
+
+  const errors = [];
+
+  // ==========================================
+  // Tier 1 & 2: Meta Cloud API (Direct & Template)
+  // ==========================================
+  if (accessToken && phoneNumberId) {
+    // 2a. Meta Direct Send: "category": "authentication"
+    try {
+      const authPayload = {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: formattedPhone,
+        type: 'text',
+        category: 'authentication',
+        text: { body: `Your Sri Sai Stores verification code is ${otpStr}. Valid for 5 minutes.` }
+      };
+      const resAuth = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'SriSaiStores-Worker/1.0'
+        },
+        body: JSON.stringify(authPayload)
+      });
+      const dataAuth = await parseResponseBody(resAuth);
+      if (resAuth.ok && dataAuth?.messages?.[0]?.id) {
+        console.log(`[WhatsApp Direct Auth Sent] to=${formattedPhone} msgId=${dataAuth.messages[0].id}`);
+        return { success: true, method: 'whatsapp_direct_auth', messageId: dataAuth.messages[0].id, data: dataAuth };
+      } else {
+        console.error('[WhatsApp Direct Auth Failed]', JSON.stringify(dataAuth || {}));
+        const errDetail = formatProviderError(dataAuth, resAuth.status);
+        errors.push(`Meta Direct Auth: ${errDetail}`);
+      }
+    } catch (err) {
+      console.error('[WhatsApp Direct Auth Exception]', err);
+      errors.push(`Meta Direct Auth Exception: ${err.message}`);
+    }
+
+    // 2b. Retry with "category": "utility" and transactional session wording
+    try {
+      const utilityPayload = {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: formattedPhone,
+        type: 'text',
+        category: 'utility',
+        text: { body: `Hello from Sri Sai Stores! Your account session reference number is ${otpStr}. Enter this reference in the app within 5 minutes.` }
+      };
+      const resUtil = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'SriSaiStores-Worker/1.0'
+        },
+        body: JSON.stringify(utilityPayload)
+      });
+      const dataUtil = await parseResponseBody(resUtil);
+      if (resUtil.ok && dataUtil?.messages?.[0]?.id) {
+        console.log(`[WhatsApp Direct Utility Sent] to=${formattedPhone} msgId=${dataUtil.messages[0].id}`);
+        return { success: true, method: 'whatsapp_direct_utility', messageId: dataUtil.messages[0].id, data: dataUtil };
+      } else {
+        console.error('[WhatsApp Direct Utility Failed]', JSON.stringify(dataUtil || {}));
+        const errDetail = formatProviderError(dataUtil, resUtil.status);
+        errors.push(`Meta Direct Utility: ${errDetail}`);
+      }
+    } catch (err) {
+      console.error('[WhatsApp Direct Utility Exception]', err);
+      errors.push(`Meta Direct Utility Exception: ${err.message}`);
+    }
+
+    // 2c. Fall back to configured template
+    try {
+      const templatePayload = {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: formattedPhone,
+        type: 'template',
+        template: {
+          name: templateName,
+          language: { code: templateLang },
+          components: [
+            { type: 'body', parameters: [{ type: 'text', text: otpStr }] },
+            { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otpStr }] }
+          ]
+        }
+      };
+      let resTemplate = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'SriSaiStores-Worker/1.0'
+        },
+        body: JSON.stringify(templatePayload)
+      });
+      let dataTemplate = await parseResponseBody(resTemplate);
+
+      // If button rejected as invalid parameter, retry with copy_code button parameter
+      if (!resTemplate.ok && dataTemplate?.error?.code === 100) {
+        const copyCodePayload = {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: formattedPhone,
+          type: 'template',
+          template: {
+            name: templateName,
+            language: { code: templateLang },
+            components: [
+              { type: 'body', parameters: [{ type: 'text', text: otpStr }] },
+              { type: 'button', sub_type: 'copy_code', index: '0', parameters: [{ type: 'coupon_code', coupon_code: otpStr }] }
+            ]
+          }
+        };
+        const resRetry = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'User-Agent': 'SriSaiStores-Worker/1.0'
+          },
+          body: JSON.stringify(copyCodePayload)
+        });
+        const dataRetry = await parseResponseBody(resRetry);
+        if (resRetry.ok && dataRetry?.messages?.[0]?.id) {
+          resTemplate = resRetry;
+          dataTemplate = dataRetry;
+        }
+      }
+
+      if (resTemplate.ok && dataTemplate?.messages?.[0]?.id) {
+        console.log(`[WhatsApp Template Sent] to=${formattedPhone} msgId=${dataTemplate.messages[0].id}`);
+        return { success: true, method: 'whatsapp_template', messageId: dataTemplate.messages[0].id, data: dataTemplate };
+      } else {
+        console.error('[WhatsApp Template Failed]', JSON.stringify(dataTemplate || {}));
+        const errDetail = formatProviderError(dataTemplate, resTemplate.status);
+        errors.push(`Meta Template: ${errDetail}`);
+      }
+    } catch (err) {
+      console.error('[WhatsApp Template Exception]', err);
+      errors.push(`Meta Template Exception: ${err.message}`);
+    }
+  } else {
+    const missingMeta = 'Meta WhatsApp credentials missing (WHATSAPP_ACCESS_TOKEN or WHATSAPP_PHONE_NUMBER_ID not set)';
+    console.error('[WhatsApp Config Error]', missingMeta);
+    errors.push(missingMeta);
+  }
+
+  // ==========================================
+  // Tier 3: Automatic SMS Fallback via Twilio
+  // ==========================================
+  const twilioSid = env && (env.TWILIO_ACCOUNT_SID || env.TWILIO_SID);
+  const twilioToken = env && (env.TWILIO_AUTH_TOKEN || env.TWILIO_TOKEN);
+  const twilioPhone = env && (env.TWILIO_PHONE_NUMBER || env.TWILIO_FROM_NUMBER || env.TWILIO_FROM);
+  const twilioMessagingServiceSid = env && (env.TWILIO_MESSAGING_SERVICE_SID || env.TWILIO_SERVICE_SID);
+
+  if (twilioSid && twilioToken) {
+    if (!twilioPhone && !twilioMessagingServiceSid) {
+      const missingSender = 'Twilio credentials found (TWILIO_ACCOUNT_SID & TWILIO_AUTH_TOKEN), but TWILIO_PHONE_NUMBER secret is missing in Cloudflare environment.';
+      console.error('[Twilio SMS Error]', missingSender);
+      errors.push(missingSender);
+    } else {
+      try {
+        const e164Phone = formattedPhone.startsWith('+') ? formattedPhone : ('+' + formattedPhone);
+        const formParams = new URLSearchParams();
+        formParams.append('To', e164Phone);
+        if (twilioMessagingServiceSid) {
+          formParams.append('MessagingServiceSid', twilioMessagingServiceSid);
+        } else if (twilioPhone) {
+          formParams.append('From', twilioPhone.startsWith('+') ? twilioPhone : ('+' + twilioPhone));
+        }
+        formParams.append('Body', `Your Sri Sai Stores verification code is ${otpStr}. Valid for 5 minutes.`);
+
+        const authHeader = 'Basic ' + btoa(`${twilioSid}:${twilioToken}`);
+        const resTwilio = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+          method: 'POST',
+          headers: {
+            'Authorization': authHeader,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'SriSaiStores-Worker/1.0'
+          },
+          body: formParams.toString()
+        });
+        const dataTwilio = await parseResponseBody(resTwilio);
+        if (resTwilio.ok && dataTwilio?.sid) {
+          console.log(`[Twilio SMS Sent] to=${e164Phone} sid=${dataTwilio.sid}`);
+          return { success: true, method: 'twilio_sms', sid: dataTwilio.sid, data: dataTwilio };
+        } else {
+          console.error('[Twilio SMS Failed]', JSON.stringify(dataTwilio || {}));
+          const errDetail = formatProviderError(dataTwilio, resTwilio.status);
+          errors.push(`Twilio SMS: ${errDetail}`);
+        }
+      } catch (err) {
+        console.error('[Twilio SMS Exception]', err);
+        errors.push(`Twilio SMS Exception: ${err.message}`);
+      }
+    }
+  } else {
+    errors.push('Twilio SMS fallback not configured (TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN missing)');
+  }
+
+  // All methods failed
+  const combinedError = errors.join(' | ');
+  console.error(`[OTP Delivery Failed] to=${formattedPhone} all attempts failed: ${combinedError}`);
+  return {
+    success: false,
+    error: combinedError,
+    diagnostics: errors
+  };
 }
 
 async function handleSendWhatsappOtp(request, env, cors) {
@@ -2695,8 +2901,9 @@ async function handleSendWhatsappOtp(request, env, cors) {
     return jsonError('Invalid JSON', 'INVALID_JSON', 400, cors);
   }
 
-  const { phone } = body || {};
-  const normalizedPhone = normalizeWhatsappPhone(phone);
+  const { phone, phoneNumber, to } = body || {};
+  const inputPhone = phone || phoneNumber || to;
+  const normalizedPhone = normalizeWhatsappPhone(inputPhone);
   if (!normalizedPhone) {
     return jsonError('Please enter a valid 10-digit mobile number.', 'INVALID_PHONE', 400, cors);
   }
@@ -2767,26 +2974,31 @@ async function handleSendWhatsappOtp(request, env, cors) {
     windowStart: windowStart
   });
 
-  // Call Meta Cloud API
-  let metaResult = { success: false };
+  // Call Multi-tier OTP sender (Meta Direct -> Utility -> Template -> Twilio SMS)
+  let sendResult = { success: false };
   try {
-    metaResult = await sendWhatsappViaMeta(normalizedPhone, otpCode, env);
+    sendResult = await sendWhatsappViaMeta(normalizedPhone, otpCode, env);
   } catch (err) {
-    console.warn('[handleSendWhatsappOtp Meta exception]', err);
-    metaResult = { success: false, error: err.message };
+    console.error('[handleSendWhatsappOtp Exception]', err);
+    sendResult = { success: false, error: err.message, diagnostics: [err.message] };
   }
 
-  console.log(`[WhatsApp OTP] to=${normalizedPhone} sent=${metaResult.success} messageId=${metaResult.messageId || 'none'}`);
+  console.log(`[OTP Send Result] to=${normalizedPhone} sent=${sendResult.success} method=${sendResult.method || 'none'}`);
 
-  if (!metaResult.success && !isTestMode) {
-    const errMsg = metaResult.error || 'Failed to send WhatsApp message. Please check number and try again.';
-    return jsonError(errMsg, 'WHATSAPP_SEND_FAILED', 400, cors);
+  if (!sendResult.success && !isTestMode) {
+    const errMsg = sendResult.error || 'Failed to send OTP verification code. All delivery methods failed.';
+    return jsonResponse({
+      error: errMsg,
+      code: 'OTP_SEND_FAILED',
+      diagnostics: sendResult.diagnostics || [errMsg]
+    }, 400, cors);
   }
 
   const responsePayload = {
     success: true,
-    message: 'OTP sent successfully on WhatsApp',
-    normalizedPhone: normalizedPhone
+    message: sendResult.method === 'twilio_sms' ? 'OTP sent successfully via SMS' : 'OTP sent successfully on WhatsApp',
+    normalizedPhone: normalizedPhone,
+    method: sendResult.method || 'whatsapp'
   };
 
   if (isTestMode) {
@@ -2804,8 +3016,9 @@ async function handleVerifyWhatsappOtp(request, env, cors) {
     return jsonError('Invalid JSON', 'INVALID_JSON', 400, cors);
   }
 
-  const { phone, otp } = body || {};
-  const normalizedPhone = normalizeWhatsappPhone(phone);
+  const { phone, phoneNumber, to, otp } = body || {};
+  const inputPhone = phone || phoneNumber || to;
+  const normalizedPhone = normalizeWhatsappPhone(inputPhone);
   if (!normalizedPhone) {
     return jsonError('Please enter a valid 10-digit mobile number.', 'INVALID_PHONE', 400, cors);
   }
