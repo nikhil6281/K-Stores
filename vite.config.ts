@@ -28,6 +28,7 @@ export default defineConfig(() => {
           privacy: resolve(import.meta.dirname, 'privacy-policy.html'),
           refund: resolve(import.meta.dirname, 'refund-policy.html'),
           shipping: resolve(import.meta.dirname, 'shipping-policy.html'),
+          deleteAccount: resolve(import.meta.dirname, 'delete-account.html'),
         }
       }
     },
